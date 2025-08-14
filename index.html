@@ -6,6 +6,8 @@
     <title>JEE 2026 Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Draggable Library -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -21,55 +23,63 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
-        .graph-container::-webkit-scrollbar {
-            display: none;
-        }
+        .graph-container::-webkit-scrollbar { display: none; }
         .day {
-            width: 14px;
-            height: 14px;
-            border-radius: 3px;
-            position: relative;
-            cursor: pointer;
+            width: 14px; height: 14px; border-radius: 3px;
+            position: relative; cursor: pointer;
         }
-        .day-past { background-color: #21262d; border: 1px solid rgba(255, 255, 255, 0.05); }
-        .day-future { background-color: #0e4429; border: 1px solid rgba(255, 255, 255, 0.05); }
+        .day-past { background-color: #21262d; }
+        .day-future { background-color: #0e4429; }
         .day-today { background-color: #1a633a; border: 1px solid #3cc36e; }
         .day-exam { background-color: #9e2a2b; border: 1px solid #ff6b6b; }
         .day-part-test { background-color: #1f6feb; border: 1px solid #58a6ff; }
         .day .tooltip {
-            visibility: hidden;
-            width: 160px;
-            background-color: #21262d;
-            color: #fff;
-            text-align: center;
-            border-radius: 6px;
-            padding: 5px 0;
-            position: absolute;
-            z-index: 10;
-            bottom: 125%;
-            left: 50%;
-            margin-left: -80px;
-            opacity: 0;
-            transition: opacity 0.3s;
-            font-size: 12px;
-            border: 1px solid #30363d;
-            pointer-events: none;
+            visibility: hidden; width: 160px; background-color: #21262d;
+            color: #fff; text-align: center; border-radius: 6px;
+            padding: 5px 0; position: absolute; z-index: 10;
+            bottom: 125%; left: 50%; margin-left: -80px;
+            opacity: 0; transition: opacity 0.3s; font-size: 12px;
+            border: 1px solid #30363d; pointer-events: none;
         }
         .day:hover .tooltip { visibility: visible; opacity: 1; }
         #countdown-timer { font-size: 1.75rem; font-weight: 600; }
         @media (min-width: 640px) { #countdown-timer { font-size: 2.25rem; } }
         @media (min-width: 1024px) { #countdown-timer { font-size: 2.5rem; } }
         .card { 
-            background-color: #161b22; 
-            border: 1px solid #30363d; 
-            border-radius: 8px;
-            padding: 1rem;
+            background-color: #161b22; border: 1px solid #30363d; 
+            border-radius: 8px; padding: 1rem;
         }
-        .legend-item { display: flex; align-items: center; gap: 0.5rem; }
-        .legend-color { width: 14px; height: 14px; border-radius: 3px; }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.25rem;
+            margin-bottom: 0.5rem;
+            border-radius: 6px;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .card-header:hover {
+            background-color: #2a3038;
+        }
+        .drag-handle { cursor: grab; }
+        .sortable-ghost {
+            background: #1f2937;
+            opacity: 0.6;
+            border: 2px dashed #3b82f6;
+        }
+        .sortable-chosen { cursor: grabbing; }
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0,0,0,0.7);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 50;
+        }
+        .todo-item.completed span {
+            text-decoration: line-through;
+            color: #6b7280;
+        }
     </style>
 </head>
-    <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-TCK0S6VC58"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -80,273 +90,472 @@
 </script>
 <body class="antialiased">
     <div class="container mx-auto px-2 sm:px-4 py-6">
-        <header class="text-center mb-6">
+        <header class="flex justify-between items-center mb-6">
             <h1 class="text-3xl sm:text-4xl font-bold text-white">JEE 2026</h1>
+            <button id="add-card-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors text-sm">
+                + Add Card
+            </button>
         </header>
 
         <!-- Dashboard Grid -->
-        <main class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <main id="dashboard-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             
-            <!-- Main Content Column -->
-            <div class="lg:col-span-2 space-y-4">
-                <!-- Countdown Timer Card -->
-                <div class="card">
-                    <div id="countdown-timer" class="flex justify-center space-x-2 sm:space-x-4 md:space-x-8 text-white text-center py-2">
-                        <div><div id="days" class="font-bold">00</div><div class="text-xs sm:text-sm text-gray-400">Days</div></div>
-                        <div><div id="hours" class="font-bold">00</div><div class="text-xs sm:text-sm text-gray-400">Hours</div></div>
-                        <div><div id="minutes" class="font-bold">00</div><div class="text-xs sm:text-sm text-gray-400">Minutes</div></div>
-                        <div><div id="seconds" class="font-bold">00</div><div class="text-xs sm:text-sm text-gray-400">Seconds</div></div>
-                    </div>
-                </div>
+            <!-- Cards will be dynamically inserted here by JavaScript -->
 
-                <!-- Contribution Graph Card -->
-                <div class="card">
-                    <div class="graph-container" id="contribution-graph"></div>
-                    <div class="flex justify-center flex-wrap gap-x-4 gap-y-2 mt-4 text-xs text-gray-400">
-                        <div class="legend-item"><div class="legend-color day-future"></div><span>Future</span></div>
-                        <div class="legend-item"><div class="legend-color day-today"></div><span>Today</span></div>
-                        <div class="legend-item"><div class="legend-color day-part-test"></div><span>Test</span></div>
-                        <div class="legend-item"><div class="legend-color day-exam"></div><span>Exam</span></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Sidebar Column -->
-            <div class="lg:col-span-1 space-y-4">
-                <!-- Manage Part Tests Card -->
-                <div class="card">
-                     <form id="add-test-form" class="flex flex-col gap-3 mb-4">
-                         <input type="date" id="test-date-input" class="bg-gray-800 border border-gray-600 text-white rounded-md p-2 w-full text-sm" required>
-                         <input type="text" id="test-name-input" placeholder="Test Name" class="bg-gray-800 border border-gray-600 text-white rounded-md p-2 flex-grow text-sm" required>
-                         <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors w-full text-sm">Add Test</button>
-                     </form>
-                     <div id="test-list-container">
-                         <h3 class="text-md font-semibold text-white mb-2 border-b border-gray-700 pb-1">Tests</h3>
-                         <ul id="test-list" class="space-y-2 max-h-48 overflow-y-auto"></ul>
-                     </div>
-                </div>
-
-                <!-- Quote of the Day Card -->
-                <div id="quote-card" class="card text-center cursor-pointer transition-transform transform hover:scale-105">
-                     <p id="quote" class="text-md text-gray-300 italic">"The best way to predict the future is to create it."</p>
-                     <p id="author" class="text-sm text-gray-500 mt-2">- Peter Drucker</p>
-                </div>
-            </div>
         </main>
     </div>
 
-    <footer class="text-center py-4">
+    <footer class="text-center py-4 mt-4">
         <p class="text-xs text-gray-500">
             Built by <a href="https://github.com/svalordev" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline">SHAURYA PRATAP SINGH</a>
         </p>
     </footer>
 
+    <!-- Templates for cards -->
+    <template id="countdown-template">
+        <div class="card" data-card-id="countdown">
+            <div class="card-header">
+                <h2 class="text-lg font-semibold">Countdown</h2>
+                <div class="drag-handle text-gray-500 p-2">☰</div>
+            </div>
+            <div id="countdown-timer" class="flex justify-center space-x-2 sm:space-x-4 md:space-x-8 text-white text-center py-2">
+                <div><div id="days" class="font-bold">00</div><div class="text-xs sm:text-sm text-gray-400">Days</div></div>
+                <div><div id="hours" class="font-bold">00</div><div class="text-xs sm:text-sm text-gray-400">Hours</div></div>
+                <div><div id="minutes" class="font-bold">00</div><div class="text-xs sm:text-sm text-gray-400">Minutes</div></div>
+                <div><div id="seconds" class="font-bold">00</div><div class="text-xs sm:text-sm text-gray-400">Seconds</div></div>
+            </div>
+        </div>
+    </template>
+
+    <template id="graph-template">
+        <div class="card md:col-span-2 xl:col-span-2" data-card-id="graph">
+            <div class="card-header">
+                <h2 class="text-lg font-semibold">Journey</h2>
+                <div class="drag-handle text-gray-500 p-2">☰</div>
+            </div>
+            <div class="graph-container" id="contribution-graph"></div>
+            <div class="flex justify-center flex-wrap gap-x-4 gap-y-2 mt-4 text-xs text-gray-400">
+                <div class="legend-item"><div class="legend-color day-future"></div><span>Future</span></div>
+                <div class="legend-item"><div class="legend-color day-today"></div><span>Today</span></div>
+                <div class="legend-item"><div class="legend-color day-part-test"></div><span>Test</span></div>
+                <div class="legend-item"><div class="legend-color day-exam"></div><span>Exam</span></div>
+            </div>
+        </div>
+    </template>
+
+    <template id="tests-template">
+         <div class="card" data-card-id="tests">
+            <div class="card-header">
+                <h2 class="text-lg font-semibold">Test Planner</h2>
+                <div class="drag-handle text-gray-500 p-2">☰</div>
+            </div>
+            <form id="add-test-form" class="flex flex-col gap-3 mb-4">
+                 <input type="date" id="test-date-input" class="bg-gray-800 border border-gray-600 text-white rounded-md p-2 w-full text-sm" required>
+                 <input type="text" id="test-name-input" placeholder="Test Name" class="bg-gray-800 border border-gray-600 text-white rounded-md p-2 flex-grow text-sm" required>
+                 <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors w-full text-sm">Add Test</button>
+            </form>
+            <div id="test-list-container">
+                 <h3 class="text-md font-semibold text-white mb-2 border-b border-gray-700 pb-1">Tests</h3>
+                 <ul id="test-list" class="space-y-2 max-h-48 overflow-y-auto"></ul>
+            </div>
+        </div>
+    </template>
+    
+    <template id="quote-template">
+        <div class="card" data-card-id="quote">
+            <div class="card-header">
+                <h2 class="text-lg font-semibold">Quote</h2>
+                <div class="drag-handle text-gray-500 p-2">☰</div>
+            </div>
+            <div id="quote-card-content" class="text-center cursor-pointer transition-transform transform hover:scale-105">
+                 <p id="quote" class="text-md text-gray-300 italic">"The best way to predict the future is to create it."</p>
+                 <p id="author" class="text-sm text-gray-500 mt-2">- Peter Drucker</p>
+            </div>
+        </div>
+    </template>
+
+    <template id="note-card-template">
+        <div class="card custom-card" data-card-type="note">
+            <div class="card-header">
+                <h2 class="text-lg font-semibold card-title">Custom Card</h2>
+                <div>
+                    <button class="delete-card-btn text-red-500 text-xs mr-2">Delete</button>
+                    <span class="drag-handle text-gray-500 p-2">☰</span>
+                </div>
+            </div>
+            <div class="text-sm text-gray-300 card-content whitespace-pre-wrap"></div>
+        </div>
+    </template>
+
+    <template id="todo-card-template">
+        <div class="card custom-card" data-card-type="todo">
+            <div class="card-header">
+                <h2 class="text-lg font-semibold card-title">To-Do List</h2>
+                <div>
+                    <button class="delete-card-btn text-red-500 text-xs mr-2">Delete</button>
+                    <span class="drag-handle text-gray-500 p-2">☰</span>
+                </div>
+            </div>
+            <div class="card-content">
+                <ul class="todo-list space-y-2 max-h-48 overflow-y-auto mb-3"></ul>
+                <form class="add-todo-form flex gap-2">
+                    <input type="text" placeholder="New task..." class="bg-gray-800 border border-gray-600 text-white rounded-md p-2 w-full text-sm" required>
+                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded-md text-sm">+</button>
+                </form>
+            </div>
+        </div>
+    </template>
+
+    <!-- Modal for adding a new card -->
+    <div id="add-card-modal" class="modal-overlay hidden">
+        <div class="card w-11/12 max-w-md">
+            <h2 class="text-xl font-semibold mb-4">Add New Card</h2>
+            <form id="new-card-form">
+                <select id="new-card-type" class="bg-gray-800 border border-gray-600 text-white rounded-md p-2 w-full mb-3">
+                    <option value="note">Note</option>
+                    <option value="todo">To-Do List</option>
+                </select>
+                <input type="text" id="new-card-title" placeholder="Card Title" class="bg-gray-800 border border-gray-600 text-white rounded-md p-2 w-full mb-3" required>
+                <textarea id="new-card-content" placeholder="Card Content (for notes)" rows="4" class="bg-gray-800 border border-gray-600 text-white rounded-md p-2 w-full mb-4"></textarea>
+                <div class="flex justify-end gap-3">
+                    <button type="button" id="cancel-add-card" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md">Cancel</button>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md">Add</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
     <script>
+    document.addEventListener('DOMContentLoaded', () => {
         // --- CONFIGURATION ---
         const EXAM_DATE = new Date("2026-01-22T00:00:00");
         const GRAPH_START_DATE = new Date("2025-01-01T00:00:00");
-        const STORAGE_KEY = 'jeePartTests_v2';
-
-        // **MODIFIED**: Added many more quotes
+        const STORAGE_KEYS = {
+            tests: 'jeePartTests_v2',
+            layout: 'jeeDashboardLayout_v2',
+            customCards: 'jeeCustomCards_v2'
+        };
         const quotes = [
             { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" },
             { text: "The secret of getting ahead is getting started.", author: "Mark Twain" },
             { text: "It’s not whether you get knocked down, it’s whether you get up.", author: "Vince Lombardi" },
-            { text: "The will to win, the desire to succeed, the urge to reach your full potential... these are the keys that will unlock the door to personal excellence.", author: "Confucius" },
-            { text: "Success is the sum of small efforts, repeated day in and day out.", author: "Robert Collier" },
-            { text: "Don't watch the clock; do what it does. Keep going.", author: "Sam Levenson" },
-            { text: "The only place where success comes before work is in the dictionary.", author: "Vidal Sassoon" },
-            { text: "Hardships often prepare ordinary people for an extraordinary destiny.", author: "C.S. Lewis" },
-            { text: "You don’t have to be great to start, but you have to start to be great.", author: "Zig Ziglar" },
-            { text: "The expert in anything was once a beginner.", author: "Helen Hayes" },
-            { text: "Push yourself, because no one else is going to do it for you.", author: "Unknown" },
-            { text: "The harder you work for something, the greater you'll feel when you achieve it.", author: "Unknown" },
-            { text: "Dream bigger. Do bigger.", author: "Unknown" },
-            { text: "Success doesn’t just find you. You have to go out and get it.", author: "Unknown" },
-            { text: "The difference between ordinary and extraordinary is that little extra.", author: "Jimmy Johnson" }
         ];
-
-        // --- DOM ELEMENTS ---
-        const dom = {
-            days: document.getElementById('days'),
-            hours: document.getElementById('hours'),
-            minutes: document.getElementById('minutes'),
-            seconds: document.getElementById('seconds'),
-            graph: document.getElementById('contribution-graph'),
-            quote: document.getElementById('quote'),
-            author: document.getElementById('author'),
-            quoteCard: document.getElementById('quote-card'), // **NEW**
-            addTestForm: document.getElementById('add-test-form'),
-            testDateInput: document.getElementById('test-date-input'),
-            testNameInput: document.getElementById('test-name-input'),
-            testList: document.getElementById('test-list')
-        };
         
-        // --- LOCAL STORAGE & STATE ---
-        let partTests = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+        // --- STATE & LOCAL STORAGE ---
+        let partTests = JSON.parse(localStorage.getItem(STORAGE_KEYS.tests)) || {};
+        let customCards = JSON.parse(localStorage.getItem(STORAGE_KEYS.customCards)) || [];
+        const defaultLayout = ['countdown', 'graph', 'tests', 'quote'];
+        let currentLayout = JSON.parse(localStorage.getItem(STORAGE_KEYS.layout)) || defaultLayout;
 
-        function saveTests() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(partTests));
+        const saveState = (key, data) => localStorage.setItem(key, JSON.stringify(data));
+
+        // --- RENDER DASHBOARD ---
+        const dashboardGrid = document.getElementById('dashboard-grid');
+
+        function renderDashboard() {
+            dashboardGrid.innerHTML = '';
+            
+            const customCardIds = customCards.map(c => c.id);
+            currentLayout = currentLayout.filter(id => defaultLayout.includes(id) || customCardIds.includes(id));
+
+            customCards.forEach(card => {
+                if (!currentLayout.includes(card.id)) {
+                    currentLayout.push(card.id);
+                }
+            });
+            saveState(STORAGE_KEYS.layout, currentLayout);
+
+            currentLayout.forEach(cardId => {
+                let cardNode;
+                if (defaultLayout.includes(cardId)) {
+                    const template = document.getElementById(`${cardId}-template`);
+                    if (template) cardNode = template.content.cloneNode(true);
+                } else {
+                    const customCardData = customCards.find(c => c.id === cardId);
+                    if (customCardData) {
+                        const templateId = `${customCardData.type}-card-template`;
+                        const template = document.getElementById(templateId);
+                        if (template) {
+                            cardNode = template.content.cloneNode(true);
+                            const cardElement = cardNode.querySelector('.card');
+                            cardElement.dataset.cardId = customCardData.id;
+                            cardElement.querySelector('.card-title').textContent = customCardData.title;
+                            
+                            if(customCardData.type === 'note') {
+                                cardElement.querySelector('.card-content').textContent = customCardData.content;
+                            } else if (customCardData.type === 'todo') {
+                                const todoListEl = cardElement.querySelector('.todo-list');
+                                todoListEl.innerHTML = '';
+                                if (Array.isArray(customCardData.content)) {
+                                    customCardData.content.forEach((item, index) => {
+                                        const li = document.createElement('li');
+                                        li.className = `flex items-center gap-2 todo-item ${item.completed ? 'completed' : ''}`;
+                                        li.dataset.index = index;
+                                        li.innerHTML = `
+                                            <input type="checkbox" ${item.completed ? 'checked' : ''} class="todo-checkbox bg-gray-900 rounded">
+                                            <span class="flex-grow text-sm">${item.text}</span>
+                                            <button class="delete-todo-item text-red-500 hover:text-red-400 font-semibold text-xs">×</button>
+                                        `;
+                                        todoListEl.appendChild(li);
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+                if(cardNode) dashboardGrid.appendChild(cardNode);
+            });
+            
+            initializeAll();
         }
 
-        function addOrUpdateTest(dateString, testName) {
-            partTests[dateString] = testName;
-            saveTests();
-            generateGraph();
-            displayPartTests();
-        }
+        // --- INITIALIZE FUNCTIONALITIES ---
+        function initializeAll() {
+            const dom = {
+                days: document.getElementById('days'),
+                hours: document.getElementById('hours'),
+                minutes: document.getElementById('minutes'),
+                seconds: document.getElementById('seconds'),
+                graph: document.getElementById('contribution-graph'),
+                quote: document.getElementById('quote'),
+                author: document.getElementById('author'),
+                quoteCardContent: document.getElementById('quote-card-content'),
+                addTestForm: document.getElementById('add-test-form'),
+                testDateInput: document.getElementById('test-date-input'),
+                testNameInput: document.getElementById('test-name-input'),
+                testList: document.getElementById('test-list')
+            };
 
-        function removeTest(dateString) {
-            delete partTests[dateString];
-            saveTests();
-            generateGraph();
-            displayPartTests();
-        }
-
-        // --- COUNTDOWN TIMER ---
-        function updateCountdown() {
-            const now = new Date();
-            const timeDifference = EXAM_DATE - now;
-
-            if (timeDifference <= 0) {
-                Object.assign(dom, { days: '00', hours: '00', minutes: '00', seconds: '00' });
-                clearInterval(countdownInterval);
-                return;
+            if (dom.days) {
+                updateCountdown(dom);
+                setInterval(() => updateCountdown(dom), 1000);
             }
-
-            const d = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
-            const h = Math.floor((timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const m = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
-            const s = Math.floor((timeDifference % (1000 * 60)) / 1000);
-
-            dom.days.innerText = d.toString().padStart(2, '0');
-            dom.hours.innerText = h.toString().padStart(2, '0');
-            dom.minutes.innerText = m.toString().padStart(2, '0');
-            dom.seconds.innerText = s.toString().padStart(2, '0');
+            if (dom.graph) {
+                generateGraph(dom.graph);
+                dom.graph.addEventListener('click', (e) => handleGraphClick(e, dom));
+            }
+            if (dom.addTestForm) {
+                displayPartTests(dom.testList);
+                dom.addTestForm.addEventListener('submit', (e) => handleTestFormSubmit(e, dom));
+                dom.testList.addEventListener('click', (e) => handleTestListClick(e));
+            }
+            if (dom.quoteCardContent) {
+                updateQuote(dom);
+                dom.quoteCardContent.parentElement.addEventListener('click', () => updateQuote(dom));
+            }
+            document.querySelectorAll('.delete-card-btn').forEach(btn => btn.addEventListener('click', handleDeleteCustomCard));
+            document.querySelectorAll('.add-todo-form').forEach(form => form.addEventListener('submit', handleAddTodoItem));
+            document.querySelectorAll('.todo-list').forEach(list => list.addEventListener('click', handleTodoItemClick));
         }
 
-        // --- UI RENDERING ---
-        function generateGraph() {
-            dom.graph.innerHTML = '';
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
+        // --- SPECIFIC FUNCTION LOGIC ---
+        function updateCountdown(dom) {
+            const now = new Date();
+            const diff = EXAM_DATE - now;
+            if (diff <= 0) return;
+            dom.days.innerText = Math.floor(diff / (1000 * 60 * 60 * 24)).toString().padStart(2, '0');
+            dom.hours.innerText = Math.floor((diff / (1000 * 60 * 60)) % 24).toString().padStart(2, '0');
+            dom.minutes.innerText = Math.floor((diff / 1000 / 60) % 60).toString().padStart(2, '0');
+            dom.seconds.innerText = Math.floor((diff / 1000) % 60).toString().padStart(2, '0');
+        }
 
+        function generateGraph(graphEl) {
+            if (!graphEl) return;
+            graphEl.innerHTML = '';
+            const today = new Date(); today.setHours(0, 0, 0, 0);
             let currentDate = new Date(GRAPH_START_DATE);
-            const examDayOnly = new Date(EXAM_DATE);
-            examDayOnly.setHours(0, 0, 0, 0);
+            const examDayOnly = new Date(EXAM_DATE); examDayOnly.setHours(0, 0, 0, 0);
 
-            while(currentDate <= examDayOnly) {
+            while (currentDate <= examDayOnly) {
                 const dayDiv = document.createElement('div');
                 const tooltipSpan = document.createElement('span');
-                
-                const year = currentDate.getFullYear();
-                const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
-                const dayOfMonth = currentDate.getDate().toString().padStart(2, '0');
-                const dateString = `${year}-${month}-${dayOfMonth}`;
-
-                dayDiv.classList.add('day');
+                const dateString = currentDate.toISOString().split('T')[0];
+                dayDiv.className = 'day';
                 dayDiv.dataset.date = dateString;
-                
-                tooltipSpan.classList.add('tooltip');
+                tooltipSpan.className = 'tooltip';
                 let tooltipText = currentDate.toDateString();
 
                 if (currentDate.getTime() === examDayOnly.getTime()) {
-                    dayDiv.classList.add('day-exam');
-                    tooltipText += ' - Exam Day!';
-                } else if (partTests[dateString]) { 
-                    dayDiv.classList.add('day-part-test');
-                    tooltipText = `${partTests[dateString]} - ${tooltipText}`;
+                    dayDiv.classList.add('day-exam'); tooltipText += ' - Exam!';
+                } else if (partTests[dateString]) {
+                    dayDiv.classList.add('day-part-test'); tooltipText = `${partTests[dateString]} - ${tooltipText}`;
                 } else if (currentDate.getTime() === today.getTime()) {
-                    dayDiv.classList.add('day-today');
-                    tooltipText += ' - Today';
+                    dayDiv.classList.add('day-today'); tooltipText += ' - Today';
                 } else if (currentDate < today) {
                     dayDiv.classList.add('day-past');
                 } else {
                     dayDiv.classList.add('day-future');
                 }
-                
                 tooltipSpan.textContent = tooltipText;
                 dayDiv.appendChild(tooltipSpan);
-                dom.graph.appendChild(dayDiv);
-                
+                graphEl.appendChild(dayDiv);
                 currentDate.setDate(currentDate.getDate() + 1);
             }
         }
-        
-        function displayPartTests() {
-            dom.testList.innerHTML = '';
-            const sortedDates = Object.keys(partTests).sort();
 
+        function displayPartTests(listEl) {
+            if (!listEl) return;
+            listEl.innerHTML = '';
+            const sortedDates = Object.keys(partTests).sort();
             if (sortedDates.length === 0) {
-                dom.testList.innerHTML = '<li class="text-gray-500 px-2 text-sm">No tests scheduled.</li>';
+                listEl.innerHTML = '<li class="text-gray-500 px-2 text-sm">No tests scheduled.</li>';
                 return;
             }
-
             sortedDates.forEach(dateString => {
                 const li = document.createElement('li');
                 li.className = 'flex justify-between items-center bg-gray-800 p-2 rounded-md';
-                const testName = partTests[dateString];
-                
-                li.innerHTML = `
-                    <div class="flex flex-col">
-                        <span class="font-semibold text-white text-sm">${testName}</span>
-                        <span class="text-xs text-gray-400">${new Date(dateString + 'T00:00:00').toDateString()}</span>
-                    </div>
-                    <button data-date="${dateString}" class="delete-btn text-red-500 hover:text-red-400 font-semibold text-xs">Delete</button>
-                `;
-                dom.testList.appendChild(li);
+                li.innerHTML = `<div class="flex flex-col"><span class="font-semibold text-white text-sm">${partTests[dateString]}</span><span class="text-xs text-gray-400">${new Date(dateString + 'T00:00:00').toDateString()}</span></div><button data-date="${dateString}" class="delete-btn text-red-500 hover:text-red-400 font-semibold text-xs">Delete</button>`;
+                listEl.appendChild(li);
             });
         }
-
-        function updateQuote() {
-            const randomIndex = Math.floor(Math.random() * quotes.length);
-            dom.quote.textContent = `"${quotes[randomIndex].text}"`;
-            dom.author.textContent = `- ${quotes[randomIndex].author}`;
-        }
         
-        // --- EVENT LISTENERS ---
-        dom.addTestForm.addEventListener('submit', (e) => {
+        function updateQuote(dom) {
+            const { text, author } = quotes[Math.floor(Math.random() * quotes.length)];
+            dom.quote.textContent = `"${text}"`;
+            dom.author.textContent = `- ${author}`;
+        }
+
+        // --- EVENT HANDLERS ---
+        function handleTestFormSubmit(e, dom) {
             e.preventDefault();
             const dateValue = dom.testDateInput.value;
             const nameValue = dom.testNameInput.value.trim();
             if (dateValue && nameValue) {
-                addOrUpdateTest(dateValue, nameValue);
+                partTests[dateValue] = nameValue;
+                saveState(STORAGE_KEYS.tests, partTests);
+                generateGraph(document.getElementById('contribution-graph'));
+                displayPartTests(document.getElementById('test-list'));
                 dom.testDateInput.value = '';
                 dom.testNameInput.value = '';
             }
-        });
+        }
 
-        dom.graph.addEventListener('click', (e) => {
+        function handleGraphClick(e, dom) {
             if (e.target.classList.contains('day')) {
                 const dateString = e.target.dataset.date;
                 if (partTests[dateString]) {
-                    removeTest(dateString);
+                    delete partTests[dateString];
                 } else {
-                    dom.testDateInput.value = dateString;
-                    dom.testNameInput.focus();
+                    if (dom.testDateInput) {
+                        dom.testDateInput.value = dateString;
+                        dom.testNameInput.focus();
+                    }
+                    return; 
                 }
+                saveState(STORAGE_KEYS.tests, partTests);
+                generateGraph(dom.graph);
+                displayPartTests(document.getElementById('test-list'));
             }
-        });
+        }
         
-        dom.testList.addEventListener('click', (e) => {
-            if (e.target.classList.contains('delete-btn')) {
+        function handleTestListClick(e) {
+             if (e.target.classList.contains('delete-btn')) {
                 const dateString = e.target.dataset.date;
-                removeTest(dateString);
+                delete partTests[dateString];
+                saveState(STORAGE_KEYS.tests, partTests);
+                generateGraph(document.getElementById('contribution-graph'));
+                displayPartTests(document.getElementById('test-list'));
             }
+        }
+        
+        function handleAddTodoItem(e) {
+            e.preventDefault();
+            const input = e.target.querySelector('input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const cardId = e.target.closest('.custom-card').dataset.cardId;
+            const card = customCards.find(c => c.id === cardId);
+            if (card) {
+                card.content.push({ text, completed: false });
+                saveState(STORAGE_KEYS.customCards, customCards);
+                renderDashboard();
+            }
+        }
+
+        function handleTodoItemClick(e) {
+            const cardId = e.target.closest('.custom-card').dataset.cardId;
+            const itemIndex = e.target.closest('.todo-item')?.dataset.index;
+            if (!cardId || !itemIndex) return;
+
+            const card = customCards.find(c => c.id === cardId);
+            if (!card) return;
+
+            if (e.target.classList.contains('delete-todo-item')) {
+                card.content.splice(itemIndex, 1);
+            } else if (e.target.classList.contains('todo-checkbox')) {
+                card.content[itemIndex].completed = !card.content[itemIndex].completed;
+            }
+            
+            saveState(STORAGE_KEYS.customCards, customCards);
+            renderDashboard();
+        }
+        
+        // --- DRAGGABLE ---
+        new Sortable(dashboardGrid, {
+            animation: 150,
+            handle: '.drag-handle',
+            ghostClass: 'sortable-ghost',
+            chosenClass: 'sortable-chosen',
+            onEnd: () => {
+                const newLayout = [...dashboardGrid.children].map(item => item.dataset.cardId);
+                saveState(STORAGE_KEYS.layout, newLayout);
+            },
         });
         
-        // **NEW**: Click event listener for the quote card
-        dom.quoteCard.addEventListener('click', updateQuote);
+        // --- MODAL HANDLING ---
+        const addCardBtn = document.getElementById('add-card-btn');
+        const modal = document.getElementById('add-card-modal');
+        const newCardForm = document.getElementById('new-card-form');
+        const cancelBtn = document.getElementById('cancel-add-card');
+        const cardTypeSelect = document.getElementById('new-card-type');
+        const cardContentTextarea = document.getElementById('new-card-content');
+
+        addCardBtn.addEventListener('click', () => modal.classList.remove('hidden'));
+        cancelBtn.addEventListener('click', () => modal.classList.add('hidden'));
+        
+        cardTypeSelect.addEventListener('change', (e) => {
+            cardContentTextarea.style.display = e.target.value === 'note' ? 'block' : 'none';
+        });
+
+        newCardForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const type = cardTypeSelect.value;
+            const title = document.getElementById('new-card-title').value.trim();
+            if(!title) return;
+            
+            let content;
+            if (type === 'note') {
+                content = cardContentTextarea.value.trim();
+            } else if (type === 'todo') {
+                content = [];
+            }
+
+            customCards.push({
+                id: `custom-${Date.now()}`,
+                type,
+                title,
+                content
+            });
+            saveState(STORAGE_KEYS.customCards, customCards);
+            renderDashboard();
+            modal.classList.add('hidden');
+            newCardForm.reset();
+            cardContentTextarea.style.display = 'block';
+        });
+
+        function handleDeleteCustomCard(e) {
+            const cardElement = e.target.closest('.custom-card');
+            const cardId = cardElement.dataset.cardId;
+            customCards = customCards.filter(card => card.id !== cardId);
+            saveState(STORAGE_KEYS.customCards, customCards);
+            renderDashboard();
+        }
 
         // --- INITIALIZATION ---
-        const countdownInterval = setInterval(updateCountdown, 1000);
-        
-        document.addEventListener('DOMContentLoaded', () => {
-            updateCountdown();
-            generateGraph();
-            displayPartTests();
-            updateQuote();
-        });
+        renderDashboard();
+    });
     </script>
 </body>
 </html>
