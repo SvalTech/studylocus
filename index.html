@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KYU NHI HO RAHI PADHAI JEE 2026 COUNTDOWN 💀💀</title>
+    <title>JEE 2026 Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -14,27 +14,19 @@
         }
         .graph-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(15px, 1fr));
-            grid-auto-rows: 15px;
-            grid-gap: 4px;
-            max-width: 1000px;
-            margin: 2rem auto;
-            padding: 1rem;
-            background-color: #161b22;
-            border-radius: 8px;
-            border: 1px solid #30363d;
+            grid-template-columns: repeat(auto-fill, minmax(14px, 1fr));
+            grid-auto-rows: 14px;
+            grid-gap: 3px;
             overflow-x: auto;
-            /* --- SCROLLBAR HIDING --- */
-            -ms-overflow-style: none;  /* IE and Edge */
-            scrollbar-width: none;  /* Firefox */
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
-        /* Hide scrollbar for Chrome, Safari and Opera */
         .graph-container::-webkit-scrollbar {
             display: none;
         }
         .day {
-            width: 15px;
-            height: 15px;
+            width: 14px;
+            height: 14px;
             border-radius: 3px;
             position: relative;
             cursor: pointer;
@@ -64,11 +56,17 @@
             pointer-events: none;
         }
         .day:hover .tooltip { visibility: visible; opacity: 1; }
-        #countdown-timer { font-size: 2rem; font-weight: 600; }
-        @media (min-width: 768px) { #countdown-timer { font-size: 3rem; } }
-        .card { background-color: #161b22; border: 1px solid #30363d; }
+        #countdown-timer { font-size: 1.75rem; font-weight: 600; }
+        @media (min-width: 640px) { #countdown-timer { font-size: 2.25rem; } }
+        @media (min-width: 1024px) { #countdown-timer { font-size: 2.5rem; } }
+        .card { 
+            background-color: #161b22; 
+            border: 1px solid #30363d; 
+            border-radius: 8px;
+            padding: 1rem;
+        }
         .legend-item { display: flex; align-items: center; gap: 0.5rem; }
-        .legend-color { width: 15px; height: 15px; border-radius: 3px; }
+        .legend-color { width: 14px; height: 14px; border-radius: 3px; }
     </style>
 </head>
     <!-- Google tag (gtag.js) -->
@@ -81,59 +79,65 @@
   gtag('config', 'G-TCK0S6VC58');
 </script>
 <body class="antialiased">
-    <div class="container mx-auto px-4 py-8">
-        <div class="text-center">
-            <h1 class="text-4xl md:text-5xl font-bold text-white mb-2">JEE Main 2026 Countdown</h1>
-            <p class="text-lg text-gray-400">January Attempt</p>
-        </div>
+    <div class="container mx-auto px-2 sm:px-4 py-6">
+        <header class="text-center mb-6">
+            <h1 class="text-3xl sm:text-4xl font-bold text-white">JEE 2026</h1>
+        </header>
 
-        <div class="card rounded-lg p-6 my-8 max-w-4xl mx-auto">
-            <h2 class="text-2xl font-semibold text-white mb-4 text-center">Time Remaining</h2>
-            <div id="countdown-timer" class="flex justify-center space-x-4 md:space-x-8 text-white text-center">
-                <div><div id="days" class="font-bold">00</div><div class="text-sm text-gray-400">Days</div></div>
-                <div><div id="hours" class="font-bold">00</div><div class="text-sm text-gray-400">Hours</div></div>
-                <div><div id="minutes" class="font-bold">00</div><div class="text-sm text-gray-400">Minutes</div></div>
-                <div><div id="seconds" class="font-bold">00</div><div class="text-sm text-gray-400">Seconds</div></div>
+        <!-- Dashboard Grid -->
+        <main class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            
+            <!-- Main Content Column -->
+            <div class="lg:col-span-2 space-y-4">
+                <!-- Countdown Timer Card -->
+                <div class="card">
+                    <div id="countdown-timer" class="flex justify-center space-x-2 sm:space-x-4 md:space-x-8 text-white text-center py-2">
+                        <div><div id="days" class="font-bold">00</div><div class="text-xs sm:text-sm text-gray-400">Days</div></div>
+                        <div><div id="hours" class="font-bold">00</div><div class="text-xs sm:text-sm text-gray-400">Hours</div></div>
+                        <div><div id="minutes" class="font-bold">00</div><div class="text-xs sm:text-sm text-gray-400">Minutes</div></div>
+                        <div><div id="seconds" class="font-bold">00</div><div class="text-xs sm:text-sm text-gray-400">Seconds</div></div>
+                    </div>
+                </div>
+
+                <!-- Contribution Graph Card -->
+                <div class="card">
+                    <div class="graph-container" id="contribution-graph"></div>
+                    <div class="flex justify-center flex-wrap gap-x-4 gap-y-2 mt-4 text-xs text-gray-400">
+                        <div class="legend-item"><div class="legend-color day-future"></div><span>Future</span></div>
+                        <div class="legend-item"><div class="legend-color day-today"></div><span>Today</span></div>
+                        <div class="legend-item"><div class="legend-color day-part-test"></div><span>Test</span></div>
+                        <div class="legend-item"><div class="legend-color day-exam"></div><span>Exam</span></div>
+                    </div>
+                </div>
             </div>
-        </div>
 
-        <div class="text-center my-8">
-            <h2 class="text-2xl font-semibold text-white mb-2">Your Journey to JEE</h2>
-            <p class="text-gray-400">Each block is a day. Click a day to mark it as a part test.</p>
-        </div>
+            <!-- Sidebar Column -->
+            <div class="lg:col-span-1 space-y-4">
+                <!-- Manage Part Tests Card -->
+                <div class="card">
+                     <form id="add-test-form" class="flex flex-col gap-3 mb-4">
+                         <input type="date" id="test-date-input" class="bg-gray-800 border border-gray-600 text-white rounded-md p-2 w-full text-sm" required>
+                         <input type="text" id="test-name-input" placeholder="Test Name" class="bg-gray-800 border border-gray-600 text-white rounded-md p-2 flex-grow text-sm" required>
+                         <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors w-full text-sm">Add Test</button>
+                     </form>
+                     <div id="test-list-container">
+                         <h3 class="text-md font-semibold text-white mb-2 border-b border-gray-700 pb-1">Tests</h3>
+                         <ul id="test-list" class="space-y-2 max-h-48 overflow-y-auto"></ul>
+                     </div>
+                </div>
 
-        <div class="graph-container" id="contribution-graph"></div>
-
-        <div class="flex justify-center flex-wrap gap-4 mt-4 text-sm text-gray-400">
-            <div class="legend-item"><div class="legend-color day-future"></div><span>Future</span></div>
-            <div class="legend-item"><div class="legend-color day-today"></div><span>Today</span></div>
-            <div class="legend-item"><div class="legend-color day-part-test"></div><span>Part Test</span></div>
-            <div class="legend-item"><div class="legend-color day-exam"></div><span>Exam Day</span></div>
-        </div>
-        
-        <div class="card rounded-lg p-6 my-8 max-w-2xl mx-auto">
-             <h2 class="text-xl font-semibold text-white mb-4 text-center">Manage Part Tests</h2>
-             <form id="add-test-form" class="flex flex-col sm:flex-row gap-2 mb-4">
-                 <input type="date" id="test-date-input" class="bg-gray-800 border border-gray-600 text-white rounded-md p-2 w-full sm:w-auto" required>
-                 <input type="text" id="test-name-input" placeholder="Test Name (e.g., Jee main 4)" class="bg-gray-800 border border-gray-600 text-white rounded-md p-2 flex-grow" required>
-                 <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors">Add Test</button>
-             </form>
-             <div id="test-list-container">
-                 <h3 class="text-lg font-semibold text-white mb-2">Scheduled Tests:</h3>
-                 <ul id="test-list" class="space-y-2"></ul>
-             </div>
-        </div>
-
-        <div class="card rounded-lg p-6 my-8 max-w-2xl mx-auto text-center">
-             <h2 class="text-xl font-semibold text-white mb-3">Quote of the Day</h2>
-             <p id="quote" class="text-lg text-gray-300 italic">"The best way to predict the future is to create it."</p>
-             <p id="author" class="text-md text-gray-500 mt-2">- Peter Drucker</p>
-        </div>
+                <!-- Quote of the Day Card -->
+                <div id="quote-card" class="card text-center cursor-pointer transition-transform transform hover:scale-105">
+                     <p id="quote" class="text-md text-gray-300 italic">"The best way to predict the future is to create it."</p>
+                     <p id="author" class="text-sm text-gray-500 mt-2">- Peter Drucker</p>
+                </div>
+            </div>
+        </main>
     </div>
 
-    <footer class="text-center py-6">
-        <p class="text-gray-500">
-            Built by <a href="https://github.com/svalordev" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline" style="font-family:monospace;">shaurya pratap singh</a>
+    <footer class="text-center py-4">
+        <p class="text-xs text-gray-500">
+            Built by <a href="https://github.com/svalordev" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline">SHAURYA PRATAP SINGH</a>
         </p>
     </footer>
 
@@ -141,12 +145,25 @@
         // --- CONFIGURATION ---
         const EXAM_DATE = new Date("2026-01-22T00:00:00");
         const GRAPH_START_DATE = new Date("2025-01-01T00:00:00");
-        const STORAGE_KEY = 'jeePartTests_v2'; // Changed key to avoid conflicts with old format
+        const STORAGE_KEY = 'jeePartTests_v2';
 
+        // **MODIFIED**: Added many more quotes
         const quotes = [
             { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" },
             { text: "The secret of getting ahead is getting started.", author: "Mark Twain" },
-            { text: "It’s not whether you get knocked down, it’s whether you get up.", author: "Vince Lombardi" }
+            { text: "It’s not whether you get knocked down, it’s whether you get up.", author: "Vince Lombardi" },
+            { text: "The will to win, the desire to succeed, the urge to reach your full potential... these are the keys that will unlock the door to personal excellence.", author: "Confucius" },
+            { text: "Success is the sum of small efforts, repeated day in and day out.", author: "Robert Collier" },
+            { text: "Don't watch the clock; do what it does. Keep going.", author: "Sam Levenson" },
+            { text: "The only place where success comes before work is in the dictionary.", author: "Vidal Sassoon" },
+            { text: "Hardships often prepare ordinary people for an extraordinary destiny.", author: "C.S. Lewis" },
+            { text: "You don’t have to be great to start, but you have to start to be great.", author: "Zig Ziglar" },
+            { text: "The expert in anything was once a beginner.", author: "Helen Hayes" },
+            { text: "Push yourself, because no one else is going to do it for you.", author: "Unknown" },
+            { text: "The harder you work for something, the greater you'll feel when you achieve it.", author: "Unknown" },
+            { text: "Dream bigger. Do bigger.", author: "Unknown" },
+            { text: "Success doesn’t just find you. You have to go out and get it.", author: "Unknown" },
+            { text: "The difference between ordinary and extraordinary is that little extra.", author: "Jimmy Johnson" }
         ];
 
         // --- DOM ELEMENTS ---
@@ -158,6 +175,7 @@
             graph: document.getElementById('contribution-graph'),
             quote: document.getElementById('quote'),
             author: document.getElementById('author'),
+            quoteCard: document.getElementById('quote-card'), // **NEW**
             addTestForm: document.getElementById('add-test-form'),
             testDateInput: document.getElementById('test-date-input'),
             testNameInput: document.getElementById('test-name-input'),
@@ -260,21 +278,21 @@
             const sortedDates = Object.keys(partTests).sort();
 
             if (sortedDates.length === 0) {
-                dom.testList.innerHTML = '<li class="text-gray-500">No part tests scheduled.</li>';
+                dom.testList.innerHTML = '<li class="text-gray-500 px-2 text-sm">No tests scheduled.</li>';
                 return;
             }
 
             sortedDates.forEach(dateString => {
                 const li = document.createElement('li');
-                li.className = 'flex justify-between items-center bg-gray-700 p-2 rounded-md';
+                li.className = 'flex justify-between items-center bg-gray-800 p-2 rounded-md';
                 const testName = partTests[dateString];
                 
                 li.innerHTML = `
                     <div class="flex flex-col">
-                        <span class="font-semibold text-white">${testName}</span>
-                        <span class="text-sm text-gray-400">${new Date(dateString + 'T00:00:00').toDateString()}</span>
+                        <span class="font-semibold text-white text-sm">${testName}</span>
+                        <span class="text-xs text-gray-400">${new Date(dateString + 'T00:00:00').toDateString()}</span>
                     </div>
-                    <button data-date="${dateString}" class="delete-btn text-red-500 hover:text-red-400 font-semibold text-sm">Delete</button>
+                    <button data-date="${dateString}" class="delete-btn text-red-500 hover:text-red-400 font-semibold text-xs">Delete</button>
                 `;
                 dom.testList.appendChild(li);
             });
@@ -316,10 +334,12 @@
                 removeTest(dateString);
             }
         });
+        
+        // **NEW**: Click event listener for the quote card
+        dom.quoteCard.addEventListener('click', updateQuote);
 
         // --- INITIALIZATION ---
         const countdownInterval = setInterval(updateCountdown, 1000);
-        setInterval(updateQuote, 30000);
         
         document.addEventListener('DOMContentLoaded', () => {
             updateCountdown();
