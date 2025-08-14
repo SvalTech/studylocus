@@ -370,7 +370,13 @@
             while (currentDate <= examDayOnly) {
                 const dayDiv = document.createElement('div');
                 const tooltipSpan = document.createElement('span');
-                const dateString = currentDate.toISOString().split('T')[0];
+                
+                // **FIXED**: Manually format the date string to YYYY-MM-DD to avoid timezone shifts.
+                const year = currentDate.getFullYear();
+                const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+                const dayOfMonth = currentDate.getDate().toString().padStart(2, '0');
+                const dateString = `${year}-${month}-${dayOfMonth}`;
+
                 dayDiv.className = 'day';
                 dayDiv.dataset.date = dateString;
                 tooltipSpan.className = 'tooltip';
@@ -477,7 +483,7 @@
         function handleTodoItemClick(e) {
             const cardId = e.target.closest('.custom-card').dataset.cardId;
             const itemIndex = e.target.closest('.todo-item')?.dataset.index;
-            if (!cardId || !itemIndex) return;
+            if (!cardId || itemIndex === undefined) return;
 
             const card = customCards.find(c => c.id === cardId);
             if (!card) return;
