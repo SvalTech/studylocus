@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KYU NHI HO RAHI PADHAI JEE 2026 COUNTDOWN 💀💀</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0d1117;
+            color: #c9d1d9;
+        }
+        .graph-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(15px, 1fr));
+            grid-auto-rows: 15px;
+            grid-gap: 4px;
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 1rem;
+            background-color: #161b22;
+            border-radius: 8px;
+            border: 1px solid #30363d;
+            overflow-x: auto;
+        }
+        .day {
+            width: 15px;
+            height: 15px;
+            border-radius: 3px;
+            position: relative;
+            cursor: pointer;
+        }
+        .day-past { background-color: #21262d; border: 1px solid rgba(255, 255, 255, 0.05); }
+        .day-future { background-color: #0e4429; border: 1px solid rgba(255, 255, 255, 0.05); }
+        .day-today { background-color: #1a633a; border: 1px solid #3cc36e; }
+        .day-exam { background-color: #9e2a2b; border: 1px solid #ff6b6b; }
+        .day-part-test { background-color: #1f6feb; border: 1px solid #58a6ff; }
+        .day .tooltip {
+            visibility: hidden;
+            width: 160px;
+            background-color: #21262d;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px 0;
+            position: absolute;
+            z-index: 10;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -80px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 12px;
+            border: 1px solid #30363d;
+            pointer-events: none;
+        }
+        .day:hover .tooltip { visibility: visible; opacity: 1; }
+        #countdown-timer { font-size: 2rem; font-weight: 600; }
+        @media (min-width: 768px) { #countdown-timer { font-size: 3rem; } }
+        .card { background-color: #161b22; border: 1px solid #30363d; }
+        .legend-item { display: flex; align-items: center; gap: 0.5rem; }
+        .legend-color { width: 15px; height: 15px; border-radius: 3px; }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="container mx-auto px-4 py-8">
+        <div class="text-center">
+            <h1 class="text-4xl md:text-5xl font-bold text-white mb-2">JEE Main 2026 Countdown</h1>
+            <p class="text-lg text-gray-400">January Attempt</p>
+        </div>
+
+        <div class="card rounded-lg p-6 my-8 max-w-4xl mx-auto">
+            <h2 class="text-2xl font-semibold text-white mb-4 text-center">Time Remaining</h2>
+            <div id="countdown-timer" class="flex justify-center space-x-4 md:space-x-8 text-white text-center">
+                <div><div id="days" class="font-bold">00</div><div class="text-sm text-gray-400">Days</div></div>
+                <div><div id="hours" class="font-bold">00</div><div class="text-sm text-gray-400">Hours</div></div>
+                <div><div id="minutes" class="font-bold">00</div><div class="text-sm text-gray-400">Minutes</div></div>
+                <div><div id="seconds" class="font-bold">00</div><div class="text-sm text-gray-400">Seconds</div></div>
+            </div>
+        </div>
+
+        <div class="text-center my-8">
+            <h2 class="text-2xl font-semibold text-white mb-2">Your Journey to JEE</h2>
+            <p class="text-gray-400">Each block is a day. Click a day to mark it as a part test.</p>
+        </div>
+
+        <div class="graph-container" id="contribution-graph"></div>
+
+        <div class="flex justify-center flex-wrap gap-4 mt-4 text-sm text-gray-400">
+            <div class="legend-item"><div class="legend-color day-future"></div><span>Future</span></div>
+            <div class="legend-item"><div class="legend-color day-today"></div><span>Today</span></div>
+            <div class="legend-item"><div class="legend-color day-part-test"></div><span>Part Test</span></div>
+            <div class="legend-item"><div class="legend-color day-exam"></div><span>Exam Day</span></div>
+        </div>
+        
+        <div class="card rounded-lg p-6 my-8 max-w-2xl mx-auto">
+             <h2 class="text-xl font-semibold text-white mb-4 text-center">Manage Part Tests</h2>
+             <form id="add-test-form" class="flex flex-col sm:flex-row gap-2 mb-4">
+                 <input type="date" id="test-date-input" class="bg-gray-800 border border-gray-600 text-white rounded-md p-2 w-full sm:w-auto" required>
+                 <input type="text" id="test-name-input" placeholder="Test Name (e.g., Jee main 4)" class="bg-gray-800 border border-gray-600 text-white rounded-md p-2 flex-grow" required>
+                 <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors">Add Test</button>
+             </form>
+             <div id="test-list-container">
+                 <h3 class="text-lg font-semibold text-white mb-2">Scheduled Tests:</h3>
+                 <ul id="test-list" class="space-y-2"></ul>
+             </div>
+        </div>
+
+        <div class="card rounded-lg p-6 my-8 max-w-2xl mx-auto text-center">
+             <h2 class="text-xl font-semibold text-white mb-3">Quote of the Day</h2>
+             <p id="quote" class="text-lg text-gray-300 italic">"The best way to predict the future is to create it."</p>
+             <p id="author" class="text-md text-gray-500 mt-2">- Peter Drucker</p>
+        </div>
+    </div>
+
+    <footer class="text-center py-6">
+        <p class="text-gray-500">
+            Built by <a href="https://github.com/svalordev" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline" style="font-family:monospace;">shaurya pratap singh</a>
+        </p>
+    </footer>
+
+    <script>
+        // --- CONFIGURATION ---
+        const EXAM_DATE = new Date("2026-01-22T00:00:00");
+        const GRAPH_START_DATE = new Date("2025-01-01T00:00:00");
+        const STORAGE_KEY = 'jeePartTests_v2'; // Changed key to avoid conflicts with old format
+
+        const quotes = [
+            { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" },
+            { text: "The secret of getting ahead is getting started.", author: "Mark Twain" },
+            { text: "It’s not whether you get knocked down, it’s whether you get up.", author: "Vince Lombardi" }
+        ];
+
+        // --- DOM ELEMENTS ---
+        const dom = {
+            days: document.getElementById('days'),
+            hours: document.getElementById('hours'),
+            minutes: document.getElementById('minutes'),
+            seconds: document.getElementById('seconds'),
+            graph: document.getElementById('contribution-graph'),
+            quote: document.getElementById('quote'),
+            author: document.getElementById('author'),
+            addTestForm: document.getElementById('add-test-form'),
+            testDateInput: document.getElementById('test-date-input'),
+            testNameInput: document.getElementById('test-name-input'),
+            testList: document.getElementById('test-list')
+        };
+        
+        // --- LOCAL STORAGE & STATE ---
+        // **MODIFIED**: Data structure is now an object { 'YYYY-MM-DD': 'Test Name' }
+        let partTests = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+
+        function saveTests() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(partTests));
+        }
+
+        function addOrUpdateTest(dateString, testName) {
+            partTests[dateString] = testName;
+            saveTests();
+            generateGraph();
+            displayPartTests();
+        }
+
+        function removeTest(dateString) {
+            delete partTests[dateString];
+            saveTests();
+            generateGraph();
+            displayPartTests();
+        }
+
+        // --- COUNTDOWN TIMER ---
+        function updateCountdown() {
+            const now = new Date();
+            const timeDifference = EXAM_DATE - now;
+
+            if (timeDifference <= 0) {
+                Object.assign(dom, { days: '00', hours: '00', minutes: '00', seconds: '00' });
+                clearInterval(countdownInterval);
+                return;
+            }
+
+            const d = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+            const h = Math.floor((timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const m = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((timeDifference % (1000 * 60)) / 1000);
+
+            dom.days.innerText = d.toString().padStart(2, '0');
+            dom.hours.innerText = h.toString().padStart(2, '0');
+            dom.minutes.innerText = m.toString().padStart(2, '0');
+            dom.seconds.innerText = s.toString().padStart(2, '0');
+        }
+
+        // --- UI RENDERING ---
+        function generateGraph() {
+            dom.graph.innerHTML = '';
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            let currentDate = new Date(GRAPH_START_DATE);
+            const examDayOnly = new Date(EXAM_DATE);
+            examDayOnly.setHours(0, 0, 0, 0);
+
+            while(currentDate <= examDayOnly) {
+                const dayDiv = document.createElement('div');
+                const tooltipSpan = document.createElement('span');
+                
+                const year = currentDate.getFullYear();
+                const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+                const dayOfMonth = currentDate.getDate().toString().padStart(2, '0');
+                const dateString = `${year}-${month}-${dayOfMonth}`;
+
+                dayDiv.classList.add('day');
+                dayDiv.dataset.date = dateString;
+                
+                tooltipSpan.classList.add('tooltip');
+                let tooltipText = currentDate.toDateString();
+
+                if (currentDate.getTime() === examDayOnly.getTime()) {
+                    dayDiv.classList.add('day-exam');
+                    tooltipText += ' - Exam Day!';
+                } else if (partTests[dateString]) { // Check if property exists
+                    dayDiv.classList.add('day-part-test');
+                    tooltipText = `${partTests[dateString]} - ${tooltipText}`; // Prepend test name
+                } else if (currentDate.getTime() === today.getTime()) {
+                    dayDiv.classList.add('day-today');
+                    tooltipText += ' - Today';
+                } else if (currentDate < today) {
+                    dayDiv.classList.add('day-past');
+                } else {
+                    dayDiv.classList.add('day-future');
+                }
+                
+                tooltipSpan.textContent = tooltipText;
+                dayDiv.appendChild(tooltipSpan);
+                dom.graph.appendChild(dayDiv);
+                
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+        }
+        
+        function displayPartTests() {
+            dom.testList.innerHTML = '';
+            const sortedDates = Object.keys(partTests).sort();
+
+            if (sortedDates.length === 0) {
+                dom.testList.innerHTML = '<li class="text-gray-500">No part tests scheduled.</li>';
+                return;
+            }
+
+            sortedDates.forEach(dateString => {
+                const li = document.createElement('li');
+                li.className = 'flex justify-between items-center bg-gray-700 p-2 rounded-md';
+                const testName = partTests[dateString];
+                
+                li.innerHTML = `
+                    <div class="flex flex-col">
+                        <span class="font-semibold text-white">${testName}</span>
+                        <span class="text-sm text-gray-400">${new Date(dateString + 'T00:00:00').toDateString()}</span>
+                    </div>
+                    <button data-date="${dateString}" class="delete-btn text-red-500 hover:text-red-400 font-semibold text-sm">Delete</button>
+                `;
+                dom.testList.appendChild(li);
+            });
+        }
+
+        function updateQuote() {
+            const randomIndex = Math.floor(Math.random() * quotes.length);
+            dom.quote.textContent = `"${quotes[randomIndex].text}"`;
+            dom.author.textContent = `- ${quotes[randomIndex].author}`;
+        }
+        
+        // --- EVENT LISTENERS ---
+        dom.addTestForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const dateValue = dom.testDateInput.value;
+            const nameValue = dom.testNameInput.value.trim();
+            if (dateValue && nameValue) {
+                addOrUpdateTest(dateValue, nameValue);
+                dom.testDateInput.value = '';
+                dom.testNameInput.value = '';
+            }
+        });
+
+        dom.graph.addEventListener('click', (e) => {
+            if (e.target.classList.contains('day')) {
+                const dateString = e.target.dataset.date;
+                if (partTests[dateString]) {
+                    removeTest(dateString);
+                } else {
+                    // Clicking a day on the graph now sets the date in the form, prompting for a name
+                    dom.testDateInput.value = dateString;
+                    dom.testNameInput.focus();
+                }
+            }
+        });
+        
+        dom.testList.addEventListener('click', (e) => {
+            if (e.target.classList.contains('delete-btn')) {
+                const dateString = e.target.dataset.date;
+                removeTest(dateString);
+            }
+        });
+
+        // --- INITIALIZATION ---
+        const countdownInterval = setInterval(updateCountdown, 1000);
+        setInterval(updateQuote, 30000);
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            updateCountdown();
+            generateGraph();
+            displayPartTests();
+            updateQuote();
+        });
+    </script>
+</body>
+</html>
