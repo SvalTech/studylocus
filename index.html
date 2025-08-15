@@ -4,15 +4,54 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JEE 2026 Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code&family=Inter:wght@400;600;700&family=Roboto+Slab&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Draggable Library -->
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <style>
+        :root {
+            --bg-color: #0d1117;
+            --card-bg-color: #161b22;
+            --border-color: #30363d;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+            --accent-color: #3b82f6;
+            --font-family: 'Inter', sans-serif;
+        }
+
+        [data-theme="light"] {
+            --bg-color: #f0f0f0;
+            --card-bg-color: #ffffff;
+            --border-color: #d1d5db;
+            --text-primary: #1f2937;
+            --text-secondary: #4b5563;
+            --accent-color: #3b82f6;
+        }
+
+        [data-theme="cyberpunk"] {
+            --bg-color: #0c0a24;
+            --card-bg-color: rgba(23, 0, 61, 0.6);
+            --border-color: #ff00f2;
+            --text-primary: #00f7ff;
+            --text-secondary: #faff00;
+            --accent-color: #ff00f2;
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0d1117;
-            color: #c9d1d9;
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        #bg-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0,0,0,0.5);
+            z-index: -1;
         }
         .graph-container {
             display: grid;
@@ -46,8 +85,11 @@
         @media (min-width: 640px) { #countdown-timer { font-size: 2.25rem; } }
         @media (min-width: 1024px) { #countdown-timer { font-size: 2.5rem; } }
         .card { 
-            background-color: #161b22; border: 1px solid #30363d; 
+            background-color: var(--card-bg-color); 
+            border: 1px solid var(--border-color); 
+            color: var(--text-primary);
             border-radius: 8px; padding: 1rem;
+            backdrop-filter: blur(5px);
         }
         .card-header {
             display: flex;
@@ -59,13 +101,13 @@
             transition: background-color 0.2s ease-in-out;
         }
         .card-header:hover {
-            background-color: #2a3038;
+            background-color: rgba(255,255,255,0.1);
         }
         .drag-handle { cursor: grab; }
         .sortable-ghost {
             background: #1f2937;
             opacity: 0.6;
-            border: 2px dashed #3b82f6;
+            border: 2px dashed var(--accent-color);
         }
         .sortable-chosen { cursor: grabbing; }
         .modal-overlay {
@@ -76,8 +118,18 @@
         }
         .todo-item.completed span {
             text-decoration: line-through;
-            color: #6b7280;
+            color: var(--text-secondary);
         }
+        .form-input {
+            background-color: rgba(0,0,0,0.2);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: var(--bg-color);
+        }
+        .text-secondary { color: var(--text-secondary); }
     </style>
 </head>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-TCK0S6VC58"></script>
@@ -89,25 +141,27 @@
   gtag('config', 'G-TCK0S6VC58');
 </script>
 <body class="antialiased">
+    <div id="bg-overlay"></div>
     <div class="container mx-auto px-2 sm:px-4 py-6">
         <header class="flex justify-between items-center mb-6">
-            <h1 class="text-3xl sm:text-4xl font-bold text-white">JEE 2026</h1>
-            <button id="add-card-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors text-sm">
-                + Add Card
-            </button>
+            <h1 class="text-3xl sm:text-4xl font-bold">JEE 2026</h1>
+            <div>
+                 <button id="customize-btn" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-md transition-colors text-sm mr-2">Customize</button>
+                <button id="add-card-btn" class="btn-primary font-bold py-2 px-4 rounded-md transition-colors text-sm">
+                    + Add Card
+                </button>
+            </div>
         </header>
 
         <!-- Dashboard Grid -->
         <main id="dashboard-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            
             <!-- Cards will be dynamically inserted here by JavaScript -->
-
         </main>
     </div>
 
     <footer class="text-center py-4 mt-4">
-        <p class="text-xs text-gray-500">
-            Built by <a href="https://github.com/svalordev" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline">SHAURYA PRATAP SINGH</a>
+        <p class="text-xs text-secondary">
+            Built by <a href="https://github.com/svalordev" target="_blank" rel="noopener noreferrer" class="hover:underline" style="color: var(--accent-color);">SHAURYA PRATAP SINGH</a>
         </p>
     </footer>
 
@@ -116,13 +170,13 @@
         <div class="card" data-card-id="countdown">
             <div class="card-header">
                 <h2 class="text-lg font-semibold">Countdown</h2>
-                <div class="drag-handle text-gray-500 p-2">☰</div>
+                <div class="drag-handle text-secondary p-2">☰</div>
             </div>
-            <div id="countdown-timer" class="flex justify-center space-x-2 sm:space-x-4 md:space-x-8 text-white text-center py-2">
-                <div><div id="days" class="font-bold">00</div><div class="text-xs sm:text-sm text-gray-400">Days</div></div>
-                <div><div id="hours" class="font-bold">00</div><div class="text-xs sm:text-sm text-gray-400">Hours</div></div>
-                <div><div id="minutes" class="font-bold">00</div><div class="text-xs sm:text-sm text-gray-400">Minutes</div></div>
-                <div><div id="seconds" class="font-bold">00</div><div class="text-xs sm:text-sm text-gray-400">Seconds</div></div>
+            <div id="countdown-timer" class="flex justify-center space-x-2 sm:space-x-4 md:space-x-8 text-center py-2">
+                <div><div id="days" class="font-bold">00</div><div class="text-xs sm:text-sm text-secondary">Days</div></div>
+                <div><div id="hours" class="font-bold">00</div><div class="text-xs sm:text-sm text-secondary">Hours</div></div>
+                <div><div id="minutes" class="font-bold">00</div><div class="text-xs sm:text-sm text-secondary">Minutes</div></div>
+                <div><div id="seconds" class="font-bold">00</div><div class="text-xs sm:text-sm text-secondary">Seconds</div></div>
             </div>
         </div>
     </template>
@@ -131,10 +185,10 @@
         <div class="card md:col-span-2 xl:col-span-2" data-card-id="graph">
             <div class="card-header">
                 <h2 class="text-lg font-semibold">Journey</h2>
-                <div class="drag-handle text-gray-500 p-2">☰</div>
+                <div class="drag-handle text-secondary p-2">☰</div>
             </div>
             <div class="graph-container" id="contribution-graph"></div>
-            <div class="flex justify-center flex-wrap gap-x-4 gap-y-2 mt-4 text-xs text-gray-400">
+            <div class="flex justify-center flex-wrap gap-x-4 gap-y-2 mt-4 text-xs text-secondary">
                 <div class="legend-item"><div class="legend-color day-future"></div><span>Future</span></div>
                 <div class="legend-item"><div class="legend-color day-today"></div><span>Today</span></div>
                 <div class="legend-item"><div class="legend-color day-part-test"></div><span>Test</span></div>
@@ -147,15 +201,15 @@
          <div class="card" data-card-id="tests">
             <div class="card-header">
                 <h2 class="text-lg font-semibold">Test Planner</h2>
-                <div class="drag-handle text-gray-500 p-2">☰</div>
+                <div class="drag-handle text-secondary p-2">☰</div>
             </div>
             <form id="add-test-form" class="flex flex-col gap-3 mb-4">
-                 <input type="date" id="test-date-input" class="bg-gray-800 border border-gray-600 text-white rounded-md p-2 w-full text-sm" required>
-                 <input type="text" id="test-name-input" placeholder="Test Name" class="bg-gray-800 border border-gray-600 text-white rounded-md p-2 flex-grow text-sm" required>
-                 <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors w-full text-sm">Add Test</button>
+                 <input type="date" id="test-date-input" class="form-input rounded-md p-2 w-full text-sm" required>
+                 <input type="text" id="test-name-input" placeholder="Test Name" class="form-input rounded-md p-2 flex-grow text-sm" required>
+                 <button type="submit" class="btn-primary font-bold py-2 px-4 rounded-md transition-colors w-full text-sm">Add Test</button>
             </form>
             <div id="test-list-container">
-                 <h3 class="text-md font-semibold text-white mb-2 border-b border-gray-700 pb-1">Tests</h3>
+                 <h3 class="text-md font-semibold mb-2 border-b pb-1" style="border-color: var(--border-color);">Tests</h3>
                  <ul id="test-list" class="space-y-2 max-h-48 overflow-y-auto"></ul>
             </div>
         </div>
@@ -165,11 +219,11 @@
         <div class="card" data-card-id="quote">
             <div class="card-header">
                 <h2 class="text-lg font-semibold">Quote</h2>
-                <div class="drag-handle text-gray-500 p-2">☰</div>
+                <div class="drag-handle text-secondary p-2">☰</div>
             </div>
             <div id="quote-card-content" class="text-center cursor-pointer transition-transform transform hover:scale-105">
-                 <p id="quote" class="text-md text-gray-300 italic">"The best way to predict the future is to create it."</p>
-                 <p id="author" class="text-sm text-gray-500 mt-2">- Peter Drucker</p>
+                 <p id="quote" class="text-md italic">"The best way to predict the future is to create it."</p>
+                 <p id="author" class="text-sm text-secondary mt-2">- Peter Drucker</p>
             </div>
         </div>
     </template>
@@ -177,13 +231,13 @@
     <template id="note-card-template">
         <div class="card custom-card" data-card-type="note">
             <div class="card-header">
-                <h2 class="text-lg font-semibold card-title">Custom Card</h2>
+                <h2 class="text-lg font-semibold card-title">Note</h2>
                 <div>
                     <button class="delete-card-btn text-red-500 text-xs mr-2">Delete</button>
-                    <span class="drag-handle text-gray-500 p-2">☰</span>
+                    <span class="drag-handle text-secondary p-2">☰</span>
                 </div>
             </div>
-            <div class="text-sm text-gray-300 card-content whitespace-pre-wrap"></div>
+            <div class="text-sm card-content whitespace-pre-wrap"></div>
         </div>
     </template>
 
@@ -193,13 +247,13 @@
                 <h2 class="text-lg font-semibold card-title">To-Do List</h2>
                 <div>
                     <button class="delete-card-btn text-red-500 text-xs mr-2">Delete</button>
-                    <span class="drag-handle text-gray-500 p-2">☰</span>
+                    <span class="drag-handle text-secondary p-2">☰</span>
                 </div>
             </div>
             <div class="card-content">
                 <ul class="todo-list space-y-2 max-h-48 overflow-y-auto mb-3"></ul>
                 <form class="add-todo-form flex gap-2">
-                    <input type="text" placeholder="New task..." class="bg-gray-800 border border-gray-600 text-white rounded-md p-2 w-full text-sm" required>
+                    <input type="text" placeholder="New task..." class="form-input rounded-md p-2 w-full text-sm" required>
                     <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded-md text-sm">+</button>
                 </form>
             </div>
@@ -211,18 +265,59 @@
         <div class="card w-11/12 max-w-md">
             <h2 class="text-xl font-semibold mb-4">Add New Card</h2>
             <form id="new-card-form">
-                <select id="new-card-type" class="bg-gray-800 border border-gray-600 text-white rounded-md p-2 w-full mb-3">
+                <select id="new-card-type" class="form-input rounded-md p-2 w-full mb-3">
                     <option value="note">Note</option>
                     <option value="todo">To-Do List</option>
                 </select>
-                <input type="text" id="new-card-title" placeholder="Card Title" class="bg-gray-800 border border-gray-600 text-white rounded-md p-2 w-full mb-3" required>
-                <textarea id="new-card-content" placeholder="Card Content (for notes)" rows="4" class="bg-gray-800 border border-gray-600 text-white rounded-md p-2 w-full mb-4"></textarea>
+                <input type="text" id="new-card-title" placeholder="Card Title" class="form-input rounded-md p-2 w-full mb-3" required>
+                <textarea id="new-card-content" placeholder="Card Content (for notes)" rows="4" class="form-input rounded-md p-2 w-full mb-4"></textarea>
                 <div class="flex justify-end gap-3">
                     <button type="button" id="cancel-add-card" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md">Cancel</button>
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md">Add</button>
+                    <button type="submit" class="btn-primary font-bold py-2 px-4 rounded-md">Add</button>
                 </div>
             </form>
         </div>
+    </div>
+
+    <!-- Modal for customization -->
+    <div id="customize-modal" class="modal-overlay hidden">
+        <div class="card w-11/12 max-w-md">
+            <h2 class="text-xl font-semibold mb-4">Customize Dashboard</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-secondary mb-1">Theme</label>
+                    <select id="theme-select" class="form-input rounded-md p-2 w-full">
+                        <option value="default">Deep Space</option>
+                        <option value="light">Solarized Light</option>
+                        <option value="cyberpunk">Cyberpunk</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-secondary mb-1">Font</label>
+                    <select id="font-select" class="form-input rounded-md p-2 w-full">
+                        <option value="'Inter', sans-serif">Inter (Sans-Serif)</option>
+                        <option value="'Roboto Slab', serif">Roboto Slab (Serif)</option>
+                        <option value="'Fira Code', monospace">Fira Code (Monospace)</option>
+                    </select>
+                </div>
+                 <div>
+                    <label class="block text-sm font-medium text-secondary mb-1">Background Image URL</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="bg-image-url" placeholder="Paste image URL..." class="form-input rounded-md p-2 w-full">
+                        <button id="remove-bg-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-md">X</button>
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-end mt-6">
+                <button type="button" id="close-customize" class="btn-primary font-bold py-2 px-4 rounded-md">Close</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Mobile Alert -->
+    <div id="mobile-alert" class="fixed bottom-4 left-4 right-4 bg-yellow-400 text-black p-3 text-center text-sm rounded-lg shadow-lg flex justify-between items-center hidden z-50">
+        <span>For the best experience, try this on a desktop.</span>
+        <button id="close-alert-btn" class="font-bold text-lg ml-4">&times;</button>
     </div>
 
 
@@ -234,7 +329,9 @@
         const STORAGE_KEYS = {
             tests: 'jeePartTests_v2',
             layout: 'jeeDashboardLayout_v2',
-            customCards: 'jeeCustomCards_v2'
+            customCards: 'jeeCustomCards_v2',
+            settings: 'jeeDashboardSettings_v1',
+            mobileAlertDismissed: 'jeeMobileAlertDismissed_v1'
         };
         const quotes = [
             { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" },
@@ -247,6 +344,12 @@
         let customCards = JSON.parse(localStorage.getItem(STORAGE_KEYS.customCards)) || [];
         const defaultLayout = ['countdown', 'graph', 'tests', 'quote'];
         let currentLayout = JSON.parse(localStorage.getItem(STORAGE_KEYS.layout)) || defaultLayout;
+        const defaultSettings = {
+            theme: 'default',
+            font: "'Inter', sans-serif",
+            bgUrl: ''
+        };
+        let settings = JSON.parse(localStorage.getItem(STORAGE_KEYS.settings)) || defaultSettings;
 
         const saveState = (key, data) => localStorage.setItem(key, JSON.stringify(data));
 
@@ -371,7 +474,6 @@
                 const dayDiv = document.createElement('div');
                 const tooltipSpan = document.createElement('span');
                 
-                // **FIXED**: Manually format the date string to YYYY-MM-DD to avoid timezone shifts.
                 const year = currentDate.getFullYear();
                 const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
                 const dayOfMonth = currentDate.getDate().toString().padStart(2, '0');
@@ -405,14 +507,13 @@
             listEl.innerHTML = '';
             const sortedDates = Object.keys(partTests).sort();
             if (sortedDates.length === 0) {
-                listEl.innerHTML = '<li class="text-gray-500 px-2 text-sm">No tests scheduled.</li>';
+                listEl.innerHTML = '<li class="text-secondary px-2 text-sm">No tests scheduled.</li>';
                 return;
             }
             sortedDates.forEach(dateString => {
                 const li = document.createElement('li');
                 li.className = 'flex justify-between items-center bg-gray-800 p-2 rounded-md';
-                li.innerHTML = `<div class="flex flex-col"><span class="font-semibold text-white text-sm">${partTests[dateString]}</span><span class="text-xs text-gray-400">${new Date(dateString + 'T00:00:00').toDateString()}</span></div><button data-date="${dateString}" class="delete-btn text-red-500 hover:text-red-400 font-semibold text-xs">Delete</button>`;
-                listEl.appendChild(li);
+                li.innerHTML = `<div class="flex flex-col"><span class="font-semibold text-sm">${partTests[dateString]}</span><span class="text-xs text-secondary">${new Date(dateString + 'T00:00:00').toDateString()}</span></div><button data-date="${dateString}" class="delete-btn text-red-500 hover:text-red-400 font-semibold text-xs">Delete</button>`;
             });
         }
         
@@ -512,14 +613,14 @@
         
         // --- MODAL HANDLING ---
         const addCardBtn = document.getElementById('add-card-btn');
-        const modal = document.getElementById('add-card-modal');
+        const addCardModal = document.getElementById('add-card-modal');
         const newCardForm = document.getElementById('new-card-form');
         const cancelBtn = document.getElementById('cancel-add-card');
         const cardTypeSelect = document.getElementById('new-card-type');
         const cardContentTextarea = document.getElementById('new-card-content');
 
-        addCardBtn.addEventListener('click', () => modal.classList.remove('hidden'));
-        cancelBtn.addEventListener('click', () => modal.classList.add('hidden'));
+        addCardBtn.addEventListener('click', () => addCardModal.classList.remove('hidden'));
+        cancelBtn.addEventListener('click', () => addCardModal.classList.add('hidden'));
         
         cardTypeSelect.addEventListener('change', (e) => {
             cardContentTextarea.style.display = e.target.value === 'note' ? 'block' : 'none';
@@ -546,7 +647,7 @@
             });
             saveState(STORAGE_KEYS.customCards, customCards);
             renderDashboard();
-            modal.classList.add('hidden');
+            addCardModal.classList.add('hidden');
             newCardForm.reset();
             cardContentTextarea.style.display = 'block';
         });
@@ -559,9 +660,76 @@
             renderDashboard();
         }
 
+        // --- CUSTOMIZATION ---
+        const customizeBtn = document.getElementById('customize-btn');
+        const customizeModal = document.getElementById('customize-modal');
+        const closeCustomizeBtn = document.getElementById('close-customize');
+        const themeSelect = document.getElementById('theme-select');
+        const fontSelect = document.getElementById('font-select');
+        const bgUrlInput = document.getElementById('bg-image-url');
+        const removeBgBtn = document.getElementById('remove-bg-btn');
+
+        function applySettings() {
+            document.documentElement.dataset.theme = settings.theme;
+            document.body.style.fontFamily = settings.font;
+            document.body.style.backgroundImage = settings.bgUrl ? `url(${settings.bgUrl})` : 'none';
+            
+            themeSelect.value = settings.theme;
+            fontSelect.value = settings.font;
+            bgUrlInput.value = settings.bgUrl;
+        }
+
+        customizeBtn.addEventListener('click', () => customizeModal.classList.remove('hidden'));
+        closeCustomizeBtn.addEventListener('click', () => customizeModal.classList.add('hidden'));
+
+        themeSelect.addEventListener('change', (e) => {
+            settings.theme = e.target.value;
+            saveState(STORAGE_KEYS.settings, settings);
+            applySettings();
+        });
+
+        fontSelect.addEventListener('change', (e) => {
+            settings.font = e.target.value;
+            saveState(STORAGE_KEYS.settings, settings);
+            applySettings();
+        });
+
+        bgUrlInput.addEventListener('input', (e) => {
+            settings.bgUrl = e.target.value;
+            saveState(STORAGE_KEYS.settings, settings);
+            applySettings();
+        });
+        
+        removeBgBtn.addEventListener('click', () => {
+             settings.bgUrl = '';
+             saveState(STORAGE_KEYS.settings, settings);
+             applySettings();
+        });
+        
+        // --- MOBILE ALERT ---
+        const mobileAlert = document.getElementById('mobile-alert');
+        const closeAlertBtn = document.getElementById('close-alert-btn');
+
+        function handleMobileAlert() {
+            const isMobile = window.innerWidth < 768;
+            const isDismissed = localStorage.getItem(STORAGE_KEYS.mobileAlertDismissed) === 'true';
+
+            if (isMobile && !isDismissed) {
+                mobileAlert.classList.remove('hidden');
+            }
+
+            closeAlertBtn.addEventListener('click', () => {
+                mobileAlert.classList.add('hidden');
+                localStorage.setItem(STORAGE_KEYS.mobileAlertDismissed, 'true');
+            });
+        }
+
         // --- INITIALIZATION ---
+        applySettings();
         renderDashboard();
+        handleMobileAlert();
     });
     </script>
 </body>
 </html>
+
