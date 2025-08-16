@@ -10,6 +10,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Draggable Library -->
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <!-- Charting Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --bg-color: #0d1117;
@@ -27,7 +29,6 @@
             --border-color: #d1d5db;
             --text-primary: #1f2937;
             --text-secondary: #4b5563;
-            --accent-color: #3b82f6;
         }
 
         [data-theme="cyberpunk"] {
@@ -127,9 +128,28 @@
         }
         .btn-primary {
             background-color: var(--accent-color);
-            color: var(--bg-color);
+            color: white;
         }
+        [data-theme="cyberpunk"] .btn-primary { color: var(--bg-color); }
         .text-secondary { color: var(--text-secondary); }
+        select.form-input {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='var(--text-secondary)' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+        }
+        select.form-input option {
+            background: var(--card-bg-color);
+            color: var(--text-primary);
+        }
+        [data-theme="light"] .form-input {
+            background-color: #e5e7eb;
+            border-color: #9ca3af;
+        }
     </style>
 </head>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-TCK0S6VC58"></script>
@@ -173,10 +193,10 @@
                 <div class="drag-handle text-secondary p-2">☰</div>
             </div>
             <div id="countdown-timer" class="flex justify-center space-x-2 sm:space-x-4 md:space-x-8 text-center py-2">
-                <div><div id="days" class="font-bold">00</div><div class="text-xs sm:text-sm text-secondary">Days</div></div>
-                <div><div id="hours" class="font-bold">00</div><div class="text-xs sm:text-sm text-secondary">Hours</div></div>
-                <div><div id="minutes" class="font-bold">00</div><div class="text-xs sm:text-sm text-secondary">Minutes</div></div>
-                <div><div id="seconds" class="font-bold">00</div><div class="text-xs sm:text-sm text-secondary">Seconds</div></div>
+                <div><div data-value="days" class="font-bold">00</div><div class="text-xs sm:text-sm text-secondary">Days</div></div>
+                <div><div data-value="hours" class="font-bold">00</div><div class="text-xs sm:text-sm text-secondary">Hours</div></div>
+                <div><div data-value="minutes" class="font-bold">00</div><div class="text-xs sm:text-sm text-secondary">Minutes</div></div>
+                <div><div data-value="seconds" class="font-bold">00</div><div class="text-xs sm:text-sm text-secondary">Seconds</div></div>
             </div>
         </div>
     </template>
@@ -204,8 +224,8 @@
                 <div class="drag-handle text-secondary p-2">☰</div>
             </div>
             <form id="add-test-form" class="flex flex-col gap-3 mb-4">
-                 <input type="date" id="test-date-input" class="form-input rounded-md p-2 w-full text-sm" required>
-                 <input type="text" id="test-name-input" placeholder="Test Name" class="form-input rounded-md p-2 flex-grow text-sm" required>
+                 <input type="date" name="date" class="form-input rounded-md p-2 w-full text-sm" required>
+                 <input type="text" name="name" placeholder="Test Name" class="form-input rounded-md p-2 flex-grow text-sm" required>
                  <button type="submit" class="btn-primary font-bold py-2 px-4 rounded-md transition-colors w-full text-sm">Add Test</button>
             </form>
             <div id="test-list-container">
@@ -260,6 +280,31 @@
         </div>
     </template>
 
+    <template id="line-graph-card-template">
+        <div class="card custom-card" data-card-type="line-graph">
+            <div class="card-header">
+                <h2 class="text-lg font-semibold card-title">Graph</h2>
+                <div>
+                    <button class="toggle-colspan-btn text-secondary text-xs mr-2" title="Toggle size">⤢</button>
+                    <button class="delete-card-btn text-red-500 text-xs mr-2">Delete</button>
+                    <span class="drag-handle text-secondary p-2">☰</span>
+                </div>
+            </div>
+            <div class="card-content">
+                <div class="mb-4 h-64">
+                    <canvas class="marks-chart"></canvas>
+                </div>
+                <form class="add-marks-form flex flex-col sm:flex-row gap-2 mb-3">
+                    <input type="text" name="name" placeholder="Paper Name" class="form-input rounded-md p-2 w-full sm:w-auto flex-grow text-sm" required>
+                    <input type="number" name="marks" placeholder="Marks" class="form-input rounded-md p-2 w-full sm:w-20 text-sm" required>
+                    <input type="number" name="maxMarks" placeholder="Max" class="form-input rounded-md p-2 w-full sm:w-20 text-sm" required>
+                    <button type="submit" class="btn-primary font-bold py-2 px-3 rounded-md text-sm">+</button>
+                </form>
+                <ul class="marks-list space-y-1 max-h-24 overflow-y-auto"></ul>
+            </div>
+        </div>
+    </template>
+
     <!-- Modal for adding a new card -->
     <div id="add-card-modal" class="modal-overlay hidden">
         <div class="card w-11/12 max-w-md">
@@ -268,6 +313,7 @@
                 <select id="new-card-type" class="form-input rounded-md p-2 w-full mb-3">
                     <option value="note">Note</option>
                     <option value="todo">To-Do List</option>
+                    <option value="line-graph">Line Graph</option>
                 </select>
                 <input type="text" id="new-card-title" placeholder="Card Title" class="form-input rounded-md p-2 w-full mb-3" required>
                 <textarea id="new-card-content" placeholder="Card Content (for notes)" rows="4" class="form-input rounded-md p-2 w-full mb-4"></textarea>
@@ -323,413 +369,435 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // --- CONFIGURATION ---
-        const EXAM_DATE = new Date("2026-01-22T00:00:00");
-        const GRAPH_START_DATE = new Date("2025-01-01T00:00:00");
+        // --- CONFIGURATION & STATE ---
         const STORAGE_KEYS = {
             tests: 'jeePartTests_v2',
-            layout: 'jeeDashboardLayout_v2',
-            customCards: 'jeeCustomCards_v2',
+            layout: 'jeeDashboardLayout_v3',
+            customCards: 'jeeCustomCards_v3',
             settings: 'jeeDashboardSettings_v1',
             mobileAlertDismissed: 'jeeMobileAlertDismissed_v1'
         };
+
+        const AppState = {
+            tests: JSON.parse(localStorage.getItem(STORAGE_KEYS.tests)) || {},
+            customCards: JSON.parse(localStorage.getItem(STORAGE_KEYS.customCards)) || [],
+            layout: JSON.parse(localStorage.getItem(STORAGE_KEYS.layout)) || ['countdown', 'graph', 'tests', 'quote'],
+            settings: JSON.parse(localStorage.getItem(STORAGE_KEYS.settings)) || { theme: 'default', font: "'Inter', sans-serif", bgUrl: '' },
+            chartInstances: {},
+            
+            save(key) {
+                localStorage.setItem(STORAGE_KEYS[key], JSON.stringify(this[key]));
+            },
+            saveSettings() {
+                 localStorage.setItem(STORAGE_KEYS.settings, JSON.stringify(this.settings));
+            }
+        };
+
         const quotes = [
-            { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" },
             { text: "The secret of getting ahead is getting started.", author: "Mark Twain" },
             { text: "It’s not whether you get knocked down, it’s whether you get up.", author: "Vince Lombardi" },
+            { text: "Success is the sum of small efforts, repeated day in and day out.", author: "Robert Collier" },
+            { text: "The expert in anything was once a beginner.", author: "Helen Hayes" },
         ];
-        
-        // --- STATE & LOCAL STORAGE ---
-        let partTests = JSON.parse(localStorage.getItem(STORAGE_KEYS.tests)) || {};
-        let customCards = JSON.parse(localStorage.getItem(STORAGE_KEYS.customCards)) || [];
-        const defaultLayout = ['countdown', 'graph', 'tests', 'quote'];
-        let currentLayout = JSON.parse(localStorage.getItem(STORAGE_KEYS.layout)) || defaultLayout;
-        const defaultSettings = {
-            theme: 'default',
-            font: "'Inter', sans-serif",
-            bgUrl: ''
+
+        // --- DOM ELEMENTS ---
+        const D = {
+            body: document.body,
+            dashboardGrid: document.getElementById('dashboard-grid'),
+            modals: {
+                addCard: document.getElementById('add-card-modal'),
+                customize: document.getElementById('customize-modal'),
+            },
+            buttons: {
+                addCard: document.getElementById('add-card-btn'),
+                cancelAddCard: document.getElementById('cancel-add-card'),
+                customize: document.getElementById('customize-btn'),
+                closeCustomize: document.getElementById('close-customize'),
+                removeBg: document.getElementById('remove-bg-btn'),
+                closeAlert: document.getElementById('close-alert-btn'),
+            },
+            forms: {
+                newCard: document.getElementById('new-card-form'),
+            },
+            inputs: {
+                cardType: document.getElementById('new-card-type'),
+                cardContent: document.getElementById('new-card-content'),
+                theme: document.getElementById('theme-select'),
+                font: document.getElementById('font-select'),
+                bgUrl: document.getElementById('bg-image-url'),
+            },
+            mobileAlert: document.getElementById('mobile-alert'),
         };
-        let settings = JSON.parse(localStorage.getItem(STORAGE_KEYS.settings)) || defaultSettings;
 
-        const saveState = (key, data) => localStorage.setItem(key, JSON.stringify(data));
-
-        // --- RENDER DASHBOARD ---
-        const dashboardGrid = document.getElementById('dashboard-grid');
-
-        function renderDashboard() {
-            dashboardGrid.innerHTML = '';
-            
-            const customCardIds = customCards.map(c => c.id);
-            currentLayout = currentLayout.filter(id => defaultLayout.includes(id) || customCardIds.includes(id));
-
-            customCards.forEach(card => {
-                if (!currentLayout.includes(card.id)) {
-                    currentLayout.push(card.id);
+        // --- CARD TYPE DEFINITIONS ---
+        const cardTypes = {
+            countdown: {
+                templateId: 'countdown-template',
+                isDefault: true,
+                render: (cardEl) => {
+                    const diff = new Date("2026-01-22T00:00:00") - new Date();
+                    cardEl.querySelector('[data-value="days"]').innerText = Math.floor(diff / 864e5).toString().padStart(2, '0');
+                    cardEl.querySelector('[data-value="hours"]').innerText = Math.floor(diff / 36e5 % 24).toString().padStart(2, '0');
+                    cardEl.querySelector('[data-value="minutes"]').innerText = Math.floor(diff / 6e4 % 60).toString().padStart(2, '0');
+                    cardEl.querySelector('[data-value="seconds"]').innerText = Math.floor(diff / 1e3 % 60).toString().padStart(2, '0');
                 }
-            });
-            saveState(STORAGE_KEYS.layout, currentLayout);
+            },
+            graph: {
+                templateId: 'graph-template',
+                isDefault: true,
+                render: (cardEl) => {
+                    const graphContainer = cardEl.querySelector('#contribution-graph');
+                    graphContainer.innerHTML = '';
+                    const today = new Date(); today.setHours(0, 0, 0, 0);
+                    let currentDate = new Date("2025-01-01T00:00:00");
+                    const examDay = new Date("2026-01-22T00:00:00"); examDay.setHours(0, 0, 0, 0);
+                    
+                    while (currentDate <= examDay) {
+                        const dayDiv = document.createElement('div');
+                        const tooltip = document.createElement('span');
+                        const dateString = currentDate.toISOString().slice(0, 10);
+                        
+                        dayDiv.className = 'day';
+                        dayDiv.dataset.date = dateString;
+                        tooltip.className = 'tooltip';
+                        
+                        let typeClass = 'day-future', tooltipText = currentDate.toDateString();
+                        if (currentDate < today) typeClass = 'day-past';
+                        if (currentDate.getTime() === today.getTime()) { typeClass = 'day-today'; tooltipText += ' - Today'; }
+                        if (AppState.tests[dateString]) { typeClass = 'day-part-test'; tooltipText = `${AppState.tests[dateString]} - ${tooltipText}`; }
+                        if (currentDate.getTime() === examDay.getTime()) { typeClass = 'day-exam'; tooltipText += ' - Exam!'; }
+                        
+                        dayDiv.classList.add(typeClass);
+                        tooltip.textContent = tooltipText;
+                        dayDiv.appendChild(tooltip);
+                        graphContainer.appendChild(dayDiv);
+                        currentDate.setDate(currentDate.getDate() + 1);
+                    }
+                }
+            },
+            tests: {
+                templateId: 'tests-template',
+                isDefault: true,
+                render: (cardEl) => {
+                    const listEl = cardEl.querySelector('#test-list');
+                    listEl.innerHTML = '';
+                    const sortedDates = Object.keys(AppState.tests).sort();
+                    if (sortedDates.length === 0) {
+                        listEl.innerHTML = '<li class="text-secondary px-2 text-sm">No tests scheduled.</li>';
+                        return;
+                    }
+                    sortedDates.forEach(date => {
+                        const li = document.createElement('li');
+                        li.className = 'flex justify-between items-center bg-gray-800 p-2 rounded-md';
+                        li.innerHTML = `<div class="flex flex-col"><span class="font-semibold text-sm">${AppState.tests[date]}</span><span class="text-xs text-secondary">${new Date(date + 'T00:00:00').toDateString()}</span></div><button data-date="${date}" class="delete-test-btn text-red-500 hover:text-red-400 font-semibold text-xs">Delete</button>`;
+                        listEl.appendChild(li);
+                    });
+                }
+            },
+            quote: {
+                templateId: 'quote-template',
+                isDefault: true,
+                render: (cardEl) => {
+                    const { text, author } = quotes[Math.floor(Math.random() * quotes.length)];
+                    cardEl.querySelector('#quote').textContent = `"${text}"`;
+                    cardEl.querySelector('#author').textContent = `- ${author}`;
+                }
+            },
+            note: {
+                templateId: 'note-card-template',
+                render: (cardEl, cardData) => {
+                    cardEl.querySelector('.card-content').textContent = cardData.content;
+                }
+            },
+            todo: {
+                templateId: 'todo-card-template',
+                render: (cardEl, cardData) => {
+                    const listEl = cardEl.querySelector('.todo-list');
+                    listEl.innerHTML = '';
+                    if (Array.isArray(cardData.content)) {
+                        cardData.content.forEach((item, index) => {
+                            const li = document.createElement('li');
+                            li.className = `flex items-center gap-2 todo-item ${item.completed ? 'completed' : ''}`;
+                            li.dataset.index = index;
+                            li.innerHTML = `<input type="checkbox" ${item.completed ? 'checked' : ''} class="todo-checkbox bg-gray-900 rounded"><span class="flex-grow text-sm">${item.text}</span><button class="delete-todo-item text-red-500 hover:text-red-400 font-semibold text-xs">×</button>`;
+                            listEl.appendChild(li);
+                        });
+                    }
+                }
+            },
+            'line-graph': {
+                templateId: 'line-graph-card-template',
+                render: (cardEl, cardData) => {
+                    const listEl = cardEl.querySelector('.marks-list');
+                    listEl.innerHTML = '';
+                    
+                    cardData.content.forEach((item, index) => {
+                        const li = document.createElement('li');
+                        li.className = 'flex justify-between items-center text-xs bg-gray-800 p-1 rounded';
+                        li.innerHTML = `<span>${item.name}: <strong>${item.marks} / ${item.maxMarks}</strong></span><button data-index="${index}" class="delete-mark-item text-red-500 px-1">×</button>`;
+                        listEl.appendChild(li);
+                    });
 
-            currentLayout.forEach(cardId => {
-                let cardNode;
-                if (defaultLayout.includes(cardId)) {
-                    const template = document.getElementById(`${cardId}-template`);
-                    if (template) cardNode = template.content.cloneNode(true);
-                } else {
-                    const customCardData = customCards.find(c => c.id === cardId);
-                    if (customCardData) {
-                        const templateId = `${customCardData.type}-card-template`;
-                        const template = document.getElementById(templateId);
-                        if (template) {
-                            cardNode = template.content.cloneNode(true);
-                            const cardElement = cardNode.querySelector('.card');
-                            cardElement.dataset.cardId = customCardData.id;
-                            cardElement.querySelector('.card-title').textContent = customCardData.title;
-                            
-                            if(customCardData.type === 'note') {
-                                cardElement.querySelector('.card-content').textContent = customCardData.content;
-                            } else if (customCardData.type === 'todo') {
-                                const todoListEl = cardElement.querySelector('.todo-list');
-                                todoListEl.innerHTML = '';
-                                if (Array.isArray(customCardData.content)) {
-                                    customCardData.content.forEach((item, index) => {
-                                        const li = document.createElement('li');
-                                        li.className = `flex items-center gap-2 todo-item ${item.completed ? 'completed' : ''}`;
-                                        li.dataset.index = index;
-                                        li.innerHTML = `
-                                            <input type="checkbox" ${item.completed ? 'checked' : ''} class="todo-checkbox bg-gray-900 rounded">
-                                            <span class="flex-grow text-sm">${item.text}</span>
-                                            <button class="delete-todo-item text-red-500 hover:text-red-400 font-semibold text-xs">×</button>
-                                        `;
-                                        todoListEl.appendChild(li);
-                                    });
-                                }
+                    const ctx = cardEl.querySelector('.marks-chart').getContext('2d');
+                    if (AppState.chartInstances[cardData.id]) {
+                        AppState.chartInstances[cardData.id].destroy();
+                    }
+                    
+                    const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
+                    const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim();
+                    const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--border-color').trim();
+                    
+                    const gradient = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height);
+                    gradient.addColorStop(0, `${accentColor}40`);
+                    gradient.addColorStop(1, `${accentColor}00`);
+
+                    const maxMarkValue = cardData.content.length > 0 ? Math.max(...cardData.content.map(d => d.maxMarks || 0)) : 300;
+
+                    AppState.chartInstances[cardData.id] = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: cardData.content.map(d => d.name),
+                            datasets: [{
+                                label: 'Marks',
+                                data: cardData.content.map(d => d.marks),
+                                borderColor: accentColor,
+                                backgroundColor: gradient,
+                                fill: true,
+                                tension: 0.3,
+                                pointBackgroundColor: accentColor,
+                                pointBorderColor: 'var(--card-bg-color)',
+                                pointHoverBackgroundColor: '#fff',
+                                pointHoverBorderColor: accentColor,
+                                pointRadius: 4,
+                                pointHoverRadius: 6,
+                                borderWidth: 2
+                            }]
+                        },
+                        options: {
+                            responsive: true, maintainAspectRatio: false,
+                            plugins: { legend: { display: false } },
+                            scales: {
+                                y: { beginAtZero: true, max: maxMarkValue, ticks: { color: textColor }, grid: { color: gridColor } },
+                                x: { ticks: { color: textColor }, grid: { color: 'transparent' } }
                             }
                         }
-                    }
+                    });
                 }
-                if(cardNode) dashboardGrid.appendChild(cardNode);
-            });
+            }
+        };
+
+        // --- CORE FUNCTIONS ---
+        function renderDashboard() {
+            Object.values(AppState.chartInstances).forEach(chart => chart.destroy());
+            AppState.chartInstances = {};
+            D.dashboardGrid.innerHTML = '';
             
-            initializeAll();
-        }
+            const customCardIds = AppState.customCards.map(c => c.id);
+            AppState.layout = AppState.layout.filter(id => cardTypes[id]?.isDefault || customCardIds.includes(id));
+            AppState.customCards.forEach(card => {
+                if (!AppState.layout.includes(card.id)) AppState.layout.push(card.id);
+            });
+            AppState.save('layout');
 
-        // --- INITIALIZE FUNCTIONALITIES ---
-        function initializeAll() {
-            const dom = {
-                days: document.getElementById('days'),
-                hours: document.getElementById('hours'),
-                minutes: document.getElementById('minutes'),
-                seconds: document.getElementById('seconds'),
-                graph: document.getElementById('contribution-graph'),
-                quote: document.getElementById('quote'),
-                author: document.getElementById('author'),
-                quoteCardContent: document.getElementById('quote-card-content'),
-                addTestForm: document.getElementById('add-test-form'),
-                testDateInput: document.getElementById('test-date-input'),
-                testNameInput: document.getElementById('test-name-input'),
-                testList: document.getElementById('test-list')
-            };
-
-            if (dom.days) {
-                updateCountdown(dom);
-                setInterval(() => updateCountdown(dom), 1000);
-            }
-            if (dom.graph) {
-                generateGraph(dom.graph);
-                dom.graph.addEventListener('click', (e) => handleGraphClick(e, dom));
-            }
-            if (dom.addTestForm) {
-                displayPartTests(dom.testList);
-                dom.addTestForm.addEventListener('submit', (e) => handleTestFormSubmit(e, dom));
-                dom.testList.addEventListener('click', (e) => handleTestListClick(e));
-            }
-            if (dom.quoteCardContent) {
-                updateQuote(dom);
-                dom.quoteCardContent.parentElement.addEventListener('click', () => updateQuote(dom));
-            }
-            document.querySelectorAll('.delete-card-btn').forEach(btn => btn.addEventListener('click', handleDeleteCustomCard));
-            document.querySelectorAll('.add-todo-form').forEach(form => form.addEventListener('submit', handleAddTodoItem));
-            document.querySelectorAll('.todo-list').forEach(list => list.addEventListener('click', handleTodoItemClick));
-        }
-
-        // --- SPECIFIC FUNCTION LOGIC ---
-        function updateCountdown(dom) {
-            const now = new Date();
-            const diff = EXAM_DATE - now;
-            if (diff <= 0) return;
-            dom.days.innerText = Math.floor(diff / (1000 * 60 * 60 * 24)).toString().padStart(2, '0');
-            dom.hours.innerText = Math.floor((diff / (1000 * 60 * 60)) % 24).toString().padStart(2, '0');
-            dom.minutes.innerText = Math.floor((diff / 1000 / 60) % 60).toString().padStart(2, '0');
-            dom.seconds.innerText = Math.floor((diff / 1000) % 60).toString().padStart(2, '0');
-        }
-
-        function generateGraph(graphEl) {
-            if (!graphEl) return;
-            graphEl.innerHTML = '';
-            const today = new Date(); today.setHours(0, 0, 0, 0);
-            let currentDate = new Date(GRAPH_START_DATE);
-            const examDayOnly = new Date(EXAM_DATE); examDayOnly.setHours(0, 0, 0, 0);
-
-            while (currentDate <= examDayOnly) {
-                const dayDiv = document.createElement('div');
-                const tooltipSpan = document.createElement('span');
-                
-                const year = currentDate.getFullYear();
-                const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
-                const dayOfMonth = currentDate.getDate().toString().padStart(2, '0');
-                const dateString = `${year}-${month}-${dayOfMonth}`;
-
-                dayDiv.className = 'day';
-                dayDiv.dataset.date = dateString;
-                tooltipSpan.className = 'tooltip';
-                let tooltipText = currentDate.toDateString();
-
-                if (currentDate.getTime() === examDayOnly.getTime()) {
-                    dayDiv.classList.add('day-exam'); tooltipText += ' - Exam!';
-                } else if (partTests[dateString]) {
-                    dayDiv.classList.add('day-part-test'); tooltipText = `${partTests[dateString]} - ${tooltipText}`;
-                } else if (currentDate.getTime() === today.getTime()) {
-                    dayDiv.classList.add('day-today'); tooltipText += ' - Today';
-                } else if (currentDate < today) {
-                    dayDiv.classList.add('day-past');
-                } else {
-                    dayDiv.classList.add('day-future');
+            AppState.layout.forEach(cardId => {
+                const cardData = AppState.customCards.find(c => c.id === cardId);
+                const type = cardData ? cardData.type : cardId;
+                const cardDef = cardTypes[type];
+                if (cardDef) {
+                    const template = document.getElementById(cardDef.templateId);
+                    const cardNode = template.content.cloneNode(true);
+                    const cardEl = cardNode.querySelector('.card');
+                    cardEl.dataset.cardId = cardId;
+                    if (cardData) {
+                        cardEl.querySelector('.card-title').textContent = cardData.title;
+                        if (cardData.colspan === 2) {
+                            cardEl.classList.add('md:col-span-2');
+                        }
+                    }
+                    D.dashboardGrid.appendChild(cardNode);
                 }
-                tooltipSpan.textContent = tooltipText;
-                dayDiv.appendChild(tooltipSpan);
-                graphEl.appendChild(dayDiv);
-                currentDate.setDate(currentDate.getDate() + 1);
-            }
-        }
+            });
 
-        function displayPartTests(listEl) {
-            if (!listEl) return;
-            listEl.innerHTML = '';
-            const sortedDates = Object.keys(partTests).sort();
-            if (sortedDates.length === 0) {
-                listEl.innerHTML = '<li class="text-secondary px-2 text-sm">No tests scheduled.</li>';
-                return;
-            }
-            sortedDates.forEach(dateString => {
-                const li = document.createElement('li');
-                li.className = 'flex justify-between items-center bg-gray-800 p-2 rounded-md';
-                li.innerHTML = `<div class="flex flex-col"><span class="font-semibold text-sm">${partTests[dateString]}</span><span class="text-xs text-secondary">${new Date(dateString + 'T00:00:00').toDateString()}</span></div><button data-date="${dateString}" class="delete-btn text-red-500 hover:text-red-400 font-semibold text-xs">Delete</button>`;
+            D.dashboardGrid.querySelectorAll('.card').forEach(cardEl => {
+                const cardId = cardEl.dataset.cardId;
+                const cardData = AppState.customCards.find(c => c.id === cardId);
+                const type = cardData ? cardData.type : cardId;
+                const cardDef = cardTypes[type];
+                if (cardDef) {
+                    cardDef.render(cardEl, cardData);
+                }
             });
         }
-        
-        function updateQuote(dom) {
-            const { text, author } = quotes[Math.floor(Math.random() * quotes.length)];
-            dom.quote.textContent = `"${text}"`;
-            dom.author.textContent = `- ${author}`;
+
+        function applySettings() {
+            document.documentElement.dataset.theme = AppState.settings.theme;
+            D.body.style.fontFamily = AppState.settings.font;
+            D.body.style.backgroundImage = AppState.settings.bgUrl ? `url(${AppState.settings.bgUrl})` : 'none';
+            D.inputs.theme.value = AppState.settings.theme;
+            D.inputs.font.value = AppState.settings.font;
+            D.inputs.bgUrl.value = AppState.settings.bgUrl;
         }
 
-        // --- EVENT HANDLERS ---
-        function handleTestFormSubmit(e, dom) {
-            e.preventDefault();
-            const dateValue = dom.testDateInput.value;
-            const nameValue = dom.testNameInput.value.trim();
-            if (dateValue && nameValue) {
-                partTests[dateValue] = nameValue;
-                saveState(STORAGE_KEYS.tests, partTests);
-                generateGraph(document.getElementById('contribution-graph'));
-                displayPartTests(document.getElementById('test-list'));
-                dom.testDateInput.value = '';
-                dom.testNameInput.value = '';
-            }
-        }
+        // --- EVENT HANDLERS (DELEGATED) ---
+        D.dashboardGrid.addEventListener('click', (e) => {
+            const cardEl = e.target.closest('.card');
+            if (!cardEl) return;
+            const cardId = cardEl.dataset.cardId;
 
-        function handleGraphClick(e, dom) {
-            if (e.target.classList.contains('day')) {
-                const dateString = e.target.dataset.date;
-                if (partTests[dateString]) {
-                    delete partTests[dateString];
-                } else {
-                    if (dom.testDateInput) {
-                        dom.testDateInput.value = dateString;
-                        dom.testNameInput.focus();
-                    }
-                    return; 
-                }
-                saveState(STORAGE_KEYS.tests, partTests);
-                generateGraph(dom.graph);
-                displayPartTests(document.getElementById('test-list'));
-            }
-        }
-        
-        function handleTestListClick(e) {
-             if (e.target.classList.contains('delete-btn')) {
-                const dateString = e.target.dataset.date;
-                delete partTests[dateString];
-                saveState(STORAGE_KEYS.tests, partTests);
-                generateGraph(document.getElementById('contribution-graph'));
-                displayPartTests(document.getElementById('test-list'));
-            }
-        }
-        
-        function handleAddTodoItem(e) {
-            e.preventDefault();
-            const input = e.target.querySelector('input');
-            const text = input.value.trim();
-            if (!text) return;
+            if (cardId === 'quote') cardTypes.quote.render(cardEl);
 
-            const cardId = e.target.closest('.custom-card').dataset.cardId;
-            const card = customCards.find(c => c.id === cardId);
-            if (card) {
-                card.content.push({ text, completed: false });
-                saveState(STORAGE_KEYS.customCards, customCards);
+            if (e.target.classList.contains('delete-test-btn')) {
+                delete AppState.tests[e.target.dataset.date];
+                AppState.save('tests');
                 renderDashboard();
             }
-        }
-
-        function handleTodoItemClick(e) {
-            const cardId = e.target.closest('.custom-card').dataset.cardId;
-            const itemIndex = e.target.closest('.todo-item')?.dataset.index;
-            if (!cardId || itemIndex === undefined) return;
-
-            const card = customCards.find(c => c.id === cardId);
-            if (!card) return;
-
-            if (e.target.classList.contains('delete-todo-item')) {
-                card.content.splice(itemIndex, 1);
-            } else if (e.target.classList.contains('todo-checkbox')) {
-                card.content[itemIndex].completed = !card.content[itemIndex].completed;
+            if (e.target.classList.contains('day')) {
+                const dateString = e.target.dataset.date;
+                if (AppState.tests[dateString]) {
+                    delete AppState.tests[dateString];
+                    AppState.save('tests');
+                    renderDashboard();
+                } else {
+                    const testForm = D.dashboardGrid.querySelector('#add-test-form');
+                    if(testForm) {
+                        testForm.date.value = dateString;
+                        testForm.name.focus();
+                    }
+                }
             }
-            
-            saveState(STORAGE_KEYS.customCards, customCards);
-            renderDashboard();
-        }
-        
-        // --- DRAGGABLE ---
-        new Sortable(dashboardGrid, {
-            animation: 150,
-            handle: '.drag-handle',
-            ghostClass: 'sortable-ghost',
-            chosenClass: 'sortable-chosen',
-            onEnd: () => {
-                const newLayout = [...dashboardGrid.children].map(item => item.dataset.cardId);
-                saveState(STORAGE_KEYS.layout, newLayout);
-            },
-        });
-        
-        // --- MODAL HANDLING ---
-        const addCardBtn = document.getElementById('add-card-btn');
-        const addCardModal = document.getElementById('add-card-modal');
-        const newCardForm = document.getElementById('new-card-form');
-        const cancelBtn = document.getElementById('cancel-add-card');
-        const cardTypeSelect = document.getElementById('new-card-type');
-        const cardContentTextarea = document.getElementById('new-card-content');
 
-        addCardBtn.addEventListener('click', () => addCardModal.classList.remove('hidden'));
-        cancelBtn.addEventListener('click', () => addCardModal.classList.add('hidden'));
-        
-        cardTypeSelect.addEventListener('change', (e) => {
-            cardContentTextarea.style.display = e.target.value === 'note' ? 'block' : 'none';
+            const cardData = AppState.customCards.find(c => c.id === cardId);
+            if (!cardData) return;
+
+            if (e.target.classList.contains('delete-card-btn')) {
+                AppState.customCards = AppState.customCards.filter(c => c.id !== cardId);
+                AppState.save('customCards');
+                renderDashboard();
+            }
+            if (e.target.classList.contains('toggle-colspan-btn')) {
+                cardData.colspan = cardData.colspan === 2 ? 1 : 2;
+                AppState.save('customCards');
+                renderDashboard();
+            }
+            if (cardData.type === 'todo') {
+                const itemEl = e.target.closest('.todo-item');
+                if (itemEl) {
+                    const itemIndex = parseInt(itemEl.dataset.index);
+                    if (e.target.classList.contains('delete-todo-item')) {
+                        cardData.content.splice(itemIndex, 1);
+                    } else if (e.target.classList.contains('todo-checkbox')) {
+                        cardData.content[itemIndex].completed = !cardData.content[itemIndex].completed;
+                    }
+                    AppState.save('customCards');
+                    cardTypes.todo.render(cardEl, cardData);
+                }
+            }
+             if (cardData.type === 'line-graph' && e.target.classList.contains('delete-mark-item')) {
+                const itemIndex = parseInt(e.target.dataset.index);
+                cardData.content.splice(itemIndex, 1);
+                AppState.save('customCards');
+                cardTypes['line-graph'].render(cardEl, cardData);
+            }
         });
 
-        newCardForm.addEventListener('submit', (e) => {
+        D.dashboardGrid.addEventListener('submit', (e) => {
             e.preventDefault();
-            const type = cardTypeSelect.value;
-            const title = document.getElementById('new-card-title').value.trim();
-            if(!title) return;
-            
-            let content;
-            if (type === 'note') {
-                content = cardContentTextarea.value.trim();
-            } else if (type === 'todo') {
-                content = [];
-            }
+            const form = e.target;
+            const cardEl = form.closest('.card');
+            const cardId = cardEl.dataset.cardId;
 
-            customCards.push({
+            if (form.id === 'add-test-form') {
+                const { date, name } = form.elements;
+                if (date.value && name.value.trim()) {
+                    AppState.tests[date.value] = name.value.trim();
+                    AppState.save('tests');
+                    renderDashboard();
+                    form.reset();
+                }
+            } else if (form.classList.contains('add-todo-form')) {
+                const card = AppState.customCards.find(c => c.id === cardId);
+                const input = form.querySelector('input');
+                if (card && input.value.trim()) {
+                    card.content.push({ text: input.value.trim(), completed: false });
+                    AppState.save('customCards');
+                    cardTypes.todo.render(cardEl, card);
+                    input.value = '';
+                }
+            } else if (form.classList.contains('add-marks-form')) {
+                const card = AppState.customCards.find(c => c.id === cardId);
+                const { name, marks, maxMarks } = form.elements;
+                if (card && name.value.trim() && marks.value && maxMarks.value) {
+                    card.content.push({ 
+                        name: name.value.trim(), 
+                        marks: parseFloat(marks.value),
+                        maxMarks: parseFloat(maxMarks.value)
+                    });
+                    AppState.save('customCards');
+                    cardTypes['line-graph'].render(cardEl, card);
+                    form.reset();
+                }
+            }
+        });
+
+        // --- MODAL & SETTINGS LISTENERS ---
+        D.buttons.addCard.addEventListener('click', () => D.modals.addCard.classList.remove('hidden'));
+        D.buttons.cancelAddCard.addEventListener('click', () => D.modals.addCard.classList.add('hidden'));
+        D.inputs.cardType.addEventListener('change', (e) => {
+            D.inputs.cardContent.style.display = e.target.value === 'note' ? 'block' : 'none';
+        });
+
+        D.forms.newCard.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const type = D.inputs.cardType.value;
+            const title = D.forms.newCard.querySelector('input[type="text"]').value.trim();
+            if (!title) return;
+            
+            AppState.customCards.push({
                 id: `custom-${Date.now()}`,
                 type,
                 title,
-                content
+                content: type === 'note' ? D.inputs.cardContent.value.trim() : [],
+                colspan: type === 'line-graph' ? 2 : 1
             });
-            saveState(STORAGE_KEYS.customCards, customCards);
+            AppState.save('customCards');
             renderDashboard();
-            addCardModal.classList.add('hidden');
-            newCardForm.reset();
-            cardContentTextarea.style.display = 'block';
+            D.modals.addCard.classList.add('hidden');
+            D.forms.newCard.reset();
+            D.inputs.cardContent.style.display = 'block';
         });
 
-        function handleDeleteCustomCard(e) {
-            const cardElement = e.target.closest('.custom-card');
-            const cardId = cardElement.dataset.cardId;
-            customCards = customCards.filter(card => card.id !== cardId);
-            saveState(STORAGE_KEYS.customCards, customCards);
-            renderDashboard();
-        }
+        D.buttons.customize.addEventListener('click', () => D.modals.customize.classList.remove('hidden'));
+        D.buttons.closeCustomize.addEventListener('click', () => D.modals.customize.classList.add('hidden'));
 
-        // --- CUSTOMIZATION ---
-        const customizeBtn = document.getElementById('customize-btn');
-        const customizeModal = document.getElementById('customize-modal');
-        const closeCustomizeBtn = document.getElementById('close-customize');
-        const themeSelect = document.getElementById('theme-select');
-        const fontSelect = document.getElementById('font-select');
-        const bgUrlInput = document.getElementById('bg-image-url');
-        const removeBgBtn = document.getElementById('remove-bg-btn');
-
-        function applySettings() {
-            document.documentElement.dataset.theme = settings.theme;
-            document.body.style.fontFamily = settings.font;
-            document.body.style.backgroundImage = settings.bgUrl ? `url(${settings.bgUrl})` : 'none';
-            
-            themeSelect.value = settings.theme;
-            fontSelect.value = settings.font;
-            bgUrlInput.value = settings.bgUrl;
-        }
-
-        customizeBtn.addEventListener('click', () => customizeModal.classList.remove('hidden'));
-        closeCustomizeBtn.addEventListener('click', () => customizeModal.classList.add('hidden'));
-
-        themeSelect.addEventListener('change', (e) => {
-            settings.theme = e.target.value;
-            saveState(STORAGE_KEYS.settings, settings);
-            applySettings();
-        });
-
-        fontSelect.addEventListener('change', (e) => {
-            settings.font = e.target.value;
-            saveState(STORAGE_KEYS.settings, settings);
-            applySettings();
-        });
-
-        bgUrlInput.addEventListener('input', (e) => {
-            settings.bgUrl = e.target.value;
-            saveState(STORAGE_KEYS.settings, settings);
-            applySettings();
-        });
-        
-        removeBgBtn.addEventListener('click', () => {
-             settings.bgUrl = '';
-             saveState(STORAGE_KEYS.settings, settings);
-             applySettings();
-        });
+        D.inputs.theme.addEventListener('change', () => { AppState.settings.theme = D.inputs.theme.value; AppState.saveSettings(); applySettings(); renderDashboard(); });
+        D.inputs.font.addEventListener('change', () => { AppState.settings.font = D.inputs.font.value; AppState.saveSettings(); applySettings(); });
+        D.inputs.bgUrl.addEventListener('input', () => { AppState.settings.bgUrl = D.inputs.bgUrl.value; AppState.saveSettings(); applySettings(); });
+        D.buttons.removeBg.addEventListener('click', () => { AppState.settings.bgUrl = ''; AppState.saveSettings(); applySettings(); });
         
         // --- MOBILE ALERT ---
-        const mobileAlert = document.getElementById('mobile-alert');
-        const closeAlertBtn = document.getElementById('close-alert-btn');
-
-        function handleMobileAlert() {
-            const isMobile = window.innerWidth < 768;
-            const isDismissed = localStorage.getItem(STORAGE_KEYS.mobileAlertDismissed) === 'true';
-
-            if (isMobile && !isDismissed) {
-                mobileAlert.classList.remove('hidden');
-            }
-
-            closeAlertBtn.addEventListener('click', () => {
-                mobileAlert.classList.add('hidden');
-                localStorage.setItem(STORAGE_KEYS.mobileAlertDismissed, 'true');
-            });
+        if (window.innerWidth < 768 && localStorage.getItem(STORAGE_KEYS.mobileAlertDismissed) !== 'true') {
+            D.mobileAlert.classList.remove('hidden');
         }
+        D.buttons.closeAlert.addEventListener('click', () => {
+            D.mobileAlert.classList.add('hidden');
+            localStorage.setItem(STORAGE_KEYS.mobileAlertDismissed, 'true');
+        });
 
         // --- INITIALIZATION ---
         applySettings();
         renderDashboard();
-        handleMobileAlert();
+        new Sortable(D.dashboardGrid, {
+            animation: 150, handle: '.drag-handle', ghostClass: 'sortable-ghost', chosenClass: 'sortable-chosen',
+            onEnd: () => {
+                AppState.layout = [...D.dashboardGrid.children].map(item => item.dataset.cardId);
+                AppState.save('layout');
+            },
+        });
+        setInterval(() => {
+            const countdownCard = D.dashboardGrid.querySelector('[data-card-id="countdown"]');
+            if (countdownCard) cardTypes.countdown.render(countdownCard);
+        }, 1000);
     });
     </script>
 </body>
 </html>
-
