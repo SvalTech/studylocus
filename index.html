@@ -60,10 +60,7 @@
             grid-auto-rows: 14px;
             grid-gap: 3px;
             overflow-x: auto;
-            -ms-overflow-style: none;
-            scrollbar-width: none;
         }
-        .graph-container::-webkit-scrollbar { display: none; }
         .day {
             width: 14px; height: 14px; border-radius: 3px;
             position: relative; cursor: pointer;
@@ -150,6 +147,14 @@
             background-color: #e5e7eb;
             border-color: #9ca3af;
         }
+        /* **NEW**: Utility class to hide scrollbars */
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none; /* Chrome, Safari and Opera */
+        }
     </style>
 </head>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-TCK0S6VC58"></script>
@@ -207,7 +212,7 @@
                 <h2 class="text-lg font-semibold">Journey</h2>
                 <div class="drag-handle text-secondary p-2">☰</div>
             </div>
-            <div class="graph-container" id="contribution-graph"></div>
+            <div class="graph-container no-scrollbar" id="contribution-graph"></div>
             <div class="flex justify-center flex-wrap gap-x-4 gap-y-2 mt-4 text-xs text-secondary">
                 <div class="legend-item"><div class="legend-color day-future"></div><span>Future</span></div>
                 <div class="legend-item"><div class="legend-color day-today"></div><span>Today</span></div>
@@ -230,7 +235,7 @@
             </form>
             <div id="test-list-container">
                  <h3 class="text-md font-semibold mb-2 border-b pb-1" style="border-color: var(--border-color);">Tests</h3>
-                 <ul id="test-list" class="space-y-2 max-h-48 overflow-y-auto"></ul>
+                 <ul id="test-list" class="space-y-2 max-h-48 overflow-y-auto no-scrollbar"></ul>
             </div>
         </div>
     </template>
@@ -271,7 +276,7 @@
                 </div>
             </div>
             <div class="card-content">
-                <ul class="todo-list space-y-2 max-h-48 overflow-y-auto mb-3"></ul>
+                <ul class="todo-list space-y-2 max-h-48 overflow-y-auto mb-3 no-scrollbar"></ul>
                 <form class="add-todo-form flex gap-2">
                     <input type="text" placeholder="New task..." class="form-input rounded-md p-2 w-full text-sm" required>
                     <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded-md text-sm">+</button>
@@ -300,7 +305,7 @@
                     <input type="number" name="maxMarks" placeholder="Max" class="form-input rounded-md p-2 w-full sm:w-20 text-sm" required>
                     <button type="submit" class="btn-primary font-bold py-2 px-3 rounded-md text-sm">+</button>
                 </form>
-                <ul class="marks-list space-y-1 max-h-24 overflow-y-auto"></ul>
+                <ul class="marks-list space-y-1 max-h-24 overflow-y-auto no-scrollbar"></ul>
             </div>
         </div>
     </template>
@@ -455,12 +460,7 @@
                     while (currentDate <= examDay) {
                         const dayDiv = document.createElement('div');
                         const tooltip = document.createElement('span');
-                        
-                        // **FIX**: Manually format the date string to YYYY-MM-DD to avoid timezone shifts.
-                        const year = currentDate.getFullYear();
-                        const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
-                        const day = currentDate.getDate().toString().padStart(2, '0');
-                        const dateString = `${year}-${month}-${day}`;
+                        const dateString = currentDate.toISOString().slice(0, 10);
                         
                         dayDiv.className = 'day';
                         dayDiv.dataset.date = dateString;
