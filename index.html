@@ -455,7 +455,12 @@
                     while (currentDate <= examDay) {
                         const dayDiv = document.createElement('div');
                         const tooltip = document.createElement('span');
-                        const dateString = currentDate.toISOString().slice(0, 10);
+                        
+                        // **FIX**: Manually format the date string to YYYY-MM-DD to avoid timezone shifts.
+                        const year = currentDate.getFullYear();
+                        const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+                        const day = currentDate.getDate().toString().padStart(2, '0');
+                        const dateString = `${year}-${month}-${day}`;
                         
                         dayDiv.className = 'day';
                         dayDiv.dataset.date = dateString;
