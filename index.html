@@ -39,6 +39,51 @@
             --text-secondary: #faff00;
             --accent-color: #ff00f2;
         }
+        
+        [data-theme="forest"] {
+            --bg-color: #1a201a;
+            --card-bg-color: #202a20;
+            --border-color: #4a5c4a;
+            --text-primary: #d4e0d4;
+            --text-secondary: #8a9c8a;
+            --accent-color: #6a9c6a;
+        }
+
+        [data-theme="rose-gold"] {
+            --bg-color: #4a1c2b;
+            --card-bg-color: #6b3040;
+            --border-color: #b97a8d;
+            --text-primary: #f5e5e8;
+            --text-secondary: #d4b2bb;
+            --accent-color: #f5c6d3;
+        }
+
+        [data-theme="ocean"] {
+            --bg-color: #0d1b2a;
+            --card-bg-color: #1b263b;
+            --border-color: #415a77;
+            --text-primary: #e0e1dd;
+            --text-secondary: #778da9;
+            --accent-color: #61a5c2;
+        }
+
+        [data-theme="sunset"] {
+            --bg-color: #2c0e37;
+            --card-bg-color: #4a1d59;
+            --border-color: #83387a;
+            --text-primary: #f8f3f9;
+            --text-secondary: #e4a1d4;
+            --accent-color: #ff6d6d;
+        }
+
+        [data-theme="dracula"] {
+            --bg-color: #282a36;
+            --card-bg-color: #44475a;
+            --border-color: #6272a4;
+            --text-primary: #f8f8f2;
+            --text-secondary: #bd93f9;
+            --accent-color: #ff79c6;
+        }
 
         body {
             font-family: var(--font-family);
@@ -127,13 +172,19 @@
             background-color: var(--accent-color);
             color: white;
         }
-        [data-theme="cyberpunk"] .btn-primary { color: var(--bg-color); }
+        [data-theme="cyberpunk"] .btn-primary,
+        [data-theme="rose-gold"] .btn-primary,
+        [data-theme="ocean"] .btn-primary,
+        [data-theme="sunset"] .btn-primary,
+        [data-theme="dracula"] .btn-primary { 
+            color: var(--bg-color); 
+        }
         .text-secondary { color: var(--text-secondary); }
         select.form-input {
             -webkit-appearance: none;
             -moz-appearance: none;
             appearance: none;
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='var(--text-secondary)' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
             background-position: right 0.5rem center;
             background-repeat: no-repeat;
             background-size: 1.5em 1.5em;
@@ -147,13 +198,12 @@
             background-color: #e5e7eb;
             border-color: #9ca3af;
         }
-        /* **NEW**: Utility class to hide scrollbars */
         .no-scrollbar {
-            -ms-overflow-style: none;  /* IE and Edge */
-            scrollbar-width: none;  /* Firefox */
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
         .no-scrollbar::-webkit-scrollbar {
-            display: none; /* Chrome, Safari and Opera */
+            display: none;
         }
     </style>
 </head>
@@ -341,6 +391,11 @@
                         <option value="default">Deep Space</option>
                         <option value="light">Solarized Light</option>
                         <option value="cyberpunk">Cyberpunk</option>
+                        <option value="forest">Forest</option>
+                        <option value="rose-gold">Rose Gold</option>
+                        <option value="ocean">Ocean</option>
+                        <option value="sunset">Sunset</option>
+                        <option value="dracula">Dracula</option>
                     </select>
                 </div>
                 <div>
@@ -434,6 +489,14 @@
             mobileAlert: document.getElementById('mobile-alert'),
         };
 
+        // --- HELPER FUNCTIONS ---
+        const toLocalDateString = (date) => {
+            const year = date.getFullYear();
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const day = date.getDate().toString().padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
+        
         // --- CARD TYPE DEFINITIONS ---
         const cardTypes = {
             countdown: {
@@ -460,7 +523,7 @@
                     while (currentDate <= examDay) {
                         const dayDiv = document.createElement('div');
                         const tooltip = document.createElement('span');
-                        const dateString = currentDate.toISOString().slice(0, 10);
+                        const dateString = toLocalDateString(currentDate);
                         
                         dayDiv.className = 'day';
                         dayDiv.dataset.date = dateString;
