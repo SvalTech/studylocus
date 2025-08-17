@@ -8,6 +8,8 @@ A customizable, minimalist, and feature-rich dashboard designed to help students
 
 ## ✨ Features
 
+![JEE Prep Dashboard Screenshot](https://i.ibb.co/jvg4cK27/Screenshot-2025-08-17-150950.png) 
+
 * **Live Countdown Timer:** See the exact days, hours, minutes, and seconds remaining for the JEE Main 2026 January attempt.
 * **Visual Journey Tracker:** A GitHub-style contributions graph visualizes your entire preparation timeline from Jan 1, 2025, to the exam day.
 * **Fully Customizable Layout:**
@@ -24,6 +26,7 @@ A customizable, minimalist, and feature-rich dashboard designed to help students
     * **Custom Fonts:** Select from sans-serif, serif, and monospace font families.
     * **Background Image:** Set any image from a URL as your dashboard's background.
 * **Fully Responsive:** The entire dashboard is designed to work seamlessly on both desktop and mobile devices.
+
 
 ---
 
