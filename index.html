@@ -12,33 +12,25 @@
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <!-- Charting Library -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Audio Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
     <style>
         :root {
             --bg-color: #0d1117;
-            --card-bg-color: rgba(22, 27, 34, 0.8);
+            --card-bg-color: #161b22;
             --border-color: #30363d;
             --text-primary: #c9d1d9;
             --text-secondary: #8b949e;
             --accent-color: #3b82f6;
             --font-family: 'Inter', sans-serif;
-            --day-past-color: #21262d;
-            --day-future-color: #0e4429;
-            --day-today-color: #1a633a;
-            --day-exam-color: #9e2a2b;
-            --day-part-test-color: #1f6feb;
         }
 
         [data-theme="light"] {
             --bg-color: #f0f0f0;
-            --card-bg-color: rgba(255, 255, 255, 0.7);
+            --card-bg-color: #ffffff;
             --border-color: #d1d5db;
             --text-primary: #1f2937;
             --text-secondary: #4b5563;
-            --day-past-color: #ebedf0;
-            --day-future-color: #9be9a8;
-            --day-today-color: #40c463;
-            --day-exam-color: #da5252;
-            --day-part-test-color: #58a6ff;
         }
 
         [data-theme="cyberpunk"] {
@@ -48,81 +40,51 @@
             --text-primary: #00f7ff;
             --text-secondary: #faff00;
             --accent-color: #ff00f2;
-            --day-past-color: #180f3d;
-            --day-future-color: #5d00ff;
-            --day-today-color: #00f7ff;
-            --day-exam-color: #ff00f2;
-            --day-part-test-color: #faff00;
         }
         
         [data-theme="forest"] {
             --bg-color: #1a201a;
-            --card-bg-color: rgba(32, 42, 32, 0.7);
+            --card-bg-color: #202a20;
             --border-color: #4a5c4a;
             --text-primary: #d4e0d4;
             --text-secondary: #8a9c8a;
             --accent-color: #6a9c6a;
-            --day-past-color: #2f3e2f;
-            --day-future-color: #4a5c4a;
-            --day-today-color: #9ae6b4;
-            --day-exam-color: #c53030;
-            --day-part-test-color: #63b3ed;
         }
 
         [data-theme="rose-gold"] {
             --bg-color: #4a1c2b;
-            --card-bg-color: rgba(107, 48, 64, 0.7);
+            --card-bg-color: #6b3040;
             --border-color: #b97a8d;
             --text-primary: #f5e5e8;
             --text-secondary: #d4b2bb;
             --accent-color: #f5c6d3;
-            --day-past-color: #6b3040;
-            --day-future-color: #b97a8d;
-            --day-today-color: #f5e5e8;
-            --day-exam-color: #ff6d6d;
-            --day-part-test-color: #f5c6d3;
         }
 
         [data-theme="ocean"] {
             --bg-color: #0d1b2a;
-            --card-bg-color: rgba(27, 38, 59, 0.7);
+            --card-bg-color: #1b263b;
             --border-color: #415a77;
             --text-primary: #e0e1dd;
             --text-secondary: #778da9;
             --accent-color: #61a5c2;
-            --day-past-color: #1b263b;
-            --day-future-color: #415a77;
-            --day-today-color: #e0e1dd;
-            --day-exam-color: #ff6b6b;
-            --day-part-test-color: #61a5c2;
         }
 
         [data-theme="sunset"] {
             --bg-color: #2c0e37;
-            --card-bg-color: rgba(74, 29, 89, 0.7);
+            --card-bg-color: #4a1d59;
             --border-color: #83387a;
             --text-primary: #f8f3f9;
             --text-secondary: #e4a1d4;
             --accent-color: #ff6d6d;
-            --day-past-color: #4a1d59;
-            --day-future-color: #83387a;
-            --day-today-color: #f8f3f9;
-            --day-exam-color: #e4a1d4;
-            --day-part-test-color: #ff6d6d;
         }
 
         [data-theme="dracula"] {
             --bg-color: #282a36;
-            --card-bg-color: rgba(68, 71, 90, 0.7);
+            --card-bg-color: #44475a;
             --border-color: #6272a4;
             --text-primary: #f8f8f2;
             --text-secondary: #bd93f9;
             --accent-color: #ff79c6;
-            --day-past-color: #44475a;
-            --day-future-color: #6272a4;
-            --day-today-color: #50fa7b;
-            --day-exam-color: #ff5555;
-            --day-part-test-color: #bd93f9;
         }
 
         body {
@@ -150,11 +112,11 @@
             width: 14px; height: 14px; border-radius: 3px;
             position: relative; cursor: pointer;
         }
-        .day-past { background-color: var(--day-past-color); }
-        .day-future { background-color: var(--day-future-color); }
-        .day-today { background-color: var(--day-today-color); border: 1px solid var(--accent-color); }
-        .day-exam { background-color: var(--day-exam-color); }
-        .day-part-test { background-color: var(--day-part-test-color); }
+        .day-past { background-color: #21262d; }
+        .day-future { background-color: #0e4429; }
+        .day-today { background-color: #1a633a; border: 1px solid #3cc36e; }
+        .day-exam { background-color: #9e2a2b; border: 1px solid #ff6b6b; }
+        .day-part-test { background-color: #1f6feb; border: 1px solid #58a6ff; }
         .day .tooltip {
             visibility: hidden; width: 180px; background-color: #21262d;
             color: #fff; text-align: center; border-radius: 6px;
@@ -252,6 +214,14 @@
         .delete-card-btn:hover {
             transform: scale(1.2);
         }
+        .pomodoro-btn.active {
+            background-color: var(--accent-color);
+            color: white;
+        }
+        [data-theme="light"] .pomodoro-btn.active { color: white; }
+        .aspect-w-16 { position: relative; padding-bottom: 56.25%; }
+        .aspect-w-16 > * { position: absolute; height: 100%; width: 100%; top: 0; right: 0; bottom: 0; left: 0; }
+
     </style>
 </head>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-TCK0S6VC58"></script>
@@ -440,6 +410,67 @@
             </div>
         </div>
     </template>
+    
+    <template id="pomodoro-card-template">
+        <div class="card custom-card" data-card-type="pomodoro">
+            <div class="card-header">
+                <h2 class="text-lg font-semibold card-title">Pomodoro</h2>
+                <div>
+                    <button class="toggle-colspan-btn text-secondary text-xs mr-2" title="Toggle size">⤢</button>
+                    <button class="delete-card-btn text-red-500 hover:text-red-400 p-2 rounded-full" title="Delete card"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
+                    <span class="drag-handle text-secondary p-2">☰</span>
+                </div>
+            </div>
+            <div class="card-content text-center">
+                <div class="flex justify-center gap-2 mb-4">
+                    <button data-mode="pomodoro" class="pomodoro-btn text-sm px-3 py-1 rounded-md border border-transparent hover:border-gray-500">Pomodoro</button>
+                    <button data-mode="shortBreak" class="pomodoro-btn text-sm px-3 py-1 rounded-md border border-transparent hover:border-gray-500">Short Break</button>
+                    <button data-mode="longBreak" class="pomodoro-btn text-sm px-3 py-1 rounded-md border border-transparent hover:border-gray-500">Long Break</button>
+                </div>
+                <div class="timer-display text-6xl font-bold my-4">25:00</div>
+                <div class="flex justify-center gap-4">
+                    <button class="start-pause-btn btn-primary font-bold py-2 px-8 text-lg rounded-md">START</button>
+                    <button class="reset-btn text-secondary hover:text-primary">Reset</button>
+                </div>
+                <div class="pomodoro-settings mt-4 flex justify-center gap-4 items-center">
+                    <div class="flex flex-col text-xs items-center">
+                        <label for="pomodoro-duration">Work</label>
+                        <input type="number" data-mode="pomodoro" class="pomodoro-duration-input form-input w-16 text-center rounded-md p-1" min="1">
+                    </div>
+                    <div class="flex flex-col text-xs items-center">
+                        <label for="short-break-duration">Short</label>
+                        <input type="number" data-mode="shortBreak" class="pomodoro-duration-input form-input w-16 text-center rounded-md p-1" min="1">
+                    </div>
+                    <div class="flex flex-col text-xs items-center">
+                        <label for="long-break-duration">Long</label>
+                        <input type="number" data-mode="longBreak" class="pomodoro-duration-input form-input w-16 text-center rounded-md p-1" min="1">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="youtube-card-template">
+        <div class="card custom-card" data-card-type="youtube">
+            <div class="card-header">
+                <h2 class="text-lg font-semibold card-title">YouTube</h2>
+                <div>
+                    <button class="toggle-colspan-btn text-secondary text-xs mr-2" title="Toggle size">⤢</button>
+                    <button class="delete-card-btn text-red-500 hover:text-red-400 p-2 rounded-full" title="Delete card"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
+                    <span class="drag-handle text-secondary p-2">☰</span>
+                </div>
+            </div>
+            <div class="card-content">
+                <div class="aspect-w-16 mb-3">
+                    <iframe class="youtube-iframe w-full h-full rounded-md" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                </div>
+                <form class="update-youtube-form flex gap-2">
+                    <input type="text" name="url" placeholder="Paste YouTube URL..." class="form-input rounded-md p-2 w-full text-sm" required>
+                    <button type="submit" class="btn-primary font-bold py-2 px-3 rounded-md text-sm">Load</button>
+                </form>
+            </div>
+        </div>
+    </template>
 
     <!-- Modal for adding a new card -->
     <div id="add-card-modal" class="modal-overlay hidden">
@@ -450,9 +481,11 @@
                     <option value="note">Note</option>
                     <option value="todo">To-Do List</option>
                     <option value="line-graph">Line Graph</option>
+                    <option value="pomodoro">Pomodoro Timer</option>
+                    <option value="youtube">YouTube Video</option>
                 </select>
                 <input type="text" id="new-card-title" placeholder="Card Title" class="form-input rounded-md p-2 w-full mb-3" required>
-                <textarea id="new-card-content" placeholder="Card Content (for notes)" rows="4" class="form-input rounded-md p-2 w-full mb-4"></textarea>
+                <textarea id="new-card-content" placeholder="Card Content (URL for YouTube)" rows="4" class="form-input rounded-md p-2 w-full mb-4"></textarea>
                 <div class="flex justify-end gap-3">
                     <button type="button" id="cancel-add-card" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md">Cancel</button>
                     <button type="submit" class="btn-primary font-bold py-2 px-4 rounded-md">Add</button>
@@ -538,7 +571,8 @@
             customCards: 'jeeCustomCards_v3',
             settings: 'jeeDashboardSettings_v1',
             mobileAlertDismissed: 'jeeMobileAlertDismissed_v1',
-            cardProps: 'jeeCardProps_v1'
+            cardProps: 'jeeCardProps_v1',
+            pomodoroState: 'jeePomodoroState_v1'
         };
 
         const AppState = {
@@ -547,6 +581,7 @@
             layout: JSON.parse(localStorage.getItem(STORAGE_KEYS.layout)) || ['countdown', 'graph', 'tests', 'quote', 'time'],
             settings: JSON.parse(localStorage.getItem(STORAGE_KEYS.settings)) || { theme: 'default', font: "'Inter', sans-serif", bgUrl: '' },
             cardProps: JSON.parse(localStorage.getItem(STORAGE_KEYS.cardProps)) || {},
+            pomodoroState: JSON.parse(localStorage.getItem(STORAGE_KEYS.pomodoroState)) || {},
             chartInstances: {},
             
             save(key) {
@@ -562,7 +597,6 @@
             { text: "It’s not whether you get knocked down, it’s whether you get up.", author: "Vince Lombardi" },
             { text: "Success is the sum of small efforts, repeated day in and day out.", author: "Robert Collier" },
             { text: "The expert in anything was once a beginner.", author: "Helen Hayes" },
-            { text: "Kyu nahi ho rahi padhai?", author: "🥰 Alakh Pandey 🥰" },
         ];
 
         // --- DOM ELEMENTS ---
@@ -775,6 +809,46 @@
                         }
                     });
                 }
+            },
+            pomodoro: {
+                templateId: 'pomodoro-card-template',
+                render: (cardEl, cardData) => {
+                    const state = AppState.pomodoroState[cardData.id] || {
+                        mode: 'pomodoro',
+                        time: 25 * 60,
+                        isRunning: false,
+                        intervalId: null,
+                        durations: { pomodoro: 25, shortBreak: 5, longBreak: 15 }
+                    };
+                    AppState.pomodoroState[cardData.id] = state;
+
+                    const minutes = Math.floor(state.time / 60).toString().padStart(2, '0');
+                    const seconds = (state.time % 60).toString().padStart(2, '0');
+                    cardEl.querySelector('.timer-display').textContent = `${minutes}:${seconds}`;
+                    
+                    cardEl.querySelectorAll('.pomodoro-btn').forEach(btn => {
+                        btn.classList.toggle('active', btn.dataset.mode === state.mode);
+                    });
+                    
+                    cardEl.querySelector('.start-pause-btn').textContent = state.isRunning ? 'PAUSE' : 'START';
+
+                    cardEl.querySelector('[data-mode="pomodoro"].pomodoro-duration-input').value = state.durations.pomodoro;
+                    cardEl.querySelector('[data-mode="shortBreak"].pomodoro-duration-input').value = state.durations.shortBreak;
+                    cardEl.querySelector('[data-mode="longBreak"].pomodoro-duration-input').value = state.durations.longBreak;
+                }
+            },
+            youtube: {
+                templateId: 'youtube-card-template',
+                render: (cardEl, cardData) => {
+                    const iframe = cardEl.querySelector('.youtube-iframe');
+                    const url = cardData.content;
+                    let videoId = '';
+                    if (url) {
+                        const urlParams = new URLSearchParams(new URL(url).search);
+                        videoId = urlParams.get('v');
+                    }
+                    iframe.src = videoId ? `https://www.youtube.com/embed/${videoId}` : '';
+                }
             }
         };
 
@@ -801,7 +875,7 @@
                     const cardEl = cardNode.querySelector('.card');
                     cardEl.dataset.cardId = cardId;
                     
-                    const props = AppState.cardProps[cardId] || { colspan: (type === 'graph' || type === 'line-graph') ? 2 : 1 };
+                    const props = AppState.cardProps[cardId] || { colspan: (type === 'graph' || type === 'line-graph' || type === 'youtube') ? 2 : 1 };
                     AppState.cardProps[cardId] = props;
                     if (props.colspan === 2) {
                         cardEl.classList.add('md:col-span-2');
@@ -870,15 +944,13 @@
                 AppState.save('cardProps');
                 renderDashboard();
             }
-            if (e.target.closest('.delete-card-btn')) {
-                AppState.layout = AppState.layout.filter(id => id !== cardId);
-                if (cardData) {
-                    AppState.customCards = AppState.customCards.filter(c => c.id !== cardId);
-                    delete AppState.cardProps[cardId];
-                    AppState.save('customCards');
-                    AppState.save('cardProps');
-                }
-                AppState.save('layout');
+            if (e.target.closest('.delete-card-btn') && cardData) {
+                AppState.customCards = AppState.customCards.filter(c => c.id !== cardId);
+                delete AppState.cardProps[cardId];
+                delete AppState.pomodoroState[cardId];
+                AppState.save('customCards');
+                AppState.save('cardProps');
+                AppState.save('pomodoroState');
                 renderDashboard();
             }
             if (cardData && cardData.type === 'todo') {
@@ -899,6 +971,31 @@
                 cardData.content.splice(itemIndex, 1);
                 AppState.save('customCards');
                 cardTypes['line-graph'].render(cardEl, cardData);
+            }
+            if (cardData && cardData.type === 'pomodoro') {
+                if (e.target.classList.contains('pomodoro-btn')) {
+                    pomodoro.setMode(cardId, e.target.dataset.mode);
+                } else if (e.target.classList.contains('start-pause-btn')) {
+                    pomodoro.toggle(cardId);
+                } else if (e.target.classList.contains('reset-btn')) {
+                    pomodoro.reset(cardId);
+                }
+            }
+        });
+
+        D.dashboardGrid.addEventListener('change', (e) => {
+            if (e.target.classList.contains('pomodoro-duration-input')) {
+                const cardEl = e.target.closest('.card');
+                const cardId = cardEl.dataset.cardId;
+                const mode = e.target.dataset.mode;
+                let duration = parseInt(e.target.value);
+                if (duration < 1) {
+                    duration = 1;
+                    e.target.value = 1;
+                }
+                if (cardId && mode && !isNaN(duration)) {
+                    pomodoro.setDuration(cardId, mode, duration);
+                }
             }
         });
 
@@ -938,6 +1035,14 @@
                     cardTypes['line-graph'].render(cardEl, card);
                     form.reset();
                 }
+            } else if (form.classList.contains('update-youtube-form')) {
+                const card = AppState.customCards.find(c => c.id === cardId);
+                const input = form.querySelector('input');
+                if (card && input.value.trim()) {
+                    card.content = input.value.trim();
+                    AppState.save('customCards');
+                    cardTypes.youtube.render(cardEl, card);
+                }
             }
         });
 
@@ -945,7 +1050,14 @@
         D.buttons.addCard.addEventListener('click', () => D.modals.addCard.classList.remove('hidden'));
         D.buttons.cancelAddCard.addEventListener('click', () => D.modals.addCard.classList.add('hidden'));
         D.inputs.cardType.addEventListener('change', (e) => {
-            D.inputs.cardContent.style.display = e.target.value === 'note' ? 'block' : 'none';
+            const isNote = e.target.value === 'note';
+            const isYoutube = e.target.value === 'youtube';
+            D.inputs.cardContent.style.display = isNote || isYoutube ? 'block' : 'none';
+            if (isYoutube) {
+                D.inputs.cardContent.placeholder = 'Paste YouTube video URL...';
+            } else {
+                D.inputs.cardContent.placeholder = 'Card Content (for notes)';
+            }
         });
 
         D.forms.newCard.addEventListener('submit', (e) => {
@@ -958,10 +1070,10 @@
                 id: `custom-${Date.now()}`,
                 type,
                 title,
-                content: type === 'note' ? D.inputs.cardContent.value.trim() : []
+                content: (type === 'note' || type === 'youtube') ? D.inputs.cardContent.value.trim() : []
             };
             AppState.customCards.push(newCard);
-            AppState.cardProps[newCard.id] = { colspan: type === 'line-graph' ? 2 : 1 };
+            AppState.cardProps[newCard.id] = { colspan: (type === 'line-graph' || type === 'youtube') ? 2 : 1 };
             AppState.save('customCards');
             AppState.save('cardProps');
             renderDashboard();
@@ -1003,6 +1115,69 @@
         // --- INFO MODAL ---
         D.buttons.info.addEventListener('click', () => D.modals.info.classList.remove('hidden'));
         D.buttons.closeInfo.addEventListener('click', () => D.modals.info.classList.add('hidden'));
+
+        // --- POMODORO LOGIC ---
+        const pomodoro = {
+            tick(cardId) {
+                const state = AppState.pomodoroState[cardId];
+                if (state.time > 0) {
+                    state.time--;
+                    this.updateDisplay(cardId);
+                } else {
+                    this.stop(cardId);
+                    new Tone.Synth().toDestination().triggerAttackRelease("C5", "0.5");
+                }
+            },
+            updateDisplay(cardId) {
+                const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
+                if (cardEl) cardTypes.pomodoro.render(cardEl, { id: cardId });
+                const state = AppState.pomodoroState[cardId];
+                if(state.isRunning) {
+                    const minutes = Math.floor(state.time / 60).toString().padStart(2, '0');
+                    const seconds = (state.time % 60).toString().padStart(2, '0');
+                    document.title = `${minutes}:${seconds} - Time to focus!`;
+                } else {
+                    document.title = 'JEE 2026 Dashboard';
+                }
+                AppState.save('pomodoroState');
+            },
+            start(cardId) {
+                const state = AppState.pomodoroState[cardId];
+                if (state.isRunning) return;
+                state.isRunning = true;
+                state.intervalId = setInterval(() => this.tick(cardId), 1000);
+                this.updateDisplay(cardId);
+            },
+            stop(cardId) {
+                const state = AppState.pomodoroState[cardId];
+                clearInterval(state.intervalId);
+                state.isRunning = false;
+                this.updateDisplay(cardId);
+            },
+            toggle(cardId) {
+                const state = AppState.pomodoroState[cardId];
+                state.isRunning ? this.stop(cardId) : this.start(cardId);
+            },
+            reset(cardId) {
+                const state = AppState.pomodoroState[cardId];
+                this.stop(cardId);
+                state.time = state.durations[state.mode] * 60;
+                this.updateDisplay(cardId);
+            },
+            setMode(cardId, mode) {
+                const state = AppState.pomodoroState[cardId];
+                state.mode = mode;
+                this.reset(cardId);
+            },
+            setDuration(cardId, mode, duration) {
+                const state = AppState.pomodoroState[cardId];
+                state.durations[mode] = duration;
+                if (state.mode === mode) {
+                    this.reset(cardId);
+                }
+                AppState.save('pomodoroState');
+            }
+        };
 
         // --- INITIALIZATION ---
         applySettings();
