@@ -116,10 +116,10 @@
         .day-exam { background-color: #9e2a2b; border: 1px solid #ff6b6b; }
         .day-part-test { background-color: #1f6feb; border: 1px solid #58a6ff; }
         .day .tooltip {
-            visibility: hidden; width: 160px; background-color: #21262d;
+            visibility: hidden; width: 180px; background-color: #21262d;
             color: #fff; text-align: center; border-radius: 6px;
             padding: 5px 0; position: absolute; z-index: 10;
-            bottom: 125%; left: 50%; margin-left: -80px;
+            bottom: 125%; left: 50%; margin-left: -90px;
             opacity: 0; transition: opacity 0.3s; font-size: 12px;
             border: 1px solid #30363d; pointer-events: none;
         }
@@ -205,6 +205,12 @@
         .no-scrollbar::-webkit-scrollbar {
             display: none;
         }
+        .delete-card-btn {
+            transition: transform 0.2s ease-in-out;
+        }
+        .delete-card-btn:hover {
+            transform: scale(1.2);
+        }
     </style>
 </head>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-TCK0S6VC58"></script>
@@ -220,7 +226,10 @@
     <div class="container mx-auto px-2 sm:px-4 py-6">
         <header class="flex justify-between items-center mb-6">
             <h1 class="text-3xl sm:text-4xl font-bold">JEE 2026</h1>
-            <div>
+            <div class="flex items-center">
+                 <button id="info-btn" class="bg-gray-700 hover:bg-gray-600 text-white font-bold p-2 rounded-full transition-colors text-sm mr-2" title="About this project">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                 </button>
                  <button id="customize-btn" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-md transition-colors text-sm mr-2">Customize</button>
                 <button id="add-card-btn" class="btn-primary font-bold py-2 px-4 rounded-md transition-colors text-sm">
                     + Add Card
@@ -236,9 +245,9 @@
 
     <footer class="text-center py-4 mt-4">
         <p class="text-xs text-secondary">
-            Built by <a href="https://github.com/svalordev" target="_blank" rel="noopener noreferrer" class="hover:underline" style="color: var(--accent-color);">Shaurya Pratap Singh</a>, Project on <a href="https://github.com/SvalTech/kyunhihorahipadhai" target="_blank" rel="noopener noreferrer" class="hover:underline" style="color: var(--accent-color);">Github</a> 
+            Built by <a href="https://github.com/svalordev" target="_blank" rel="noopener noreferrer" class="hover:underline" style="color: var(--accent-color);">Shaurya Pratap Singh</a> | 
+            <a href="https://github.com/SvalTech/kyunhihorahipadhai/" target="_blank" rel="noopener noreferrer" class="hover:underline" style="color: var(--accent-color);">View on GitHub</a>
         </p>
-        
     </footer>
 
     <!-- Templates for cards -->
@@ -246,7 +255,10 @@
         <div class="card" data-card-id="countdown">
             <div class="card-header">
                 <h2 class="text-lg font-semibold">Countdown</h2>
-                <div class="drag-handle text-secondary p-2">☰</div>
+                <div>
+                    <button class="toggle-colspan-btn text-secondary text-xs mr-2" title="Toggle size">⤢</button>
+                    <span class="drag-handle text-secondary p-2">☰</span>
+                </div>
             </div>
             <div id="countdown-timer" class="flex justify-center space-x-2 sm:space-x-4 md:space-x-8 text-center py-2">
                 <div><div data-value="days" class="font-bold">00</div><div class="text-xs sm:text-sm text-secondary">Days</div></div>
@@ -257,11 +269,30 @@
         </div>
     </template>
 
+    <template id="time-template">
+        <div class="card" data-card-id="time">
+            <div class="card-header">
+                <h2 class="text-lg font-semibold">Current Time</h2>
+                <div>
+                    <button class="toggle-colspan-btn text-secondary text-xs mr-2" title="Toggle size">⤢</button>
+                    <span class="drag-handle text-secondary p-2">☰</span>
+                </div>
+            </div>
+            <div class="text-center py-2">
+                <div data-value="time" class="text-3xl font-bold tracking-wider">00:00:00 AM</div>
+                <div data-value="date" class="text-sm text-secondary">Sunday, August 17, 2025</div>
+            </div>
+        </div>
+    </template>
+
     <template id="graph-template">
-        <div class="card md:col-span-2 xl:col-span-2" data-card-id="graph">
+        <div class="card" data-card-id="graph">
             <div class="card-header">
                 <h2 class="text-lg font-semibold">Journey</h2>
-                <div class="drag-handle text-secondary p-2">☰</div>
+                 <div>
+                    <button class="toggle-colspan-btn text-secondary text-xs mr-2" title="Toggle size">⤢</button>
+                    <span class="drag-handle text-secondary p-2">☰</span>
+                </div>
             </div>
             <div class="graph-container no-scrollbar" id="contribution-graph"></div>
             <div class="flex justify-center flex-wrap gap-x-4 gap-y-2 mt-4 text-xs text-secondary">
@@ -277,7 +308,10 @@
          <div class="card" data-card-id="tests">
             <div class="card-header">
                 <h2 class="text-lg font-semibold">Test Planner</h2>
-                <div class="drag-handle text-secondary p-2">☰</div>
+                 <div>
+                    <button class="toggle-colspan-btn text-secondary text-xs mr-2" title="Toggle size">⤢</button>
+                    <span class="drag-handle text-secondary p-2">☰</span>
+                </div>
             </div>
             <form id="add-test-form" class="flex flex-col gap-3 mb-4">
                  <input type="date" name="date" class="form-input rounded-md p-2 w-full text-sm" required>
@@ -295,7 +329,10 @@
         <div class="card" data-card-id="quote">
             <div class="card-header">
                 <h2 class="text-lg font-semibold">Quote</h2>
-                <div class="drag-handle text-secondary p-2">☰</div>
+                 <div>
+                    <button class="toggle-colspan-btn text-secondary text-xs mr-2" title="Toggle size">⤢</button>
+                    <span class="drag-handle text-secondary p-2">☰</span>
+                </div>
             </div>
             <div id="quote-card-content" class="text-center cursor-pointer transition-transform transform hover:scale-105">
                  <p id="quote" class="text-md italic">"The best way to predict the future is to create it."</p>
@@ -309,7 +346,8 @@
             <div class="card-header">
                 <h2 class="text-lg font-semibold card-title">Note</h2>
                 <div>
-                    <button class="delete-card-btn text-red-500 text-xs mr-2">Delete</button>
+                    <button class="toggle-colspan-btn text-secondary text-xs mr-2" title="Toggle size">⤢</button>
+                    <button class="delete-card-btn text-red-500 hover:text-red-400 p-2 rounded-full" title="Delete card"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
                     <span class="drag-handle text-secondary p-2">☰</span>
                 </div>
             </div>
@@ -322,7 +360,8 @@
             <div class="card-header">
                 <h2 class="text-lg font-semibold card-title">To-Do List</h2>
                 <div>
-                    <button class="delete-card-btn text-red-500 text-xs mr-2">Delete</button>
+                    <button class="toggle-colspan-btn text-secondary text-xs mr-2" title="Toggle size">⤢</button>
+                    <button class="delete-card-btn text-red-500 hover:text-red-400 p-2 rounded-full" title="Delete card"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
                     <span class="drag-handle text-secondary p-2">☰</span>
                 </div>
             </div>
@@ -342,7 +381,7 @@
                 <h2 class="text-lg font-semibold card-title">Graph</h2>
                 <div>
                     <button class="toggle-colspan-btn text-secondary text-xs mr-2" title="Toggle size">⤢</button>
-                    <button class="delete-card-btn text-red-500 text-xs mr-2">Delete</button>
+                    <button class="delete-card-btn text-red-500 hover:text-red-400 p-2 rounded-full" title="Delete card"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
                     <span class="drag-handle text-secondary p-2">☰</span>
                 </div>
             </div>
@@ -415,7 +454,11 @@
                     </div>
                 </div>
             </div>
-            <div class="flex justify-end mt-6">
+            <div class="flex justify-between items-center mt-6">
+                <button type="button" id="reset-dashboard-btn" class="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    <span>Reset Dashboard</span>
+                </button>
                 <button type="button" id="close-customize" class="btn-primary font-bold py-2 px-4 rounded-md">Close</button>
             </div>
         </div>
@@ -427,6 +470,23 @@
         <button id="close-alert-btn" class="font-bold text-lg ml-4">&times;</button>
     </div>
 
+    <!-- Info Modal -->
+    <div id="info-modal" class="modal-overlay hidden">
+        <div class="card w-11/12 max-w-md">
+            <h2 class="text-xl font-semibold mb-4">About This Project</h2>
+            <p class="text-sm text-secondary mb-4">
+                This dashboard was created to help students track their preparation for the JEE exam. It's a fully customizable, open-source tool built with modern web technologies.
+            </p>
+            <div class="space-y-2 text-sm">
+                <p><strong>Created by:</strong> <a href="https://github.com/svalordev" target="_blank" class="hover:underline" style="color: var(--accent-color);">Shaurya Pratap Singh</a></p>
+                <p><strong>Project Repository:</strong> <a href="https://github.com/SvalTech/kyunhihorahipadhai/" target="_blank" class="hover:underline" style="color: var(--accent-color);">View on GitHub</a></p>
+            </div>
+            <div class="flex justify-end mt-6">
+                <button type="button" id="close-info-modal" class="btn-primary font-bold py-2 px-4 rounded-md">Close</button>
+            </div>
+        </div>
+    </div>
+
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -436,14 +496,16 @@
             layout: 'jeeDashboardLayout_v3',
             customCards: 'jeeCustomCards_v3',
             settings: 'jeeDashboardSettings_v1',
-            mobileAlertDismissed: 'jeeMobileAlertDismissed_v1'
+            mobileAlertDismissed: 'jeeMobileAlertDismissed_v1',
+            cardProps: 'jeeCardProps_v1'
         };
 
         const AppState = {
             tests: JSON.parse(localStorage.getItem(STORAGE_KEYS.tests)) || {},
             customCards: JSON.parse(localStorage.getItem(STORAGE_KEYS.customCards)) || [],
-            layout: JSON.parse(localStorage.getItem(STORAGE_KEYS.layout)) || ['countdown', 'graph', 'tests', 'quote'],
+            layout: JSON.parse(localStorage.getItem(STORAGE_KEYS.layout)) || ['countdown', 'graph', 'tests', 'quote', 'time'],
             settings: JSON.parse(localStorage.getItem(STORAGE_KEYS.settings)) || { theme: 'default', font: "'Inter', sans-serif", bgUrl: '' },
+            cardProps: JSON.parse(localStorage.getItem(STORAGE_KEYS.cardProps)) || {},
             chartInstances: {},
             
             save(key) {
@@ -468,6 +530,7 @@
             modals: {
                 addCard: document.getElementById('add-card-modal'),
                 customize: document.getElementById('customize-modal'),
+                info: document.getElementById('info-modal'),
             },
             buttons: {
                 addCard: document.getElementById('add-card-btn'),
@@ -476,6 +539,9 @@
                 closeCustomize: document.getElementById('close-customize'),
                 removeBg: document.getElementById('remove-bg-btn'),
                 closeAlert: document.getElementById('close-alert-btn'),
+                resetDashboard: document.getElementById('reset-dashboard-btn'),
+                info: document.getElementById('info-btn'),
+                closeInfo: document.getElementById('close-info-modal'),
             },
             forms: {
                 newCard: document.getElementById('new-card-form'),
@@ -511,6 +577,17 @@
                     cardEl.querySelector('[data-value="seconds"]').innerText = Math.floor(diff / 1e3 % 60).toString().padStart(2, '0');
                 }
             },
+            time: {
+                templateId: 'time-template',
+                isDefault: true,
+                render: (cardEl) => {
+                    const now = new Date();
+                    const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+                    const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                    cardEl.querySelector('[data-value="time"]').textContent = now.toLocaleTimeString('en-US', timeOptions);
+                    cardEl.querySelector('[data-value="date"]').textContent = now.toLocaleDateString('en-US', dateOptions);
+                }
+            },
             graph: {
                 templateId: 'graph-template',
                 isDefault: true,
@@ -533,7 +610,11 @@
                         let typeClass = 'day-future', tooltipText = currentDate.toDateString();
                         if (currentDate < today) typeClass = 'day-past';
                         if (currentDate.getTime() === today.getTime()) { typeClass = 'day-today'; tooltipText += ' - Today'; }
-                        if (AppState.tests[dateString]) { typeClass = 'day-part-test'; tooltipText = `${AppState.tests[dateString]} - ${tooltipText}`; }
+                        if (AppState.tests[dateString]) { 
+                            typeClass = 'day-part-test';
+                            const daysRemaining = Math.ceil((new Date(dateString) - today) / (1000 * 60 * 60 * 24));
+                            tooltipText = `${AppState.tests[dateString]} (${daysRemaining} days from now)`;
+                        }
                         if (currentDate.getTime() === examDay.getTime()) { typeClass = 'day-exam'; tooltipText += ' - Exam!'; }
                         
                         dayDiv.classList.add(typeClass);
@@ -677,11 +758,14 @@
                     const cardNode = template.content.cloneNode(true);
                     const cardEl = cardNode.querySelector('.card');
                     cardEl.dataset.cardId = cardId;
+                    
+                    const props = AppState.cardProps[cardId] || { colspan: (type === 'graph' || type === 'line-graph') ? 2 : 1 };
+                    AppState.cardProps[cardId] = props;
+                    if (props.colspan === 2) {
+                        cardEl.classList.add('md:col-span-2');
+                    }
                     if (cardData) {
                         cardEl.querySelector('.card-title').textContent = cardData.title;
-                        if (cardData.colspan === 2) {
-                            cardEl.classList.add('md:col-span-2');
-                        }
                     }
                     D.dashboardGrid.appendChild(cardNode);
                 }
@@ -715,8 +799,8 @@
 
             if (cardId === 'quote') cardTypes.quote.render(cardEl);
 
-            if (e.target.classList.contains('delete-test-btn')) {
-                delete AppState.tests[e.target.dataset.date];
+            if (e.target.closest('.delete-test-btn')) {
+                delete AppState.tests[e.target.closest('.delete-test-btn').dataset.date];
                 AppState.save('tests');
                 renderDashboard();
             }
@@ -736,23 +820,30 @@
             }
 
             const cardData = AppState.customCards.find(c => c.id === cardId);
-            if (!cardData) return;
-
-            if (e.target.classList.contains('delete-card-btn')) {
-                AppState.customCards = AppState.customCards.filter(c => c.id !== cardId);
-                AppState.save('customCards');
+            
+            if (e.target.closest('.toggle-colspan-btn')) {
+                const props = AppState.cardProps[cardId] || { colspan: 1 };
+                props.colspan = props.colspan === 2 ? 1 : 2;
+                AppState.cardProps[cardId] = props;
+                AppState.save('cardProps');
                 renderDashboard();
             }
-            if (e.target.classList.contains('toggle-colspan-btn')) {
-                cardData.colspan = cardData.colspan === 2 ? 1 : 2;
-                AppState.save('customCards');
+            if (e.target.closest('.delete-card-btn')) {
+                AppState.layout = AppState.layout.filter(id => id !== cardId);
+                if (cardData) {
+                    AppState.customCards = AppState.customCards.filter(c => c.id !== cardId);
+                    delete AppState.cardProps[cardId];
+                    AppState.save('customCards');
+                    AppState.save('cardProps');
+                }
+                AppState.save('layout');
                 renderDashboard();
             }
-            if (cardData.type === 'todo') {
+            if (cardData && cardData.type === 'todo') {
                 const itemEl = e.target.closest('.todo-item');
                 if (itemEl) {
                     const itemIndex = parseInt(itemEl.dataset.index);
-                    if (e.target.classList.contains('delete-todo-item')) {
+                    if (e.target.closest('.delete-todo-item')) {
                         cardData.content.splice(itemIndex, 1);
                     } else if (e.target.classList.contains('todo-checkbox')) {
                         cardData.content[itemIndex].completed = !cardData.content[itemIndex].completed;
@@ -761,8 +852,8 @@
                     cardTypes.todo.render(cardEl, cardData);
                 }
             }
-             if (cardData.type === 'line-graph' && e.target.classList.contains('delete-mark-item')) {
-                const itemIndex = parseInt(e.target.dataset.index);
+             if (cardData && cardData.type === 'line-graph' && e.target.closest('.delete-mark-item')) {
+                const itemIndex = parseInt(e.target.closest('.delete-mark-item').dataset.index);
                 cardData.content.splice(itemIndex, 1);
                 AppState.save('customCards');
                 cardTypes['line-graph'].render(cardEl, cardData);
@@ -821,14 +912,16 @@
             const title = D.forms.newCard.querySelector('input[type="text"]').value.trim();
             if (!title) return;
             
-            AppState.customCards.push({
+            const newCard = {
                 id: `custom-${Date.now()}`,
                 type,
                 title,
-                content: type === 'note' ? D.inputs.cardContent.value.trim() : [],
-                colspan: type === 'line-graph' ? 2 : 1
-            });
+                content: type === 'note' ? D.inputs.cardContent.value.trim() : []
+            };
+            AppState.customCards.push(newCard);
+            AppState.cardProps[newCard.id] = { colspan: type === 'line-graph' ? 2 : 1 };
             AppState.save('customCards');
+            AppState.save('cardProps');
             renderDashboard();
             D.modals.addCard.classList.add('hidden');
             D.forms.newCard.reset();
@@ -843,6 +936,19 @@
         D.inputs.bgUrl.addEventListener('input', () => { AppState.settings.bgUrl = D.inputs.bgUrl.value; AppState.saveSettings(); applySettings(); });
         D.buttons.removeBg.addEventListener('click', () => { AppState.settings.bgUrl = ''; AppState.saveSettings(); applySettings(); });
         
+        D.buttons.resetDashboard.addEventListener('click', () => {
+            if (confirm('Are you sure you want to reset the dashboard? This will delete all custom cards and reset the layout.')) {
+                AppState.customCards = [];
+                AppState.layout = ['countdown', 'graph', 'tests', 'quote', 'time'];
+                AppState.cardProps = {};
+                AppState.save('customCards');
+                AppState.save('layout');
+                AppState.save('cardProps');
+                renderDashboard();
+                D.modals.customize.classList.add('hidden');
+            }
+        });
+
         // --- MOBILE ALERT ---
         if (window.innerWidth < 768 && localStorage.getItem(STORAGE_KEYS.mobileAlertDismissed) !== 'true') {
             D.mobileAlert.classList.remove('hidden');
@@ -851,6 +957,10 @@
             D.mobileAlert.classList.add('hidden');
             localStorage.setItem(STORAGE_KEYS.mobileAlertDismissed, 'true');
         });
+        
+        // --- INFO MODAL ---
+        D.buttons.info.addEventListener('click', () => D.modals.info.classList.remove('hidden'));
+        D.buttons.closeInfo.addEventListener('click', () => D.modals.info.classList.add('hidden'));
 
         // --- INITIALIZATION ---
         applySettings();
@@ -865,6 +975,8 @@
         setInterval(() => {
             const countdownCard = D.dashboardGrid.querySelector('[data-card-id="countdown"]');
             if (countdownCard) cardTypes.countdown.render(countdownCard);
+            const timeCard = D.dashboardGrid.querySelector('[data-card-id="time"]');
+            if (timeCard) cardTypes.time.render(timeCard);
         }, 1000);
     });
     </script>
