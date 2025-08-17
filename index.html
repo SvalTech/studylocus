@@ -17,20 +17,30 @@
     <style>
         :root {
             --bg-color: #0d1117;
-            --card-bg-color: #161b22;
+            --card-bg-color: rgba(22, 27, 34, 0.8);
             --border-color: #30363d;
             --text-primary: #c9d1d9;
             --text-secondary: #8b949e;
             --accent-color: #3b82f6;
             --font-family: 'Inter', sans-serif;
+            --day-past-color: #21262d;
+            --day-future-color: #0e4429;
+            --day-today-color: #1a633a;
+            --day-exam-color: #9e2a2b;
+            --day-part-test-color: #1f6feb;
         }
 
         [data-theme="light"] {
             --bg-color: #f0f0f0;
-            --card-bg-color: #ffffff;
+            --card-bg-color: rgba(255, 255, 255, 0.7);
             --border-color: #d1d5db;
             --text-primary: #1f2937;
             --text-secondary: #4b5563;
+            --day-past-color: #ebedf0;
+            --day-future-color: #9be9a8;
+            --day-today-color: #40c463;
+            --day-exam-color: #da5252;
+            --day-part-test-color: #58a6ff;
         }
 
         [data-theme="cyberpunk"] {
@@ -40,51 +50,81 @@
             --text-primary: #00f7ff;
             --text-secondary: #faff00;
             --accent-color: #ff00f2;
+            --day-past-color: #180f3d;
+            --day-future-color: #5d00ff;
+            --day-today-color: #00f7ff;
+            --day-exam-color: #ff00f2;
+            --day-part-test-color: #faff00;
         }
         
         [data-theme="forest"] {
             --bg-color: #1a201a;
-            --card-bg-color: #202a20;
+            --card-bg-color: rgba(32, 42, 32, 0.7);
             --border-color: #4a5c4a;
             --text-primary: #d4e0d4;
             --text-secondary: #8a9c8a;
             --accent-color: #6a9c6a;
+            --day-past-color: #2f3e2f;
+            --day-future-color: #4a5c4a;
+            --day-today-color: #9ae6b4;
+            --day-exam-color: #c53030;
+            --day-part-test-color: #63b3ed;
         }
 
         [data-theme="rose-gold"] {
             --bg-color: #4a1c2b;
-            --card-bg-color: #6b3040;
+            --card-bg-color: rgba(107, 48, 64, 0.7);
             --border-color: #b97a8d;
             --text-primary: #f5e5e8;
             --text-secondary: #d4b2bb;
             --accent-color: #f5c6d3;
+            --day-past-color: #6b3040;
+            --day-future-color: #b97a8d;
+            --day-today-color: #f5e5e8;
+            --day-exam-color: #ff6d6d;
+            --day-part-test-color: #f5c6d3;
         }
 
         [data-theme="ocean"] {
             --bg-color: #0d1b2a;
-            --card-bg-color: #1b263b;
+            --card-bg-color: rgba(27, 38, 59, 0.7);
             --border-color: #415a77;
             --text-primary: #e0e1dd;
             --text-secondary: #778da9;
             --accent-color: #61a5c2;
+            --day-past-color: #1b263b;
+            --day-future-color: #415a77;
+            --day-today-color: #e0e1dd;
+            --day-exam-color: #ff6b6b;
+            --day-part-test-color: #61a5c2;
         }
 
         [data-theme="sunset"] {
             --bg-color: #2c0e37;
-            --card-bg-color: #4a1d59;
+            --card-bg-color: rgba(74, 29, 89, 0.7);
             --border-color: #83387a;
             --text-primary: #f8f3f9;
             --text-secondary: #e4a1d4;
             --accent-color: #ff6d6d;
+            --day-past-color: #4a1d59;
+            --day-future-color: #83387a;
+            --day-today-color: #f8f3f9;
+            --day-exam-color: #e4a1d4;
+            --day-part-test-color: #ff6d6d;
         }
 
         [data-theme="dracula"] {
             --bg-color: #282a36;
-            --card-bg-color: #44475a;
+            --card-bg-color: rgba(68, 71, 90, 0.7);
             --border-color: #6272a4;
             --text-primary: #f8f8f2;
             --text-secondary: #bd93f9;
             --accent-color: #ff79c6;
+            --day-past-color: #44475a;
+            --day-future-color: #6272a4;
+            --day-today-color: #50fa7b;
+            --day-exam-color: #ff5555;
+            --day-part-test-color: #bd93f9;
         }
 
         body {
@@ -112,11 +152,11 @@
             width: 14px; height: 14px; border-radius: 3px;
             position: relative; cursor: pointer;
         }
-        .day-past { background-color: #21262d; }
-        .day-future { background-color: #0e4429; }
-        .day-today { background-color: #1a633a; border: 1px solid #3cc36e; }
-        .day-exam { background-color: #9e2a2b; border: 1px solid #ff6b6b; }
-        .day-part-test { background-color: #1f6feb; border: 1px solid #58a6ff; }
+        .day-past { background-color: var(--day-past-color); }
+        .day-future { background-color: var(--day-future-color); }
+        .day-today { background-color: var(--day-today-color); border: 1px solid var(--accent-color); }
+        .day-exam { background-color: var(--day-exam-color); }
+        .day-part-test { background-color: var(--day-part-test-color); }
         .day .tooltip {
             visibility: hidden; width: 180px; background-color: #21262d;
             color: #fff; text-align: center; border-radius: 6px;
@@ -944,14 +984,16 @@
                 AppState.save('cardProps');
                 renderDashboard();
             }
-            if (e.target.closest('.delete-card-btn') && cardData) {
-                AppState.customCards = AppState.customCards.filter(c => c.id !== cardId);
-                delete AppState.cardProps[cardId];
-                delete AppState.pomodoroState[cardId];
-                AppState.save('customCards');
-                AppState.save('cardProps');
-                AppState.save('pomodoroState');
-                renderDashboard();
+            if (e.target.closest('.delete-card-btn')) {
+                if (cardData) { // Only custom cards can be deleted
+                    AppState.customCards = AppState.customCards.filter(c => c.id !== cardId);
+                    delete AppState.cardProps[cardId];
+                    delete AppState.pomodoroState[cardId];
+                    AppState.save('customCards');
+                    AppState.save('cardProps');
+                    AppState.save('pomodoroState');
+                    renderDashboard();
+                }
             }
             if (cardData && cardData.type === 'todo') {
                 const itemEl = e.target.closest('.todo-item');
