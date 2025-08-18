@@ -215,6 +215,18 @@
             background-color: rgba(0,0,0,0.7);
             display: flex; align-items: center; justify-content: center;
             z-index: 50;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .modal-overlay.hidden {
+            pointer-events: none;
+            opacity: 0;
+        }
+        .modal-overlay > .card {
+            transition: transform 0.3s ease-in-out;
+            transform: scale(0.95);
+        }
+        .modal-overlay:not(.hidden) > .card {
+            transform: scale(1);
         }
         .todo-item.completed span {
             text-decoration: line-through;
@@ -224,6 +236,11 @@
             background-color: rgba(0,0,0,0.2);
             border: 1px solid var(--border-color);
             color: var(--text-primary);
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-color) 40%, transparent);
         }
         .btn-primary {
             background-color: var(--accent-color);
@@ -297,6 +314,60 @@
             opacity: 1;
             transform: translateY(0);
         }
+        .todo-checkbox {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 1.25rem;
+            height: 1.25rem;
+            border-radius: 0.25rem;
+            border: 1px solid var(--border-color);
+            background-color: transparent;
+            cursor: pointer;
+            position: relative;
+            transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+        }
+        .todo-checkbox:checked {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+        .todo-checkbox:checked::after {
+            content: '✔';
+            position: absolute;
+            color: white;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.8rem;
+        }
+        [data-theme="light"] .todo-checkbox:checked::after {
+            color: var(--card-bg-color);
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .card-enter {
+            animation: fadeInUp 0.5s ease-out forwards;
+            opacity: 0;
+        }
+        .fab-menu a {
+            transition: transform 0.2s ease-out, background-color 0.2s;
+            transform: translateX(10px);
+            opacity: 0;
+        }
+        .fab-container:hover .fab-menu a {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        .fab-container:hover .fab-menu a:nth-child(2) { transition-delay: 0.05s; }
+        .fab-container:hover .fab-menu a:nth-child(3) { transition-delay: 0.1s; }
+        .btn-lift {
+            transition: transform 0.2s ease-in-out;
+        }
+        .btn-lift:hover {
+            transform: translateY(-2px);
+        }
     </style>
 </head>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-TCK0S6VC58"></script>
@@ -313,11 +384,11 @@
         <header class="flex justify-between items-center mb-6">
             <h1 id="main-title" class="text-3xl sm:text-4xl font-bold cursor-pointer">JEE 2026</h1>
             <div class="flex items-center">
-                 <button id="info-btn" class="bg-gray-700 hover:bg-gray-600 text-white font-bold p-2 rounded-full transition-colors text-sm mr-2" title="About this project">
+                 <button id="info-btn" class="btn-lift bg-gray-700 hover:bg-gray-600 text-white font-bold p-2 rounded-full transition-colors text-sm mr-2" title="About this project">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
                  </button>
-                 <button id="customize-btn" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-md transition-colors text-sm mr-2">Customize</button>
-                <button id="add-card-btn" class="btn-primary font-bold py-2 px-4 rounded-md transition-colors text-sm">
+                 <button id="customize-btn" class="btn-lift bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-md transition-colors text-sm mr-2">Customize</button>
+                <button id="add-card-btn" class="btn-lift btn-primary font-bold py-2 px-4 rounded-md transition-colors text-sm">
                     + Add Card
                 </button>
             </div>
@@ -402,7 +473,7 @@
             <form id="add-test-form" class="flex flex-col gap-3 mb-4">
                  <input type="date" name="date" class="form-input rounded-md p-2 w-full text-sm" required>
                  <input type="text" name="name" placeholder="Test Name" class="form-input rounded-md p-2 flex-grow text-sm" required>
-                 <button type="submit" class="btn-primary font-bold py-2 px-4 rounded-md transition-colors w-full text-sm">Add Test</button>
+                 <button type="submit" class="btn-lift btn-primary font-bold py-2 px-4 rounded-md transition-colors w-full text-sm">Add Test</button>
             </form>
             <div id="test-list-container">
                  <h3 class="text-md font-semibold mb-2 border-b pb-1" style="border-color: var(--border-color);">Tests</h3>
@@ -452,10 +523,13 @@
                 </div>
             </div>
             <div class="card-content">
-                <ul class="todo-list space-y-2 max-h-48 overflow-y-auto mb-3 no-scrollbar"></ul>
-                <form class="add-todo-form flex gap-2">
-                    <input type="text" placeholder="New task..." class="form-input rounded-md p-2 w-full text-sm" required>
-                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded-md text-sm">+</button>
+                <div class="progress-container w-full bg-gray-700 rounded-full h-2.5 mb-4">
+                    <div class="progress-bar bg-green-500 h-2.5 rounded-full" style="width: 0%"></div>
+                </div>
+                <ul class="todo-list space-y-1 max-h-48 overflow-y-auto mb-3 no-scrollbar"></ul>
+                <form class="add-todo-form flex gap-2 mt-2">
+                    <input type="text" placeholder="Add a new task..." class="form-input rounded-md p-2 w-full text-sm" required>
+                    <button type="submit" class="btn-lift bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded-md text-sm">+</button>
                 </form>
             </div>
         </div>
@@ -479,7 +553,7 @@
                     <input type="text" name="name" placeholder="Paper Name" class="form-input rounded-md p-2 w-full sm:w-auto flex-grow text-sm" required>
                     <input type="number" name="marks" placeholder="Marks" class="form-input rounded-md p-2 w-full sm:w-20 text-sm" required>
                     <input type="number" name="maxMarks" placeholder="Max" class="form-input rounded-md p-2 w-full sm:w-20 text-sm" required>
-                    <button type="submit" class="btn-primary font-bold py-2 px-3 rounded-md text-sm">+</button>
+                    <button type="submit" class="btn-lift btn-primary font-bold py-2 px-3 rounded-md text-sm">+</button>
                 </form>
                 <ul class="marks-list space-y-1 max-h-24 overflow-y-auto no-scrollbar"></ul>
             </div>
@@ -504,7 +578,7 @@
                 </div>
                 <div class="timer-display text-6xl font-bold my-4">25:00</div>
                 <div class="flex justify-center gap-4">
-                    <button class="start-pause-btn btn-primary font-bold py-2 px-8 text-lg rounded-md">START</button>
+                    <button class="start-pause-btn btn-lift btn-primary font-bold py-2 px-8 text-lg rounded-md">START</button>
                     <button class="reset-btn text-secondary hover:text-primary">Reset</button>
                 </div>
                 <div class="pomodoro-settings mt-4 flex justify-center gap-4 items-center">
@@ -541,7 +615,7 @@
                 </div>
                 <form class="update-youtube-form flex gap-2">
                     <input type="text" name="url" placeholder="Paste YouTube URL..." class="form-input rounded-md p-2 w-full text-sm" required>
-                    <button type="submit" class="btn-primary font-bold py-2 px-3 rounded-md text-sm">Load</button>
+                    <button type="submit" class="btn-lift btn-primary font-bold py-2 px-3 rounded-md text-sm">Load</button>
                 </form>
             </div>
         </div>
@@ -562,8 +636,8 @@
                 <input type="text" id="new-card-title" placeholder="Card Title" class="form-input rounded-md p-2 w-full mb-3" required>
                 <textarea id="new-card-content" placeholder="Card Content (URL for YouTube)" rows="4" class="form-input rounded-md p-2 w-full mb-4"></textarea>
                 <div class="flex justify-end gap-3">
-                    <button type="button" id="cancel-add-card" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md">Cancel</button>
-                    <button type="submit" class="btn-primary font-bold py-2 px-4 rounded-md">Add</button>
+                    <button type="button" id="cancel-add-card" class="btn-lift bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md">Cancel</button>
+                    <button type="submit" class="btn-lift btn-primary font-bold py-2 px-4 rounded-md">Add</button>
                 </div>
             </form>
         </div>
@@ -600,16 +674,16 @@
                     <label class="block text-sm font-medium text-secondary mb-1">Background Image URL</label>
                     <div class="flex gap-2">
                         <input type="text" id="bg-image-url" placeholder="Paste image URL..." class="form-input rounded-md p-2 w-full">
-                        <button id="remove-bg-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-md">X</button>
+                        <button id="remove-bg-btn" class="btn-lift bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-md">X</button>
                     </div>
                 </div>
             </div>
             <div class="flex justify-between items-center mt-6">
-                <button type="button" id="reset-dashboard-btn" class="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md">
+                <button type="button" id="reset-dashboard-btn" class="btn-lift flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md">
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                     <span>Reset Dashboard</span>
                 </button>
-                <button type="button" id="close-customize" class="btn-primary font-bold py-2 px-4 rounded-md">Close</button>
+                <button type="button" id="close-customize" class="btn-lift btn-primary font-bold py-2 px-4 rounded-md">Close</button>
             </div>
         </div>
     </div>
@@ -632,7 +706,7 @@
                 <p><strong>Project Repository:</strong> <a href="https://github.com/SvalTech/kyunhihorahipadhai/" target="_blank" class="hover:underline" style="color: var(--accent-color);">View on GitHub</a></p>
             </div>
             <div class="flex justify-end mt-6">
-                <button type="button" id="close-info-modal" class="btn-primary font-bold py-2 px-4 rounded-md">Close</button>
+                <button type="button" id="close-info-modal" class="btn-lift btn-primary font-bold py-2 px-4 rounded-md">Close</button>
             </div>
         </div>
     </div>
@@ -650,7 +724,7 @@
                 <span>Syllabus Tracker</span>
              </a>
         </div>
-        <button class="w-14 h-14 rounded-full bg-gray-800 shadow-lg flex items-center justify-center text-white hover:bg-gray-700 transition-colors">
+        <button class="btn-lift w-14 h-14 rounded-full bg-gray-800 shadow-lg flex items-center justify-center text-white hover:bg-gray-700 transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
         </button>
     </div>
@@ -676,7 +750,7 @@
             { id: 'default-note', type: 'note', title: 'Welcome!', content: 'Welcome to your new dashboard! You can drag, resize, and delete these cards. Add your own from the top right. Best of luck in your JEE journey!' }
         ];
 
-        const defaultLayout = ['countdown', 'graph', 'default-todo', 'default-note', 'default-youtube', 'default-line-graph', 'tests', 'quote', 'time'];
+        const defaultLayout = ['countdown', 'time', 'graph', 'tests', 'quote', 'default-line-graph', 'default-todo', 'default-note', 'default-youtube'];
         const defaultCardProps = {
             'graph': { colspan: 2 },
             'default-line-graph': { colspan: 1 },
@@ -711,7 +785,8 @@
             { text: "Kyu nahi ho rahi padhai?", author: "Alakh Pandey" },
             { text: "System phaad denge!", author: "A wise man" },
             { text: "Physics is not a subject, it's an emotion.", author: "Alakh Pandey" },
-            { text: "Aag laga denge!", author: "Revolutionaries" }
+            { text: "Aag laga denge!", author: "Revolutionaries" },
+            { text: "Mehnat karta hu bhai", author: "Basava Reddy" }
         ];
 
         // --- DOM ELEMENTS ---
@@ -856,15 +931,25 @@
                 templateId: 'todo-card-template',
                 render: (cardEl, cardData) => {
                     const listEl = cardEl.querySelector('.todo-list');
+                    const progressBar = cardEl.querySelector('.progress-bar');
                     listEl.innerHTML = '';
                     if (Array.isArray(cardData.content)) {
-                        cardData.content.forEach((item, index) => {
-                            const li = document.createElement('li');
-                            li.className = `flex items-center gap-2 todo-item ${item.completed ? 'completed' : ''}`;
-                            li.dataset.index = index;
-                            li.innerHTML = `<input type="checkbox" ${item.completed ? 'checked' : ''} class="todo-checkbox bg-gray-900 rounded"><span class="flex-grow text-sm">${item.text}</span><button class="delete-todo-item text-red-500 hover:text-red-400 font-semibold text-xs">×</button>`;
-                            listEl.appendChild(li);
-                        });
+                        const totalTasks = cardData.content.length;
+                        const completedTasks = cardData.content.filter(item => item.completed).length;
+                        const progress = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+                        progressBar.style.width = `${progress}%`;
+                        
+                        if(totalTasks === 0) {
+                            listEl.innerHTML = '<li class="text-secondary px-2 text-sm">No tasks yet. Add one below!</li>';
+                        } else {
+                            cardData.content.forEach((item, index) => {
+                                const li = document.createElement('li');
+                                li.className = `flex items-center gap-3 p-2 rounded-md hover:bg-white/5 transition-colors todo-item ${item.completed ? 'completed' : ''}`;
+                                li.dataset.index = index;
+                                li.innerHTML = `<input type="checkbox" ${item.completed ? 'checked' : ''} class="todo-checkbox"><span class="flex-grow text-sm">${item.text}</span><button class="delete-todo-item text-red-500 hover:text-red-400 font-semibold text-xs">×</button>`;
+                                listEl.appendChild(li);
+                            });
+                        }
                     }
                 }
             },
@@ -1004,7 +1089,7 @@
                 }
             });
 
-            D.dashboardGrid.querySelectorAll('.card').forEach(cardEl => {
+            D.dashboardGrid.querySelectorAll('.card').forEach((cardEl, index) => {
                 const cardId = cardEl.dataset.cardId;
                 const cardData = AppState.customCards.find(c => c.id === cardId);
                 const type = cardData ? cardData.type : cardId;
@@ -1012,6 +1097,8 @@
                 if (cardDef) {
                     cardDef.render(cardEl, cardData);
                 }
+                cardEl.style.animationDelay = `${index * 50}ms`;
+                cardEl.classList.add('card-enter');
             });
         }
 
