@@ -673,14 +673,14 @@
             { id: 'default-todo', type: 'todo', title: 'My Tasks', content: [{ text: 'Solve 20 Physics problems', completed: false }, { text: 'Revise Organic Chemistry', completed: true }, { text: 'Take a short break!', completed: false }] },
             { id: 'default-line-graph', type: 'line-graph', title: 'Mock Test Progress', content: [{ name: 'Test 1', marks: 120, maxMarks: 300 }, { name: 'Test 2', marks: 145, maxMarks: 300 }, { name: 'Test 3', marks: 160, maxMarks: 300 }] },
             { id: 'default-youtube', type: 'youtube', title: 'Lofi Study Music', content: 'https://www.youtube.com/watch?v=jfKfPfyJRdk' },
-            { id: 'default-note', type: 'note', title: 'Welcome!', content: 'Welcome to your new dashboard! You can drag, resize, and delete these cards. Add your own from the top right.' }
+            { id: 'default-note', type: 'note', title: 'Welcome!', content: 'Welcome to your new dashboard! You can drag, resize, and delete these cards. Add your own from the top right. Best of luck in your JEE journey!' }
         ];
 
-        const defaultLayout = ['countdown', 'time', 'graph', 'tests', 'quote', 'default-line-graph', 'default-todo', 'default-note', 'default-youtube'];
+        const defaultLayout = ['countdown', 'graph', 'default-todo', 'default-note', 'default-youtube', 'default-line-graph', 'tests', 'quote', 'time'];
         const defaultCardProps = {
             'graph': { colspan: 2 },
-            'default-line-graph': { colspan: 2 },
-            'default-youtube': { colspan: 2 }
+            'default-line-graph': { colspan: 1 },
+            'default-youtube': { colspan: 1 }
         };
 
         const AppState = {
