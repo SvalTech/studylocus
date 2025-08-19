@@ -143,7 +143,7 @@
         
         [data-theme="chaitanya-noob"] {
             --bg-color: #000000;
-            --card-bg-color: rgba(20, 0, 30, 0.7);
+            --card-bg-color: transparent;
             --border-color: #39ff14;
             --text-primary: #39ff14;
             --text-secondary: #ff00ff;
@@ -155,6 +155,10 @@
             --day-part-test-color: transparent;
         }
         
+        [data-theme="chaitanya-noob"] .card {
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+        }
         [data-theme="chaitanya-noob"] .graph-container .day {
             border: none !important;
         }
@@ -369,7 +373,7 @@
   gtag('js', new Date());
 
   gtag('config', 'G-TCK0S6VC58');
-</script>
+</script>gap-2
 <body class="antialiased">
     <div id="bg-overlay"></div>
     <div class="container mx-auto px-2 sm:px-4 py-6">
@@ -652,7 +656,6 @@
                         <option value="sunset">Sunset</option>
                         <option value="dracula">Dracula</option>
                         <option value="alakh-pandey" class="hidden">Alakh Pandey</option>
-                        <option value="chaitanya-noob" class="hidden">Chaitanya is a noob 🤓</option>
                     </select>
                 </div>
                 <div>
@@ -787,7 +790,6 @@
             { text: "I love Organic Chemistry 🤓", author: "Chaitanya (probably)" },
             { text: "Isomerism is my favorite topic 🤓", author: "Definitely Chaitanya" },
             { text: "Just like us guys 🤓", author: "Chaitanya the moron" },
-            { text: "Missing Ya***i 🤓", author: "Chaitanya the moron" },
         ];
 
         // --- DOM ELEMENTS ---
@@ -1233,7 +1235,6 @@
                 const input = form.querySelector('input');
                 const text = input.value.trim();
                 if (text.toLowerCase() === 'doingocmakesmeexcited') {
-                    D.inputs.theme.querySelector('[value="chaitanya-noob"]').classList.remove('hidden');
                     AppState.settings.theme = 'chaitanya-noob';
                     AppState.saveSettings();
                     applySettings();
