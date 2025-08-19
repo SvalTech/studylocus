@@ -140,6 +140,34 @@
             --day-exam-color: #cf6679;
             --day-part-test-color: #bb86fc;
         }
+        
+        [data-theme="chaitanya-noob"] {
+            --bg-color: #000000;
+            --card-bg-color: rgba(20, 0, 30, 0.7);
+            --border-color: #39ff14;
+            --text-primary: #39ff14;
+            --text-secondary: #ff00ff;
+            --accent-color: #39ff14;
+            --day-past-color: transparent;
+            --day-future-color: transparent;
+            --day-today-color: transparent;
+            --day-exam-color: transparent;
+            --day-part-test-color: transparent;
+        }
+        
+        [data-theme="chaitanya-noob"] .graph-container .day {
+            border: none !important;
+        }
+        [data-theme="chaitanya-noob"] .graph-container .day::before {
+            content: '🤓';
+            font-size: 12px;
+            line-height: 14px;
+            display: block;
+            text-align: center;
+        }
+        [data-theme="chaitanya-noob"] .graph-container .day-today {
+            border: 1px solid var(--accent-color) !important;
+        }
 
         body {
             font-family: var(--font-family);
@@ -239,7 +267,8 @@
         [data-theme="ocean"] .btn-primary,
         [data-theme="sunset"] .btn-primary,
         [data-theme="dracula"] .btn-primary,
-        [data-theme="alakh-pandey"] .btn-primary { 
+        [data-theme="alakh-pandey"] .btn-primary,
+        [data-theme="chaitanya-noob"] .btn-primary { 
             color: var(--bg-color); 
         }
         .text-secondary { color: var(--text-secondary); }
@@ -623,6 +652,7 @@
                         <option value="sunset">Sunset</option>
                         <option value="dracula">Dracula</option>
                         <option value="alakh-pandey" class="hidden">Alakh Pandey</option>
+                        <option value="chaitanya-noob" class="hidden">Chaitanya is a noob 🤓</option>
                     </select>
                 </div>
                 <div>
@@ -751,6 +781,14 @@
             { text: "Aag laga denge!", author: "Revolutionaries" },
             { text: "Mehnat karta hu bhai", author: "Basava Reddy" }
         ];
+        
+        const chaitanyaQuotes = [
+            { text: "Chaitanya is a noob 🤓", author: "Everyone" },
+            { text: "I love Organic Chemistry 🤓", author: "Chaitanya (probably)" },
+            { text: "Isomerism is my favorite topic 🤓", author: "Definitely Chaitanya" },
+            { text: "Just like us guys 🤓", author: "Chaitanya the moron" },
+            { text: "Missing Ya***i 🤓", author: "Chaitanya the moron" },
+        ];
 
         // --- DOM ELEMENTS ---
         const D = {
@@ -878,7 +916,9 @@
                 templateId: 'quote-template',
                 isDefault: true,
                 render: (cardEl) => {
-                    const currentQuotes = AppState.settings.theme === 'alakh-pandey' ? memeQuotes : quotes;
+                    let currentQuotes = quotes;
+                    if (AppState.settings.theme === 'alakh-pandey') currentQuotes = memeQuotes;
+                    if (AppState.settings.theme === 'chaitanya-noob') currentQuotes = chaitanyaQuotes;
                     const { text, author } = currentQuotes[Math.floor(Math.random() * currentQuotes.length)];
                     cardEl.querySelector('#quote').textContent = `"${text}"`;
                     cardEl.querySelector('#author').textContent = `- ${author}`;
@@ -1052,7 +1092,7 @@
                 }
             });
 
-            D.dashboardGrid.querySelectorAll('.card').forEach(cardEl => {
+            D.dashboardGrid.querySelectorAll('.card').forEach((cardEl, index) => {
                 const cardId = cardEl.dataset.cardId;
                 const cardData = AppState.customCards.find(c => c.id === cardId);
                 const type = cardData ? cardData.type : cardId;
@@ -1060,6 +1100,8 @@
                 if (cardDef) {
                     cardDef.render(cardEl, cardData);
                 }
+                cardEl.style.animationDelay = `${index * 50}ms`;
+                cardEl.classList.add('card-enter');
             });
         }
 
@@ -1068,6 +1110,8 @@
             D.body.style.fontFamily = AppState.settings.font;
             if (AppState.settings.theme === 'alakh-pandey') {
                 D.body.style.backgroundImage = `url(https://i.imgflip.com/8otyfs.jpg)`;
+            } else if (AppState.settings.theme === 'chaitanya-noob') {
+                D.body.style.backgroundImage = `url(https://i.ibb.co/pv4BYhMs/Whats-App-Image-2025-08-06-at-16-12-41-4f47e159.jpg)`;
             } else {
                 D.body.style.backgroundImage = AppState.settings.bgUrl ? `url(${AppState.settings.bgUrl})` : 'none';
             }
@@ -1187,8 +1231,18 @@
             } else if (form.classList.contains('add-todo-form')) {
                 const card = AppState.customCards.find(c => c.id === cardId);
                 const input = form.querySelector('input');
-                if (card && input.value.trim()) {
-                    card.content.push({ text: input.value.trim(), completed: false });
+                const text = input.value.trim();
+                if (text.toLowerCase() === 'doingocmakesmeexcited') {
+                    D.inputs.theme.querySelector('[value="chaitanya-noob"]').classList.remove('hidden');
+                    AppState.settings.theme = 'chaitanya-noob';
+                    AppState.saveSettings();
+                    applySettings();
+                    renderDashboard();
+                    input.value = '';
+                    return;
+                }
+                if (card && text) {
+                    card.content.push({ text: text, completed: false });
                     AppState.save('customCards');
                     cardTypes.todo.render(cardEl, card);
                     input.value = '';
