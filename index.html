@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JEE Dashboard</title>
+    <title>JEE 2026 Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Comic+Neue&family=Fira+Code&family=Inter:wght@400;600;700&family=Roboto+Slab&display=swap" rel="stylesheet">
@@ -663,6 +663,7 @@
                         <option value="sunset">Sunset</option>
                         <option value="dracula">Dracula</option>
                         <option value="alakh-pandey" class="hidden">Alakh Pandey</option>
+                        <option value="chaitanya-noob" class="hidden">Chaitanya is a noob 🤓</option>
                     </select>
                 </div>
                 <div>
@@ -763,18 +764,26 @@
             { id: 'default-note', type: 'note', title: 'Welcome!', content: 'Welcome to your new dashboard! You can drag, resize, and delete these cards. Add your own from the top right. Best of luck in your JEE journey!' }
         ];
 
-        const defaultLayout =  ['countdown', 'graph', 'default-todo', 'default-note', 'default-youtube', 'default-line-graph', 'tests', 'quote', 'time']
+        const defaultLayout = ['countdown', 'graph', 'default-todo', 'default-note', 'default-youtube', 'default-line-graph', 'tests', 'quote', 'time'];
         const defaultCardProps = {
             'graph': { colspan: 2 },
             'default-line-graph': { colspan: 1 },
             'default-youtube': { colspan: 1 }
         };
-
+        
+        const savedSettings = JSON.parse(localStorage.getItem(STORAGE_KEYS.settings));
+        
         const AppState = {
             tests: JSON.parse(localStorage.getItem(STORAGE_KEYS.tests)) || {},
             customCards: JSON.parse(localStorage.getItem(STORAGE_KEYS.customCards)) || defaultCustomCards,
             layout: JSON.parse(localStorage.getItem(STORAGE_KEYS.layout)) || defaultLayout,
-            settings: JSON.parse(localStorage.getItem(STORAGE_KEYS.settings)) || { theme: 'default', font: "'Inter', sans-serif", bgUrl: '', targetYear: '2026' },
+            settings: {
+                theme: 'default', 
+                font: "'Inter', sans-serif", 
+                bgUrl: '', 
+                targetYear: '2026',
+                ...savedSettings
+            },
             cardProps: JSON.parse(localStorage.getItem(STORAGE_KEYS.cardProps)) || defaultCardProps,
             pomodoroState: JSON.parse(localStorage.getItem(STORAGE_KEYS.pomodoroState)) || {},
             chartInstances: {},
