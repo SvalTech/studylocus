@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JEE 2026 Dashboard</title>
+    <title>JEE Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code&family=Inter:wght@400;600;700&family=Roboto+Slab&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue&family=Fira+Code&family=Inter:wght@400;600;700&family=Roboto+Slab&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Draggable Library -->
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
@@ -645,6 +645,13 @@
             <h2 class="text-xl font-semibold mb-4">Customize Dashboard</h2>
             <div class="space-y-4">
                 <div>
+                    <label class="block text-sm font-medium text-secondary mb-1">Target Year</label>
+                    <select id="year-select" class="form-input rounded-md p-2 w-full">
+                        <option value="2026">2026</option>
+                        <option value="2027">2027</option>
+                    </select>
+                </div>
+                <div>
                     <label class="block text-sm font-medium text-secondary mb-1">Theme</label>
                     <select id="theme-select" class="form-input rounded-md p-2 w-full">
                         <option value="default">Deep Space</option>
@@ -664,6 +671,7 @@
                         <option value="'Inter', sans-serif">Inter (Sans-Serif)</option>
                         <option value="'Roboto Slab', serif">Roboto Slab (Serif)</option>
                         <option value="'Fira Code', monospace">Fira Code (Monospace)</option>
+                        <option value="'Comic Neue', cursive">Comic Sans</option>
                     </select>
                 </div>
                  <div>
@@ -739,6 +747,15 @@
             pomodoroState: 'jeePomodoroState_v1'
         };
 
+        const YEAR_CONFIG = {
+            '2026': {
+                examDate: new Date("2026-01-22T00:00:00"),
+            },
+            '2027': {
+                examDate: new Date("2027-01-21T00:00:00"),
+            }
+        };
+
         const defaultCustomCards = [
             { id: 'default-todo', type: 'todo', title: 'My Tasks', content: [{ text: 'Solve 20 Physics problems', completed: false }, { text: 'Revise Organic Chemistry', completed: true }, { text: 'Take a short break!', completed: false }] },
             { id: 'default-line-graph', type: 'line-graph', title: 'Mock Test Progress', content: [{ name: 'Test 1', marks: 120, maxMarks: 300 }, { name: 'Test 2', marks: 145, maxMarks: 300 }, { name: 'Test 3', marks: 160, maxMarks: 300 }] },
@@ -746,7 +763,7 @@
             { id: 'default-note', type: 'note', title: 'Welcome!', content: 'Welcome to your new dashboard! You can drag, resize, and delete these cards. Add your own from the top right. Best of luck in your JEE journey!' }
         ];
 
-        const defaultLayout = ['countdown', 'graph', 'default-todo', 'default-note', 'default-youtube', 'default-line-graph', 'tests', 'quote', 'time'];
+        const defaultLayout =  ['countdown', 'graph', 'default-todo', 'default-note', 'default-youtube', 'default-line-graph', 'tests', 'quote', 'time']
         const defaultCardProps = {
             'graph': { colspan: 2 },
             'default-line-graph': { colspan: 1 },
@@ -757,7 +774,7 @@
             tests: JSON.parse(localStorage.getItem(STORAGE_KEYS.tests)) || {},
             customCards: JSON.parse(localStorage.getItem(STORAGE_KEYS.customCards)) || defaultCustomCards,
             layout: JSON.parse(localStorage.getItem(STORAGE_KEYS.layout)) || defaultLayout,
-            settings: JSON.parse(localStorage.getItem(STORAGE_KEYS.settings)) || { theme: 'default', font: "'Inter', sans-serif", bgUrl: '' },
+            settings: JSON.parse(localStorage.getItem(STORAGE_KEYS.settings)) || { theme: 'default', font: "'Inter', sans-serif", bgUrl: '', targetYear: '2026' },
             cardProps: JSON.parse(localStorage.getItem(STORAGE_KEYS.cardProps)) || defaultCardProps,
             pomodoroState: JSON.parse(localStorage.getItem(STORAGE_KEYS.pomodoroState)) || {},
             chartInstances: {},
@@ -822,6 +839,7 @@
                 theme: document.getElementById('theme-select'),
                 font: document.getElementById('font-select'),
                 bgUrl: document.getElementById('bg-image-url'),
+                year: document.getElementById('year-select'),
             },
             mobileAlert: document.getElementById('mobile-alert'),
         };
@@ -840,7 +858,7 @@
                 templateId: 'countdown-template',
                 isDefault: true,
                 render: (cardEl) => {
-                    const diff = new Date("2026-01-22T00:00:00") - new Date();
+                    const diff = YEAR_CONFIG[AppState.settings.targetYear].examDate - new Date();
                     cardEl.querySelector('[data-value="days"]').innerText = Math.floor(diff / 864e5).toString().padStart(2, '0');
                     cardEl.querySelector('[data-value="hours"]').innerText = Math.floor(diff / 36e5 % 24).toString().padStart(2, '0');
                     cardEl.querySelector('[data-value="minutes"]').innerText = Math.floor(diff / 6e4 % 60).toString().padStart(2, '0');
@@ -865,8 +883,9 @@
                     const graphContainer = cardEl.querySelector('#contribution-graph');
                     graphContainer.innerHTML = '';
                     const today = new Date(); today.setHours(0, 0, 0, 0);
-                    let currentDate = new Date("2025-01-01T00:00:00");
-                    const examDay = new Date("2026-01-22T00:00:00"); examDay.setHours(0, 0, 0, 0);
+                    const currentYear = new Date().getFullYear();
+                    let currentDate = new Date(`${currentYear}-01-01T00:00:00`);
+                    const examDay = new Date(YEAR_CONFIG[AppState.settings.targetYear].examDate); examDay.setHours(0, 0, 0, 0);
                     
                     while (currentDate <= examDay) {
                         const dayDiv = document.createElement('div');
@@ -1089,6 +1108,9 @@
                     }
                     if (cardData) {
                         cardEl.querySelector('.card-title').textContent = cardData.title;
+                    } else if (AppState.settings.theme === 'chaitanya-noob') {
+                        const titleEl = cardEl.querySelector('h2');
+                        if (titleEl) titleEl.textContent += ' 🤓';
                     }
                     D.dashboardGrid.appendChild(cardNode);
                 }
@@ -1120,6 +1142,8 @@
             D.inputs.theme.value = AppState.settings.theme;
             D.inputs.font.value = AppState.settings.font;
             D.inputs.bgUrl.value = AppState.settings.bgUrl;
+            D.inputs.year.value = AppState.settings.targetYear;
+            D.mainTitle.textContent = `JEE ${AppState.settings.targetYear}`;
         }
 
         // --- EVENT HANDLERS (DELEGATED) ---
@@ -1315,6 +1339,7 @@
         D.inputs.font.addEventListener('change', () => { AppState.settings.font = D.inputs.font.value; AppState.saveSettings(); applySettings(); });
         D.inputs.bgUrl.addEventListener('input', () => { AppState.settings.bgUrl = D.inputs.bgUrl.value; AppState.saveSettings(); applySettings(); });
         D.buttons.removeBg.addEventListener('click', () => { AppState.settings.bgUrl = ''; AppState.saveSettings(); applySettings(); });
+        D.inputs.year.addEventListener('change', () => { AppState.settings.targetYear = D.inputs.year.value; AppState.saveSettings(); applySettings(); renderDashboard(); });
         
         D.buttons.resetDashboard.addEventListener('click', () => {
             if (confirm('Are you sure you want to reset the dashboard? This will delete all custom cards and reset the layout.')) {
@@ -1408,15 +1433,16 @@
         // --- EASTER EGG ---
         let clickCount = 0;
         let clickTimer = null;
-        D.mainTitle.addEventListener('click', () => {
-            clickCount++;
-            if (clickCount === 1) {
+        D.mainTitle.addEventListener('click', (e) => {
+            if (e.detail === 1) {
                 clickTimer = setTimeout(() => {
-                    clickCount = 0;
-                }, 500);
-            } else if (clickCount === 3) {
+                    AppState.settings.targetYear = AppState.settings.targetYear === '2026' ? '2027' : '2026';
+                    AppState.saveSettings();
+                    applySettings();
+                    renderDashboard();
+                }, 200);
+            } else if (e.detail === 3) {
                 clearTimeout(clickTimer);
-                clickCount = 0;
                 D.inputs.theme.querySelector('[value="alakh-pandey"]').classList.remove('hidden');
                 AppState.settings.theme = 'alakh-pandey';
                 AppState.saveSettings();
