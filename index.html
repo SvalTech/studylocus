@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JEE Dashboard | StudyLocus</title>
+    <title>Study Dashboard | StudyLocus</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,13 +16,17 @@
     <!-- Audio Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
     <style>
+        
+
         :root {
             --bg-color: #0d1117;
-            --card-bg-color: rgba(22, 27, 34, 0.8);
+            --card-bg-color: rgba(22, 27, 34, 0.85);
             --border-color: #30363d;
             --text-primary: #c9d1d9;
             --text-secondary: #8b949e;
-            --accent-color: #3b82f6;
+            --accent-color: #58a6ff;
+            --accent-glow: 0 0 15px rgba(88, 166, 255, 0.3);
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.3);
             --font-family: 'Inter', sans-serif;
             --day-past-color: #21262d;
             --day-future-color: #0e4429;
@@ -33,10 +37,13 @@
 
         [data-theme="light"] {
             --bg-color: #f0f0f0;
-            --card-bg-color: rgba(255, 255, 255, 0.7);
+            --card-bg-color: rgba(255, 255, 255, 0.8);
             --border-color: #d1d5db;
             --text-primary: #1f2937;
             --text-secondary: #4b5563;
+            --accent-color: #3b82f6;
+            --accent-glow: 0 0 15px rgba(59, 130, 246, 0.4);
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.1);
             --day-past-color: #ebedf0;
             --day-future-color: #9be9a8;
             --day-today-color: #40c463;
@@ -46,11 +53,13 @@
 
         [data-theme="cyberpunk"] {
             --bg-color: #0c0a24;
-            --card-bg-color: rgba(23, 0, 61, 0.6);
+            --card-bg-color: rgba(23, 0, 61, 0.7);
             --border-color: #ff00f2;
             --text-primary: #00f7ff;
             --text-secondary: #faff00;
             --accent-color: #ff00f2;
+            --accent-glow: 0 0 20px rgba(255, 0, 242, 0.5);
+            --card-shadow: 0 0 10px rgba(255, 0, 242, 0.3);
             --day-past-color: #180f3d;
             --day-future-color: #5d00ff;
             --day-today-color: #00f7ff;
@@ -60,11 +69,13 @@
         
         [data-theme="forest"] {
             --bg-color: #1a201a;
-            --card-bg-color: rgba(32, 42, 32, 0.7);
+            --card-bg-color: rgba(32, 42, 32, 0.75);
             --border-color: #4a5c4a;
             --text-primary: #d4e0d4;
             --text-secondary: #8a9c8a;
             --accent-color: #6a9c6a;
+            --accent-glow: 0 0 15px rgba(106, 156, 106, 0.4);
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.3);
             --day-past-color: #2f3e2f;
             --day-future-color: #4a5c4a;
             --day-today-color: #9ae6b4;
@@ -74,11 +85,13 @@
 
         [data-theme="rose-gold"] {
             --bg-color: #4a1c2b;
-            --card-bg-color: rgba(107, 48, 64, 0.7);
+            --card-bg-color: rgba(107, 48, 64, 0.75);
             --border-color: #b97a8d;
             --text-primary: #f5e5e8;
             --text-secondary: #d4b2bb;
             --accent-color: #f5c6d3;
+            --accent-glow: 0 0 15px rgba(245, 198, 211, 0.4);
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.3);
             --day-past-color: #6b3040;
             --day-future-color: #b97a8d;
             --day-today-color: #f5e5e8;
@@ -88,11 +101,13 @@
 
         [data-theme="ocean"] {
             --bg-color: #0d1b2a;
-            --card-bg-color: rgba(27, 38, 59, 0.7);
+            --card-bg-color: rgba(27, 38, 59, 0.75);
             --border-color: #415a77;
             --text-primary: #e0e1dd;
             --text-secondary: #778da9;
             --accent-color: #61a5c2;
+            --accent-glow: 0 0 15px rgba(97, 165, 194, 0.4);
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.3);
             --day-past-color: #1b263b;
             --day-future-color: #415a77;
             --day-today-color: #e0e1dd;
@@ -102,11 +117,13 @@
 
         [data-theme="sunset"] {
             --bg-color: #2c0e37;
-            --card-bg-color: rgba(74, 29, 89, 0.7);
+            --card-bg-color: rgba(74, 29, 89, 0.75);
             --border-color: #83387a;
             --text-primary: #f8f3f9;
             --text-secondary: #e4a1d4;
             --accent-color: #ff6d6d;
+            --accent-glow: 0 0 15px rgba(255, 109, 109, 0.4);
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.3);
             --day-past-color: #4a1d59;
             --day-future-color: #83387a;
             --day-today-color: #f8f3f9;
@@ -116,11 +133,13 @@
 
         [data-theme="dracula"] {
             --bg-color: #282a36;
-            --card-bg-color: rgba(68, 71, 90, 0.7);
+            --card-bg-color: rgba(68, 71, 90, 0.8);
             --border-color: #6272a4;
             --text-primary: #f8f8f2;
             --text-secondary: #bd93f9;
             --accent-color: #ff79c6;
+            --accent-glow: 0 0 15px rgba(255, 121, 198, 0.4);
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.3);
             --day-past-color: #44475a;
             --day-future-color: #6272a4;
             --day-today-color: #50fa7b;
@@ -130,11 +149,13 @@
         
         [data-theme="alakh-pandey"] {
             --bg-color: #1e1e1e;
-            --card-bg-color: rgba(40, 40, 40, 0.8);
+            --card-bg-color: rgba(40, 40, 40, 0.85);
             --border-color: #f5cb5c;
             --text-primary: #ffffff;
             --text-secondary: #e0e0e0;
             --accent-color: #f5cb5c;
+            --accent-glow: 0 0 15px rgba(245, 203, 92, 0.4);
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.3);
             --day-past-color: #333533;
             --day-future-color: #4f4f4f;
             --day-today-color: #f5cb5c;
@@ -149,6 +170,8 @@
             --text-primary: #39ff14;
             --text-secondary: #ff00ff;
             --accent-color: #39ff14;
+            --accent-glow: 0 0 20px rgba(57, 255, 20, 0.5);
+            --card-shadow: 0 0 10px rgba(57, 255, 20, 0.3);
             --day-past-color: transparent;
             --day-future-color: transparent;
             --day-today-color: transparent;
@@ -156,23 +179,10 @@
             --day-part-test-color: transparent;
         }
         
-        [data-theme="chaitanya-noob"] .card {
-            backdrop-filter: none;
-            -webkit-backdrop-filter: none;
-        }
-        [data-theme="chaitanya-noob"] .graph-container .day {
-            border: none !important;
-        }
-        [data-theme="chaitanya-noob"] .graph-container .day::before {
-            content: '🤓';
-            font-size: 12px;
-            line-height: 14px;
-            display: block;
-            text-align: center;
-        }
-        [data-theme="chaitanya-noob"] .graph-container .day-today {
-            border: 1px solid var(--accent-color) !important;
-        }
+        [data-theme="chaitanya-noob"] .card { backdrop-filter: none; -webkit-backdrop-filter: none; }
+        [data-theme="chaitanya-noob"] .graph-container .day { border: none !important; }
+        [data-theme="chaitanya-noob"] .graph-container .day::before { content: '🤓'; font-size: 12px; line-height: 14px; display: block; text-align: center; }
+        [data-theme="chaitanya-noob"] .graph-container .day-today { border: 1px solid var(--accent-color) !important; }
 
         body {
             font-family: var(--font-family);
@@ -181,190 +191,89 @@
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+            transition: background-color 0.5s ease, background-image 0.5s ease;
         }
-        #bg-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: rgba(0,0,0,0.5);
-            z-index: -1;
-        }
-        .graph-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(14px, 1fr));
-            grid-auto-rows: 14px;
-            grid-gap: 3px;
-            overflow-x: auto;
-        }
-        .day {
-            width: 14px; height: 14px; border-radius: 3px;
-            position: relative; cursor: pointer;
-        }
+        #bg-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.5); z-index: -1; }
+        .graph-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(14px, 1fr)); grid-auto-rows: 14px; grid-gap: 3px; overflow-x: auto; }
+        .day { width: 14px; height: 14px; border-radius: 3px; position: relative; cursor: pointer; }
         .day-past { background-color: var(--day-past-color); }
         .day-future { background-color: var(--day-future-color); }
         .day-today { background-color: var(--day-today-color); border: 1px solid var(--accent-color); }
         .day-exam { background-color: var(--day-exam-color); }
         .day-part-test { background-color: var(--day-part-test-color); }
-        .day .tooltip {
-            visibility: hidden; width: 180px; background-color: #21262d;
-            color: #fff; text-align: center; border-radius: 6px;
-            padding: 5px 0; position: absolute; z-index: 10;
-            bottom: 125%; left: 50%; margin-left: -90px;
-            opacity: 0; transition: opacity 0.3s; font-size: 12px;
-            border: 1px solid #30363d; pointer-events: none;
-        }
+        .day .tooltip { visibility: hidden; width: 180px; background-color: #21262d; color: #fff; text-align: center; border-radius: 6px; padding: 5px 0; position: absolute; z-index: 10; bottom: 125%; left: 50%; margin-left: -90px; opacity: 0; transition: opacity 0.3s; font-size: 12px; border: 1px solid #30363d; pointer-events: none; }
         .day:hover .tooltip { visibility: visible; opacity: 1; }
         #countdown-timer { font-size: 1.75rem; font-weight: 600; }
         @media (min-width: 640px) { #countdown-timer { font-size: 2.25rem; } }
         @media (min-width: 1024px) { #countdown-timer { font-size: 2.5rem; } }
+        
         .card { 
             background-color: var(--card-bg-color); 
             border: 1px solid var(--border-color); 
             color: var(--text-primary);
-            border-radius: 8px; padding: 1rem;
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
+            border-radius: 12px;
+            padding: 1.25rem;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: var(--card-shadow);
         }
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.25rem;
-            margin-bottom: 0.5rem;
-            border-radius: 6px;
-            transition: background-color 0.2s ease-in-out;
-        }
-        .card-header:hover {
-            background-color: rgba(255,255,255,0.1);
-        }
+        
+        .card-header { display: flex; justify-content: space-between; align-items: center; padding: 0.25rem; margin-bottom: 0.5rem; border-radius: 6px; transition: background-color 0.2s ease-in-out; }
+        .card-header:hover { background-color: rgba(255,255,255,0.1); }
         .drag-handle { cursor: grab; }
-        .sortable-ghost {
-            background: #1f2937;
-            opacity: 0.6;
-            border: 2px dashed var(--accent-color);
-        }
+        .sortable-ghost { background: #1f2937; opacity: 0.6; border: 2px dashed var(--accent-color); }
         .sortable-chosen { cursor: grabbing; }
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background-color: rgba(0,0,0,0.7);
-            display: flex; align-items: center; justify-content: center;
-            z-index: 50;
-        }
-        .todo-item.completed span {
-            text-decoration: line-through;
-            color: var(--text-secondary);
-        }
-        .form-input {
-            background-color: rgba(0,0,0,0.2);
-            border: 1px solid var(--border-color);
-            color: var(--text-primary);
-        }
-        .form-input:focus {
-            outline: none;
-            border-color: var(--accent-color);
-            box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-color) 40%, transparent);
-        }
-        .btn-primary {
-            background-color: var(--accent-color);
-            color: white;
-        }
+        
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.5); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 50; opacity: 0; transition: opacity 0.3s ease; pointer-events: none; }
+        .modal-overlay:not(.hidden) { opacity: 1; pointer-events: auto; }
+        .modal-overlay > .card { transform: scale(0.95); opacity: 0; transition: transform 0.3s ease, opacity 0.3s ease; }
+        .modal-overlay:not(.hidden) > .card { transform: scale(1); opacity: 1; }
+        
+        .todo-item.completed span { text-decoration: line-through; color: var(--text-secondary); }
+        .form-input { background-color: rgba(0,0,0,0.2); border: 1px solid var(--border-color); color: var(--text-primary); transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+        .form-input:focus { outline: none; border-color: var(--accent-color); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-color) 40%, transparent); }
+        
+        .btn-primary { background-color: var(--accent-color); color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); border: 1px solid transparent; transition: all 0.2s ease-in-out; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.3), var(--accent-glow); }
+
+        header .space-x-2 > button { transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease; }
+        header .space-x-2 > button:hover { transform: translateY(-2px); box-shadow: var(--accent-glow); }
+        
         [data-theme="cyberpunk"] .btn-primary,
         [data-theme="rose-gold"] .btn-primary,
         [data-theme="ocean"] .btn-primary,
         [data-theme="sunset"] .btn-primary,
         [data-theme="dracula"] .btn-primary,
         [data-theme="alakh-pandey"] .btn-primary,
-        [data-theme="chaitanya-noob"] .btn-primary { 
-            color: var(--bg-color); 
-        }
+        [data-theme="chaitanya-noob"] .btn-primary { color: var(--bg-color); }
         .text-secondary { color: var(--text-secondary); }
-        select.form-input {
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-            background-position: right 0.5rem center;
-            background-repeat: no-repeat;
-            background-size: 1.5em 1.5em;
-            padding-right: 2.5rem;
-        }
-        select.form-input option {
-            background: var(--card-bg-color);
-            color: var(--text-primary);
-        }
-        [data-theme="light"] .form-input {
-            background-color: #e5e7eb;
-            border-color: #9ca3af;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .delete-card-btn {
-            transition: transform 0.2s ease-in-out;
-        }
-        .delete-card-btn:hover {
-            transform: scale(1.2);
-        }
-        .pomodoro-btn.active {
-            background-color: var(--accent-color);
-            color: white;
-        }
+        select.form-input { -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); background-position: right 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; padding-right: 2.5rem; }
+        select.form-input option { background: var(--card-bg-color); color: var(--text-primary); }
+        [data-theme="light"] .form-input { background-color: #e5e7eb; border-color: #9ca3af; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .delete-card-btn { transition: transform 0.2s ease-in-out; }
+        .delete-card-btn:hover { transform: scale(1.2); }
+        .pomodoro-btn.active { background-color: var(--accent-color); color: white; }
         [data-theme="light"] .pomodoro-btn.active { color: white; }
         .aspect-w-16 { position: relative; padding-bottom: 56.25%; }
         .aspect-w-16 > * { position: absolute; height: 100%; width: 100%; top: 0; right: 0; bottom: 0; left: 0; }
-        .fab-container {
-            position: fixed;
-            bottom: 1.5rem;
-            right: 1.5rem;
-            z-index: 40;
-        }
-        .fab-menu {
-            visibility: hidden;
-            opacity: 0;
-            transform: translateY(10px);
-            transition: all 0.2s ease-out;
-            position: absolute;
-            bottom: 100%;
-            right: 0;
-            margin-bottom: 0.5rem;
-        }
-        .fab-container:hover .fab-menu {
-            visibility: visible;
-            opacity: 1;
-            transform: translateY(0);
-        }
-        .todo-checkbox {
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            width: 1.25rem;
-            height: 1.25rem;
-            border-radius: 0.25rem;
-            border: 1px solid var(--border-color);
-            background-color: transparent;
-            cursor: pointer;
-            position: relative;
-            transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
-        }
-        .todo-checkbox:checked {
-            background-color: var(--accent-color);
-            border-color: var(--accent-color);
-        }
-        .todo-checkbox:checked::after {
-            content: '✔';
-            position: absolute;
-            color: white;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 0.8rem;
-        }
-        [data-theme="light"] .todo-checkbox:checked::after {
-            color: var(--card-bg-color);
-        }
+        .fab-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 40; }
+        .fab-menu { visibility: hidden; opacity: 0; transform: translateY(10px); transition: all 0.2s ease-out; position: absolute; bottom: 100%; right: 0; margin-bottom: 0.5rem; }
+        .fab-container:hover .fab-menu { visibility: visible; opacity: 1; transform: translateY(0); }
+        .todo-checkbox { -webkit-appearance: none; -moz-appearance: none; appearance: none; width: 1.25rem; height: 1.25rem; border-radius: 0.25rem; border: 1px solid var(--border-color); background-color: transparent; cursor: pointer; position: relative; transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out; }
+        .todo-checkbox:checked { background-color: var(--accent-color); border-color: var(--accent-color); }
+        .todo-checkbox:checked::after { content: '✔'; position: absolute; color: white; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 0.8rem; }
+        [data-theme="light"] .todo-checkbox:checked::after { color: var(--card-bg-color); }
+
+        /* --- Zen Mode Styles --- */
+        body.zen-mode header, body.zen-mode footer, body.zen-mode .fab-container { display: none; }
+        body.zen-mode #dashboard-grid { grid-template-columns: minmax(0, 1fr); max-width: 800px; margin-left: auto; margin-right: auto; gap: 1.5rem; transition: all 0.5s ease; }
+        body.zen-mode #dashboard-grid > .card { grid-column: span 1 / span 1; }
+        body.zen-mode .card:hover { transform: none; box-shadow: var(--card-shadow); }
+        body.zen-mode .card-header { justify-content: center; }
+        body.zen-mode .drag-handle, body.zen-mode .toggle-colspan-btn, body.zen-mode .delete-card-btn, body.zen-mode form, body.zen-mode .delete-test-btn, body.zen-mode .delete-todo-item, body.zen-mode .delete-mark-item, body.zen-mode .pomodoro-settings, body.zen-mode .pomodoro-btn { display: none; }
     </style>
 </head>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-TCK0S6VC58"></script>
@@ -380,13 +289,20 @@
     <div class="container mx-auto px-2 sm:px-4 py-6">
         <header class="flex justify-between items-center mb-6">
             <h1 id="main-title" class="text-3xl sm:text-4xl font-bold cursor-pointer">JEE 2026</h1>
-            <div class="flex items-center">
-                 <button id="info-btn" class="bg-gray-700 hover:bg-gray-600 text-white font-bold p-2 rounded-full transition-colors text-sm mr-2" title="About this project">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            <div class="flex items-center space-x-2">
+                 <button id="info-btn" class="bg-gray-700 hover:bg-gray-600 text-white font-bold p-2 rounded-full transition-colors text-sm" title="About this project">
+                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
                  </button>
-                 <button id="customize-btn" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-md transition-colors text-sm mr-2">Customize</button>
-                <button id="add-card-btn" class="btn-primary font-bold py-2 px-4 rounded-md transition-colors text-sm">
-                    + Add Card
+                 <button id="customize-btn" class="bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-full w-10 h-10 md:w-auto md:rounded-md flex items-center justify-center md:px-4 md:py-2 transition-all text-sm" title="Customize Dashboard">
+                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+                    <span class="hidden md:inline md:ml-2">Customize</span>
+                </button>
+                <button id="add-card-btn" class="btn-primary font-bold rounded-full w-10 h-10 md:w-auto md:rounded-md flex items-center justify-center md:px-4 md:py-2 transition-all text-sm" title="Add New Card">
+                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    <span class="hidden md:inline md:ml-2">Add Card</span>
+                </button>
+                <button id="zen-mode-btn" class="bg-gray-700 hover:bg-gray-600 text-white font-bold p-2 rounded-full transition-colors text-sm" title="Enter Zen Mode">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12a10 10 0 1 0 20 0c0-4-5-9-10-9s-10 5-10 9"></path><path d="M15 12a3 3 0 1 0-6 0"></path><path d="M12 22c4 0 8-1.5 8-4H4c0 2.5 4 4 8 4Z"></path></svg>
                 </button>
             </div>
         </header>
@@ -396,6 +312,8 @@
             <!-- Cards will be dynamically inserted here by JavaScript -->
         </main>
     </div>
+
+    <button id="exit-zen-btn" class="hidden fixed top-4 right-4 bg-gray-800/50 hover:bg-gray-700/70 backdrop-blur-sm text-white font-bold p-2 rounded-full transition-colors z-50" title="Exit Zen Mode"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
 
     <footer class="text-center py-4 mt-4">
         <p class="text-xs text-secondary">
@@ -443,7 +361,7 @@
         <div class="card" data-card-id="graph">
             <div class="card-header">
                 <h2 class="text-lg font-semibold">Journey</h2>
-                 <div>
+                <div>
                     <button class="toggle-colspan-btn text-secondary text-xs mr-2" title="Toggle size">⤢</button>
                     <span class="drag-handle text-secondary p-2">☰</span>
                 </div>
@@ -462,7 +380,7 @@
          <div class="card" data-card-id="tests">
             <div class="card-header">
                 <h2 class="text-lg font-semibold">Test Planner</h2>
-                 <div>
+                <div>
                     <button class="toggle-colspan-btn text-secondary text-xs mr-2" title="Toggle size">⤢</button>
                     <span class="drag-handle text-secondary p-2">☰</span>
                 </div>
@@ -483,7 +401,7 @@
         <div class="card" data-card-id="quote">
             <div class="card-header">
                 <h2 class="text-lg font-semibold">Quote</h2>
-                 <div>
+                <div>
                     <button class="toggle-colspan-btn text-secondary text-xs mr-2" title="Toggle size">⤢</button>
                     <span class="drag-handle text-secondary p-2">☰</span>
                 </div>
@@ -536,8 +454,8 @@
         <div class="card custom-card" data-card-type="line-graph">
             <div class="card-header">
                 <h2 class="text-lg font-semibold card-title">Graph</h2>
-                <div>
-                    <button class="toggle-colspan-btn text-secondary text-xs mr-2" title="Toggle size">⤢</button>
+                <div class="flex items-center gap-2">
+                    <button class="toggle-colspan-btn text-secondary text-xs" title="Toggle size">⤢</button>
                     <button class="delete-card-btn text-red-500 hover:text-red-400 p-2 rounded-full" title="Delete card"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
                     <span class="drag-handle text-secondary p-2">☰</span>
                 </div>
@@ -549,7 +467,7 @@
                 <form class="add-marks-form flex flex-col sm:flex-row gap-2 mb-3">
                     <input type="text" name="name" placeholder="Paper Name" class="form-input rounded-md p-2 w-full sm:w-auto flex-grow text-sm" required>
                     <input type="number" name="marks" placeholder="Marks" class="form-input rounded-md p-2 w-full sm:w-20 text-sm" required>
-                    <input type="number" name="maxMarks" placeholder="Max" class="form-input rounded-md p-2 w-full sm:w-20 text-sm" required>
+                    <input type="number" name="maxMarks" placeholder="Total" class="form-input rounded-md p-2 w-full sm:w-20 text-sm" required>
                     <button type="submit" class="btn-primary font-bold py-2 px-3 rounded-md text-sm">+</button>
                 </form>
                 <ul class="marks-list space-y-1 max-h-24 overflow-y-auto no-scrollbar"></ul>
@@ -642,15 +560,24 @@
 
     <!-- Modal for customization -->
     <div id="customize-modal" class="modal-overlay hidden">
-        <div class="card w-11/12 max-w-md">
+        <div class="card w-11/12 max-w-md relative">
+             <button id="close-customize-icon-btn" class="absolute top-3 right-3 text-secondary hover:text-primary transition-colors p-1 rounded-full">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
             <h2 class="text-xl font-semibold mb-4">Customize Dashboard</h2>
             <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-secondary mb-1">Target Year</label>
-                    <select id="year-select" class="form-input rounded-md p-2 w-full">
-                        <option value="2026">2026</option>
-                        <option value="2027">2027</option>
-                    </select>
+                 <div>
+                    <label class="block text-sm font-medium text-secondary mb-1">Target Exam</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <select id="exam-type-select" class="form-input rounded-md p-2 w-full">
+                            <option value="JEE">JEE</option>
+                            <option value="NEET">NEET</option>
+                        </select>
+                        <select id="exam-year-select" class="form-input rounded-md p-2 w-full">
+                            <option value="2026">2026</option>
+                            <option value="2027">2027</option>
+                        </select>
+                    </div>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-secondary mb-1">Theme</label>
@@ -690,9 +617,28 @@
                 </button>
                 <button type="button" id="close-customize" class="btn-primary font-bold py-2 px-4 rounded-md">Close</button>
             </div>
+            <div class="mt-6 pt-4 border-t" style="border-color: var(--border-color);">
+                <h3 class="text-md font-semibold mb-3 text-secondary">Data Management</h3>
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <button type="button" id="export-data-btn" class="flex-1 bg-green-700 hover:bg-green-800 text-white font-bold py-2 px-4 rounded-md text-sm transition-colors">Export Data</button>
+                    <button type="button" id="import-data-btn" class="flex-1 bg-sky-600 hover:bg-sky-700 text-white font-bold py-2 px-4 rounded-md text-sm transition-colors">Import Data</button>
+                </div>
+            </div>
         </div>
     </div>
     
+    <!-- Generic Confirmation Modal -->
+    <div id="confirm-modal" class="modal-overlay hidden">
+        <div class="card w-11/12 max-w-sm">
+            <h2 id="confirm-title" class="text-xl font-semibold mb-2">Are you sure?</h2>
+            <p id="confirm-message" class="text-sm text-secondary mb-6"></p>
+            <div class="flex justify-end gap-3">
+                <button type="button" id="confirm-cancel-btn" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md">Cancel</button>
+                <button type="button" id="confirm-ok-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md">Confirm</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Mobile Alert -->
     <div id="mobile-alert" class="fixed bottom-4 left-4 right-4 bg-yellow-400 text-black p-3 text-center text-sm rounded-lg shadow-lg flex justify-between items-center hidden z-50">
         <span>For the best experience, try this on a desktop.</span>
@@ -734,6 +680,7 @@
         </button>
     </div>
 
+    <input type="file" id="import-file-input" class="hidden" accept=".json">
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -742,18 +689,20 @@
             tests: 'jeePartTests_v2',
             layout: 'jeeDashboardLayout_v3',
             customCards: 'jeeCustomCards_v3',
-            settings: 'jeeDashboardSettings_v1',
+            settings: 'jeeDashboardSettings_v3', // version bump
             mobileAlertDismissed: 'jeeMobileAlertDismissed_v1',
-            cardProps: 'jeeCardProps_v1',
+            cardProps: 'jeeCardProps_v2',
             pomodoroState: 'jeePomodoroState_v1'
         };
 
-        const YEAR_CONFIG = {
-            '2026': {
-                examDate: new Date("2026-01-22T00:00:00"),
+        const EXAM_CONFIG = {
+            'JEE': {
+                2026: new Date("2026-01-22T00:00:00"),
+                2027: new Date("2027-01-21T00:00:00"),
             },
-            '2027': {
-                examDate: new Date("2027-01-21T00:00:00"),
+            'NEET': {
+                2026: new Date("2026-05-03T00:00:00"),
+                2027: new Date("2027-05-02T00:00:00"),
             }
         };
 
@@ -761,7 +710,7 @@
             { id: 'default-todo', type: 'todo', title: 'My Tasks', content: [{ text: 'Solve 20 Physics problems', completed: false }, { text: 'Revise Organic Chemistry', completed: true }, { text: 'Take a short break!', completed: false }] },
             { id: 'default-line-graph', type: 'line-graph', title: 'Mock Test Progress', content: [{ name: 'Test 1', marks: 120, maxMarks: 300 }, { name: 'Test 2', marks: 145, maxMarks: 300 }, { name: 'Test 3', marks: 160, maxMarks: 300 }] },
             { id: 'default-youtube', type: 'youtube', title: 'Lofi Study Music', content: 'https://www.youtube.com/watch?v=jfKfPfyJRdk' },
-            { id: 'default-note', type: 'note', title: 'Welcome!', content: 'Welcome to your new dashboard! You can drag, resize, and delete these cards. Add your own from the top right. Best of luck in your JEE journey!' }
+            { id: 'default-note', type: 'note', title: 'Welcome!', content: 'Welcome to your new dashboard! You can drag, resize, and delete these cards. Add your own from the top right. Best of luck in your journey!' }
         ];
 
         const defaultLayout = ['countdown', 'graph', 'default-todo', 'default-note', 'default-youtube', 'default-line-graph', 'tests', 'quote', 'time'];
@@ -781,7 +730,8 @@
                 theme: 'default', 
                 font: "'Inter', sans-serif", 
                 bgUrl: '', 
-                targetYear: '2026',
+                examType: 'JEE',
+                examYear: '2026',
                 ...savedSettings
             },
             cardProps: JSON.parse(localStorage.getItem(STORAGE_KEYS.cardProps)) || defaultCardProps,
@@ -796,30 +746,30 @@
             }
         };
 
-const quotes = [
-    { text: "The secret of getting ahead is getting started.", author: "Mark Twain" },
-    { text: "It’s not whether you get knocked down, it’s whether you get up.", author: "Vince Lombardi" },
-    { text: "Success is the sum of small efforts, repeated day in and day out.", author: "Robert Collier" },
-    { text: "The expert in anything was once a beginner.", author: "Helen Hayes" },
-    { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" },
-    { text: "The difference between ordinary and extraordinary is that little extra.", author: "Jimmy Johnson" },
-    { text: "A person who never made a mistake never tried anything new.", author: "Albert Einstein" },
-    { text: "The harder I work, the luckier I get.", author: "Samuel Goldwyn" },
-    { text: "Success is not final, failure is not fatal: it is the courage to continue that counts.", author: "Winston Churchill" },
-    { text: "Strive for progress, not perfection.", author: "Unknown" },
-    { text: "Genius is one percent inspiration and ninety-nine percent perspiration.", author: "Thomas A. Edison" },
-    { text: "It does not matter how slowly you go as long as you do not stop.", author: "Confucius" },
-    { text: "Doubt kills more dreams than failure ever will.", author: "Suzy Kassem" },
-    { text: "Push yourself, because no one else is going to do it for you.", author: "Unknown" },
-    { text: "If you want to shine like a sun, first burn like a sun.", author: "A. P. J. Abdul Kalam" },
-    { text: "The important thing is not to stop questioning. Curiosity has its own reason for existing.", author: "Albert Einstein" },
-    { text: "We are what we repeatedly do. Excellence, then, is not an act, but a habit.", author: "Aristotle" },
-    { text: "The chapters you study today will decide the chapters of your life tomorrow.", author: "Unknown" },
-    { text: "Your toughest competition is the person you were yesterday.", author: "Unknown" },
-    { text: "Rank is just a number. Knowledge and skill are the real assets.", author: "Unknown" },
-    { text: "Dream is not that which you see while sleeping it is something that does not let you sleep.", author: "A. P. J. Abdul Kalam" },
-    { text: "Focus on the process, not the outcome. The right process will lead to the right outcome.", author: "Unknown" },
-];
+        const quotes = [
+            { text: "The secret of getting ahead is getting started.", author: "Mark Twain" },
+            { text: "It’s not whether you get knocked down, it’s whether you get up.", author: "Vince Lombardi" },
+            { text: "Success is the sum of small efforts, repeated day in and day out.", author: "Robert Collier" },
+            { text: "The expert in anything was once a beginner.", author: "Helen Hayes" },
+            { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" },
+            { text: "The difference between ordinary and extraordinary is that little extra.", author: "Jimmy Johnson" },
+            { text: "A person who never made a mistake never tried anything new.", author: "Albert Einstein" },
+            { text: "The harder I work, the luckier I get.", author: "Samuel Goldwyn" },
+            { text: "Success is not final, failure is not fatal: it is the courage to continue that counts.", author: "Winston Churchill" },
+            { text: "Strive for progress, not perfection.", author: "Unknown" },
+            { text: "Genius is one percent inspiration and ninety-nine percent perspiration.", author: "Thomas A. Edison" },
+            { text: "It does not matter how slowly you go as long as you do not stop.", author: "Confucius" },
+            { text: "Doubt kills more dreams than failure ever will.", author: "Suzy Kassem" },
+            { text: "Push yourself, because no one else is going to do it for you.", author: "Unknown" },
+            { text: "If you want to shine like a sun, first burn like a sun.", author: "A. P. J. Abdul Kalam" },
+            { text: "The important thing is not to stop questioning. Curiosity has its own reason for existing.", author: "Albert Einstein" },
+            { text: "We are what we repeatedly do. Excellence, then, is not an act, but a habit.", author: "Aristotle" },
+            { text: "The chapters you study today will decide the chapters of your life tomorrow.", author: "Unknown" },
+            { text: "Your toughest competition is the person you were yesterday.", author: "Unknown" },
+            { text: "Rank is just a number. Knowledge and skill are the real assets.", author: "Unknown" },
+            { text: "Dream is not that which you see while sleeping it is something that does not let you sleep.", author: "A. P. J. Abdul Kalam" },
+            { text: "Focus on the process, not the outcome. The right process will lead to the right outcome.", author: "Unknown" },
+        ];
         
         const memeQuotes = [
             { text: "Kyu nahi ho rahi padhai?", author: "Alakh Pandey" },
@@ -845,17 +795,25 @@ const quotes = [
                 addCard: document.getElementById('add-card-modal'),
                 customize: document.getElementById('customize-modal'),
                 info: document.getElementById('info-modal'),
+                confirm: document.getElementById('confirm-modal'),
             },
             buttons: {
                 addCard: document.getElementById('add-card-btn'),
                 cancelAddCard: document.getElementById('cancel-add-card'),
                 customize: document.getElementById('customize-btn'),
                 closeCustomize: document.getElementById('close-customize'),
+                closeCustomizeIcon: document.getElementById('close-customize-icon-btn'),
                 removeBg: document.getElementById('remove-bg-btn'),
                 closeAlert: document.getElementById('close-alert-btn'),
                 resetDashboard: document.getElementById('reset-dashboard-btn'),
                 info: document.getElementById('info-btn'),
                 closeInfo: document.getElementById('close-info-modal'),
+                exportData: document.getElementById('export-data-btn'),
+                importData: document.getElementById('import-data-btn'),
+                confirmOk: document.getElementById('confirm-ok-btn'),
+                confirmCancel: document.getElementById('confirm-cancel-btn'),
+                zenModeBtn: document.getElementById('zen-mode-btn'),
+                exitZenBtn: document.getElementById('exit-zen-btn'),
             },
             forms: {
                 newCard: document.getElementById('new-card-form'),
@@ -866,17 +824,34 @@ const quotes = [
                 theme: document.getElementById('theme-select'),
                 font: document.getElementById('font-select'),
                 bgUrl: document.getElementById('bg-image-url'),
-                year: document.getElementById('year-select'),
+                examType: document.getElementById('exam-type-select'),
+                examYear: document.getElementById('exam-year-select'),
+                importFile: document.getElementById('import-file-input'),
             },
             mobileAlert: document.getElementById('mobile-alert'),
+            confirmTitle: document.getElementById('confirm-title'),
+            confirmMessage: document.getElementById('confirm-message'),
         };
 
         // --- HELPER FUNCTIONS ---
+        let confirmCallback = null;
+        function showConfirmation(message, onConfirm, title = 'Are you sure?') {
+            D.confirmTitle.textContent = title;
+            D.confirmMessage.textContent = message;
+            confirmCallback = onConfirm;
+            D.modals.confirm.classList.remove('hidden');
+        }
+
         const toLocalDateString = (date) => {
             const year = date.getFullYear();
             const month = (date.getMonth() + 1).toString().padStart(2, '0');
             const day = date.getDate().toString().padStart(2, '0');
             return `${year}-${month}-${day}`;
+        };
+
+        const getExamDate = () => {
+            const { examType, examYear } = AppState.settings;
+            return EXAM_CONFIG[examType]?.[examYear] || new Date();
         };
         
         // --- CARD TYPE DEFINITIONS ---
@@ -885,7 +860,7 @@ const quotes = [
                 templateId: 'countdown-template',
                 isDefault: true,
                 render: (cardEl) => {
-                    const diff = YEAR_CONFIG[AppState.settings.targetYear].examDate - new Date();
+                    const diff = getExamDate() - new Date();
                     cardEl.querySelector('[data-value="days"]').innerText = Math.floor(diff / 864e5).toString().padStart(2, '0');
                     cardEl.querySelector('[data-value="hours"]').innerText = Math.floor(diff / 36e5 % 24).toString().padStart(2, '0');
                     cardEl.querySelector('[data-value="minutes"]').innerText = Math.floor(diff / 6e4 % 60).toString().padStart(2, '0');
@@ -912,7 +887,7 @@ const quotes = [
                     const today = new Date(); today.setHours(0, 0, 0, 0);
                     const currentYear = new Date().getFullYear();
                     let currentDate = new Date(`${currentYear}-01-01T00:00:00`);
-                    const examDay = new Date(YEAR_CONFIG[AppState.settings.targetYear].examDate); examDay.setHours(0, 0, 0, 0);
+                    const examDay = getExamDate(); examDay.setHours(0, 0, 0, 0);
                     
                     while (currentDate <= examDay) {
                         const dayDiv = document.createElement('div');
@@ -1097,8 +1072,14 @@ const quotes = [
                     const url = cardData.content;
                     let videoId = '';
                     if (url) {
-                        const urlParams = new URLSearchParams(new URL(url).search);
-                        videoId = urlParams.get('v');
+                        try {
+                            const urlObj = new URL(url);
+                            if (urlObj.hostname.includes('youtu.be')) {
+                                videoId = urlObj.pathname.slice(1);
+                            } else {
+                                videoId = urlObj.searchParams.get('v');
+                            }
+                        } catch(e) { console.error("Invalid YouTube URL"); }
                     }
                     iframe.src = videoId ? `https://www.youtube.com/embed/${videoId}` : '';
                 }
@@ -1151,12 +1132,11 @@ const quotes = [
                 if (cardDef) {
                     cardDef.render(cardEl, cardData);
                 }
-                cardEl.style.animationDelay = `${index * 50}ms`;
-                cardEl.classList.add('card-enter');
             });
         }
 
         function applySettings() {
+            // Apply theme, font, background
             document.documentElement.dataset.theme = AppState.settings.theme;
             D.body.style.fontFamily = AppState.settings.font;
             if (AppState.settings.theme === 'alakh-pandey') {
@@ -1166,11 +1146,17 @@ const quotes = [
             } else {
                 D.body.style.backgroundImage = AppState.settings.bgUrl ? `url(${AppState.settings.bgUrl})` : 'none';
             }
+            
+            // Update main title
+            const { examType, examYear } = AppState.settings;
+            D.mainTitle.textContent = `${examType} ${examYear}`;
+
+            // Update customize modal inputs
             D.inputs.theme.value = AppState.settings.theme;
             D.inputs.font.value = AppState.settings.font;
             D.inputs.bgUrl.value = AppState.settings.bgUrl;
-            D.inputs.year.value = AppState.settings.targetYear;
-            D.mainTitle.textContent = `JEE ${AppState.settings.targetYear}`;
+            D.inputs.examType.value = AppState.settings.examType;
+            D.inputs.examYear.value = AppState.settings.examYear;
         }
 
         // --- EVENT HANDLERS (DELEGATED) ---
@@ -1294,6 +1280,7 @@ const quotes = [
                     return;
                 }
                 if (card && text) {
+                    if (!Array.isArray(card.content)) card.content = [];
                     card.content.push({ text: text, completed: false });
                     AppState.save('customCards');
                     cardTypes.todo.render(cardEl, card);
@@ -1303,6 +1290,7 @@ const quotes = [
                 const card = AppState.customCards.find(c => c.id === cardId);
                 const { name, marks, maxMarks } = form.elements;
                 if (card && name.value.trim() && marks.value && maxMarks.value) {
+                    if (!Array.isArray(card.content)) card.content = [];
                     card.content.push({ 
                         name: name.value.trim(), 
                         marks: parseFloat(marks.value),
@@ -1350,7 +1338,9 @@ const quotes = [
                 content: (type === 'note' || type === 'youtube') ? D.inputs.cardContent.value.trim() : []
             };
             AppState.customCards.push(newCard);
-            AppState.cardProps[newCard.id] = { colspan: (type === 'line-graph' || type === 'youtube') ? 2 : 1 };
+            const props = { colspan: (type === 'line-graph' || type === 'youtube') ? 2 : 1 };
+            if (type === 'line-graph') props.maxMarks = 300;
+            AppState.cardProps[newCard.id] = props;
             AppState.save('customCards');
             AppState.save('cardProps');
             renderDashboard();
@@ -1359,17 +1349,32 @@ const quotes = [
             D.inputs.cardContent.style.display = 'block';
         });
 
+        const closeCustomizeModal = () => D.modals.customize.classList.add('hidden');
         D.buttons.customize.addEventListener('click', () => D.modals.customize.classList.remove('hidden'));
-        D.buttons.closeCustomize.addEventListener('click', () => D.modals.customize.classList.add('hidden'));
+        D.buttons.closeCustomize.addEventListener('click', closeCustomizeModal);
+        D.buttons.closeCustomizeIcon.addEventListener('click', closeCustomizeModal);
+        D.modals.customize.addEventListener('click', (e) => {
+            if (e.target === D.modals.customize) {
+                closeCustomizeModal();
+            }
+        });
 
+        // Settings change listeners
+        const handleSettingsChange = () => {
+            AppState.saveSettings();
+            applySettings();
+            renderDashboard();
+        };
+        D.inputs.examType.addEventListener('change', () => { AppState.settings.examType = D.inputs.examType.value; handleSettingsChange(); });
+        D.inputs.examYear.addEventListener('change', () => { AppState.settings.examYear = D.inputs.examYear.value; handleSettingsChange(); });
+        
         D.inputs.theme.addEventListener('change', () => { AppState.settings.theme = D.inputs.theme.value; AppState.saveSettings(); applySettings(); renderDashboard(); });
         D.inputs.font.addEventListener('change', () => { AppState.settings.font = D.inputs.font.value; AppState.saveSettings(); applySettings(); });
         D.inputs.bgUrl.addEventListener('input', () => { AppState.settings.bgUrl = D.inputs.bgUrl.value; AppState.saveSettings(); applySettings(); });
         D.buttons.removeBg.addEventListener('click', () => { AppState.settings.bgUrl = ''; AppState.saveSettings(); applySettings(); });
-        D.inputs.year.addEventListener('change', () => { AppState.settings.targetYear = D.inputs.year.value; AppState.saveSettings(); applySettings(); renderDashboard(); });
         
         D.buttons.resetDashboard.addEventListener('click', () => {
-            if (confirm('Are you sure you want to reset the dashboard? This will delete all custom cards and reset the layout.')) {
+            showConfirmation('This will delete all custom cards and reset the layout.', () => {
                 AppState.customCards = [];
                 AppState.layout = ['countdown', 'graph', 'tests', 'quote', 'time'];
                 AppState.cardProps = {};
@@ -1378,7 +1383,74 @@ const quotes = [
                 AppState.save('cardProps');
                 renderDashboard();
                 D.modals.customize.classList.add('hidden');
+            }, 'Reset Dashboard?');
+        });
+
+        D.buttons.exportData.addEventListener('click', () => {
+            const dataToExport = {};
+            for (const key in STORAGE_KEYS) {
+                const item = localStorage.getItem(STORAGE_KEYS[key]);
+                if (item !== null) {
+                   dataToExport[key] = JSON.parse(item);
+                }
             }
+
+            const jsonString = JSON.stringify(dataToExport, null, 2);
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            const date = new Date().toISOString().slice(0, 10);
+            a.download = `studylocus-backup-${date}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+        
+        D.buttons.importData.addEventListener('click', () => {
+            D.inputs.importFile.click();
+        });
+
+        D.inputs.importFile.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    
+                    const coreKeys = ['layout', 'customCards', 'settings'];
+                    const hasCoreKeys = coreKeys.every(key => key in importedData);
+
+                    if (!hasCoreKeys) {
+                        console.error('Import failed: The JSON file appears to be invalid or is not a valid dashboard backup.');
+                        return;
+                    }
+                    
+                    showConfirmation('This will overwrite your current dashboard configuration.', () => {
+                        localStorage.clear();
+                        for (const key in importedData) {
+                            if (key in STORAGE_KEYS) {
+                                const storageKey = STORAGE_KEYS[key];
+                                const dataToImport = importedData[key];
+                                if (dataToImport !== null && dataToImport !== undefined) {
+                                    localStorage.setItem(storageKey, JSON.stringify(dataToImport));
+                                }
+                            }
+                        }
+                        location.reload();
+                    }, 'Import Data?');
+
+                } catch (error) {
+                    console.error('Error importing data:', error);
+                } finally {
+                    D.inputs.importFile.value = '';
+                }
+            };
+            reader.readAsText(file);
         });
 
         // --- MOBILE ALERT ---
@@ -1390,9 +1462,32 @@ const quotes = [
             localStorage.setItem(STORAGE_KEYS.mobileAlertDismissed, 'true');
         });
         
-        // --- INFO MODAL ---
+        // --- INFO & CONFIRM & ZEN MODALS ---
         D.buttons.info.addEventListener('click', () => D.modals.info.classList.remove('hidden'));
         D.buttons.closeInfo.addEventListener('click', () => D.modals.info.classList.add('hidden'));
+        
+        D.buttons.zenModeBtn.addEventListener('click', () => {
+            D.body.classList.add('zen-mode');
+            D.buttons.exitZenBtn.classList.remove('hidden');
+        });
+
+        D.buttons.exitZenBtn.addEventListener('click', () => {
+            D.body.classList.remove('zen-mode');
+            D.buttons.exitZenBtn.classList.add('hidden');
+        });
+
+        D.buttons.confirmCancel.addEventListener('click', () => {
+            D.modals.confirm.classList.add('hidden');
+            confirmCallback = null;
+        });
+
+        D.buttons.confirmOk.addEventListener('click', () => {
+            if (typeof confirmCallback === 'function') {
+                confirmCallback();
+            }
+            D.modals.confirm.classList.add('hidden');
+            confirmCallback = null;
+        });
 
         // --- POMODORO LOGIC ---
         const pomodoro = {
@@ -1415,7 +1510,8 @@ const quotes = [
                     const seconds = (state.time % 60).toString().padStart(2, '0');
                     document.title = `${minutes}:${seconds} - Time to focus!`;
                 } else {
-                    document.title = 'JEE 2026 Dashboard';
+                    const { examType, examYear } = AppState.settings;
+                    document.title = `${examType} ${examYear} | StudyLocus`;
                 }
                 AppState.save('pomodoroState');
             },
@@ -1458,17 +1554,9 @@ const quotes = [
         };
         
         // --- EASTER EGG ---
-        let clickCount = 0;
         let clickTimer = null;
         D.mainTitle.addEventListener('click', (e) => {
-            if (e.detail === 1) {
-                clickTimer = setTimeout(() => {
-                    AppState.settings.targetYear = AppState.settings.targetYear === '2026' ? '2027' : '2026';
-                    AppState.saveSettings();
-                    applySettings();
-                    renderDashboard();
-                }, 200);
-            } else if (e.detail === 3) {
+            if (e.detail === 3) {
                 clearTimeout(clickTimer);
                 D.inputs.theme.querySelector('[value="alakh-pandey"]').classList.remove('hidden');
                 AppState.settings.theme = 'alakh-pandey';
@@ -1498,3 +1586,5 @@ const quotes = [
     </script>
 </body>
 </html>
+
+
