@@ -1,6 +1,6 @@
-# JEE Prep Dashboard (Kyu nahi ho rahi padhai)?
+# StudyLocus 🔥
 
-A customizable, minimalist, and feature-rich dashboard designed to help students track their preparation for the JEE 2026 exam. This tool provides a live countdown, a visual progress tracker, and modular cards for notes, to-do lists, and mock test analysis, all in one persistent and personalizable workspace.
+A customizable, minimalist, and feature-rich dashboard designed to help students track their preparation for the JEE, NEET 2026,2027 exams. This tool provides a live countdown, a visual progress tracker, and modular cards for notes, to-do lists, and mock test analysis, all in one persistent and personalizable workspace.
 
 ![JEE Prep Dashboard Screenshot](https://i.ibb.co/Cp6jbLQM/Screenshot-2025-08-16-230241.png) 
 
@@ -10,7 +10,7 @@ A customizable, minimalist, and feature-rich dashboard designed to help students
 
 ![JEE Prep Dashboard Screenshot](https://i.ibb.co/jvg4cK27/Screenshot-2025-08-17-150950.png) 
 
-* **Live Countdown Timer:** See the exact days, hours, minutes, and seconds remaining for the JEE Main 2026 January attempt.
+* **Live Countdown Timer:** See the exact days, hours, minutes, and seconds remaining for the exam.
 * **Visual Journey Tracker:** A GitHub-style contributions graph visualizes your entire preparation timeline from Jan 1, 2025, to the exam day.
 * **Fully Customizable Layout:**
     * **Draggable Cards:** Drag and drop any card to arrange the layout exactly how you like it.
@@ -27,24 +27,6 @@ A customizable, minimalist, and feature-rich dashboard designed to help students
     * **Background Image:** Set any image from a URL as your dashboard's background.
 * **Fully Responsive:** The entire dashboard is designed to work seamlessly on both desktop and mobile devices.
 
-
----
-
-## 🚀 How to Use
-
-This is a standalone web application. You can use it in two main ways:
-
-### 1. As a Web Page
-
-1.  Download the `index.html` file (the one you have been editing).
-2.  Open it in any modern web browser like Chrome, Firefox, or Edge.
-3.  All your data (layout, custom cards, settings) will be saved in your browser's local storage.
-
-### 2. As a Chrome New Tab Extension (Recommended)
-
-For the most immersive experience, you can set this dashboard as your new tab page in Chrome.
-
----
 
 ## 🛠️ Tech Stack
 
