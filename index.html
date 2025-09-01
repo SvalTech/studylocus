@@ -290,6 +290,69 @@
         body.zen-mode .card:hover { transform: none; box-shadow: var(--card-shadow); }
         body.zen-mode .card-header { justify-content: center; }
         body.zen-mode .drag-handle, body.zen-mode .toggle-colspan-btn, body.zen-mode .delete-card-btn, body.zen-mode form, body.zen-mode .delete-test-btn, body.zen-mode .delete-todo-item, body.zen-mode .delete-mark-item, body.zen-mode .pomodoro-settings, body.zen-mode .pomodoro-btn, body.zen-mode .log-btn, body.zen-mode .reset-btn { display: none; }
+    
+        .youtube-container {
+            position: relative; /* Ensure ::after is positioned correctly */
+            border-radius: 0.375rem;
+            overflow: hidden; /* Hide anything from ::after that goes outside the border */
+        }
+        .youtube-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--accent-color);
+            opacity: 0.20;
+            mix-blend-mode: screen;
+            pointer-events: none; /* IMPORTANT: Allows clicks to pass through to the iframe */
+            transition: background-color 0.5s ease, opacity 0.5s ease;
+            z-index: 1;
+        }
+
+        /* Disable tint for themes where it doesn't look good */
+        [data-theme="light"] .youtube-container::after,
+        [data-theme="chaitanya-noob"] .youtube-container::after {
+            opacity: 0;
+        }
+
+        .youtube-iframe {
+            transition: filter 0.3s ease-in-out;
+        }
+        .youtube-container.blurred .youtube-iframe {
+            filter: blur(8px);
+        }
+
+        .form-input-toggle {
+            -webkit-appearance: none;
+            appearance: none;
+            position: relative;
+            width: 38px;
+            height: 22px;
+            border-radius: 9999px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border: 1px solid var(--border-color);
+            transition: background-color .2s ease-in-out;
+            cursor: pointer;
+        }
+        .form-input-toggle::before {
+            content: "";
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background-color: white;
+            transition: transform .2s ease-in-out;
+        }
+        .form-input-toggle:checked {
+            background-color: var(--accent-color);
+        }
+        .form-input-toggle:checked::before {
+            transform: translateX(16px);
+        }
     </style>
 </head>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-TCK0S6VC58"></script>
@@ -502,11 +565,6 @@
                 </div>
             </div>
             <div class="card-content text-center">
-                <div class="flex justify-center gap-2 mb-4">
-                    <button data-mode="pomodoro" class="pomodoro-btn text-sm px-3 py-1 rounded-md border border-transparent hover:border-gray-500">Pomodoro</button>
-                    <button data-mode="shortBreak" class="pomodoro-btn text-sm px-3 py-1 rounded-md border border-transparent hover:border-gray-500">Short Break</button>
-                    <button data-mode="longBreak" class="pomodoro-btn text-sm px-3 py-1 rounded-md border border-transparent hover:border-gray-500">Long Break</button>
-                </div>
                 <div class="timer-display text-6xl font-bold my-4">25:00</div>
                 <div class="flex justify-center gap-4">
                     <button class="start-pause-btn btn-primary font-bold py-2 px-8 text-lg rounded-md">START</button>
@@ -541,7 +599,7 @@
                 </div>
             </div>
             <div class="card-content">
-                <div class="aspect-w-16 mb-3">
+                <div class="aspect-w-16 mb-3 youtube-container">
                     <iframe class="youtube-iframe w-full h-full rounded-md" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                 </div>
                 <form class="update-youtube-form flex gap-2">
@@ -575,11 +633,12 @@
                         <option>Botany</option>
                     </select>
                 </div>
-                <div class="flex justify-center gap-4 mb-4">
+                <div class="flex justify-center gap-4">
                     <button class="start-pause-btn btn-primary font-bold py-2 px-8 text-lg rounded-md">START</button>
                     <button class="log-btn bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-md">LOG</button>
                     <button class="reset-btn text-secondary hover:text-primary">Reset</button>
                 </div>
+                <p class="log-message text-red-500 text-xs mt-2 h-4"></p>
                 <div class="w-full border-t border-[var(--border-color)] my-3"></div>
                 <div class="flex justify-between items-center mb-2">
                     <h3 class="text-md font-semibold text-left">Today's Log</h3>
@@ -664,6 +723,19 @@
                     <div class="flex gap-2">
                         <input type="text" id="bg-image-url" placeholder="Paste image URL..." class="form-input rounded-md p-2 w-full">
                         <button id="remove-bg-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-md">X</button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-secondary mb-1">YouTube Player</label>
+                    <div class="space-y-2 mt-2 p-3 rounded-md" style="background-color: rgba(0,0,0,0.2);">
+                        <label for="youtube-tint-toggle" class="flex items-center justify-between cursor-pointer">
+                            <span class="text-sm">Enable Video Tint</span>
+                            <input type="checkbox" id="youtube-tint-toggle" class="form-input-toggle">
+                        </label>
+                        <label for="youtube-blur-toggle" class="flex items-center justify-between cursor-pointer">
+                            <span class="text-sm">Blur Video Player</span>
+                             <input type="checkbox" id="youtube-blur-toggle" class="form-input-toggle">
+                        </label>
                     </div>
                 </div>
             </div>
@@ -778,7 +850,7 @@
             'graph': { colspan: 2 },
             'default-line-graph': { colspan: 1 },
             'default-youtube': { colspan: 1 },
-            'default-study-logger': { colspan: 2 }
+            'default-study-logger': { colspan: 1 }
         };
         
         const savedSettings = JSON.parse(localStorage.getItem(STORAGE_KEYS.settings));
@@ -793,6 +865,8 @@
                 bgUrl: '', 
                 examType: 'JEE',
                 examYear: '2026',
+                youtubeTintEnabled: true,
+                youtubeBlurEnabled: false,
                 ...savedSettings
             },
             cardProps: JSON.parse(localStorage.getItem(STORAGE_KEYS.cardProps)) || defaultCardProps,
@@ -890,6 +964,8 @@
                 examType: document.getElementById('exam-type-select'),
                 examYear: document.getElementById('exam-year-select'),
                 importFile: document.getElementById('import-file-input'),
+                youtubeTintToggle: document.getElementById('youtube-tint-toggle'),
+                youtubeBlurToggle: document.getElementById('youtube-blur-toggle'),
             },
             mobileAlert: document.getElementById('mobile-alert'),
             confirmTitle: document.getElementById('confirm-title'),
@@ -1162,6 +1238,10 @@
                         } catch(e) { console.error("Invalid YouTube URL"); }
                     }
                     iframe.src = videoId ? `https://www.youtube.com/embed/${videoId}` : '';
+                    
+                    const container = cardEl.querySelector('.youtube-container');
+                    container.classList.toggle('tint-disabled', !AppState.settings.youtubeTintEnabled);
+                    container.classList.toggle('blurred', AppState.settings.youtubeBlurEnabled);
                 }
             },
             'time-logger': {
@@ -1199,7 +1279,7 @@
                         Object.entries(todaysLogs).forEach(([subject, seconds]) => {
                             const li = document.createElement('li');
                             li.className = 'flex justify-between items-center';
-                            li.innerHTML = `<span>${subject}</span><span class="font-semibold">${formatSecondsToReadable(seconds)}</span>`;
+                            li.innerHTML = `<span>${subject}</span><div class="flex items-center gap-2"><span class="font-semibold">${formatSecondsToReadable(seconds)}</span><button data-subject="${subject}" class="delete-log-item text-red-500 hover:text-red-400 font-semibold px-2 py-1 text-xs leading-none rounded-sm">×</button></div>`;
                             logListEl.appendChild(li);
                         });
                     }
@@ -1256,6 +1336,21 @@
             });
         }
 
+        function applyYouTubeSettings() {
+            const tintEnabled = AppState.settings.youtubeTintEnabled;
+            const blurEnabled = AppState.settings.youtubeBlurEnabled;
+            
+            // Set toggles in customize panel
+            if(D.inputs.youtubeTintToggle) D.inputs.youtubeTintToggle.checked = tintEnabled;
+            if(D.inputs.youtubeBlurToggle) D.inputs.youtubeBlurToggle.checked = blurEnabled;
+
+            // Apply classes to all YouTube cards on the dashboard
+            document.querySelectorAll('[data-card-type="youtube"] .youtube-container').forEach(container => {
+                container.classList.toggle('tint-disabled', !tintEnabled);
+                container.classList.toggle('blurred', blurEnabled);
+            });
+        }
+
         function applySettings() {
             // Apply theme, font, background
             document.documentElement.dataset.theme = AppState.settings.theme;
@@ -1278,6 +1373,8 @@
             D.inputs.bgUrl.value = AppState.settings.bgUrl;
             D.inputs.examType.value = AppState.settings.examType;
             D.inputs.examYear.value = AppState.settings.examYear;
+
+            applyYouTubeSettings();
         }
 
         // --- EVENT HANDLERS (DELEGATED) ---
@@ -1328,6 +1425,22 @@
                     AppState.save('pomodoroState');
                     AppState.save('timeLoggerState');
                     renderDashboard();
+                }
+            }
+            if (e.target.classList.contains('delete-log-item')) {
+                const cardEl = e.target.closest('.card');
+                const cardId = cardEl.dataset.cardId;
+                const subject = e.target.dataset.subject;
+                const todayStr = toLocalDateString(new Date());
+
+                if (AppState.studyLogs[todayStr] && AppState.studyLogs[todayStr][subject] !== undefined) {
+                    delete AppState.studyLogs[todayStr][subject];
+                    if (Object.keys(AppState.studyLogs[todayStr]).length === 0) {
+                        delete AppState.studyLogs[todayStr];
+                    }
+                    AppState.save('studyLogs');
+                    const cardData = AppState.customCards.find(c => c.id === cardId);
+                    cardTypes['time-logger'].render(cardEl, cardData);
                 }
             }
             if (cardData && cardData.type === 'todo') {
@@ -1510,6 +1623,17 @@
         D.inputs.bgUrl.addEventListener('input', () => { AppState.settings.bgUrl = D.inputs.bgUrl.value; AppState.saveSettings(); applySettings(); });
         D.buttons.removeBg.addEventListener('click', () => { AppState.settings.bgUrl = ''; AppState.saveSettings(); applySettings(); });
         
+        D.inputs.youtubeTintToggle.addEventListener('change', () => { 
+            AppState.settings.youtubeTintEnabled = D.inputs.youtubeTintToggle.checked; 
+            AppState.saveSettings(); 
+            applyYouTubeSettings(); 
+        });
+        D.inputs.youtubeBlurToggle.addEventListener('change', () => { 
+            AppState.settings.youtubeBlurEnabled = D.inputs.youtubeBlurToggle.checked; 
+            AppState.saveSettings(); 
+            applyYouTubeSettings(); 
+        });
+
         D.buttons.resetDashboard.addEventListener('click', () => {
             showConfirmation('This will delete all custom cards and reset the layout to the default.', () => {
                 // Remove all data except settings and alert dismissal status
@@ -1734,7 +1858,21 @@
             log(cardId) {
                 this.pause(cardId);
                 const state = AppState.timeLoggerState[cardId];
-                if (state.accumulatedTime === 0) return;
+                
+                // Minimum 1 minute log time check
+                if (state.accumulatedTime < 60) {
+                    const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
+                    if (cardEl) {
+                        const messageEl = cardEl.querySelector('.log-message');
+                        if (messageEl) {
+                            messageEl.textContent = 'Minimum log time is 1 minute.';
+                            setTimeout(() => {
+                                if (messageEl) messageEl.textContent = '';
+                            }, 3000);
+                        }
+                    }
+                    return; // Abort logging
+                }
 
                 const todayStr = toLocalDateString(new Date());
                 if (!AppState.studyLogs[todayStr]) {
@@ -1802,4 +1940,8 @@
     </script>
 </body>
 </html>
+
+
+
+
 
