@@ -2,7 +2,7 @@
 
 A customizable, minimalist, and feature-rich dashboard designed to help students track their preparation for the JEE, NEET 2026,2027 exams. This tool provides a live countdown, a visual progress tracker, and modular cards for notes, to-do lists, and mock test analysis, all in one persistent and personalizable workspace.
 
-![JEE Prep Dashboard Screenshot](https://i.ibb.co/Cp6jbLQM/Screenshot-2025-08-16-230241.png) 
+![JEE Prep Dashboard Screenshot](https://i.ibb.co/HfH2nntv/Screenshot-2025-09-01-224801.png) 
 
 ---
 
