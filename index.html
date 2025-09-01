@@ -269,11 +269,27 @@
 
         /* --- Zen Mode Styles --- */
         body.zen-mode header, body.zen-mode footer, body.zen-mode .fab-container { display: none; }
-        body.zen-mode #dashboard-grid { grid-template-columns: minmax(0, 1fr); max-width: 800px; margin-left: auto; margin-right: auto; gap: 1.5rem; transition: all 0.5s ease; }
-        body.zen-mode #dashboard-grid > .card { grid-column: span 1 / span 1; }
+        body.zen-mode #dashboard-grid {
+            grid-template-columns: minmax(0, 1fr);
+            max-width: 800px; /* Default for single column view */
+            margin-left: auto;
+            margin-right: auto;
+            gap: 1.5rem;
+            transition: all 0.5s ease;
+        }
+        
+        /* Responsive Zen Mode for larger screens */
+        @media (min-width: 1024px) {
+            body.zen-mode #dashboard-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                max-width: 1400px; /* Wider for two columns */
+            }
+        }
+
+        body.zen-mode #dashboard-grid > .card { grid-column: span 1 / span 1 !important; /* Override any existing col-span */ }
         body.zen-mode .card:hover { transform: none; box-shadow: var(--card-shadow); }
         body.zen-mode .card-header { justify-content: center; }
-        body.zen-mode .drag-handle, body.zen-mode .toggle-colspan-btn, body.zen-mode .delete-card-btn, body.zen-mode form, body.zen-mode .delete-test-btn, body.zen-mode .delete-todo-item, body.zen-mode .delete-mark-item, body.zen-mode .pomodoro-settings, body.zen-mode .pomodoro-btn { display: none; }
+        body.zen-mode .drag-handle, body.zen-mode .toggle-colspan-btn, body.zen-mode .delete-card-btn, body.zen-mode form, body.zen-mode .delete-test-btn, body.zen-mode .delete-todo-item, body.zen-mode .delete-mark-item, body.zen-mode .pomodoro-settings, body.zen-mode .pomodoro-btn, body.zen-mode .log-btn, body.zen-mode .reset-btn { display: none; }
     </style>
 </head>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-TCK0S6VC58"></script>
@@ -536,6 +552,46 @@
         </div>
     </template>
 
+    <template id="time-logger-card-template">
+        <div class="card custom-card" data-card-type="time-logger">
+            <div class="card-header">
+                <h2 class="text-lg font-semibold card-title">Study Logger</h2>
+                <div>
+                    <button class="toggle-colspan-btn text-secondary text-xs mr-2" title="Toggle size">⤢</button>
+                    <button class="delete-card-btn text-red-500 hover:text-red-400 p-2 rounded-full" title="Delete card"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
+                    <span class="drag-handle text-secondary p-2">☰</span>
+                </div>
+            </div>
+            <div class="card-content text-center">
+                <div class="timer-display text-5xl font-bold my-4 tabular-nums">00:00:00</div>
+                <div class="flex flex-col sm:flex-row gap-2 mb-4 items-center justify-center">
+                    <label class="text-sm text-secondary sr-only sm:not-sr-only">Subject:</label>
+                    <select class="subject-select form-input rounded-md p-2 text-sm flex-grow">
+                        <option>Physics</option>
+                        <option>Chemistry</option>
+                        <option>Maths</option>
+                        <option>Biology</option>
+                        <option>Zoology</option>
+                        <option>Botany</option>
+                    </select>
+                </div>
+                <div class="flex justify-center gap-4 mb-4">
+                    <button class="start-pause-btn btn-primary font-bold py-2 px-8 text-lg rounded-md">START</button>
+                    <button class="log-btn bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-md">LOG</button>
+                    <button class="reset-btn text-secondary hover:text-primary">Reset</button>
+                </div>
+                <div class="w-full border-t border-[var(--border-color)] my-3"></div>
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-md font-semibold text-left">Today's Log</h3>
+                    <span class="total-study-time text-sm font-bold text-secondary"></span>
+                </div>
+                <ul class="study-log-list space-y-2 max-h-32 overflow-y-auto no-scrollbar text-left text-sm">
+                    <!-- Log items will be injected here -->
+                </ul>
+            </div>
+        </div>
+    </template>
+
     <!-- Modal for adding a new card -->
     <div id="add-card-modal" class="modal-overlay hidden">
         <div class="card w-11/12 max-w-md">
@@ -547,6 +603,7 @@
                     <option value="line-graph">Line Graph</option>
                     <option value="pomodoro">Pomodoro Timer</option>
                     <option value="youtube">YouTube Video</option>
+                    <option value="time-logger">Study Logger</option>
                 </select>
                 <input type="text" id="new-card-title" placeholder="Card Title" class="form-input rounded-md p-2 w-full mb-3" required>
                 <textarea id="new-card-content" placeholder="Card Content (URL for YouTube)" rows="4" class="form-input rounded-md p-2 w-full mb-4"></textarea>
@@ -689,10 +746,12 @@
             tests: 'jeePartTests_v2',
             layout: 'jeeDashboardLayout_v3',
             customCards: 'jeeCustomCards_v3',
-            settings: 'jeeDashboardSettings_v3', // version bump
+            settings: 'jeeDashboardSettings_v3',
             mobileAlertDismissed: 'jeeMobileAlertDismissed_v1',
             cardProps: 'jeeCardProps_v2',
-            pomodoroState: 'jeePomodoroState_v1'
+            pomodoroState: 'jeePomodoroState_v1',
+            timeLoggerState: 'jeeTimeLoggerState_v1',
+            studyLogs: 'jeeStudyLogs_v1'
         };
 
         const EXAM_CONFIG = {
@@ -710,14 +769,16 @@
             { id: 'default-todo', type: 'todo', title: 'My Tasks', content: [{ text: 'Solve 20 Physics problems', completed: false }, { text: 'Revise Organic Chemistry', completed: true }, { text: 'Take a short break!', completed: false }] },
             { id: 'default-line-graph', type: 'line-graph', title: 'Mock Test Progress', content: [{ name: 'Test 1', marks: 120, maxMarks: 300 }, { name: 'Test 2', marks: 145, maxMarks: 300 }, { name: 'Test 3', marks: 160, maxMarks: 300 }] },
             { id: 'default-youtube', type: 'youtube', title: 'Lofi Study Music', content: 'https://www.youtube.com/watch?v=jfKfPfyJRdk' },
-            { id: 'default-note', type: 'note', title: 'Welcome!', content: 'Welcome to your new dashboard! You can drag, resize, and delete these cards. Add your own from the top right. Best of luck in your journey!' }
+            { id: 'default-note', type: 'note', title: 'Welcome!', content: 'Welcome to your new dashboard! You can drag, resize, and delete these cards. Add your own from the top right. Best of luck in your journey!' },
+            { id: 'default-study-logger', type: 'time-logger', title: 'Study Log', content: [] }
         ];
 
-        const defaultLayout = ['countdown', 'graph', 'default-todo', 'default-note', 'default-youtube', 'default-line-graph', 'tests', 'quote', 'time'];
+        const defaultLayout = ['countdown', 'graph', 'default-todo', 'default-study-logger', 'default-note', 'default-youtube', 'default-line-graph', 'tests', 'quote', 'time'];
         const defaultCardProps = {
             'graph': { colspan: 2 },
             'default-line-graph': { colspan: 1 },
-            'default-youtube': { colspan: 1 }
+            'default-youtube': { colspan: 1 },
+            'default-study-logger': { colspan: 2 }
         };
         
         const savedSettings = JSON.parse(localStorage.getItem(STORAGE_KEYS.settings));
@@ -736,6 +797,8 @@
             },
             cardProps: JSON.parse(localStorage.getItem(STORAGE_KEYS.cardProps)) || defaultCardProps,
             pomodoroState: JSON.parse(localStorage.getItem(STORAGE_KEYS.pomodoroState)) || {},
+            timeLoggerState: JSON.parse(localStorage.getItem(STORAGE_KEYS.timeLoggerState)) || {},
+            studyLogs: JSON.parse(localStorage.getItem(STORAGE_KEYS.studyLogs)) || {},
             chartInstances: {},
             
             save(key) {
@@ -853,6 +916,23 @@
             const { examType, examYear } = AppState.settings;
             return EXAM_CONFIG[examType]?.[examYear] || new Date();
         };
+
+        const formatSeconds = (s) => {
+            const h = Math.floor(s / 3600).toString().padStart(2,'0');
+            const m = Math.floor(s % 3600 / 60).toString().padStart(2,'0');
+            const sec = Math.floor(s % 60).toString().padStart(2,'0');
+            return `${h}:${m}:${sec}`;
+        };
+
+        const formatSecondsToReadable = (s) => {
+            const h = Math.floor(s / 3600);
+            const m = Math.floor(s % 3600 / 60);
+            let str = '';
+            if (h > 0) str += `${h}h `;
+            if (m > 0 || h > 0) str += `${m}m`;
+            if (str === '') str = `${s % 60}s`
+            return str.trim();
+        }
         
         // --- CARD TYPE DEFINITIONS ---
         const cardTypes = {
@@ -1083,6 +1163,47 @@
                     }
                     iframe.src = videoId ? `https://www.youtube.com/embed/${videoId}` : '';
                 }
+            },
+            'time-logger': {
+                templateId: 'time-logger-card-template',
+                render: (cardEl, cardData) => {
+                    const state = AppState.timeLoggerState[cardData.id] || {
+                        isRunning: false,
+                        accumulatedTime: 0,
+                        currentSubject: 'Physics',
+                        intervalId: null
+                    };
+                    AppState.timeLoggerState[cardData.id] = state;
+
+                    // Update timer display
+                    cardEl.querySelector('.timer-display').textContent = formatSeconds(state.accumulatedTime);
+                    cardEl.querySelector('.start-pause-btn').textContent = state.isRunning ? 'PAUSE' : 'START';
+                    cardEl.querySelector('.subject-select').value = state.currentSubject;
+
+                    // Update today's log display
+                    const logListEl = cardEl.querySelector('.study-log-list');
+                    const totalTimeEl = cardEl.querySelector('.total-study-time');
+                    logListEl.innerHTML = '';
+                    const todayStr = toLocalDateString(new Date());
+                    const todaysLogs = AppState.studyLogs[todayStr] || {};
+                    
+                    // Calculate and display total time
+                    const totalSecondsToday = Object.values(todaysLogs).reduce((total, seconds) => total + seconds, 0);
+                    if (totalTimeEl) {
+                        totalTimeEl.textContent = `Total: ${formatSecondsToReadable(totalSecondsToday)}`;
+                    }
+                    
+                    if (Object.keys(todaysLogs).length === 0) {
+                        logListEl.innerHTML = '<li class="text-secondary px-2 text-sm">No sessions logged today.</li>';
+                    } else {
+                        Object.entries(todaysLogs).forEach(([subject, seconds]) => {
+                            const li = document.createElement('li');
+                            li.className = 'flex justify-between items-center';
+                            li.innerHTML = `<span>${subject}</span><span class="font-semibold">${formatSecondsToReadable(seconds)}</span>`;
+                            logListEl.appendChild(li);
+                        });
+                    }
+                }
             }
         };
 
@@ -1109,7 +1230,7 @@
                     const cardEl = cardNode.querySelector('.card');
                     cardEl.dataset.cardId = cardId;
                     
-                    const props = AppState.cardProps[cardId] || { colspan: (type === 'graph' || type === 'line-graph' || type === 'youtube') ? 2 : 1 };
+                    const props = AppState.cardProps[cardId] || { colspan: (type === 'graph' || type === 'line-graph' || type === 'youtube' || type === 'time-logger') ? 2 : 1 };
                     AppState.cardProps[cardId] = props;
                     if (props.colspan === 2) {
                         cardEl.classList.add('md:col-span-2');
@@ -1201,9 +1322,11 @@
                     AppState.customCards = AppState.customCards.filter(c => c.id !== cardId);
                     delete AppState.cardProps[cardId];
                     delete AppState.pomodoroState[cardId];
+                    delete AppState.timeLoggerState[cardId];
                     AppState.save('customCards');
                     AppState.save('cardProps');
                     AppState.save('pomodoroState');
+                    AppState.save('timeLoggerState');
                     renderDashboard();
                 }
             }
@@ -1235,6 +1358,15 @@
                     pomodoro.reset(cardId);
                 }
             }
+            if (cardData && cardData.type === 'time-logger') {
+                if (e.target.classList.contains('start-pause-btn')) {
+                    timeLogger.toggle(cardId);
+                } else if (e.target.classList.contains('log-btn')) {
+                    timeLogger.log(cardId);
+                } else if (e.target.classList.contains('reset-btn')) {
+                    timeLogger.reset(cardId);
+                }
+            }
         });
 
         D.dashboardGrid.addEventListener('change', (e) => {
@@ -1250,6 +1382,11 @@
                 if (cardId && mode && !isNaN(duration)) {
                     pomodoro.setDuration(cardId, mode, duration);
                 }
+            }
+            if (e.target.classList.contains('subject-select')) {
+                const cardEl = e.target.closest('.card');
+                const cardId = cardEl.dataset.cardId;
+                timeLogger.changeSubject(cardId, e.target.value);
             }
         });
 
@@ -1338,7 +1475,7 @@
                 content: (type === 'note' || type === 'youtube') ? D.inputs.cardContent.value.trim() : []
             };
             AppState.customCards.push(newCard);
-            const props = { colspan: (type === 'line-graph' || type === 'youtube') ? 2 : 1 };
+            const props = { colspan: (type === 'line-graph' || type === 'youtube' || type === 'time-logger') ? 2 : 1 };
             if (type === 'line-graph') props.maxMarks = 300;
             AppState.cardProps[newCard.id] = props;
             AppState.save('customCards');
@@ -1374,15 +1511,14 @@
         D.buttons.removeBg.addEventListener('click', () => { AppState.settings.bgUrl = ''; AppState.saveSettings(); applySettings(); });
         
         D.buttons.resetDashboard.addEventListener('click', () => {
-            showConfirmation('This will delete all custom cards and reset the layout.', () => {
-                AppState.customCards = [];
-                AppState.layout = ['countdown', 'graph', 'tests', 'quote', 'time'];
-                AppState.cardProps = {};
-                AppState.save('customCards');
-                AppState.save('layout');
-                AppState.save('cardProps');
-                renderDashboard();
-                D.modals.customize.classList.add('hidden');
+            showConfirmation('This will delete all custom cards and reset the layout to the default.', () => {
+                // Remove all data except settings and alert dismissal status
+                Object.keys(STORAGE_KEYS).forEach(key => {
+                    if (key !== 'settings' && key !== 'mobileAlertDismissed') {
+                        localStorage.removeItem(STORAGE_KEYS[key]);
+                    }
+                });
+                location.reload(); // Reload the page to apply defaults
             }, 'Reset Dashboard?');
         });
 
@@ -1552,6 +1688,86 @@
                 AppState.save('pomodoroState');
             }
         };
+
+        // --- TIME LOGGER LOGIC ---
+        const timeLogger = {
+            tick(cardId) {
+                const state = AppState.timeLoggerState[cardId];
+                if (state && state.isRunning) {
+                    state.accumulatedTime++;
+                    this.updateDisplay(cardId, state);
+                }
+            },
+            updateDisplay(cardId, state) {
+                const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
+                if (cardEl) {
+                    cardEl.querySelector('.timer-display').textContent = formatSeconds(state.accumulatedTime);
+                }
+            },
+            start(cardId) {
+                const state = AppState.timeLoggerState[cardId];
+                if (state.isRunning) return;
+                state.isRunning = true;
+                state.intervalId = setInterval(() => this.tick(cardId), 1000);
+                const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
+                if(cardEl) cardEl.querySelector('.start-pause-btn').textContent = 'PAUSE';
+                AppState.save('timeLoggerState');
+            },
+            pause(cardId) {
+                const state = AppState.timeLoggerState[cardId];
+                if (!state.isRunning) return;
+                clearInterval(state.intervalId);
+                state.intervalId = null;
+                state.isRunning = false;
+                const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
+                if(cardEl) cardEl.querySelector('.start-pause-btn').textContent = 'START';
+                AppState.save('timeLoggerState');
+            },
+            toggle(cardId) {
+                const state = AppState.timeLoggerState[cardId];
+                if (state.isRunning) {
+                    this.pause(cardId);
+                } else {
+                    this.start(cardId);
+                }
+            },
+            log(cardId) {
+                this.pause(cardId);
+                const state = AppState.timeLoggerState[cardId];
+                if (state.accumulatedTime === 0) return;
+
+                const todayStr = toLocalDateString(new Date());
+                if (!AppState.studyLogs[todayStr]) {
+                    AppState.studyLogs[todayStr] = {};
+                }
+                
+                const currentSubject = state.currentSubject;
+                if (!AppState.studyLogs[todayStr][currentSubject]) {
+                    AppState.studyLogs[todayStr][currentSubject] = 0;
+                }
+                
+                AppState.studyLogs[todayStr][currentSubject] += state.accumulatedTime;
+                AppState.save('studyLogs');
+
+                this.reset(cardId); // Reset after logging
+                const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
+                if(cardEl) cardTypes['time-logger'].render(cardEl, {id: cardId}); // Re-render to show updated log list
+            },
+            reset(cardId) {
+                this.pause(cardId);
+                const state = AppState.timeLoggerState[cardId];
+                state.accumulatedTime = 0;
+                this.updateDisplay(cardId, state);
+                AppState.save('timeLoggerState');
+            },
+            changeSubject(cardId, subject) {
+                const state = AppState.timeLoggerState[cardId];
+                if (state) {
+                    state.currentSubject = subject;
+                    AppState.save('timeLoggerState');
+                }
+            }
+        };
         
         // --- EASTER EGG ---
         let clickTimer = null;
@@ -1586,5 +1802,4 @@
     </script>
 </body>
 </html>
-
 
