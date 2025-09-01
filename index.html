@@ -176,6 +176,21 @@
             --day-exam-color: transparent;
             --day-part-test-color: transparent;
         }
+
+        [data-theme="god-mode"] {
+            --bg-color: #000000;
+            --card-bg-color: rgba(10, 20, 10, 0.7);
+            --border-color: #00ff00;
+            --text-primary: #00ff00;
+            --text-secondary: #008000;
+            --accent-color: #00ff00;
+            --font-family: 'Fira Code', monospace;
+            --day-past-color: #002000;
+            --day-future-color: #004000;
+            --day-today-color: #00ff00;
+            --day-exam-color: #ff0000;
+            --day-part-test-color: #00ffff;
+        }
         
         [data-theme="chaitanya-noob"] .card { backdrop-filter: none; -webkit-backdrop-filter: none; }
         [data-theme="chaitanya-noob"] .graph-container .day { border: none !important; }
@@ -357,12 +372,17 @@
         .legend-item {
             display: flex;
             align-items: center;
-            gap: 0.25rem;
+            gap: 0.5rem;
         }
         .legend-color {
             width: 12px;
             height: 12px;
             border-radius: 2px;
+        }
+
+        @keyframes fall-apart {
+            0% { transform: translateY(0) rotate(0); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
         }
     </style>
 </head>
@@ -827,6 +847,22 @@
 
     <input type="file" id="import-file-input" class="hidden" accept=".json">
 
+    <!-- God Mode Panel -->
+    <div id="god-mode-panel" class="hidden fixed bottom-4 left-4 card p-4 w-64 z-50 space-y-3">
+        <h3 class="text-lg font-bold text-center" style="color: var(--accent-color);">-- GOD MODE --</h3>
+        <p class="text-xs text-secondary text-center">Ultimate power is now yours.</p>
+        <div class="border-t border-[var(--border-color)]"></div>
+        <div class="space-y-2">
+            <button id="god-mode-theme-btn" class="w-full bg-green-700 hover:bg-green-800 text-white font-bold py-2 px-4 rounded-md text-sm">Matrix Theme</button>
+            <button id="god-mode-complete-tasks-btn" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-2 px-4 rounded-md text-sm">Complete All Tasks</button>
+            <button id="god-mode-perfect-score-btn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-md text-sm">Get Perfect Score</button>
+            <button id="god-mode-timewarp-btn" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-md text-sm">Time Warp (+7 Days)</button>
+            <button id="god-mode-scramble-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md text-sm">Scramble Layout</button>
+            <button id="god-mode-nuke-btn" class="w-full bg-red-700 hover:bg-red-800 text-white font-bold py-2 px-4 rounded-md text-sm">NUKE</button>
+        </div>
+        <button id="god-mode-close-btn" class="absolute top-2 right-2 text-secondary hover:text-primary">&times;</button>
+    </div>
+
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         // --- CONFIGURATION & STATE ---
@@ -967,6 +1003,7 @@
                 confirmCancel: document.getElementById('confirm-cancel-btn'),
                 zenModeBtn: document.getElementById('zen-mode-btn'),
                 exitZenBtn: document.getElementById('exit-zen-btn'),
+                godModeClose: document.getElementById('god-mode-close-btn'),
             },
             forms: {
                 newCard: document.getElementById('new-card-form'),
@@ -986,6 +1023,7 @@
             mobileAlert: document.getElementById('mobile-alert'),
             confirmTitle: document.getElementById('confirm-title'),
             confirmMessage: document.getElementById('confirm-message'),
+            godModePanel: document.getElementById('god-mode-panel'),
         };
 
         // --- HELPER FUNCTIONS ---
@@ -1375,6 +1413,8 @@
                 D.body.style.backgroundImage = `url(https://i.imgflip.com/8otyfs.jpg)`;
             } else if (AppState.settings.theme === 'chaitanya-noob') {
                 D.body.style.backgroundImage = `url(https://i.ibb.co/pv4BYhMs/Whats-App-Image-2025-08-06-at-16-12-41-4f47e159.jpg)`;
+            } else if (AppState.settings.theme === 'god-mode') {
+                 D.body.style.backgroundImage = `url('https://i.pinimg.com/originals/c5/9a/d2/c59ad2bd4ad2fbacd04017debc679ddb.gif')`;
             } else {
                 D.body.style.backgroundImage = AppState.settings.bgUrl ? `url(${AppState.settings.bgUrl})` : 'none';
             }
@@ -1537,6 +1577,11 @@
                 const card = AppState.customCards.find(c => c.id === cardId);
                 const input = form.querySelector('input');
                 const text = input.value.trim();
+                if (text.toLowerCase() === 'coco') {
+                    activateGodMode();
+                    input.value = '';
+                    return;
+                }
                 if (text.toLowerCase() === 'doingocmakesmeexcited') {
                     AppState.settings.theme = 'chaitanya-noob';
                     AppState.saveSettings();
@@ -1923,6 +1968,110 @@
             }
         };
         
+        // --- GOD MODE ---
+        let godModeBackup = null;
+
+        function createGodModeBackup() {
+            if (!godModeBackup) {
+                godModeBackup = {
+                    theme: AppState.settings.theme,
+                    customCards: JSON.parse(JSON.stringify(AppState.customCards)),
+                    tests: JSON.parse(JSON.stringify(AppState.tests)),
+                    layout: [...AppState.layout]
+                };
+            }
+        }
+
+        function activateGodMode() {
+            D.godModePanel.classList.remove('hidden');
+            new Tone.Synth().toDestination().triggerAttackRelease("C4", "0.5");
+        }
+
+        D.body.addEventListener('click', (e) => {
+            if(e.target.closest('#god-mode-panel')) {
+                const buttonId = e.target.id;
+
+                if(buttonId === 'god-mode-close-btn') {
+                    D.godModePanel.classList.add('hidden');
+                    if (godModeBackup) {
+                        AppState.settings.theme = godModeBackup.theme;
+                        AppState.customCards = godModeBackup.customCards;
+                        AppState.tests = godModeBackup.tests;
+                        AppState.layout = godModeBackup.layout;
+                        
+                        godModeBackup = null;
+                        
+                        applySettings();
+                        renderDashboard();
+                    }
+                }
+                if(buttonId === 'god-mode-theme-btn') {
+                    createGodModeBackup();
+                    const themeSelect = D.inputs.theme;
+                    if (!themeSelect.querySelector('[value="god-mode"]')) {
+                        const godOption = document.createElement('option');
+                        godOption.value = 'god-mode';
+                        godOption.textContent = '--- GOD MODE ---';
+                        themeSelect.appendChild(godOption);
+                    }
+                    AppState.settings.theme = 'god-mode';
+                    applySettings();
+                    renderDashboard();
+                }
+                if(buttonId === 'god-mode-complete-tasks-btn') {
+                     createGodModeBackup();
+                     AppState.customCards.forEach(card => {
+                        if (card.type === 'todo' && Array.isArray(card.content)) {
+                            card.content.forEach(task => task.completed = true);
+                        }
+                    });
+                    renderDashboard();
+                }
+                if(buttonId === 'god-mode-perfect-score-btn') {
+                    createGodModeBackup();
+                    const graphCard = AppState.customCards.find(c => c.type === 'line-graph');
+                    if (graphCard && Array.isArray(graphCard.content)) {
+                        const maxMarks = AppState.settings.examType === 'NEET' ? 720 : 300;
+                        graphCard.content.push({ name: 'God Tier', marks: maxMarks, maxMarks: maxMarks });
+                        renderDashboard();
+                    }
+                }
+                if(buttonId === 'god-mode-timewarp-btn') {
+                    createGodModeBackup();
+                    const newTests = {};
+                    Object.keys(AppState.tests).forEach(dateStr => {
+                        const date = new Date(dateStr + 'T00:00:00');
+                        date.setDate(date.getDate() + 7);
+                        const newDateStr = toLocalDateString(date);
+                        newTests[newDateStr] = AppState.tests[dateStr];
+                    });
+                    AppState.tests = newTests;
+                    renderDashboard();
+                }
+                if(buttonId === 'god-mode-scramble-btn') {
+                    createGodModeBackup();
+                    let array = AppState.layout;
+                    for (let i = array.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [array[i], array[j]] = [array[j], array[i]];
+                    }
+                    renderDashboard();
+                }
+                if(buttonId === 'god-mode-nuke-btn') {
+                    D.dashboardGrid.querySelectorAll('.card').forEach((card, i) => {
+                        card.style.animation = `fall-apart 1s ease-in-out ${i * 0.05}s forwards`;
+                    });
+                    setTimeout(() => {
+                        showConfirmation("Dashboard nuked. Restore?", () => {
+                            D.dashboardGrid.innerHTML = '';
+                            renderDashboard();
+                        }, "KABOOM!");
+                    }, 1500);
+                }
+            }
+        });
+
+
         // --- EASTER EGG ---
         let clickTimer = null;
         D.mainTitle.addEventListener('click', (e) => {
@@ -1956,4 +2105,5 @@
     </script>
 </body>
 </html>
+
 
