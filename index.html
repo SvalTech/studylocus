@@ -3,7 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Study Dashboard | StudyLocus</title>
+    <title>StudyLocus | Customizable Dashboard for JEE & NEET Prep</title>
+    <meta name="description" content="A customizable dashboard for students preparing for JEE, NEET, and other competitive exams. Track your progress with a journey graph, manage tasks with to-do lists, and stay focused with a Pomodoro timer.">
+    <meta name="keywords" content="JEE dashboard, NEET dashboard, study planner, exam preparation, Pomodoro timer, syllabus tracker, mock test analysis, student dashboard, JEE 2026, NEET 2026, study logger">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://sval.tech/studylocus/">
+    <meta property="og:title" content="StudyLocus | Customizable Dashboard for JEE & NEET Prep">
+    <meta property="og:description" content="A customizable dashboard for students preparing for JEE, NEET, and other competitive exams. Track your progress, manage tasks, and stay focused.">
+    <meta property="og:image" content="https://i.imgur.com/gYf98ma.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://sval.tech/studylocus/">
+    <meta property="twitter:title" content="StudyLocus | Customizable Dashboard for JEE & NEET Prep">
+    <meta property="twitter:description" content="A customizable dashboard for students preparing for JEE, NEET, and other competitive exams. Track your progress, manage tasks, and stay focused.">
+    <meta property="twitter:image" content="https://i.imgur.com/gYf98ma.png">
+    
+    <link rel="canonical" href="https://sval.tech/studylocus/" />
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -380,11 +398,43 @@
             border-radius: 2px;
         }
 
+        .sr-only {
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          padding: 0;
+          margin: -1px;
+          overflow: hidden;
+          clip: rect(0, 0, 0, 0);
+          white-space: nowrap;
+          border-width: 0;
+        }
+
         @keyframes fall-apart {
             0% { transform: translateY(0) rotate(0); opacity: 1; }
             100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
         }
     </style>
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "StudyLocus Dashboard",
+      "applicationCategory": "EducationalApplication",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "0"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "Shaurya Pratap Singh",
+        "url": "https://github.com/svalordev"
+      },
+      "description": "A customizable dashboard for students preparing for JEE, NEET, and other competitive exams. Track your progress with a journey graph, manage tasks with to-do lists, and stay focused with a Pomodoro timer."
+    }
+    </script>
 </head>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-TCK0S6VC58"></script>
 <script>
@@ -400,18 +450,18 @@
         <header class="flex justify-between items-center mb-6">
             <h1 id="main-title" class="text-3xl sm:text-4xl font-bold cursor-pointer">JEE 2026</h1>
             <div class="flex items-center space-x-2">
-                 <button id="info-btn" class="bg-gray-700/50 hover:bg-gray-600/60 text-white font-bold p-2 rounded-full transition-colors text-sm" title="About this project">
+                 <button id="info-btn" class="bg-gray-700/50 hover:bg-gray-600/60 text-white font-bold p-2 rounded-full transition-colors text-sm" title="About this project" aria-label="About this project">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
                  </button>
-                 <button id="customize-btn" class="bg-gray-700/50 hover:bg-gray-600/60 text-white font-bold rounded-full w-10 h-10 md:w-auto md:rounded-md flex items-center justify-center md:px-4 md:py-2 transition-all text-sm" title="Customize Dashboard">
+                 <button id="customize-btn" class="bg-gray-700/50 hover:bg-gray-600/60 text-white font-bold rounded-full w-10 h-10 md:w-auto md:rounded-md flex items-center justify-center md:px-4 md:py-2 transition-all text-sm" title="Customize Dashboard" aria-label="Customize Dashboard">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="4" y1="21" y2="14"></line><line x1="4" x2="4" y1="10" y2="3"></line><line x1="12" x2="12" y1="21" y2="12"></line><line x1="12" x2="12" y1="8" y2="3"></line><line x1="20" x2="20" y1="21" y2="16"></line><line x1="20" x2="20" y1="12" y2="3"></line><line x1="1" x2="7" y1="14" y2="14"></line><line x1="9" x2="15" y1="8" y2="8"></line><line x1="17" x2="23" y1="16" y2="16"></line></svg>
                     <span class="hidden md:inline md:ml-2">Customize</span>
                 </button>
-                <button id="add-card-btn" class="btn-primary font-bold rounded-full w-10 h-10 md:w-auto md:rounded-md flex items-center justify-center md:px-4 md:py-2 transition-all text-sm" title="Add New Card">
+                <button id="add-card-btn" class="btn-primary font-bold rounded-full w-10 h-10 md:w-auto md:rounded-md flex items-center justify-center md:px-4 md:py-2 transition-all text-sm" title="Add New Card" aria-label="Add New Card">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     <span class="hidden md:inline md:ml-2">Add Card</span>
                 </button>
-                <button id="zen-mode-btn" class="bg-gray-700/50 hover:bg-gray-600/60 text-white font-bold p-2 rounded-full transition-colors text-sm" title="Enter Zen Mode">
+                <button id="zen-mode-btn" class="bg-gray-700/50 hover:bg-gray-600/60 text-white font-bold p-2 rounded-full transition-colors text-sm" title="Enter Zen Mode" aria-label="Enter Zen Mode">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2Z"></path><path d="m9.5 16.5 4-4"></path><path d="m14.5 16.5-4-4"></path><path d="M12 8V7"></path></svg>
                 </button>
             </div>
@@ -423,7 +473,7 @@
         </main>
     </div>
 
-    <button id="exit-zen-btn" class="hidden fixed top-4 right-4 bg-gray-800/50 hover:bg-gray-700/70 backdrop-blur-sm text-white font-bold p-2 rounded-full transition-colors z-50" title="Exit Zen Mode"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+    <button id="exit-zen-btn" class="hidden fixed top-4 right-4 bg-gray-800/50 hover:bg-gray-700/70 backdrop-blur-sm text-white font-bold p-2 rounded-full transition-colors z-50" title="Exit Zen Mode" aria-label="Exit Zen Mode"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
 
     <footer class="text-center py-4 mt-4">
         <p class="text-xs text-secondary">
@@ -438,8 +488,8 @@
             <div class="card-header">
                 <h2 class="text-lg font-semibold">Countdown</h2>
                 <div class="card-header-controls">
-                    <button class="toggle-colspan-btn" title="Toggle size"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m6 6v-4m0 4h-4"/><path d="M3 3l6 6"/><path d="M3 3v4m0-4h4"/></svg></button>
-                    <span class="drag-handle"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+                    <button class="toggle-colspan-btn" title="Toggle size" aria-label="Toggle card size"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m6 6v-4m0 4h-4"/><path d="M3 3l6 6"/><path d="M3 3v4m0-4h4"/></svg></button>
+                    <span class="drag-handle" aria-label="Drag to reorder"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
                 </div>
             </div>
             <div id="countdown-timer" class="flex justify-center space-x-2 sm:space-x-4 md:space-x-8 text-center py-2">
@@ -456,8 +506,8 @@
             <div class="card-header">
                 <h2 class="text-lg font-semibold">Current Time</h2>
                 <div class="card-header-controls">
-                    <button class="toggle-colspan-btn" title="Toggle size"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m6 6v-4m0 4h-4"/><path d="M3 3l6 6"/><path d="M3 3v4m0-4h4"/></svg></button>
-                    <span class="drag-handle"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+                    <button class="toggle-colspan-btn" title="Toggle size" aria-label="Toggle card size"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m6 6v-4m0 4h-4"/><path d="M3 3l6 6"/><path d="M3 3v4m0-4h4"/></svg></button>
+                    <span class="drag-handle" aria-label="Drag to reorder"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
                 </div>
             </div>
             <div class="text-center py-2">
@@ -472,8 +522,8 @@
             <div class="card-header">
                 <h2 class="text-lg font-semibold">Journey</h2>
                 <div class="card-header-controls">
-                    <button class="toggle-colspan-btn" title="Toggle size"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m6 6v-4m0 4h-4"/><path d="M3 3l6 6"/><path d="M3 3v4m0-4h4"/></svg></button>
-                    <span class="drag-handle"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+                    <button class="toggle-colspan-btn" title="Toggle size" aria-label="Toggle card size"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m6 6v-4m0 4h-4"/><path d="M3 3l6 6"/><path d="M3 3v4m0-4h4"/></svg></button>
+                    <span class="drag-handle" aria-label="Drag to reorder"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
                 </div>
             </div>
             <div class="graph-container no-scrollbar" id="contribution-graph"></div>
@@ -491,8 +541,8 @@
             <div class="card-header">
                 <h2 class="text-lg font-semibold">Test Planner</h2>
                 <div class="card-header-controls">
-                    <button class="toggle-colspan-btn" title="Toggle size"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m6 6v-4m0 4h-4"/><path d="M3 3l6 6"/><path d="M3 3v4m0-4h4"/></svg></button>
-                    <span class="drag-handle"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+                    <button class="toggle-colspan-btn" title="Toggle size" aria-label="Toggle card size"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m6 6v-4m0 4h-4"/><path d="M3 3l6 6"/><path d="M3 3v4m0-4h4"/></svg></button>
+                    <span class="drag-handle" aria-label="Drag to reorder"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
                 </div>
             </div>
             <form id="add-test-form" class="flex flex-col gap-3 mb-4">
@@ -512,8 +562,8 @@
             <div class="card-header">
                 <h2 class="text-lg font-semibold">Quote</h2>
                 <div class="card-header-controls">
-                    <button class="toggle-colspan-btn" title="Toggle size"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m6 6v-4m0 4h-4"/><path d="M3 3l6 6"/><path d="M3 3v4m0-4h4"/></svg></button>
-                    <span class="drag-handle"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+                    <button class="toggle-colspan-btn" title="Toggle size" aria-label="Toggle card size"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m6 6v-4m0 4h-4"/><path d="M3 3l6 6"/><path d="M3 3v4m0-4h4"/></svg></button>
+                    <span class="drag-handle" aria-label="Drag to reorder"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
                 </div>
             </div>
             <div id="quote-card-content" class="text-center cursor-pointer transition-transform transform hover:scale-105">
@@ -528,9 +578,9 @@
             <div class="card-header">
                 <h2 class="text-lg font-semibold card-title">Note</h2>
                 <div class="card-header-controls">
-                    <button class="toggle-colspan-btn" title="Toggle size"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m6 6v-4m0 4h-4"/><path d="M3 3l6 6"/><path d="M3 3v4m0-4h4"/></svg></button>
-                    <button class="delete-card-btn" title="Delete card"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg></button>
-                    <span class="drag-handle"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+                    <button class="toggle-colspan-btn" title="Toggle size" aria-label="Toggle card size"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m6 6v-4m0 4h-4"/><path d="M3 3l6 6"/><path d="M3 3v4m0-4h4"/></svg></button>
+                    <button class="delete-card-btn" title="Delete card" aria-label="Delete card"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg></button>
+                    <span class="drag-handle" aria-label="Drag to reorder"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
                 </div>
             </div>
             <div class="text-sm card-content whitespace-pre-wrap"></div>
@@ -542,9 +592,9 @@
             <div class="card-header">
                 <h2 class="text-lg font-semibold card-title">To-Do List</h2>
                 <div class="card-header-controls">
-                    <button class="toggle-colspan-btn" title="Toggle size"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m6 6v-4m0 4h-4"/><path d="M3 3l6 6"/><path d="M3 3v4m0-4h4"/></svg></button>
-                    <button class="delete-card-btn" title="Delete card"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg></button>
-                    <span class="drag-handle"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+                    <button class="toggle-colspan-btn" title="Toggle size" aria-label="Toggle card size"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m6 6v-4m0 4h-4"/><path d="M3 3l6 6"/><path d="M3 3v4m0-4h4"/></svg></button>
+                    <button class="delete-card-btn" title="Delete card" aria-label="Delete card"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg></button>
+                    <span class="drag-handle" aria-label="Drag to reorder"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
                 </div>
             </div>
             <div class="card-content">
@@ -554,7 +604,7 @@
                 <ul class="todo-list space-y-1 max-h-48 overflow-y-auto mb-3 no-scrollbar"></ul>
                 <form class="add-todo-form flex gap-2 mt-2">
                     <input type="text" placeholder="Add a new task..." class="form-input rounded-md p-2 w-full text-sm" required>
-                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded-md text-sm">+</button>
+                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded-md text-sm" aria-label="Add task">+</button>
                 </form>
             </div>
         </div>
@@ -565,9 +615,9 @@
             <div class="card-header">
                 <h2 class="text-lg font-semibold card-title">Graph</h2>
                 <div class="card-header-controls">
-                    <button class="toggle-colspan-btn" title="Toggle size"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m6 6v-4m0 4h-4"/><path d="M3 3l6 6"/><path d="M3 3v4m0-4h4"/></svg></button>
-                    <button class="delete-card-btn" title="Delete card"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg></button>
-                    <span class="drag-handle"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+                    <button class="toggle-colspan-btn" title="Toggle size" aria-label="Toggle card size"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m6 6v-4m0 4h-4"/><path d="M3 3l6 6"/><path d="M3 3v4m0-4h4"/></svg></button>
+                    <button class="delete-card-btn" title="Delete card" aria-label="Delete card"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg></button>
+                    <span class="drag-handle" aria-label="Drag to reorder"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
                 </div>
             </div>
             <div class="card-content">
@@ -578,7 +628,7 @@
                     <input type="text" name="name" placeholder="Paper Name" class="form-input rounded-md p-2 w-full sm:w-auto flex-grow text-sm" required>
                     <input type="number" name="marks" placeholder="Marks" class="form-input rounded-md p-2 w-full sm:w-20 text-sm" required>
                     <input type="number" name="maxMarks" placeholder="Total" class="form-input rounded-md p-2 w-full sm:w-20 text-sm" required>
-                    <button type="submit" class="btn-primary font-bold py-2 px-3 rounded-md text-sm">+</button>
+                    <button type="submit" class="btn-primary font-bold py-2 px-3 rounded-md text-sm" aria-label="Add mark entry">+</button>
                 </form>
                 <ul class="marks-list space-y-1 max-h-24 overflow-y-auto no-scrollbar"></ul>
             </div>
@@ -590,9 +640,9 @@
             <div class="card-header">
                 <h2 class="text-lg font-semibold card-title">Pomodoro</h2>
                 <div class="card-header-controls">
-                    <button class="toggle-colspan-btn" title="Toggle size"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m6 6v-4m0 4h-4"/><path d="M3 3l6 6"/><path d="M3 3v4m0-4h4"/></svg></button>
-                    <button class="delete-card-btn" title="Delete card"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg></button>
-                    <span class="drag-handle"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+                    <button class="toggle-colspan-btn" title="Toggle size" aria-label="Toggle card size"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m6 6v-4m0 4h-4"/><path d="M3 3l6 6"/><path d="M3 3v4m0-4h4"/></svg></button>
+                    <button class="delete-card-btn" title="Delete card" aria-label="Delete card"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg></button>
+                    <span class="drag-handle" aria-label="Drag to reorder"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
                 </div>
             </div>
             <div class="card-content text-center">
@@ -607,18 +657,18 @@
                     <button class="reset-btn text-secondary hover:text-primary">Reset</button>
                 </div>
                 <div class="pomodoro-settings mt-4 flex justify-center gap-4 items-center">
-                    <div class="flex flex-col text-xs items-center">
-                        <label>Work</label>
+                    <label class="flex flex-col text-xs items-center">
+                        Work
                         <input type="number" data-mode="pomodoro" class="pomodoro-duration-input form-input w-16 text-center rounded-md p-1" min="1">
-                    </div>
-                    <div class="flex flex-col text-xs items-center">
-                        <label>Short</label>
+                    </label>
+                    <label class="flex flex-col text-xs items-center">
+                        Short
                         <input type="number" data-mode="shortBreak" class="pomodoro-duration-input form-input w-16 text-center rounded-md p-1" min="1">
-                    </div>
-                    <div class="flex flex-col text-xs items-center">
-                        <label>Long</label>
+                    </label>
+                    <label class="flex flex-col text-xs items-center">
+                        Long
                         <input type="number" data-mode="longBreak" class="pomodoro-duration-input form-input w-16 text-center rounded-md p-1" min="1">
-                    </div>
+                    </label>
                 </div>
             </div>
         </div>
@@ -629,17 +679,18 @@
             <div class="card-header">
                 <h2 class="text-lg font-semibold card-title">YouTube</h2>
                 <div class="card-header-controls">
-                    <button class="toggle-colspan-btn" title="Toggle size"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m6 6v-4m0 4h-4"/><path d="M3 3l6 6"/><path d="M3 3v4m0-4h4"/></svg></button>
-                    <button class="delete-card-btn" title="Delete card"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg></button>
-                    <span class="drag-handle"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+                    <button class="toggle-colspan-btn" title="Toggle size" aria-label="Toggle card size"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m6 6v-4m0 4h-4"/><path d="M3 3l6 6"/><path d="M3 3v4m0-4h4"/></svg></button>
+                    <button class="delete-card-btn" title="Delete card" aria-label="Delete card"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg></button>
+                    <span class="drag-handle" aria-label="Drag to reorder"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
                 </div>
             </div>
             <div class="card-content">
                 <div class="aspect-w-16 mb-3 youtube-container">
-                    <iframe class="youtube-iframe w-full h-full" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    <iframe class="youtube-iframe w-full h-full" title="Embedded YouTube video player" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                 </div>
                 <form class="update-youtube-form flex gap-2">
-                    <input type="text" name="url" placeholder="Paste YouTube URL..." class="form-input rounded-md p-2 w-full text-sm" required>
+                    <label for="youtube-url-input" class="sr-only">YouTube URL</label>
+                    <input type="text" id="youtube-url-input" name="url" placeholder="Paste YouTube URL..." class="form-input rounded-md p-2 w-full text-sm" required>
                     <button type="submit" class="btn-primary font-bold py-2 px-3 rounded-md text-sm">Load</button>
                 </form>
             </div>
@@ -651,16 +702,16 @@
             <div class="card-header">
                 <h2 class="text-lg font-semibold card-title">Study Logger</h2>
                 <div class="card-header-controls">
-                    <button class="toggle-colspan-btn" title="Toggle size"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m6 6v-4m0 4h-4"/><path d="M3 3l6 6"/><path d="M3 3v4m0-4h4"/></svg></button>
-                    <button class="delete-card-btn" title="Delete card"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg></button>
-                    <span class="drag-handle"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+                    <button class="toggle-colspan-btn" title="Toggle size" aria-label="Toggle card size"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m6 6v-4m0 4h-4"/><path d="M3 3l6 6"/><path d="M3 3v4m0-4h4"/></svg></button>
+                    <button class="delete-card-btn" title="Delete card" aria-label="Delete card"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg></button>
+                    <span class="drag-handle" aria-label="Drag to reorder"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
                 </div>
             </div>
             <div class="card-content text-center">
                 <div class="timer-display text-5xl font-bold my-4 tabular-nums">00:00:00</div>
                 <div class="flex flex-col sm:flex-row gap-2 mb-4 items-center justify-center">
-                    <label class="text-sm text-secondary sr-only sm:not-sr-only">Subject:</label>
-                    <select class="subject-select form-input rounded-md p-2 text-sm flex-grow">
+                    <label for="subject-select" class="text-sm text-secondary sr-only sm:not-sr-only">Subject:</label>
+                    <select id="subject-select" class="subject-select form-input rounded-md p-2 text-sm flex-grow">
                         <option>Physics</option>
                         <option>Chemistry</option>
                         <option>Maths</option>
@@ -692,6 +743,7 @@
         <div class="card w-11/12 max-w-md">
             <h2 class="text-xl font-semibold mb-4">Add New Card</h2>
             <form id="new-card-form">
+                <label for="new-card-type" class="sr-only">Card Type</label>
                 <select id="new-card-type" class="form-input rounded-md p-2 w-full mb-3">
                     <option value="note">Note</option>
                     <option value="todo">To-Do List</option>
@@ -700,7 +752,9 @@
                     <option value="youtube">YouTube Video</option>
                     <option value="time-logger">Study Logger</option>
                 </select>
+                 <label for="new-card-title" class="sr-only">Card Title</label>
                 <input type="text" id="new-card-title" placeholder="Card Title" class="form-input rounded-md p-2 w-full mb-3" required>
+                 <label for="new-card-content" class="sr-only">Card Content</label>
                 <textarea id="new-card-content" placeholder="Card Content (URL for YouTube)" rows="4" class="form-input rounded-md p-2 w-full mb-4"></textarea>
                 <div class="flex justify-end gap-3">
                     <button type="button" id="cancel-add-card" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md">Cancel</button>
@@ -713,18 +767,19 @@
     <!-- Modal for customization -->
     <div id="customize-modal" class="modal-overlay hidden">
         <div class="card w-11/12 max-w-md relative">
-             <button id="close-customize-icon-btn" class="absolute top-3 right-3 text-secondary hover:text-primary transition-colors p-1 rounded-full">
+             <button id="close-customize-icon-btn" class="absolute top-3 right-3 text-secondary hover:text-primary transition-colors p-1 rounded-full" aria-label="Close customize panel">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
             <h2 class="text-xl font-semibold mb-4">Customize Dashboard</h2>
             <div class="space-y-4">
                  <div>
-                    <label class="block text-sm font-medium text-secondary mb-1">Target Exam</label>
+                    <label for="exam-type-select" class="block text-sm font-medium text-secondary mb-1">Target Exam</label>
                     <div class="grid grid-cols-2 gap-2">
                         <select id="exam-type-select" class="form-input rounded-md p-2 w-full">
                             <option value="JEE">JEE</option>
                             <option value="NEET">NEET</option>
                         </select>
+                        <label for="exam-year-select" class="sr-only">Exam Year</label>
                         <select id="exam-year-select" class="form-input rounded-md p-2 w-full">
                             <option value="2026">2026</option>
                             <option value="2027">2027</option>
@@ -732,7 +787,7 @@
                     </div>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-secondary mb-1">Theme</label>
+                    <label for="theme-select" class="block text-sm font-medium text-secondary mb-1">Theme</label>
                     <select id="theme-select" class="form-input rounded-md p-2 w-full">
                         <option value="default">Deep Space</option>
                         <option value="light">Solarized Light</option>
@@ -746,7 +801,7 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-secondary mb-1">Font</label>
+                    <label for="font-select" class="block text-sm font-medium text-secondary mb-1">Font</label>
                     <select id="font-select" class="form-input rounded-md p-2 w-full">
                         <option value="'Inter', sans-serif">Inter (Sans-Serif)</option>
                         <option value="'Roboto Slab', serif">Roboto Slab (Serif)</option>
@@ -755,10 +810,10 @@
                     </select>
                 </div>
                  <div>
-                    <label class="block text-sm font-medium text-secondary mb-1">Background Image URL</label>
+                    <label for="bg-image-url" class="block text-sm font-medium text-secondary mb-1">Background Image URL</label>
                     <div class="flex gap-2">
                         <input type="text" id="bg-image-url" placeholder="Paste image URL..." class="form-input rounded-md p-2 w-full">
-                        <button id="remove-bg-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-md">X</button>
+                        <button id="remove-bg-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-md" aria-label="Remove background image">X</button>
                     </div>
                 </div>
                 <div>
@@ -807,7 +862,7 @@
     <!-- Mobile Alert -->
     <div id="mobile-alert" class="fixed bottom-4 left-4 right-4 bg-yellow-400 text-black p-3 text-center text-sm rounded-lg shadow-lg flex justify-between items-center hidden z-50">
         <span>For the best experience, try this on a desktop.</span>
-        <button id="close-alert-btn" class="font-bold text-lg ml-4">&times;</button>
+        <button id="close-alert-btn" class="font-bold text-lg ml-4" aria-label="Close mobile alert">&times;</button>
     </div>
 
     <!-- Info Modal -->
@@ -819,7 +874,7 @@
             </p>
             <div class="space-y-2 text-sm">
                 <p><strong>Created by:</strong> <a href="https://github.com/svalordev" target="_blank" class="hover:underline" style="color: var(--accent-color);">Shaurya Pratap Singh</a></p>
-                <p><strong>Project Repository:</strong> <a href="https://github.com/SvalTech/kyunhihorahipadhai/" target="_blank" rel="noopener noreferrer" class="hover:underline" style="color: var(--accent-color);">View on GitHub</a></p>
+                <p><strong>Project Repository:</strong> <a href="https://github.com/SvalTech/studylocus/" target="_blank" class="hover:underline" style="color: var(--accent-color);">View on GitHub</a></p>
             </div>
             <div class="flex justify-end mt-6">
                 <button type="button" id="close-info-modal" class="btn-primary font-bold py-2 px-4 rounded-md">Close</button>
@@ -840,7 +895,7 @@
                 <span>Syllabus Tracker</span>
              </a>
         </div>
-        <button class="w-14 h-14 rounded-full bg-gray-800 shadow-lg flex items-center justify-center text-white hover:bg-gray-700 transition-colors">
+        <button class="w-14 h-14 rounded-full bg-gray-800 shadow-lg flex items-center justify-center text-white hover:bg-gray-700 transition-colors" aria-label="Toggle sval.tech products menu">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
         </button>
     </div>
@@ -860,7 +915,7 @@
             <button id="god-mode-scramble-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md text-sm">Scramble Layout</button>
             <button id="god-mode-nuke-btn" class="w-full bg-red-700 hover:bg-red-800 text-white font-bold py-2 px-4 rounded-md text-sm">NUKE</button>
         </div>
-        <button id="god-mode-close-btn" class="absolute top-2 right-2 text-secondary hover:text-primary">&times;</button>
+        <button id="god-mode-close-btn" class="absolute top-2 right-2 text-secondary hover:text-primary" aria-label="Close God Mode Panel">&times;</button>
     </div>
 
     <script>
@@ -892,16 +947,14 @@
         const defaultCustomCards = [
             { id: 'default-todo', type: 'todo', title: 'My Tasks', content: [{ text: 'Solve 20 Physics problems', completed: false }, { text: 'Revise Organic Chemistry', completed: true }, { text: 'Take a short break!', completed: false }] },
             { id: 'default-line-graph', type: 'line-graph', title: 'Mock Test Progress', content: [{ name: 'Test 1', marks: 120, maxMarks: 300 }, { name: 'Test 2', marks: 145, maxMarks: 300 }, { name: 'Test 3', marks: 160, maxMarks: 300 }] },
-            { id: 'default-youtube', type: 'youtube', title: 'Lofi Study Music', content: 'https://www.youtube.com/watch?v=jfKfPfyJRdk' },
             { id: 'default-note', type: 'note', title: 'Welcome!', content: 'Welcome to your new dashboard! You can drag, resize, and delete these cards. Add your own from the top right. Best of luck in your journey!' },
             { id: 'default-study-logger', type: 'time-logger', title: 'Study Log', content: [] }
         ];
 
-        const defaultLayout = ['countdown', 'graph', 'default-todo', 'default-study-logger', 'default-note', 'default-youtube', 'default-line-graph', 'tests', 'quote', 'time'];
+        const defaultLayout = ['countdown', 'graph', 'default-todo', 'default-study-logger', 'default-note', 'default-line-graph', 'tests', 'quote', 'time'];
         const defaultCardProps = {
             'graph': { colspan: 2 },
             'default-line-graph': { colspan: 1 },
-            'default-youtube': { colspan: 1 },
             'default-study-logger': { colspan: 1 }
         };
         
@@ -1182,7 +1235,7 @@
                                 const li = document.createElement('li');
                                 li.className = `flex items-center gap-3 p-2 rounded-md hover:bg-white/5 transition-colors todo-item ${item.completed ? 'completed' : ''}`;
                                 li.dataset.index = index;
-                                li.innerHTML = `<input type="checkbox" ${item.completed ? 'checked' : ''} class="todo-checkbox"><span class="flex-grow text-sm">${item.text}</span><button class="delete-todo-item text-red-500 hover:text-red-400 font-semibold text-xs">×</button>`;
+                                li.innerHTML = `<input type="checkbox" ${item.completed ? 'checked' : ''} class="todo-checkbox"><span class="flex-grow text-sm">${item.text}</span><button class="delete-todo-item" aria-label="Delete task">×</button>`;
                                 listEl.appendChild(li);
                             });
                         }
@@ -1198,7 +1251,7 @@
                     cardData.content.forEach((item, index) => {
                         const li = document.createElement('li');
                         li.className = 'flex justify-between items-center text-xs bg-gray-800 p-1 rounded';
-                        li.innerHTML = `<span>${item.name}: <strong>${item.marks} / ${item.maxMarks}</strong></span><button data-index="${index}" class="delete-mark-item text-red-500 px-1">×</button>`;
+                        li.innerHTML = `<span>${item.name}: <strong>${item.marks} / ${item.maxMarks}</strong></span><button data-index="${index}" class="delete-mark-item text-red-500 px-1" aria-label="Delete mark entry">×</button>`;
                         listEl.appendChild(li);
                     });
 
@@ -1312,7 +1365,12 @@
                     // Update timer display
                     cardEl.querySelector('.timer-display').textContent = formatSeconds(state.accumulatedTime);
                     cardEl.querySelector('.start-pause-btn').textContent = state.isRunning ? 'PAUSE' : 'START';
-                    cardEl.querySelector('.subject-select').value = state.currentSubject;
+
+                    const selectId = `subject-select-${cardData.id}`;
+                    cardEl.querySelector('label[for="subject-select"]').setAttribute('for', selectId);
+                    const selectEl = cardEl.querySelector('.subject-select');
+                    selectEl.id = selectId;
+                    selectEl.value = state.currentSubject;
 
                     // Update today's log display
                     const logListEl = cardEl.querySelector('.study-log-list');
@@ -1333,7 +1391,7 @@
                         Object.entries(todaysLogs).forEach(([subject, seconds]) => {
                             const li = document.createElement('li');
                             li.className = 'flex justify-between items-center';
-                            li.innerHTML = `<span>${subject}</span><div class="flex items-center gap-2"><span class="font-semibold">${formatSecondsToReadable(seconds)}</span><button data-subject="${subject}" class="delete-log-item text-red-500 hover:text-red-400 font-semibold px-2 py-1 text-xs leading-none rounded-sm">×</button></div>`;
+                            li.innerHTML = `<span>${subject}</span><div class="flex items-center gap-2"><span class="font-semibold">${formatSecondsToReadable(seconds)}</span><button data-subject="${subject}" class="delete-log-item text-red-500 hover:text-red-400 font-semibold px-2 py-1 text-xs leading-none rounded-sm" aria-label="Delete ${subject} log">×</button></div>`;
                             logListEl.appendChild(li);
                         });
                     }
@@ -1983,6 +2041,7 @@
         }
 
         function activateGodMode() {
+            createGodModeBackup();
             D.godModePanel.classList.remove('hidden');
             new Tone.Synth().toDestination().triggerAttackRelease("C4", "0.5");
         }
@@ -2006,7 +2065,6 @@
                     }
                 }
                 if(buttonId === 'god-mode-theme-btn') {
-                    createGodModeBackup();
                     const themeSelect = D.inputs.theme;
                     if (!themeSelect.querySelector('[value="god-mode"]')) {
                         const godOption = document.createElement('option');
@@ -2019,7 +2077,6 @@
                     renderDashboard();
                 }
                 if(buttonId === 'god-mode-complete-tasks-btn') {
-                     createGodModeBackup();
                      AppState.customCards.forEach(card => {
                         if (card.type === 'todo' && Array.isArray(card.content)) {
                             card.content.forEach(task => task.completed = true);
@@ -2028,7 +2085,6 @@
                     renderDashboard();
                 }
                 if(buttonId === 'god-mode-perfect-score-btn') {
-                    createGodModeBackup();
                     const graphCard = AppState.customCards.find(c => c.type === 'line-graph');
                     if (graphCard && Array.isArray(graphCard.content)) {
                         const maxMarks = AppState.settings.examType === 'NEET' ? 720 : 300;
@@ -2037,7 +2093,6 @@
                     }
                 }
                 if(buttonId === 'god-mode-timewarp-btn') {
-                    createGodModeBackup();
                     const newTests = {};
                     Object.keys(AppState.tests).forEach(dateStr => {
                         const date = new Date(dateStr + 'T00:00:00');
@@ -2049,7 +2104,6 @@
                     renderDashboard();
                 }
                 if(buttonId === 'god-mode-scramble-btn') {
-                    createGodModeBackup();
                     let array = AppState.layout;
                     for (let i = array.length - 1; i > 0; i--) {
                         const j = Math.floor(Math.random() * (i + 1));
