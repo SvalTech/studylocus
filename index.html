@@ -303,24 +303,6 @@
 
         /* --- Zen Mode Styles --- */
         body.zen-mode header, body.zen-mode footer, body.zen-mode .fab-container { display: none; }
-        body.zen-mode #dashboard-grid {
-            grid-template-columns: minmax(0, 1fr);
-            max-width: 800px; /* Default for single column view */
-            margin-left: auto;
-            margin-right: auto;
-            gap: 1.5rem;
-            transition: all 0.5s ease;
-        }
-        
-        /* Responsive Zen Mode for larger screens */
-        @media (min-width: 1024px) {
-            body.zen-mode #dashboard-grid {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-                max-width: 1400px; /* Wider for two columns */
-            }
-        }
-
-        body.zen-mode #dashboard-grid > .card { grid-column: span 1 / span 1 !important; /* Override any existing col-span */ }
         body.zen-mode .card:hover { transform: none; box-shadow: var(--card-shadow); }
         body.zen-mode .card-header { justify-content: center; }
         body.zen-mode .card-header-controls, body.zen-mode form, body.zen-mode .delete-test-btn, body.zen-mode .delete-todo-item, body.zen-mode .delete-mark-item, body.zen-mode .pomodoro-settings, body.zen-mode .pomodoro-btn, body.zen-mode .log-btn, body.zen-mode .reset-btn { display: none; }
@@ -2159,5 +2141,6 @@
     </script>
 </body>
 </html>
+
 
 
