@@ -460,7 +460,7 @@
     <footer class="text-center py-4 mt-4">
         <p class="text-xs text-secondary">
             Built by <a href="https://github.com/svalordev" target="_blank" rel="noopener noreferrer" class="hover:underline" style="color: var(--accent-color);">Shaurya Pratap Singh</a> | 
-            <a href="https://github.com/SvalTech/studylocus/" target="_blank" rel="noopener noreferrer" class="hover:underline" style="color: var(--accent-color);">View on GitHub / Report Issue</a>
+            <a href="https://github.com/SvalTech/studylocus/" target="_blank" rel="noopener noreferrer" class="hover:underline" style="color: var(--accent-color);">View on GitHub</a>
         </p>
     </footer>
 
@@ -638,6 +638,7 @@
                     <button class="start-pause-btn btn-primary font-bold py-2 px-8 text-lg rounded-md">START</button>
                     <button class="reset-btn text-secondary hover:text-primary">Reset</button>
                 </div>
+                 <div class="focus-status text-xs text-yellow-400 mt-2 h-4"></div>
                 <div class="pomodoro-settings mt-4 flex justify-center gap-4 items-center">
                     <label class="flex flex-col text-xs items-center">
                         Work
@@ -691,15 +692,11 @@
             </div>
             <div class="card-content text-center">
                 <div class="timer-display text-5xl font-bold my-4 tabular-nums">00:00:00</div>
+                 <div class="focus-status text-xs text-yellow-400 mb-2 h-4"></div>
                 <div class="flex flex-col sm:flex-row gap-2 mb-4 items-center justify-center">
                     <label for="subject-select" class="text-sm text-secondary sr-only sm:not-sr-only">Subject:</label>
                     <select id="subject-select" class="subject-select form-input rounded-md p-2 text-sm flex-grow">
-                        <option>Physics</option>
-                        <option>Chemistry</option>
-                        <option>Maths</option>
-                        <option>Biology</option>
-                        <option>Zoology</option>
-                        <option>Botany</option>
+                        <!-- Options populated by JS -->
                     </select>
                 </div>
                 <div class="flex justify-center gap-4">
@@ -811,6 +808,15 @@
                         </label>
                     </div>
                 </div>
+                 <div>
+                    <label class="block text-sm font-medium text-secondary mb-1">Focus Mode</label>
+                    <div class="space-y-2 mt-2 p-3 rounded-md" style="background-color: rgba(0,0,0,0.2);">
+                        <label for="focus-shield-toggle" class="flex items-center justify-between cursor-pointer">
+                            <span class="text-sm">Enable Focus Shield</span>
+                            <input type="checkbox" id="focus-shield-toggle" class="form-input-toggle">
+                        </label>
+                    </div>
+                </div>
             </div>
             <div class="flex justify-between items-center mt-6">
                 <button type="button" id="reset-dashboard-btn" class="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md">
@@ -856,7 +862,7 @@
             </p>
             <div class="space-y-2 text-sm">
                 <p><strong>Created by:</strong> <a href="https://github.com/svalordev" target="_blank" class="hover:underline" style="color: var(--accent-color);">Shaurya Pratap Singh</a></p>
-                <p><strong>Project Repository:</strong> <a href="https://github.com/SvalTech/studylocus/" target="_blank" class="hover:underline" style="color: var(--accent-color);">View on GitHub</a></p>
+                <p><strong>Project Repository:</strong> <a href="https://github.com/SvalTech/studylocus/" target="_blank" rel="noopener noreferrer" class="hover:underline" style="color: var(--accent-color);">View on GitHub</a></p>
             </div>
             <div class="flex justify-end mt-6">
                 <button type="button" id="close-info-modal" class="btn-primary font-bold py-2 px-4 rounded-md">Close</button>
@@ -954,6 +960,8 @@
                 examYear: '2026',
                 youtubeTintEnabled: true,
                 youtubeBlurEnabled: false,
+                focusShieldEnabled: false,
+                userSubjects: [],
                 ...savedSettings
             },
             cardProps: JSON.parse(localStorage.getItem(STORAGE_KEYS.cardProps)) || defaultCardProps,
@@ -961,6 +969,7 @@
             timeLoggerState: JSON.parse(localStorage.getItem(STORAGE_KEYS.timeLoggerState)) || {},
             studyLogs: JSON.parse(localStorage.getItem(STORAGE_KEYS.studyLogs)) || {},
             chartInstances: {},
+            activeTimer: { cardId: null, type: null, unfocusedTime: 0, unfocusedStart: 0 },
             
             save(key) {
                 localStorage.setItem(STORAGE_KEYS[key], JSON.stringify(this[key]));
@@ -1054,6 +1063,7 @@
                 importFile: document.getElementById('import-file-input'),
                 youtubeTintToggle: document.getElementById('youtube-tint-toggle'),
                 youtubeBlurToggle: document.getElementById('youtube-blur-toggle'),
+                focusShieldToggle: document.getElementById('focus-shield-toggle'),
             },
             mobileAlert: document.getElementById('mobile-alert'),
             confirmTitle: document.getElementById('confirm-title'),
@@ -1352,6 +1362,12 @@
                     cardEl.querySelector('label[for="subject-select"]').setAttribute('for', selectId);
                     const selectEl = cardEl.querySelector('.subject-select');
                     selectEl.id = selectId;
+
+                    // Populate subjects
+                    const defaultSubjects = ['Physics', 'Chemistry', 'Maths', 'Biology', 'Zoology', 'Botany'];
+                    const allSubjects = [...new Set([...defaultSubjects, ...AppState.settings.userSubjects || []])];
+                    selectEl.innerHTML = allSubjects.map(s => `<option>${s}</option>`).join('') + '<option value="add_new">Add New Subject...</option>';
+
                     selectEl.value = state.currentSubject;
 
                     // Update today's log display
@@ -1469,6 +1485,7 @@
             D.inputs.bgUrl.value = AppState.settings.bgUrl;
             D.inputs.examType.value = AppState.settings.examType;
             D.inputs.examYear.value = AppState.settings.examYear;
+            D.inputs.focusShieldToggle.checked = AppState.settings.focusShieldEnabled;
 
             applyYouTubeSettings();
         }
@@ -1734,6 +1751,21 @@
             AppState.saveSettings(); 
             applyYouTubeSettings(); 
         });
+        D.inputs.focusShieldToggle.addEventListener('change', () => { 
+            const isEnabled = D.inputs.focusShieldToggle.checked;
+            AppState.settings.focusShieldEnabled = isEnabled; 
+            AppState.saveSettings(); 
+
+            // If disabling the shield while a timer is active, stop the focus session.
+            if (!isEnabled && AppState.activeTimer.cardId) {
+                const { cardId, type } = AppState.activeTimer;
+                if (type === 'pomodoro') {
+                    pomodoro.stop(cardId);
+                } else if (type === 'time-logger') {
+                    timeLogger.pause(cardId);
+                }
+            }
+        });
 
         D.buttons.resetDashboard.addEventListener('click', () => {
             showConfirmation('This will delete all custom cards and reset the layout to the default.', () => {
@@ -1876,16 +1908,42 @@
                 }
                 AppState.save('pomodoroState');
             },
-            start(cardId) {
+            start(cardId, isResume = false) {
                 const state = AppState.pomodoroState[cardId];
                 if (state.isRunning) return;
                 state.isRunning = true;
+
+                if (!isResume) {
+                     if (AppState.activeTimer.cardId !== cardId || AppState.activeTimer.type !== 'pomodoro') {
+                        AppState.activeTimer.unfocusedTime = 0;
+                        const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
+                        if (cardEl) {
+                            const focusStatusEl = cardEl.querySelector('.focus-status');
+                            if (focusStatusEl) focusStatusEl.textContent = '';
+                        }
+                    }
+                    AppState.activeTimer.cardId = cardId;
+                    AppState.activeTimer.type = 'pomodoro';
+                    if(AppState.settings.focusShieldEnabled) enterFocusMode();
+                }
+
                 state.intervalId = setInterval(() => this.tick(cardId), 1000);
+                this.updateDisplay(cardId);
+            },
+            _internalPause(cardId) {
+                const state = AppState.pomodoroState[cardId];
+                clearInterval(state.intervalId);
+                state.isRunning = false;
                 this.updateDisplay(cardId);
             },
             stop(cardId) {
                 const state = AppState.pomodoroState[cardId];
                 clearInterval(state.intervalId);
+                if(AppState.activeTimer.cardId === cardId) {
+                    AppState.activeTimer.cardId = null;
+                    AppState.activeTimer.type = null;
+                    if(AppState.settings.focusShieldEnabled) exitFocusMode();
+                }
                 state.isRunning = false;
                 this.updateDisplay(cardId);
             },
@@ -1929,13 +1987,38 @@
                     cardEl.querySelector('.timer-display').textContent = formatSeconds(state.accumulatedTime);
                 }
             },
-            start(cardId) {
+            start(cardId, isResume = false) {
                 const state = AppState.timeLoggerState[cardId];
                 if (state.isRunning) return;
                 state.isRunning = true;
+
+                if (!isResume) {
+                    if (AppState.activeTimer.cardId !== cardId || AppState.activeTimer.type !== 'time-logger') {
+                        AppState.activeTimer.unfocusedTime = 0;
+                         const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
+                        if (cardEl) {
+                            const focusStatusEl = cardEl.querySelector('.focus-status');
+                            if (focusStatusEl) focusStatusEl.textContent = '';
+                        }
+                    }
+                    AppState.activeTimer.cardId = cardId;
+                    AppState.activeTimer.type = 'time-logger';
+                    if(AppState.settings.focusShieldEnabled) enterFocusMode();
+                }
+                
                 state.intervalId = setInterval(() => this.tick(cardId), 1000);
                 const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
                 if(cardEl) cardEl.querySelector('.start-pause-btn').textContent = 'PAUSE';
+                AppState.save('timeLoggerState');
+            },
+            _internalPause(cardId) {
+                const state = AppState.timeLoggerState[cardId];
+                if (!state.isRunning) return;
+                clearInterval(state.intervalId);
+                state.intervalId = null;
+                state.isRunning = false;
+                const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
+                if(cardEl) cardEl.querySelector('.start-pause-btn').textContent = 'START';
                 AppState.save('timeLoggerState');
             },
             pause(cardId) {
@@ -1944,6 +2027,11 @@
                 clearInterval(state.intervalId);
                 state.intervalId = null;
                 state.isRunning = false;
+                 if(AppState.activeTimer.cardId === cardId) {
+                    AppState.activeTimer.cardId = null;
+                    AppState.activeTimer.type = null;
+                    if(AppState.settings.focusShieldEnabled) exitFocusMode();
+                }
                 const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
                 if(cardEl) cardEl.querySelector('.start-pause-btn').textContent = 'START';
                 AppState.save('timeLoggerState');
@@ -1988,9 +2076,13 @@
                 AppState.studyLogs[todayStr][currentSubject] += state.accumulatedTime;
                 AppState.save('studyLogs');
 
-                this.reset(cardId); // Reset after logging
+                
                 const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
-                if(cardEl) cardTypes['time-logger'].render(cardEl, {id: cardId}); // Re-render to show updated log list
+                if(cardEl) {
+                    const cardData = AppState.customCards.find(c => c.id === cardId);
+                    cardTypes['time-logger'].render(cardEl, cardData); 
+                }
+                this.reset(cardId); // Reset after logging and re-rendering
             },
             reset(cardId) {
                 this.pause(cardId);
@@ -2001,7 +2093,23 @@
             },
             changeSubject(cardId, subject) {
                 const state = AppState.timeLoggerState[cardId];
-                if (state) {
+                const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
+                
+                if (subject === 'add_new') {
+                    const newSubject = prompt('Enter new subject name:');
+                    if (newSubject && newSubject.trim()) {
+                        if (!AppState.settings.userSubjects) {
+                            AppState.settings.userSubjects = [];
+                        }
+                        AppState.settings.userSubjects.push(newSubject.trim());
+                        AppState.saveSettings();
+                        state.currentSubject = newSubject.trim();
+                        renderDashboard(); // This will re-render all cards to update the dropdowns
+                    } else {
+                        // Reset select if user cancels
+                        if(cardEl) cardEl.querySelector('.subject-select').value = state.currentSubject;
+                    }
+                } else if (state) {
                     state.currentSubject = subject;
                     AppState.save('timeLoggerState');
                 }
@@ -2120,6 +2228,78 @@
                 renderDashboard();
             }
         });
+        
+        // --- FOCUS SHIELD ---
+        function enterFocusMode() {
+            try {
+                if(document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen();
+                }
+            } catch(e) {
+                console.warn("Fullscreen request failed.", e);
+            }
+            document.addEventListener('visibilitychange', handleVisibilityChange);
+            document.addEventListener('fullscreenchange', handleFullscreenChange);
+        }
+
+        function exitFocusMode() {
+            try {
+                if(document.fullscreenElement && document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            } catch(e) {
+                console.warn("Exit fullscreen request failed.", e);
+            }
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+            document.removeEventListener('fullscreenchange', handleFullscreenChange);
+            
+            const { cardId, type } = AppState.activeTimer;
+            const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
+            if(cardEl) {
+                const focusStatusEl = cardEl.querySelector('.focus-status');
+                if(focusStatusEl) focusStatusEl.textContent = '';
+            }
+        }
+
+        function handleFullscreenChange() {
+            if (!document.fullscreenElement && AppState.activeTimer.cardId) {
+                const { cardId, type } = AppState.activeTimer;
+                if(type === 'pomodoro') pomodoro.stop(cardId);
+                if(type === 'time-logger') timeLogger.pause(cardId);
+            }
+        }
+
+        function handleVisibilityChange() {
+            const { cardId, type } = AppState.activeTimer;
+            if(!cardId) return;
+
+            const timerObj = type === 'pomodoro' ? pomodoro : timeLogger;
+            const state = type === 'pomodoro' ? AppState.pomodoroState[cardId] : AppState.timeLoggerState[cardId];
+
+            if (document.visibilityState === 'hidden') {
+                if (state.isRunning) {
+                    AppState.activeTimer.unfocusedStart = Date.now();
+                    if(type === 'pomodoro') timerObj._internalPause(cardId);
+                    if(type === 'time-logger') timerObj._internalPause(cardId);
+                }
+            } else {
+                 if (AppState.activeTimer.unfocusedStart > 0) { // Only resume if it was auto-paused
+                    const unfocusedDuration = Math.round((Date.now() - AppState.activeTimer.unfocusedStart) / 1000);
+                    AppState.activeTimer.unfocusedTime += unfocusedDuration;
+                    
+                    const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
+                    if(cardEl) {
+                        const focusStatusEl = cardEl.querySelector('.focus-status');
+                        if(focusStatusEl) focusStatusEl.textContent = `Unfocused for ${formatSecondsToReadable(AppState.activeTimer.unfocusedTime)}`;
+                    }
+                    AppState.activeTimer.unfocusedStart = 0; // Clear start time after calculating
+                    
+                    if(type === 'pomodoro') timerObj.start(cardId, true); // Resume with isResume flag
+                    if(type === 'time-logger') timerObj.start(cardId, true); // Resume with isResume flag
+                }
+            }
+        }
+
 
         // --- INITIALIZATION ---
         applySettings();
@@ -2141,6 +2321,4 @@
     </script>
 </body>
 </html>
-
-
 
