@@ -1,0 +1,2492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyLocus | Customizable Dashboard for JEE & NEET Prep</title>
+    <meta name="description" content="A customizable dashboard for students preparing for JEE, NEET, and other competitive exams. Track your progress with a journey graph, manage tasks with to-do lists, and stay focused with a Pomodoro timer.">
+    <meta name="keywords" content="JEE dashboard, NEET dashboard, study planner, exam preparation, Pomodoro timer, syllabus tracker, mock test analysis, student dashboard, JEE 2026, NEET 2026, study logger">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://sval.tech/studylocus/">
+    <meta property="og:title" content="StudyLocus | Customizable Dashboard for JEE & NEET Prep">
+    <meta property="og:description" content="A customizable dashboard for students preparing for JEE, NEET, and other competitive exams. Track your progress, manage tasks, and stay focused.">
+    <meta property="og:image" content="https://i.ibb.co/5Wm282XC/logo1.png">
+
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://sval.tech/studylocus/">
+    <meta property="twitter:title" content="StudyLocus | Customizable Dashboard for JEE & NEET Prep">
+    <meta property="twitter:description" content="A customizable dashboard for students preparing for JEE, NEET, and other competitive exams. Track your progress, manage tasks, and stay focused.">
+    <meta property="twitter:image" content="https://i.ibb.co/5Wm282XC/logo1.png">
+    
+    <link rel="canonical" href="https://sval.tech/studylocus/" />
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue&family=Fira+Code&family=Inter:wght@400;600;700&family=Roboto+Slab&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <style>
+        /* [YOUR EXISTING CSS STYLES GO HERE... I've omitted them for brevity but you should keep them] */
+        :root {
+            --bg-color: #0d1117;
+            --card-bg-color: rgba(22, 27, 34, 0.85);
+            --border-color: #30363d;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+            --accent-color: #58a6ff;
+            --accent-glow: 0 0 15px rgba(88, 166, 255, 0.3);
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            --font-family: 'Inter', sans-serif;
+            --day-past-color: #21262d;
+            --day-future-color: #0e4429;
+            --day-today-color: #1a633a;
+            --day-exam-color: #9e2a2b;
+            --day-part-test-color: #1f6feb;
+        }
+
+        [data-theme="light"] {
+            --bg-color: #f0f0f0;
+            --card-bg-color: rgba(255, 255, 255, 0.8);
+            --border-color: #d1d5db;
+            --text-primary: #1f2937;
+            --text-secondary: #4b5563;
+            --accent-color: #3b82f6;
+            --accent-glow: 0 0 15px rgba(59, 130, 246, 0.4);
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            --day-past-color: #ebedf0;
+            --day-future-color: #9be9a8;
+            --day-today-color: #40c463;
+            --day-exam-color: #da5252;
+            --day-part-test-color: #58a6ff;
+        }
+
+        [data-theme="cyberpunk"] {
+            --bg-color: #0c0a24;
+            --card-bg-color: rgba(23, 0, 61, 0.7);
+            --border-color: #ff00f2;
+            --text-primary: #00f7ff;
+            --text-secondary: #faff00;
+            --accent-color: #ff00f2;
+            --accent-glow: 0 0 20px rgba(255, 0, 242, 0.5);
+            --card-shadow: 0 0 10px rgba(255, 0, 242, 0.3);
+            --day-past-color: #180f3d;
+            --day-future-color: #5d00ff;
+            --day-today-color: #00f7ff;
+            --day-exam-color: #ff00f2;
+            --day-part-test-color: #faff00;
+        }
+        
+        [data-theme="forest"] {
+            --bg-color: #1a201a;
+            --card-bg-color: rgba(32, 42, 32, 0.75);
+            --border-color: #4a5c4a;
+            --text-primary: #d4e0d4;
+            --text-secondary: #8a9c8a;
+            --accent-color: #6a9c6a;
+            --accent-glow: 0 0 15px rgba(106, 156, 106, 0.4);
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            --day-past-color: #2f3e2f;
+            --day-future-color: #4a5c4a;
+            --day-today-color: #9ae6b4;
+            --day-exam-color: #c53030;
+            --day-part-test-color: #63b3ed;
+        }
+
+        [data-theme="rose-gold"] {
+            --bg-color: #4a1c2b;
+            --card-bg-color: rgba(107, 48, 64, 0.75);
+            --border-color: #b97a8d;
+            --text-primary: #f5e5e8;
+            --text-secondary: #d4b2bb;
+            --accent-color: #f5c6d3;
+            --accent-glow: 0 0 15px rgba(245, 198, 211, 0.4);
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            --day-past-color: #6b3040;
+            --day-future-color: #b97a8d;
+            --day-today-color: #f5e5e8;
+            --day-exam-color: #ff6d6d;
+            --day-part-test-color: #f5c6d3;
+        }
+
+        [data-theme="ocean"] {
+            --bg-color: #0d1b2a;
+            --card-bg-color: rgba(27, 38, 59, 0.75);
+            --border-color: #415a77;
+            --text-primary: #e0e1dd;
+            --text-secondary: #778da9;
+            --accent-color: #61a5c2;
+            --accent-glow: 0 0 15px rgba(97, 165, 194, 0.4);
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            --day-past-color: #1b263b;
+            --day-future-color: #415a77;
+            --day-today-color: #e0e1dd;
+            --day-exam-color: #ff6b6b;
+            --day-part-test-color: #61a5c2;
+        }
+
+        [data-theme="sunset"] {
+            --bg-color: #2c0e37;
+            --card-bg-color: rgba(74, 29, 89, 0.75);
+            --border-color: #83387a;
+            --text-primary: #f8f3f9;
+            --text-secondary: #e4a1d4;
+            --accent-color: #ff6d6d;
+            --accent-glow: 0 0 15px rgba(255, 109, 109, 0.4);
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            --day-past-color: #4a1d59;
+            --day-future-color: #83387a;
+            --day-today-color: #f8f3f9;
+            --day-exam-color: #e4a1d4;
+            --day-part-test-color: #ff6d6d;
+        }
+
+        [data-theme="dracula"] {
+            --bg-color: #282a36;
+            --card-bg-color: rgba(68, 71, 90, 0.8);
+            --border-color: #6272a4;
+            --text-primary: #f8f8f2;
+            --text-secondary: #bd93f9;
+            --accent-color: #ff79c6;
+            --accent-glow: 0 0 15px rgba(255, 121, 198, 0.4);
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            --day-past-color: #44475a;
+            --day-future-color: #6272a4;
+            --day-today-color: #50fa7b;
+            --day-exam-color: #ff5555;
+            --day-part-test-color: #bd93f9;
+        }
+        
+        [data-theme="alakh-pandey"] {
+            --bg-color: #1e1e1e;
+            --card-bg-color: rgba(40, 40, 40, 0.85);
+            --border-color: #f5cb5c;
+            --text-primary: #ffffff;
+            --text-secondary: #e0e0e0;
+            --accent-color: #f5cb5c;
+            --accent-glow: 0 0 15px rgba(245, 203, 92, 0.4);
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            --day-past-color: #333533;
+            --day-future-color: #4f4f4f;
+            --day-today-color: #f5cb5c;
+            --day-exam-color: #cf6679;
+            --day-part-test-color: #bb86fc;
+        }
+        
+        [data-theme="chaitanya-noob"] {
+            --bg-color: #000000;
+            --card-bg-color: transparent;
+            --border-color: #39ff14;
+            --text-primary: #39ff14;
+            --text-secondary: #ff00ff;
+            --accent-color: #39ff14;
+            --accent-glow: 0 0 20px rgba(57, 255, 20, 0.5);
+            --card-shadow: 0 0 10px rgba(57, 255, 20, 0.3);
+            --day-past-color: transparent;
+            --day-future-color: transparent;
+            --day-today-color: transparent;
+            --day-exam-color: transparent;
+            --day-part-test-color: transparent;
+        }
+
+        [data-theme="god-mode"] {
+            --bg-color: #000000;
+            --card-bg-color: rgba(10, 20, 10, 0.7);
+            --border-color: #00ff00;
+            --text-primary: #00ff00;
+            --text-secondary: #008000;
+            --accent-color: #00ff00;
+            --font-family: 'Fira Code', monospace;
+            --day-past-color: #002000;
+            --day-future-color: #004000;
+            --day-today-color: #00ff00;
+            --day-exam-color: #ff0000;
+            --day-part-test-color: #00ffff;
+        }
+        
+        [data-theme="chaitanya-noob"] .card { backdrop-filter: none; -webkit-backdrop-filter: none; }
+        [data-theme="chaitanya-noob"] .graph-container .day { border: none !important; }
+        [data-theme="chaitanya-noob"] .graph-container .day::before { content: '🤓'; font-size: 12px; line-height: 14px; display: block; text-align: center; }
+        [data-theme="chaitanya-noob"] .graph-container .day-today { border: 1px solid var(--accent-color) !important; }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+            transition: background-color 0.5s ease, background-image 0.5s ease;
+        }
+        #bg-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.5); z-index: -1; }
+        .graph-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(14px, 1fr)); grid-auto-rows: 14px; grid-gap: 3px; overflow-x: auto; }
+        .day { width: 14px; height: 14px; border-radius: 3px; position: relative; cursor: pointer; }
+        .day-past { background-color: var(--day-past-color); }
+        .day-future { background-color: var(--day-future-color); }
+        .day-today { background-color: var(--day-today-color); border: 1px solid var(--accent-color); }
+        .day-exam { background-color: var(--day-exam-color); }
+        .day-part-test { background-color: var(--day-part-test-color); }
+        .day .tooltip { visibility: hidden; width: 180px; background-color: #21262d; color: #fff; text-align: center; border-radius: 6px; padding: 5px 0; position: absolute; z-index: 10; bottom: 125%; left: 50%; margin-left: -90px; opacity: 0; transition: opacity 0.3s; font-size: 12px; border: 1px solid #30363d; pointer-events: none; }
+        .day:hover .tooltip { visibility: visible; opacity: 1; }
+        #countdown-timer { font-size: 1.75rem; font-weight: 600; }
+        @media (min-width: 640px) { #countdown-timer { font-size: 2.25rem; } }
+        @media (min-width: 1024px) { #countdown-timer { font-size: 2.5rem; } }
+        
+        .card { 
+            background-color: var(--card-bg-color); 
+            border: 1px solid var(--border-color); 
+            color: var(--text-primary);
+            border-radius: 12px;
+            padding: 1.25rem;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: var(--card-shadow);
+        }
+        
+        .card-header { display: flex; justify-content: space-between; align-items: center; padding: 0; margin-bottom: 0.75rem; }
+        .card-header h2 { margin-left: 0.25rem;}
+        .card-header-controls { display: flex; align-items: center; gap: 0.25rem;}
+        .card-header-controls button { color: var(--text-secondary); padding: 0.25rem; border-radius: 9999px; transition: color 0.2s ease, background-color 0.2s ease; }
+        .card-header-controls button:hover { color: var(--text-primary); background-color: rgba(255,255,255,0.1); }
+        
+        .drag-handle { cursor: grab; padding: 0.5rem; }
+        .sortable-ghost { background: #1f2937; opacity: 0.6; border: 2px dashed var(--accent-color); }
+        .sortable-chosen { cursor: grabbing; }
+        
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.5); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 50; opacity: 0; transition: opacity 0.3s ease; pointer-events: none; }
+        .modal-overlay:not(.hidden) { opacity: 1; pointer-events: auto; }
+        .modal-overlay > .card { transform: scale(0.95); opacity: 0; transition: transform 0.3s ease, opacity 0.3s ease; }
+        .modal-overlay:not(.hidden) > .card { transform: scale(1); opacity: 1; }
+        
+        .todo-item.completed span { text-decoration: line-through; color: var(--text-secondary); }
+        .form-input { background-color: rgba(0,0,0,0.2); border: 1px solid var(--border-color); color: var(--text-primary); transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+        .form-input:focus { outline: none; border-color: var(--accent-color); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-color) 40%, transparent); }
+        
+        .btn-primary { background-color: var(--accent-color); color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); border: 1px solid transparent; transition: all 0.2s ease-in-out; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.3), var(--accent-glow); }
+
+        header .space-x-2 > button { transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease; }
+        header .space-x-2 > button:hover { transform: translateY(-2px); box-shadow: var(--accent-glow); }
+        
+        [data-theme="cyberpunk"] .btn-primary,
+        [data-theme="rose-gold"] .btn-primary,
+        [data-theme="ocean"] .btn-primary,
+        [data-theme="sunset"] .btn-primary,
+        [data-theme="dracula"] .btn-primary,
+        [data-theme="alakh-pandey"] .btn-primary,
+        [data-theme="chaitanya-noob"] .btn-primary { color: var(--bg-color); }
+        .text-secondary { color: var(--text-secondary); }
+        select.form-input { -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); background-position: right 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; padding-right: 2.5rem; }
+        select.form-input option { background: var(--card-bg-color); color: var(--text-primary); }
+        [data-theme="light"] .form-input { background-color: #e5e7eb; border-color: #9ca3af; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .delete-card-btn:hover { color: #ef4444 !important; }
+        .pomodoro-btn.active { background-color: var(--accent-color); color: white; }
+        [data-theme="light"] .pomodoro-btn.active { color: white; }
+        .aspect-w-16 { position: relative; padding-bottom: 56.25%; }
+        .aspect-w-16 > * { position: absolute; height: 100%; width: 100%; top: 0; right: 0; bottom: 0; left: 0; }
+        .fab-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 40; }
+        .fab-menu { visibility: hidden; opacity: 0; transform: translateY(10px); transition: all 0.2s ease-out; position: absolute; bottom: 100%; right: 0; margin-bottom: 0.5rem; }
+        .fab-container:hover .fab-menu { visibility: visible; opacity: 1; transform: translateY(0); }
+        .todo-checkbox { -webkit-appearance: none; -moz-appearance: none; appearance: none; width: 1.25rem; height: 1.25rem; border-radius: 0.25rem; border: 1px solid var(--border-color); background-color: transparent; cursor: pointer; position: relative; transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out; }
+        .todo-checkbox:checked { background-color: var(--accent-color); border-color: var(--accent-color); }
+        .todo-checkbox:checked::after { content: '✔'; position: absolute; color: white; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 0.8rem; }
+        [data-theme="light"] .todo-checkbox:checked::after { color: var(--card-bg-color); }
+
+        /* --- Zen Mode Styles --- */
+        body.zen-mode header, body.zen-mode footer, body.zen-mode .fab-container { display: none; }
+        body.zen-mode .card:hover { transform: none; box-shadow: var(--card-shadow); }
+        body.zen-mode .card-header { justify-content: center; }
+        body.zen-mode .card-header-controls, body.zen-mode form, body.zen-mode .delete-test-btn, body.zen-mode .delete-todo-item, body.zen-mode .delete-mark-item, body.zen-mode .pomodoro-settings, body.zen-mode .pomodoro-btn, body.zen-mode .log-btn, body.zen-mode .reset-btn { display: none; }
+        
+        .youtube-container {
+            position: relative; /* Ensure ::after is positioned correctly */
+            border-radius: 0.375rem;
+            overflow: hidden; /* Hide anything from ::after that goes outside the border */
+        }
+        .youtube-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--accent-color);
+            opacity: 0.20;
+            mix-blend-mode: screen;
+            pointer-events: none; /* IMPORTANT: Allows clicks to pass through to the iframe */
+            transition: background-color 0.5s ease, opacity 0.5s ease;
+            z-index: 1;
+        }
+        
+        /* Disable tint via settings toggle */
+        .youtube-container.tint-disabled::after {
+            opacity: 0;
+        }
+        
+        .youtube-iframe {
+            transition: filter 0.3s ease-in-out;
+        }
+        .youtube-container.blurred .youtube-iframe {
+            filter: blur(16px);
+        }
+
+        .form-input-toggle {
+            -webkit-appearance: none;
+            appearance: none;
+            position: relative;
+            width: 38px;
+            height: 22px;
+            border-radius: 9999px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border: 1px solid var(--border-color);
+            transition: background-color .2s ease-in-out;
+            cursor: pointer;
+        }
+        .form-input-toggle::before {
+            content: "";
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background-color: white;
+            transition: transform .2s ease-in-out;
+        }
+        .form-input-toggle:checked {
+            background-color: var(--accent-color);
+        }
+        .form-input-toggle:checked::before {
+            transform: translateX(16px);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+        @keyframes fall-apart {
+            0% { transform: translateY(0) rotate(0); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+        #sync-status {
+            transition: opacity 0.5s;
+        }
+        /* ✨ END: Firebase Auth UI Styles */
+    </style>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "StudyLocus Dashboard",
+      "applicationCategory": "EducationalApplication",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "0"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "Shaurya Pratap Singh",
+        "url": "https://github.com/svalordev"
+      },
+      "description": "A customizable dashboard for students preparing for JEE, NEET, and other competitive exams. Track your progress with a journey graph, manage tasks with to-do lists, and stay focused with a Pomodoro timer."
+    }
+    </script>
+</head>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-TCK0S6VC58"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-TCK0S6VC58');
+</script>
+<body class="antialiased">
+    <div id="bg-overlay"></div>
+    <div class="container mx-auto px-2 sm:px-4 py-6">
+        <header class="flex justify-between items-center mb-6">
+            <h1 id="main-title" class="text-3xl sm:text-4xl font-bold cursor-pointer">JEE 2026</h1>
+            
+            <div class="flex items-center gap-2 sm:gap-4">
+                <div class="flex items-center gap-2">
+                    <span id="sync-status" class="text-xs text-secondary opacity-0"></span>
+                    <div id="auth-container">
+                        </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button id="info-btn" class="bg-gray-700/50 hover:bg-gray-600/60 text-white font-bold p-2 rounded-full transition-colors text-sm" title="About this project" aria-label="About this project">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+                    </button>
+                    <button id="customize-btn" class="bg-gray-700/50 hover:bg-gray-600/60 text-white font-bold rounded-full w-10 h-10 md:w-auto md:rounded-md flex items-center justify-center md:px-4 md:py-2 transition-all text-sm" title="Customize Dashboard" aria-label="Customize Dashboard">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="4" y1="21" y2="14"></line><line x1="4" x2="4" y1="10" y2="3"></line><line x1="12" x2="12" y1="21" y2="12"></line><line x1="12" x2="12" y1="8" y2="3"></line><line x1="20" x2="20" y1="21" y2="16"></line><line x1="20" x2="20" y1="12" y2="3"></line><line x1="1" x2="7" y1="14" y2="14"></line><line x1="9" x2="15" y1="8" y2="8"></line><line x1="17" x2="23" y1="16" y2="16"></line></svg>
+                        <span class="hidden md:inline md:ml-2">Customize</span>
+                    </button>
+                    <button id="add-card-btn" class="btn-primary font-bold rounded-full w-10 h-10 md:w-auto md:rounded-md flex items-center justify-center md:px-4 md:py-2 transition-all text-sm" title="Add New Card" aria-label="Add New Card">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        <span class="hidden md:inline md:ml-2">Add Card</span>
+                    </button>
+                    <button id="zen-mode-btn" class="bg-gray-700/50 hover:bg-gray-600/60 text-white font-bold p-2 rounded-full transition-colors text-sm" title="Enter Zen Mode" aria-label="Enter Zen Mode">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2Z"></path><path d="m9.5 16.5 4-4"></path><path d="m14.5 16.5-4-4"></path><path d="M12 8V7"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main id="dashboard-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            </main>
+    </div>
+
+    <button id="exit-zen-btn" class="hidden fixed top-4 right-4 bg-gray-800/50 hover:bg-gray-700/70 backdrop-blur-sm text-white font-bold p-2 rounded-full transition-colors z-50" title="Exit Zen Mode" aria-label="Exit Zen Mode"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+
+    <footer class="text-center py-4 mt-4">
+        <p class="text-xs text-secondary">
+            Built by <a href="https://github.com/svalordev" target="_blank" rel="noopener noreferrer" class="hover:underline" style="color: var(--accent-color);">Shaurya Pratap Singh</a> | 
+            <a href="https://github.com/SvalTech/studylocus/" target="_blank" rel="noopener noreferrer" class="hover:underline" style="color: var(--accent-color);">View on GitHub</a>
+        </p>
+    </footer>
+
+    <template id="countdown-template">
+        <div class="card" data-card-id="countdown">
+            <div class="card-header">
+                <h2 class="text-lg font-semibold">Countdown</h2>
+                <div class="card-header-controls">
+                    <button class="toggle-colspan-btn" title="Toggle size" aria-label="Toggle card size"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m6 6v-4m0 4h-4"/><path d="M3 3l6 6"/><path d="M3 3v4m0-4h4"/></svg></button>
+                    <span class="drag-handle" aria-label="Drag to reorder"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+                </div>
+            </div>
+            <div id="countdown-timer" class="flex justify-center space-x-2 sm:space-x-4 md:space-x-8 text-center py-2">
+                <div><div data-value="days" class="font-bold">00</div><div class="text-xs sm:text-sm text-secondary">Days</div></div>
+                <div><div data-value="hours" class="font-bold">00</div><div class="text-xs sm:text-sm text-secondary">Hours</div></div>
+                <div><div data-value="minutes" class="font-bold">00</div><div class="text-xs sm:text-sm text-secondary">Minutes</div></div>
+                <div><div data-value="seconds" class="font-bold">00</div><div class="text-xs sm:text-sm text-secondary">Seconds</div></div>
+            </div>
+        </div>
+    </template>
+
+    <template id="time-template">
+        <div class="card" data-card-id="time">
+            <div class="card-header">
+                <h2 class="text-lg font-semibold">Current Time</h2>
+                <div class="card-header-controls">
+                    <button class="toggle-colspan-btn" title="Toggle size" aria-label="Toggle card size"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m6 6v-4m0 4h-4"/><path d="M3 3l6 6"/><path d="M3 3v4m0-4h4"/></svg></button>
+                    <span class="drag-handle" aria-label="Drag to reorder"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+                </div>
+            </div>
+            <div class="text-center py-2">
+                <div data-value="time" class="text-3xl font-bold tracking-wider">00:00:00 AM</div>
+                <div data-value="date" class="text-sm text-secondary">Sunday, August 17, 2025</div>
+            </div>
+        </div>
+    </template>
+
+    <template id="graph-template">
+        <div class="card" data-card-id="graph">
+            <div class="card-header">
+                <h2 class="text-lg font-semibold">Journey</h2>
+                <div class="card-header-controls">
+                    <button class="toggle-colspan-btn" title="Toggle size" aria-label="Toggle card size"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m6 6v-4m0 4h-4"/><path d="M3 3l6 6"/><path d="M3 3v4m0-4h4"/></svg></button>
+                    <span class="drag-handle" aria-label="Drag to reorder"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+                </div>
+            </div>
+            <div class="graph-container no-scrollbar" id="contribution-graph"></div>
+            <div class="flex justify-center flex-wrap gap-x-4 gap-y-2 mt-4 text-xs text-secondary">
+                <div class="legend-item"><div class="legend-color day-future"></div><span>Future</span></div>
+                <div class="legend-item"><div class="legend-color day-today"></div><span>Today</span></div>
+                <div class="legend-item"><div class="legend-color day-part-test"></div><span>Test</span></div>
+                <div class="legend-item"><div class="legend-color day-exam"></div><span>Exam</span></div>
+            </div>
+        </div>
+    </template>
+
+    <template id="tests-template">
+         <div class="card" data-card-id="tests">
+             <div class="card-header">
+                 <h2 class="text-lg font-semibold">Test Planner</h2>
+                 <div class="card-header-controls">
+                     <button class="toggle-colspan-btn" title="Toggle size" aria-label="Toggle card size"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m6 6v-4m0 4h-4"/><path d="M3 3l6 6"/><path d="M3 3v4m0-4h4"/></svg></button>
+                     <span class="drag-handle" aria-label="Drag to reorder"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+                 </div>
+             </div>
+             <form id="add-test-form" class="flex flex-col gap-3 mb-4">
+                 <input type="date" name="date" class="form-input rounded-md p-2 w-full text-sm" required>
+                 <input type="text" name="name" placeholder="Test Name" class="form-input rounded-md p-2 flex-grow text-sm" required>
+                 <button type="submit" class="btn-primary font-bold py-2 px-4 rounded-md transition-colors w-full text-sm">Add Test</button>
+             </form>
+             <div id="test-list-container">
+                 <h3 class="text-md font-semibold mb-2 border-b pb-1" style="border-color: var(--border-color);">Tests</h3>
+                 <ul id="test-list" class="space-y-2 max-h-48 overflow-y-auto no-scrollbar"></ul>
+             </div>
+         </div>
+    </template>
+    
+    <template id="quote-template">
+        <div class="card" data-card-id="quote">
+            <div class="card-header">
+                <h2 class="text-lg font-semibold">Quote</h2>
+                <div class="card-header-controls">
+                    <button class="toggle-colspan-btn" title="Toggle size" aria-label="Toggle card size"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m6 6v-4m0 4h-4"/><path d="M3 3l6 6"/><path d="M3 3v4m0-4h4"/></svg></button>
+                    <span class="drag-handle" aria-label="Drag to reorder"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+                </div>
+            </div>
+            <div id="quote-card-content" class="text-center cursor-pointer transition-transform transform hover:scale-105">
+                 <p id="quote" class="text-md italic">"The best way to predict the future is to create it."</p>
+                 <p id="author" class="text-sm text-secondary mt-2">- Peter Drucker</p>
+            </div>
+        </div>
+    </template>
+
+    <template id="note-card-template">
+        <div class="card custom-card" data-card-type="note">
+            <div class="card-header">
+                <h2 class="text-lg font-semibold card-title">Note</h2>
+                <div class="card-header-controls">
+                    <button class="toggle-colspan-btn" title="Toggle size" aria-label="Toggle card size"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m6 6v-4m0 4h-4"/><path d="M3 3l6 6"/><path d="M3 3v4m0-4h4"/></svg></button>
+                    <button class="delete-card-btn" title="Delete card" aria-label="Delete card"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg></button>
+                    <span class="drag-handle" aria-label="Drag to reorder"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+                </div>
+            </div>
+            <div class="text-sm card-content whitespace-pre-wrap"></div>
+        </div>
+    </template>
+
+    <template id="todo-card-template">
+        <div class="card custom-card" data-card-type="todo">
+            <div class="card-header">
+                <h2 class="text-lg font-semibold card-title">To-Do List</h2>
+                <div class="card-header-controls">
+                    <button class="toggle-colspan-btn" title="Toggle size" aria-label="Toggle card size"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m6 6v-4m0 4h-4"/><path d="M3 3l6 6"/><path d="M3 3v4m0-4h4"/></svg></button>
+                    <button class="delete-card-btn" title="Delete card" aria-label="Delete card"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg></button>
+                    <span class="drag-handle" aria-label="Drag to reorder"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+                </div>
+            </div>
+            <div class="card-content">
+                <div class="progress-container w-full bg-gray-700 rounded-full h-2.5 mb-4">
+                    <div class="progress-bar bg-green-500 h-2.5 rounded-full" style="width: 0%"></div>
+                </div>
+                <ul class="todo-list space-y-1 max-h-48 overflow-y-auto mb-3 no-scrollbar"></ul>
+                <form class="add-todo-form flex gap-2 mt-2">
+                    <input type="text" placeholder="Add a new task..." class="form-input rounded-md p-2 w-full text-sm" required>
+                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded-md text-sm" aria-label="Add task">+</button>
+                </form>
+            </div>
+        </div>
+    </template>
+
+    <template id="line-graph-card-template">
+        <div class="card custom-card" data-card-type="line-graph">
+            <div class="card-header">
+                <h2 class="text-lg font-semibold card-title">Graph</h2>
+                <div class="card-header-controls">
+                    <button class="toggle-colspan-btn" title="Toggle size" aria-label="Toggle card size"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m6 6v-4m0 4h-4"/><path d="M3 3l6 6"/><path d="M3 3v4m0-4h4"/></svg></button>
+                    <button class="delete-card-btn" title="Delete card" aria-label="Delete card"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg></button>
+                    <span class="drag-handle" aria-label="Drag to reorder"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+                </div>
+            </div>
+            <div class="card-content">
+                <div class="mb-4 h-64">
+                    <canvas class="marks-chart"></canvas>
+                </div>
+                <form class="add-marks-form flex flex-col sm:flex-row gap-2 mb-3">
+                    <input type="text" name="name" placeholder="Paper Name" class="form-input rounded-md p-2 w-full sm:w-auto flex-grow text-sm" required>
+                    <input type="number" name="marks" placeholder="Marks" class="form-input rounded-md p-2 w-full sm:w-20 text-sm" required>
+                    <input type="number" name="maxMarks" placeholder="Total" class="form-input rounded-md p-2 w-full sm:w-20 text-sm" required>
+                    <button type="submit" class="btn-primary font-bold py-2 px-3 rounded-md text-sm" aria-label="Add mark entry">+</button>
+                </form>
+                <ul class="marks-list space-y-1 max-h-24 overflow-y-auto no-scrollbar"></ul>
+            </div>
+        </div>
+    </template>
+    
+    <template id="pomodoro-card-template">
+        <div class="card custom-card" data-card-type="pomodoro">
+            <div class="card-header">
+                <h2 class="text-lg font-semibold card-title">Pomodoro</h2>
+                <div class="card-header-controls">
+                    <button class="toggle-colspan-btn" title="Toggle size" aria-label="Toggle card size"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m6 6v-4m0 4h-4"/><path d="M3 3l6 6"/><path d="M3 3v4m0-4h4"/></svg></button>
+                    <button class="delete-card-btn" title="Delete card" aria-label="Delete card"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg></button>
+                    <span class="drag-handle" aria-label="Drag to reorder"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+                </div>
+            </div>
+            <div class="card-content text-center">
+                <div class="flex justify-center gap-2 mb-4">
+                    <button data-mode="pomodoro" class="pomodoro-btn text-sm px-3 py-1 rounded-md border border-transparent hover:border-gray-500">Pomodoro</button>
+                    <button data-mode="shortBreak" class="pomodoro-btn text-sm px-3 py-1 rounded-md border border-transparent hover:border-gray-500">Short Break</button>
+                    <button data-mode="longBreak" class="pomodoro-btn text-sm px-3 py-1 rounded-md border border-transparent hover:border-gray-500">Long Break</button>
+                </div>
+                <div class="timer-display text-6xl font-bold my-4">25:00</div>
+                <div class="flex justify-center gap-4">
+                    <button class="start-pause-btn btn-primary font-bold py-2 px-8 text-lg rounded-md">START</button>
+                    <button class="reset-btn text-secondary hover:text-primary">Reset</button>
+                </div>
+                 <div class="focus-status text-xs text-yellow-400 mt-2 h-4"></div>
+                <div class="pomodoro-settings mt-4 flex justify-center gap-4 items-center">
+                    <label class="flex flex-col text-xs items-center">
+                        Work
+                        <input type="number" data-mode="pomodoro" class="pomodoro-duration-input form-input w-16 text-center rounded-md p-1" min="1">
+                    </label>
+                    <label class="flex flex-col text-xs items-center">
+                        Short
+                        <input type="number" data-mode="shortBreak" class="pomodoro-duration-input form-input w-16 text-center rounded-md p-1" min="1">
+                    </label>
+                    <label class="flex flex-col text-xs items-center">
+                        Long
+                        <input type="number" data-mode="longBreak" class="pomodoro-duration-input form-input w-16 text-center rounded-md p-1" min="1">
+                    </label>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="youtube-card-template">
+        <div class="card custom-card" data-card-type="youtube">
+            <div class="card-header">
+                <h2 class="text-lg font-semibold card-title">YouTube</h2>
+                <div class="card-header-controls">
+                    <button class="toggle-colspan-btn" title="Toggle size" aria-label="Toggle card size"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m6 6v-4m0 4h-4"/><path d="M3 3l6 6"/><path d="M3 3v4m0-4h4"/></svg></button>
+                    <button class="delete-card-btn" title="Delete card" aria-label="Delete card"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg></button>
+                    <span class="drag-handle" aria-label="Drag to reorder"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+                </div>
+            </div>
+            <div class="card-content">
+                <div class="aspect-w-16 mb-3 youtube-container">
+                    <iframe class="youtube-iframe w-full h-full" title="Embedded YouTube video player" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                </div>
+                <form class="update-youtube-form flex gap-2">
+                    <label for="youtube-url-input" class="sr-only">YouTube URL</label>
+                    <input type="text" id="youtube-url-input" name="url" placeholder="Paste YouTube URL..." class="form-input rounded-md p-2 w-full text-sm" required>
+                    <button type="submit" class="btn-primary font-bold py-2 px-3 rounded-md text-sm">Load</button>
+                </form>
+            </div>
+        </div>
+    </template>
+
+    <template id="time-logger-card-template">
+        <div class="card custom-card" data-card-type="time-logger">
+            <div class="card-header">
+                <h2 class="text-lg font-semibold card-title">Study Logger</h2>
+                <div class="card-header-controls">
+                    <button class="toggle-colspan-btn" title="Toggle size" aria-label="Toggle card size"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m6 6v-4m0 4h-4"/><path d="M3 3l6 6"/><path d="M3 3v4m0-4h4"/></svg></button>
+                    <button class="delete-card-btn" title="Delete card" aria-label="Delete card"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg></button>
+                    <span class="drag-handle" aria-label="Drag to reorder"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+                </div>
+            </div>
+            <div class="card-content text-center">
+                <div class="timer-display text-5xl font-bold my-4 tabular-nums">00:00:00</div>
+                 <div class="focus-status text-xs text-yellow-400 mb-2 h-4"></div>
+                <div class="flex flex-col sm:flex-row gap-2 mb-4 items-center justify-center">
+                    <label for="subject-select" class="text-sm text-secondary sr-only sm:not-sr-only">Subject:</label>
+                    <select id="subject-select" class="subject-select form-input rounded-md p-2 text-sm flex-grow">
+                        </select>
+                </div>
+                <div class="flex justify-center gap-4">
+                    <button class="start-pause-btn btn-primary font-bold py-2 px-8 text-lg rounded-md">START</button>
+                    <button class="log-btn bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-md">LOG</button>
+                    <button class="reset-btn text-secondary hover:text-primary">Reset</button>
+                </div>
+                <p class="log-message text-red-500 text-xs mt-2 h-4"></p>
+                <div class="w-full border-t border-[var(--border-color)] my-3"></div>
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-md font-semibold text-left">Today's Log</h3>
+                    <span class="total-study-time text-sm font-bold text-secondary"></span>
+                </div>
+                <ul class="study-log-list space-y-2 max-h-32 overflow-y-auto no-scrollbar text-left text-sm">
+                    </ul>
+            </div>
+        </div>
+    </template>
+
+    <div id="add-card-modal" class="modal-overlay hidden">
+        <div class="card w-11/12 max-w-md">
+            <h2 class="text-xl font-semibold mb-4">Add New Card</h2>
+            <form id="new-card-form">
+                <label for="new-card-type" class="sr-only">Card Type</label>
+                <select id="new-card-type" class="form-input rounded-md p-2 w-full mb-3">
+                    <option value="note">Note</option>
+                    <option value="todo">To-Do List</option>
+                    <option value="line-graph">Line Graph</option>
+                    <option value="pomodoro">Pomodoro Timer</option>
+                    <option value="youtube">YouTube Video</option>
+                    <option value="time-logger">Study Logger</option>
+                </select>
+                 <label for="new-card-title" class="sr-only">Card Title</label>
+                <input type="text" id="new-card-title" placeholder="Card Title" class="form-input rounded-md p-2 w-full mb-3" required>
+                 <label for="new-card-content" class="sr-only">Card Content</label>
+                <textarea id="new-card-content" placeholder="Card Content (URL for YouTube)" rows="4" class="form-input rounded-md p-2 w-full mb-4"></textarea>
+                <div class="flex justify-end gap-3">
+                    <button type="button" id="cancel-add-card" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md">Cancel</button>
+                    <button type="submit" class="btn-primary font-bold py-2 px-4 rounded-md">Add</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="customize-modal" class="modal-overlay hidden">
+        <div class="card w-11/12 max-w-md relative">
+             <button id="close-customize-icon-btn" class="absolute top-3 right-3 text-secondary hover:text-primary transition-colors p-1 rounded-full" aria-label="Close customize panel">
+                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+             </button>
+            <h2 class="text-xl font-semibold mb-4">Customize Dashboard</h2>
+            <div class="space-y-4">
+                 <div>
+                     <label for="exam-type-select" class="block text-sm font-medium text-secondary mb-1">Target Exam</label>
+                     <div class="grid grid-cols-2 gap-2">
+                         <select id="exam-type-select" class="form-input rounded-md p-2 w-full">
+                             <option value="JEE">JEE</option>
+                             <option value="NEET">NEET</option>
+                         </select>
+                         <label for="exam-year-select" class="sr-only">Exam Year</label>
+                         <select id="exam-year-select" class="form-input rounded-md p-2 w-full">
+                             <option value="2026">2026</option>
+                             <option value="2027">2027</option>
+                         </select>
+                     </div>
+                 </div>
+                 <div>
+                     <label for="theme-select" class="block text-sm font-medium text-secondary mb-1">Theme</label>
+                     <select id="theme-select" class="form-input rounded-md p-2 w-full">
+                         <option value="default">Deep Space</option>
+                         <option value="light">Solarized Light</option>
+                         <option value="cyberpunk">Cyberpunk</option>
+                         <option value="forest">Forest</option>
+                         <option value="rose-gold">Rose Gold</option>
+                         <option value="ocean">Ocean</option>
+                         <option value="sunset">Sunset</option>
+                         <option value="dracula">Dracula</option>
+                         <option value="alakh-pandey" class="hidden">Alakh Pandey</option>
+                     </select>
+                 </div>
+                 <div>
+                     <label for="font-select" class="block text-sm font-medium text-secondary mb-1">Font</label>
+                     <select id="font-select" class="form-input rounded-md p-2 w-full">
+                         <option value="'Inter', sans-serif">Inter (Sans-Serif)</option>
+                         <option value="'Roboto Slab', serif">Roboto Slab (Serif)</option>
+                         <option value="'Fira Code', monospace">Fira Code (Monospace)</option>
+                         <option value="'Comic Neue', cursive">Comic Sans</option>
+                     </select>
+                 </div>
+                 <div>
+                     <label for="bg-image-url" class="block text-sm font-medium text-secondary mb-1">Background Image URL</label>
+                     <div class="flex gap-2">
+                         <input type="text" id="bg-image-url" placeholder="Paste image URL..." class="form-input rounded-md p-2 w-full">
+                         <button id="remove-bg-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-md" aria-label="Remove background image">X</button>
+                     </div>
+                 </div>
+                 <div>
+                     <label class="block text-sm font-medium text-secondary mb-1">YouTube Player</label>
+                     <div class="space-y-2 mt-2 p-3 rounded-md" style="background-color: rgba(0,0,0,0.2);">
+                         <label for="youtube-tint-toggle" class="flex items-center justify-between cursor-pointer">
+                             <span class="text-sm">Enable Video Tint</span>
+                             <input type="checkbox" id="youtube-tint-toggle" class="form-input-toggle">
+                         </label>
+                         <label for="youtube-blur-toggle" class="flex items-center justify-between cursor-pointer">
+                             <span class="text-sm">Blur Video Player</span>
+                              <input type="checkbox" id="youtube-blur-toggle" class="form-input-toggle">
+                         </label>
+                     </div>
+                 </div>
+                 <div>
+                     <label class="block text-sm font-medium text-secondary mb-1">Focus Mode</label>
+                     <div class="space-y-2 mt-2 p-3 rounded-md" style="background-color: rgba(0,0,0,0.2);">
+                         <label for="focus-shield-toggle" class="flex items-center justify-between cursor-pointer">
+                             <span class="text-sm">Enable Focus Shield</span>
+                             <input type="checkbox" id="focus-shield-toggle" class="form-input-toggle">
+                         </label>
+                     </div>
+                 </div>
+            </div>
+            <div class="flex justify-between items-center mt-6">
+                <button type="button" id="reset-dashboard-btn" class="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                    <span>Reset Dashboard</span>
+                </button>
+                <button type="button" id="close-customize" class="btn-primary font-bold py-2 px-4 rounded-md">Close</button>
+            </div>
+            <div class="mt-6 pt-4 border-t" style="border-color: var(--border-color);">
+                <h3 class="text-md font-semibold mb-3 text-secondary">Data Management</h3>
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <button type="button" id="export-data-btn" class="flex-1 bg-green-700 hover:bg-green-800 text-white font-bold py-2 px-4 rounded-md text-sm transition-colors">Export Data</button>
+                    <button type="button" id="import-data-btn" class="flex-1 bg-sky-600 hover:bg-sky-700 text-white font-bold py-2 px-4 rounded-md text-sm transition-colors">Import Data</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="confirm-modal" class="modal-overlay hidden">
+        <div class="card w-11/12 max-w-sm">
+            <h2 id="confirm-title" class="text-xl font-semibold mb-2">Are you sure?</h2>
+            <p id="confirm-message" class="text-sm text-secondary mb-6"></p>
+            <div class="flex justify-end gap-3">
+                <button type="button" id="confirm-cancel-btn" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md">Cancel</button>
+                <button type="button" id="confirm-ok-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="mobile-alert" class="fixed bottom-4 left-4 right-4 bg-yellow-400 text-black p-3 text-center text-sm rounded-lg shadow-lg flex justify-between items-center hidden z-50">
+        <span>For the best experience, try this on a desktop.</span>
+        <button id="close-alert-btn" class="font-bold text-lg ml-4" aria-label="Close mobile alert">&times;</button>
+    </div>
+
+    <div id="info-modal" class="modal-overlay hidden">
+        <div class="card w-11/12 max-w-md">
+            <h2 class="text-xl font-semibold mb-4">About StudyLocus</h2>
+            <p class="text-sm text-secondary mb-4">
+                This dashboard was created to help students track their preparation for the JEE exam. It's a fully customizable, open-source tool built with modern web technologies.
+            </p>
+            <div class="space-y-2 text-sm">
+                <p><strong>Created by:</strong> <a href="https://github.com/svalordev" target="_blank" class="hover:underline" style="color: var(--accent-color);">Shaurya Pratap Singh</a></p>
+                <p><strong>Project Repository:</strong> <a href="https://github.com/SvalTech/studylocus/" target="_blank" rel="noopener noreferrer" class="hover:underline" style="color: var(--accent-color);">View on GitHub</a></p>
+            </div>
+            <div class="flex justify-end mt-6">
+                <button type="button" id="close-info-modal" class="btn-primary font-bold py-2 px-4 rounded-md">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="fab-container">
+        <div class="fab-menu card p-2 space-y-1">
+             <h3 class="text-sm font-bold px-2 text-secondary">sval.tech</h3>
+             <a href="#" class="flex items-center gap-2 p-2 rounded-md hover:bg-gray-700/50">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M7 3v18"></path><path d="M12 3v18"></path><path d="M17 3v18"></path><path d="M3 7.5h18"></path><path d="M3 12h18"></path><path d="M3 16.5h18"></path></svg>
+                 <span>Dashboard</span>
+             </a>
+             <a href="https://svaltech.github.io/syllabustracker" target="_blank" class="flex items-center gap-2 p-2 rounded-md hover:bg-gray-700/50">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="m10 14-2 2 2 2"></path><path d="m14 6-2 2 2 2"></path></svg>
+                 <span>Syllabus Tracker</span>
+             </a>
+        </div>
+        <button class="w-14 h-14 rounded-full bg-gray-800 shadow-lg flex items-center justify-center text-white hover:bg-gray-700 transition-colors" aria-label="Toggle sval.tech products menu">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        </button>
+    </div>
+
+    <input type="file" id="import-file-input" class="hidden" accept=".json">
+
+    <div id="god-mode-panel" class="hidden fixed bottom-4 left-4 card p-4 w-64 z-50 space-y-3">
+        <h3 class="text-lg font-bold text-center" style="color: var(--accent-color);">-- GOD MODE --</h3>
+        <p class="text-xs text-secondary text-center">Ultimate power is now yours.</p>
+        <div class="border-t border-[var(--border-color)]"></div>
+        <div class="space-y-2">
+            <button id="god-mode-theme-btn" class="w-full bg-green-700 hover:bg-green-800 text-white font-bold py-2 px-4 rounded-md text-sm">Matrix Theme</button>
+            <button id="god-mode-complete-tasks-btn" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-2 px-4 rounded-md text-sm">Complete All Tasks</button>
+            <button id="god-mode-perfect-score-btn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-md text-sm">Get Perfect Score</button>
+            <button id="god-mode-timewarp-btn" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-md text-sm">Time Warp (+7 Days)</button>
+            <button id="god-mode-scramble-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md text-sm">Scramble Layout</button>
+            <button id="god-mode-nuke-btn" class="w-full bg-red-700 hover:bg-red-800 text-white font-bold py-2 px-4 rounded-md text-sm">NUKE</button>
+        </div>
+        <button id="god-mode-close-btn" class="absolute top-2 right-2 text-secondary hover:text-primary" aria-label="Close God Mode Panel">&times;</button>
+    </div>
+    <script src="firebase-config.js"></script>
+    <script>
+    // --- 🔥 START: Firebase Configuration ---
+    // IMPORTANT: Replace this with your project's Firebase credentials.
+    // You can find this in your Firebase project settings.
+    
+    // Initialize Firebase
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    let currentUser = null;
+    let syncTimeout = null;
+    // --- 🔥 END: Firebase Configuration ---
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- CONFIGURATION & STATE ---
+        const STORAGE_KEYS = {
+            tests: 'jeePartTests_v2',
+            layout: 'jeeDashboardLayout_v3',
+            customCards: 'jeeCustomCards_v3',
+            settings: 'jeeDashboardSettings_v3',
+            mobileAlertDismissed: 'jeeMobileAlertDismissed_v1',
+            cardProps: 'jeeCardProps_v2',
+            pomodoroState: 'jeePomodoroState_v1',
+            timeLoggerState: 'jeeTimeLoggerState_v1',
+            studyLogs: 'jeeStudyLogs_v1'
+        };
+
+        const EXAM_CONFIG = {
+            'JEE': {
+                2026: new Date("2026-01-22T00:00:00"),
+                2027: new Date("2027-01-21T00:00:00"),
+            },
+            'NEET': {
+                2026: new Date("2026-05-03T00:00:00"),
+                2027: new Date("2027-05-02T00:00:00"),
+            }
+        };
+
+        const defaultCustomCards = [
+            { id: 'default-todo', type: 'todo', title: 'My Tasks', content: [{ text: 'Solve 20 Physics problems', completed: false }, { text: 'Revise Organic Chemistry', completed: true }, { text: 'Take a short break!', completed: false }] },
+            { id: 'default-line-graph', type: 'line-graph', title: 'Mock Test Progress', content: [{ name: 'Test 1', marks: 120, maxMarks: 300 }, { name: 'Test 2', marks: 145, maxMarks: 300 }, { name: 'Test 3', marks: 160, maxMarks: 300 }] },
+            { id: 'default-note', type: 'note', title: 'Welcome!', content: 'Welcome to your new dashboard! You can drag, resize, and delete these cards. Add your own from the top right. Best of luck in your journey!' },
+            { id: 'default-study-logger', type: 'time-logger', title: 'Study Log', content: [] }
+        ];
+
+        const defaultLayout = ['countdown', 'graph', 'default-todo', 'default-study-logger', 'default-note', 'default-line-graph', 'tests', 'quote', 'time'];
+        const defaultCardProps = {
+            'graph': { colspan: 2 },
+            'default-line-graph': { colspan: 1 },
+            'default-study-logger': { colspan: 1 }
+        };
+        
+        const savedSettings = JSON.parse(localStorage.getItem(STORAGE_KEYS.settings));
+        
+        const AppState = {
+            tests: JSON.parse(localStorage.getItem(STORAGE_KEYS.tests)) || {},
+            customCards: JSON.parse(localStorage.getItem(STORAGE_KEYS.customCards)) || defaultCustomCards,
+            layout: JSON.parse(localStorage.getItem(STORAGE_KEYS.layout)) || defaultLayout,
+            settings: {
+                theme: 'default', 
+                font: "'Inter', sans-serif", 
+                bgUrl: '', 
+                examType: 'JEE',
+                examYear: '2026',
+                youtubeTintEnabled: true,
+                youtubeBlurEnabled: false,
+                focusShieldEnabled: false,
+                userSubjects: [],
+                ...savedSettings
+            },
+            cardProps: JSON.parse(localStorage.getItem(STORAGE_KEYS.cardProps)) || defaultCardProps,
+            pomodoroState: JSON.parse(localStorage.getItem(STORAGE_KEYS.pomodoroState)) || {},
+            timeLoggerState: JSON.parse(localStorage.getItem(STORAGE_KEYS.timeLoggerState)) || {},
+            studyLogs: JSON.parse(localStorage.getItem(STORAGE_KEYS.studyLogs)) || {},
+            chartInstances: {},
+            activeTimer: { cardId: null, type: null, unfocusedTime: 0, unfocusedStart: 0 },
+            
+            // ✨ MODIFIED SAVE FUNCTION
+            save(key) {
+                localStorage.setItem(STORAGE_KEYS[key], JSON.stringify(this[key]));
+                syncKeyToFirestore(key);
+            },
+            saveSettings() {
+                 localStorage.setItem(STORAGE_KEYS.settings, JSON.stringify(this.settings));
+                 syncKeyToFirestore('settings');
+            }
+        };
+
+        const quotes = [
+            { text: "The secret of getting ahead is getting started.", author: "Mark Twain" },
+            { text: "It’s not whether you get knocked down, it’s whether you get up.", author: "Vince Lombardi" },
+            { text: "Success is the sum of small efforts, repeated day in and day out.", author: "Robert Collier" },
+            { text: "The expert in anything was once a beginner.", author: "Helen Hayes" },
+            { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" },
+            { text: "The difference between ordinary and extraordinary is that little extra.", author: "Jimmy Johnson" },
+            { text: "A person who never made a mistake never tried anything new.", author: "Albert Einstein" },
+            { text: "The harder I work, the luckier I get.", author: "Samuel Goldwyn" },
+            { text: "Success is not final, failure is not fatal: it is the courage to continue that counts.", author: "Winston Churchill" },
+            { text: "Strive for progress, not perfection.", author: "Unknown" },
+            { text: "Genius is one percent inspiration and ninety-nine percent perspiration.", author: "Thomas A. Edison" },
+            { text: "It does not matter how slowly you go as long as you do not stop.", author: "Confucius" },
+            { text: "Doubt kills more dreams than failure ever will.", author: "Suzy Kassem" },
+            { text: "Push yourself, because no one else is going to do it for you.", author: "Unknown" },
+            { text: "If you want to shine like a sun, first burn like a sun.", author: "A. P. J. Abdul Kalam" },
+            { text: "The important thing is not to stop questioning. Curiosity has its own reason for existing.", author: "Albert Einstein" },
+            { text: "We are what we repeatedly do. Excellence, then, is not an act, but a habit.", author: "Aristotle" },
+            { text: "The chapters you study today will decide the chapters of your life tomorrow.", author: "Unknown" },
+            { text: "Your toughest competition is the person you were yesterday.", author: "Unknown" },
+            { text: "Rank is just a number. Knowledge and skill are the real assets.", author: "Unknown" },
+            { text: "Dream is not that which you see while sleeping it is something that does not let you sleep.", author: "A. P. J. Abdul Kalam" },
+            { text: "Focus on the process, not the outcome. The right process will lead to the right outcome.", author: "Unknown" },
+        ];
+        
+        const memeQuotes = [
+            { text: "Kyu nahi ho rahi padhai?", author: "Alakh Pandey" },
+            { text: "System phaad denge!", author: "A wise man" },
+            { text: "Physics is not a subject, it's an emotion.", author: "Alakh Pandey" },
+            { text: "Aag laga denge!", author: "Revolutionaries" },
+            { text: "Mehnat karta hu bhai", author: "Basava Reddy" }
+        ];
+        
+        const chaitanyaQuotes = [
+            { text: "Chaitanya is a noob 🤓", author: "Everyone" },
+            { text: "I love Organic Chemistry 🤓", author: "Chaitanya (probably)" },
+            { text: "Isomerism is my favorite topic 🤓", author: "Definitely Chaitanya" },
+            { text: "Just like us guys 🤓", author: "Chaitanya the moron" },
+        ];
+
+        // --- DOM ELEMENTS ---
+        const D = {
+            body: document.body,
+            mainTitle: document.getElementById('main-title'),
+            dashboardGrid: document.getElementById('dashboard-grid'),
+            authContainer: document.getElementById('auth-container'), // ✨ New
+            syncStatus: document.getElementById('sync-status'),       // ✨ New
+            modals: {
+                addCard: document.getElementById('add-card-modal'),
+                customize: document.getElementById('customize-modal'),
+                info: document.getElementById('info-modal'),
+                confirm: document.getElementById('confirm-modal'),
+            },
+            buttons: {
+                addCard: document.getElementById('add-card-btn'),
+                cancelAddCard: document.getElementById('cancel-add-card'),
+                customize: document.getElementById('customize-btn'),
+                closeCustomize: document.getElementById('close-customize'),
+                closeCustomizeIcon: document.getElementById('close-customize-icon-btn'),
+                removeBg: document.getElementById('remove-bg-btn'),
+                closeAlert: document.getElementById('close-alert-btn'),
+                resetDashboard: document.getElementById('reset-dashboard-btn'),
+                info: document.getElementById('info-btn'),
+                closeInfo: document.getElementById('close-info-modal'),
+                exportData: document.getElementById('export-data-btn'),
+                importData: document.getElementById('import-data-btn'),
+                confirmOk: document.getElementById('confirm-ok-btn'),
+                confirmCancel: document.getElementById('confirm-cancel-btn'),
+                zenModeBtn: document.getElementById('zen-mode-btn'),
+                exitZenBtn: document.getElementById('exit-zen-btn'),
+                godModeClose: document.getElementById('god-mode-close-btn'),
+            },
+            forms: {
+                newCard: document.getElementById('new-card-form'),
+            },
+            inputs: {
+                cardType: document.getElementById('new-card-type'),
+                cardContent: document.getElementById('new-card-content'),
+                theme: document.getElementById('theme-select'),
+                font: document.getElementById('font-select'),
+                bgUrl: document.getElementById('bg-image-url'),
+                examType: document.getElementById('exam-type-select'),
+                examYear: document.getElementById('exam-year-select'),
+                importFile: document.getElementById('import-file-input'),
+                youtubeTintToggle: document.getElementById('youtube-tint-toggle'),
+                youtubeBlurToggle: document.getElementById('youtube-blur-toggle'),
+                focusShieldToggle: document.getElementById('focus-shield-toggle'),
+            },
+            mobileAlert: document.getElementById('mobile-alert'),
+            confirmTitle: document.getElementById('confirm-title'),
+            confirmMessage: document.getElementById('confirm-message'),
+            godModePanel: document.getElementById('god-mode-panel'),
+        };
+
+        // --- 🔥 START: Firebase Auth and Sync Logic ---
+
+        // Listen for authentication state changes
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                // User is signed in.
+                currentUser = user;
+                handleUserLogin(user);
+            } else {
+                // User is signed out.
+                currentUser = null;
+                updateAuthUI();
+                // We don't need to reload, the app will just use localStorage
+            }
+        });
+
+        const signIn = () => {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider).catch(error => {
+                console.error("Authentication Error:", error);
+            });
+        };
+
+        const signOut = () => {
+	sessionStorage.removeItem('cloud_data_loaded');
+            auth.signOut();
+        };
+
+        const updateAuthUI = () => {
+            if (currentUser) {
+                // ✨ FIX: Button is now a responsive circle on mobile, and a pill on desktop.
+                D.authContainer.innerHTML = `
+                    <button id="sign-out-btn" title="Sign Out" class="flex items-center justify-center w-10 h-10 rounded-full transition-colors hover:bg-white/20 sm:w-auto sm:h-auto sm:px-2 sm:py-1">
+                        <img src="${currentUser.photoURL}" alt="${currentUser.displayName}" class="w-8 h-8 rounded-full" />
+                        <span class="text-sm font-semibold hidden sm:inline ml-2">${currentUser.displayName.split(' ')[0]}</span>
+                    </button>
+                `;
+                D.authContainer.querySelector('#sign-out-btn').addEventListener('click', signOut);
+            } else {
+                 // ✨ FIX: "Sign In" is now an icon on mobile and includes text on desktop.
+                 D.authContainer.innerHTML = `
+                    <button id="sign-in-btn" class="flex items-center justify-center w-10 h-10 rounded-full transition-colors hover:bg-white/20 sm:w-auto sm:px-3 sm:py-2">
+                        <!-- Google G Icon SVG -->
+                        <svg class="w-5 h-5" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M47.532 24.552c0-1.566-.14-3.084-.404-4.548H24.5v8.58h12.944c-.566 2.76-2.213 5.108-4.72 6.708v5.524h7.112c4.162-3.832 6.596-9.42 6.596-16.264z" fill="#4285F4"/>
+                            <path d="M24.5 48c6.48 0 11.944-2.14 15.928-5.788l-7.112-5.524c-2.14 1.44-4.884 2.292-7.816 2.292-6.004 0-11.084-4.04-12.9-9.492H4.42v5.7c3.48 6.912 10.32 11.532 18.08 11.532l2 .28z" fill="#34A853"/>
+                            <path d="M11.6 28.98c-.34-.996-.54-2.052-.54-3.144s.2-2.148.54-3.144V16.992H4.42C2.852 20.04 2 23.436 2 27.024c0 3.588.852 6.984 2.42 10.032l7.18-5.7v-.376z" fill="#FBBC05"/>
+                            <path d="M24.5 9.8c3.516 0 6.66 1.212 9.128 3.54l6.32-6.32C36.44.88 30.98 0 24.5 0 16.74 0 9.9 4.62 6.42 11.532l7.18 5.7c1.816-5.452 6.896-9.432 12.9-9.432z" fill="#EA4335"/>
+                        </svg>
+                        <span class="text-sm font-semibold hidden sm:inline ml-2">Sign In</span>
+                    </button>
+                `;
+                D.authContainer.querySelector('#sign-in-btn').addEventListener('click', signIn);
+            }
+        };
+        
+        const handleUserLogin = async (user) => {
+            updateAuthUI();
+            const userDocRef = db.collection('users').doc(user.uid);
+            const doc = await userDocRef.get();
+
+            if (doc.exists) {
+                // Returning user: Load data from Firestore
+                loadDataFromFirestore(doc.data());
+            } else {
+                // New user: Migrate local data to Firestore
+                migrateLocalDataToFirestore(userDocRef);
+            }
+        };
+
+const loadDataFromFirestore = (cloudData) => {
+            // ✨ FIX: Check for a session flag to prevent the reload loop.
+            if (sessionStorage.getItem('cloud_data_loaded') === 'true') {
+                console.log("Cloud data already loaded this session. Skipping redundant load.");
+                return;
+            }
+
+            console.log("Loading data from cloud...");
+            let needsReload = false;
+            for(const key in STORAGE_KEYS) {
+                if (cloudData[key]) {
+                    const localDataString = localStorage.getItem(STORAGE_KEYS[key]);
+                    const cloudDataString = JSON.stringify(cloudData[key]);
+                    
+                    // This comparison is what causes the loop, but now it only runs once per session.
+                    if (localDataString !== cloudDataString) {
+                         localStorage.setItem(STORAGE_KEYS[key], cloudDataString);
+                         needsReload = true;
+                    }
+                }
+            }
+
+            if(needsReload) {
+                // ✨ FIX: Set the flag *before* reloading to break the cycle.
+                sessionStorage.setItem('cloud_data_loaded', 'true');
+                location.reload();
+            }
+        };
+
+        const migrateLocalDataToFirestore = (userDocRef) => {
+             console.log("New user detected. Migrating local data to cloud...");
+             const localData = {};
+             for(const key in STORAGE_KEYS) {
+                 const data = localStorage.getItem(STORAGE_KEYS[key]);
+                 if (data) {
+                     localData[key] = JSON.parse(data);
+                 }
+             }
+             if (Object.keys(localData).length > 0) {
+                 userDocRef.set(localData)
+                    .then(() => showSyncStatus("Synced"))
+                    .catch(e => console.error("Migration failed:", e));
+             }
+        };
+        
+        const showSyncStatus = (status) => {
+            clearTimeout(syncTimeout);
+            D.syncStatus.textContent = status;
+            D.syncStatus.style.opacity = 1;
+            if(status !== "Saving...") {
+                syncTimeout = setTimeout(() => { D.syncStatus.style.opacity = 0; }, 2000);
+            }
+        };
+        
+        // This is the core function that syncs a specific piece of data to Firestore
+        const syncKeyToFirestore = (key) => {
+            if (!currentUser) return;
+            
+            showSyncStatus("Saving...");
+            const userDocRef = db.collection('users').doc(currentUser.uid);
+            const dataToSync = localStorage.getItem(STORAGE_KEYS[key]);
+            
+            if (dataToSync) {
+                const payload = { [key]: JSON.parse(dataToSync) };
+                userDocRef.set(payload, { merge: true })
+                    .then(() => showSyncStatus("All changes saved"))
+                    .catch(e => {
+                        showSyncStatus("Sync Error");
+                        console.error("Firestore sync error:", e);
+                    });
+            }
+        };
+
+        // --- 🔥 END: Firebase Auth and Sync Logic ---
+
+
+        // --- HELPER FUNCTIONS ---
+        let confirmCallback = null;
+        function showConfirmation(message, onConfirm, title = 'Are you sure?') {
+            D.confirmTitle.textContent = title;
+            D.confirmMessage.textContent = message;
+            confirmCallback = onConfirm;
+            D.modals.confirm.classList.remove('hidden');
+        }
+
+        const toLocalDateString = (date) => {
+            const year = date.getFullYear();
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const day = date.getDate().toString().padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
+
+        const getExamDate = () => {
+            const { examType, examYear } = AppState.settings;
+            return EXAM_CONFIG[examType]?.[examYear] || new Date();
+        };
+
+        const formatSeconds = (s) => {
+            const h = Math.floor(s / 3600).toString().padStart(2,'0');
+            const m = Math.floor(s % 3600 / 60).toString().padStart(2,'0');
+            const sec = Math.floor(s % 60).toString().padStart(2,'0');
+            return `${h}:${m}:${sec}`;
+        };
+
+        const formatSecondsToReadable = (s) => {
+            const h = Math.floor(s / 3600);
+            const m = Math.floor(s % 3600 / 60);
+            let str = '';
+            if (h > 0) str += `${h}h `;
+            if (m > 0 || h > 0) str += `${m}m`;
+            if (str === '') str = `${s % 60}s`
+            return str.trim();
+        }
+        
+        // --- CARD TYPE DEFINITIONS ---
+        // [YOUR EXISTING `cardTypes` OBJECT GOES HERE... No changes needed inside it.]
+        const cardTypes = {
+            countdown: {
+                templateId: 'countdown-template',
+                isDefault: true,
+                render: (cardEl) => {
+                    const diff = getExamDate() - new Date();
+                    cardEl.querySelector('[data-value="days"]').innerText = Math.floor(diff / 864e5).toString().padStart(2, '0');
+                    cardEl.querySelector('[data-value="hours"]').innerText = Math.floor(diff / 36e5 % 24).toString().padStart(2, '0');
+                    cardEl.querySelector('[data-value="minutes"]').innerText = Math.floor(diff / 6e4 % 60).toString().padStart(2, '0');
+                    cardEl.querySelector('[data-value="seconds"]').innerText = Math.floor(diff / 1e3 % 60).toString().padStart(2, '0');
+                }
+            },
+            time: {
+                templateId: 'time-template',
+                isDefault: true,
+                render: (cardEl) => {
+                    const now = new Date();
+                    const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+                    const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                    cardEl.querySelector('[data-value="time"]').textContent = now.toLocaleTimeString('en-US', timeOptions);
+                    cardEl.querySelector('[data-value="date"]').textContent = now.toLocaleDateString('en-US', dateOptions);
+                }
+            },
+            graph: {
+                templateId: 'graph-template',
+                isDefault: true,
+                render: (cardEl) => {
+                    const graphContainer = cardEl.querySelector('#contribution-graph');
+                    graphContainer.innerHTML = '';
+                    const today = new Date(); today.setHours(0, 0, 0, 0);
+                    const currentYear = new Date().getFullYear();
+                    let currentDate = new Date(`${currentYear}-01-01T00:00:00`);
+                    const examDay = getExamDate(); examDay.setHours(0, 0, 0, 0);
+                    
+                    while (currentDate <= examDay) {
+                        const dayDiv = document.createElement('div');
+                        const tooltip = document.createElement('span');
+                        const dateString = toLocalDateString(currentDate);
+                        
+                        dayDiv.className = 'day';
+                        dayDiv.dataset.date = dateString;
+                        tooltip.className = 'tooltip';
+                        
+                        let typeClass = 'day-future', tooltipText = currentDate.toDateString();
+                        if (currentDate < today) typeClass = 'day-past';
+                        if (currentDate.getTime() === today.getTime()) { typeClass = 'day-today'; tooltipText += ' - Today'; }
+                        if (AppState.tests[dateString]) { 
+                            typeClass = 'day-part-test';
+                            const daysRemaining = Math.ceil((new Date(dateString) - today) / (1000 * 60 * 60 * 24));
+                            tooltipText = `${AppState.tests[dateString]} (${daysRemaining} days from now)`;
+                        }
+                        if (currentDate.getTime() === examDay.getTime()) { typeClass = 'day-exam'; tooltipText += ' - Exam!'; }
+                        
+                        dayDiv.classList.add(typeClass);
+                        tooltip.textContent = tooltipText;
+                        dayDiv.appendChild(tooltip);
+                        graphContainer.appendChild(dayDiv);
+                        currentDate.setDate(currentDate.getDate() + 1);
+                    }
+                }
+            },
+            tests: {
+                templateId: 'tests-template',
+                isDefault: true,
+                render: (cardEl) => {
+                    const listEl = cardEl.querySelector('#test-list');
+                    listEl.innerHTML = '';
+                    const sortedDates = Object.keys(AppState.tests).sort();
+                    if (sortedDates.length === 0) {
+                        listEl.innerHTML = '<li class="text-secondary px-2 text-sm">No tests scheduled.</li>';
+                        return;
+                    }
+                    sortedDates.forEach(date => {
+                        const li = document.createElement('li');
+                        li.className = 'flex justify-between items-center bg-gray-800 p-2 rounded-md';
+                        li.innerHTML = `<div class="flex flex-col"><span class="font-semibold text-sm">${AppState.tests[date]}</span><span class="text-xs text-secondary">${new Date(date + 'T00:00:00').toDateString()}</span></div><button data-date="${date}" class="delete-test-btn text-red-500 hover:text-red-400 font-semibold text-xs">Delete</button>`;
+                        listEl.appendChild(li);
+                    });
+                }
+            },
+            quote: {
+                templateId: 'quote-template',
+                isDefault: true,
+                render: (cardEl) => {
+                    let currentQuotes = quotes;
+                    if (AppState.settings.theme === 'alakh-pandey') currentQuotes = memeQuotes;
+                    if (AppState.settings.theme === 'chaitanya-noob') currentQuotes = chaitanyaQuotes;
+                    const { text, author } = currentQuotes[Math.floor(Math.random() * currentQuotes.length)];
+                    cardEl.querySelector('#quote').textContent = `"${text}"`;
+                    cardEl.querySelector('#author').textContent = `- ${author}`;
+                }
+            },
+            note: {
+                templateId: 'note-card-template',
+                render: (cardEl, cardData) => {
+                    cardEl.querySelector('.card-content').textContent = cardData.content;
+                }
+            },
+            todo: {
+                templateId: 'todo-card-template',
+                render: (cardEl, cardData) => {
+                    const listEl = cardEl.querySelector('.todo-list');
+                    const progressBar = cardEl.querySelector('.progress-bar');
+                    listEl.innerHTML = '';
+                    if (Array.isArray(cardData.content)) {
+                        const totalTasks = cardData.content.length;
+                        const completedTasks = cardData.content.filter(item => item.completed).length;
+                        const progress = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+                        progressBar.style.width = `${progress}%`;
+                        
+                        if(totalTasks === 0) {
+                            listEl.innerHTML = '<li class="text-secondary px-2 text-sm">No tasks yet. Add one below!</li>';
+                        } else {
+                            cardData.content.forEach((item, index) => {
+                                const li = document.createElement('li');
+                                li.className = `flex items-center gap-3 p-2 rounded-md hover:bg-white/5 transition-colors todo-item ${item.completed ? 'completed' : ''}`;
+                                li.dataset.index = index;
+                                li.innerHTML = `<input type="checkbox" ${item.completed ? 'checked' : ''} class="todo-checkbox"><span class="flex-grow text-sm">${item.text}</span><button class="delete-todo-item" aria-label="Delete task">×</button>`;
+                                listEl.appendChild(li);
+                            });
+                        }
+                    }
+                }
+            },
+            'line-graph': {
+                templateId: 'line-graph-card-template',
+                render: (cardEl, cardData) => {
+                    const listEl = cardEl.querySelector('.marks-list');
+                    listEl.innerHTML = '';
+                    
+                    cardData.content.forEach((item, index) => {
+                        const li = document.createElement('li');
+                        li.className = 'flex justify-between items-center text-xs bg-gray-800 p-1 rounded';
+                        li.innerHTML = `<span>${item.name}: <strong>${item.marks} / ${item.maxMarks}</strong></span><button data-index="${index}" class="delete-mark-item text-red-500 px-1" aria-label="Delete mark entry">×</button>`;
+                        listEl.appendChild(li);
+                    });
+
+                    const ctx = cardEl.querySelector('.marks-chart').getContext('2d');
+                    if (AppState.chartInstances[cardData.id]) {
+                        AppState.chartInstances[cardData.id].destroy();
+                    }
+                    
+                    const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
+                    const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim();
+                    const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--border-color').trim();
+                    
+                    const gradient = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height);
+                    gradient.addColorStop(0, `${accentColor}40`);
+                    gradient.addColorStop(1, `${accentColor}00`);
+
+                    const maxMarkValue = cardData.content.length > 0 ? Math.max(...cardData.content.map(d => d.maxMarks || 0)) : 300;
+
+                    AppState.chartInstances[cardData.id] = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: cardData.content.map(d => d.name),
+                            datasets: [{
+                                label: 'Marks',
+                                data: cardData.content.map(d => d.marks),
+                                borderColor: accentColor,
+                                backgroundColor: gradient,
+                                fill: true,
+                                tension: 0.3,
+                                pointBackgroundColor: accentColor,
+                                pointBorderColor: 'var(--card-bg-color)',
+                                pointHoverBackgroundColor: '#fff',
+                                pointHoverBorderColor: accentColor,
+                                pointRadius: 4,
+                                pointHoverRadius: 6,
+                                borderWidth: 2
+                            }]
+                        },
+                        options: {
+                            responsive: true, maintainAspectRatio: false,
+                            plugins: { legend: { display: false } },
+                            scales: {
+                                y: { beginAtZero: true, max: maxMarkValue, ticks: { color: textColor }, grid: { color: gridColor } },
+                                x: { ticks: { color: textColor }, grid: { color: 'transparent' } }
+                            }
+                        }
+                    });
+                }
+            },
+            pomodoro: {
+                templateId: 'pomodoro-card-template',
+                render: (cardEl, cardData) => {
+                    const state = AppState.pomodoroState[cardData.id] || {
+                        mode: 'pomodoro',
+                        time: 25 * 60,
+                        isRunning: false,
+                        intervalId: null,
+                        durations: { pomodoro: 25, shortBreak: 5, longBreak: 15 }
+                    };
+                    AppState.pomodoroState[cardData.id] = state;
+
+                    const minutes = Math.floor(state.time / 60).toString().padStart(2, '0');
+                    const seconds = (state.time % 60).toString().padStart(2, '0');
+                    cardEl.querySelector('.timer-display').textContent = `${minutes}:${seconds}`;
+                    
+                    cardEl.querySelectorAll('.pomodoro-btn').forEach(btn => {
+                        btn.classList.toggle('active', btn.dataset.mode === state.mode);
+                    });
+                    
+                    cardEl.querySelector('.start-pause-btn').textContent = state.isRunning ? 'PAUSE' : 'START';
+
+                    cardEl.querySelector('[data-mode="pomodoro"].pomodoro-duration-input').value = state.durations.pomodoro;
+                    cardEl.querySelector('[data-mode="shortBreak"].pomodoro-duration-input').value = state.durations.shortBreak;
+                    cardEl.querySelector('[data-mode="longBreak"].pomodoro-duration-input').value = state.durations.longBreak;
+                }
+            },
+            youtube: {
+                templateId: 'youtube-card-template',
+                render: (cardEl, cardData) => {
+                    const iframe = cardEl.querySelector('.youtube-iframe');
+                    const url = cardData.content;
+                    let videoId = '';
+                    if (url) {
+                        try {
+                            const urlObj = new URL(url);
+                            if (urlObj.hostname.includes('youtu.be')) {
+                                videoId = urlObj.pathname.slice(1);
+                            } else {
+                                videoId = urlObj.searchParams.get('v');
+                            }
+                        } catch(e) { console.error("Invalid YouTube URL"); }
+                    }
+                    iframe.src = videoId ? `https://www.youtube.com/embed/${videoId}` : '';
+                    
+                    const container = cardEl.querySelector('.youtube-container');
+                    container.classList.toggle('tint-disabled', !AppState.settings.youtubeTintEnabled);
+                    container.classList.toggle('blurred', AppState.settings.youtubeBlurEnabled);
+                }
+            },
+            'time-logger': {
+                templateId: 'time-logger-card-template',
+                render: (cardEl, cardData) => {
+                    const state = AppState.timeLoggerState[cardData.id] || {
+                        isRunning: false,
+                        accumulatedTime: 0,
+                        currentSubject: 'Physics',
+                        intervalId: null
+                    };
+                    AppState.timeLoggerState[cardData.id] = state;
+
+                    // Update timer display
+                    cardEl.querySelector('.timer-display').textContent = formatSeconds(state.accumulatedTime);
+                    cardEl.querySelector('.start-pause-btn').textContent = state.isRunning ? 'PAUSE' : 'START';
+
+                    const selectId = `subject-select-${cardData.id}`;
+                    cardEl.querySelector('label[for="subject-select"]').setAttribute('for', selectId);
+                    const selectEl = cardEl.querySelector('.subject-select');
+                    selectEl.id = selectId;
+
+                    // Populate subjects
+                    const defaultSubjects = ['Physics', 'Chemistry', 'Maths', 'Biology', 'Zoology', 'Botany'];
+                    const allSubjects = [...new Set([...defaultSubjects, ...AppState.settings.userSubjects || []])];
+                    selectEl.innerHTML = allSubjects.map(s => `<option>${s}</option>`).join('') + '<option value="add_new">Add New Subject...</option>';
+
+                    selectEl.value = state.currentSubject;
+
+                    // Update today's log display
+                    const logListEl = cardEl.querySelector('.study-log-list');
+                    const totalTimeEl = cardEl.querySelector('.total-study-time');
+                    logListEl.innerHTML = '';
+                    const todayStr = toLocalDateString(new Date());
+                    const todaysLogs = AppState.studyLogs[todayStr] || {};
+                    
+                    // Calculate and display total time
+                    const totalSecondsToday = Object.values(todaysLogs).reduce((total, seconds) => total + seconds, 0);
+                    if (totalTimeEl) {
+                        totalTimeEl.textContent = `Total: ${formatSecondsToReadable(totalSecondsToday)}`;
+                    }
+                    
+                    if (Object.keys(todaysLogs).length === 0) {
+                        logListEl.innerHTML = '<li class="text-secondary px-2 text-sm">No sessions logged today.</li>';
+                    } else {
+                        Object.entries(todaysLogs).forEach(([subject, seconds]) => {
+                            const li = document.createElement('li');
+                            li.className = 'flex justify-between items-center';
+                            li.innerHTML = `<span>${subject}</span><div class="flex items-center gap-2"><span class="font-semibold">${formatSecondsToReadable(seconds)}</span><button data-subject="${subject}" class="delete-log-item text-red-500 hover:text-red-400 font-semibold px-2 py-1 text-xs leading-none rounded-sm" aria-label="Delete ${subject} log">×</button></div>`;
+                            logListEl.appendChild(li);
+                        });
+                    }
+                }
+            }
+        };
+
+
+        // --- CORE FUNCTIONS ---
+        // [YOUR EXISTING `renderDashboard`, `applyYouTubeSettings`, and `applySettings` functions go here... No changes needed.]
+        function renderDashboard() {
+            Object.values(AppState.chartInstances).forEach(chart => chart.destroy());
+            AppState.chartInstances = {};
+            D.dashboardGrid.innerHTML = '';
+            
+            const customCardIds = AppState.customCards.map(c => c.id);
+            AppState.layout = AppState.layout.filter(id => cardTypes[id]?.isDefault || customCardIds.includes(id));
+            AppState.customCards.forEach(card => {
+                if (!AppState.layout.includes(card.id)) AppState.layout.push(card.id);
+            });
+            AppState.save('layout');
+
+            AppState.layout.forEach(cardId => {
+                const cardData = AppState.customCards.find(c => c.id === cardId);
+                const type = cardData ? cardData.type : cardId;
+                const cardDef = cardTypes[type];
+                if (cardDef) {
+                    const template = document.getElementById(cardDef.templateId);
+                    const cardNode = template.content.cloneNode(true);
+                    const cardEl = cardNode.querySelector('.card');
+                    cardEl.dataset.cardId = cardId;
+                    
+                    const props = AppState.cardProps[cardId] || { colspan: (type === 'graph' || type === 'line-graph' || type === 'youtube' || type === 'time-logger') ? 2 : 1 };
+                    AppState.cardProps[cardId] = props;
+                    if (props.colspan === 2) {
+                        cardEl.classList.add('md:col-span-2');
+                    }
+                    if (cardData) {
+                        cardEl.querySelector('.card-title').textContent = cardData.title;
+                    } else if (AppState.settings.theme === 'chaitanya-noob') {
+                        const titleEl = cardEl.querySelector('h2');
+                        if (titleEl) titleEl.textContent += ' 🤓';
+                    }
+                    D.dashboardGrid.appendChild(cardNode);
+                }
+            });
+
+            D.dashboardGrid.querySelectorAll('.card').forEach((cardEl, index) => {
+                const cardId = cardEl.dataset.cardId;
+                const cardData = AppState.customCards.find(c => c.id === cardId);
+                const type = cardData ? cardData.type : cardId;
+                const cardDef = cardTypes[type];
+                if (cardDef) {
+                    cardDef.render(cardEl, cardData);
+                }
+            });
+        }
+
+        function applyYouTubeSettings() {
+            const tintEnabled = AppState.settings.youtubeTintEnabled;
+            const blurEnabled = AppState.settings.youtubeBlurEnabled;
+            
+            // Set toggles in customize panel
+            if(D.inputs.youtubeTintToggle) D.inputs.youtubeTintToggle.checked = tintEnabled;
+            if(D.inputs.youtubeBlurToggle) D.inputs.youtubeBlurToggle.checked = blurEnabled;
+
+            // Apply classes to all YouTube cards on the dashboard
+            document.querySelectorAll('[data-card-type="youtube"] .youtube-container').forEach(container => {
+                container.classList.toggle('tint-disabled', !tintEnabled);
+                container.classList.toggle('blurred', blurEnabled);
+            });
+        }
+
+        function applySettings() {
+            // Apply theme, font, background
+            document.documentElement.dataset.theme = AppState.settings.theme;
+            D.body.style.fontFamily = AppState.settings.font;
+            if (AppState.settings.theme === 'alakh-pandey') {
+                D.body.style.backgroundImage = `url(https://i.imgflip.com/8otyfs.jpg)`;
+            } else if (AppState.settings.theme === 'chaitanya-noob') {
+                D.body.style.backgroundImage = `url(https://i.ibb.co/pv4BYhMs/Whats-App-Image-2025-08-06-at-16-12-41-4f47e159.jpg)`;
+            } else if (AppState.settings.theme === 'god-mode') {
+                 D.body.style.backgroundImage = `url('https://i.pinimg.com/originals/c5/9a/d2/c59ad2bd4ad2fbacd04017debc679ddb.gif')`;
+            } else {
+                D.body.style.backgroundImage = AppState.settings.bgUrl ? `url(${AppState.settings.bgUrl})` : 'none';
+            }
+            
+            // Update main title
+            const { examType, examYear } = AppState.settings;
+            D.mainTitle.textContent = `${examType} ${examYear}`;
+
+            // Update customize modal inputs
+            D.inputs.theme.value = AppState.settings.theme;
+            D.inputs.font.value = AppState.settings.font;
+            D.inputs.bgUrl.value = AppState.settings.bgUrl;
+            D.inputs.examType.value = AppState.settings.examType;
+            D.inputs.examYear.value = AppState.settings.examYear;
+            D.inputs.focusShieldToggle.checked = AppState.settings.focusShieldEnabled;
+
+            applyYouTubeSettings();
+        }
+
+        // --- EVENT HANDLERS (DELEGATED) ---
+        // [YOUR EXISTING event listeners for `D.dashboardGrid`, modals, settings, etc. go here... No changes needed.]
+         D.dashboardGrid.addEventListener('click', (e) => {
+            const cardEl = e.target.closest('.card');
+            if (!cardEl) return;
+            const cardId = cardEl.dataset.cardId;
+
+            if (cardId === 'quote') cardTypes.quote.render(cardEl);
+
+            if (e.target.closest('.delete-test-btn')) {
+                delete AppState.tests[e.target.closest('.delete-test-btn').dataset.date];
+                AppState.save('tests');
+                renderDashboard();
+            }
+            if (e.target.classList.contains('day')) {
+                const dateString = e.target.dataset.date;
+                if (AppState.tests[dateString]) {
+                    delete AppState.tests[dateString];
+                    AppState.save('tests');
+                    renderDashboard();
+                } else {
+                    const testForm = D.dashboardGrid.querySelector('#add-test-form');
+                    if(testForm) {
+                        testForm.date.value = dateString;
+                        testForm.name.focus();
+                    }
+                }
+            }
+
+            const cardData = AppState.customCards.find(c => c.id === cardId);
+            
+            if (e.target.closest('.toggle-colspan-btn')) {
+                const props = AppState.cardProps[cardId] || { colspan: 1 };
+                props.colspan = props.colspan === 2 ? 1 : 2;
+                AppState.cardProps[cardId] = props;
+                AppState.save('cardProps');
+                renderDashboard();
+            }
+            if (e.target.closest('.delete-card-btn')) {
+                if (cardData) { // Only custom cards can be deleted
+                    AppState.customCards = AppState.customCards.filter(c => c.id !== cardId);
+                    delete AppState.cardProps[cardId];
+                    delete AppState.pomodoroState[cardId];
+                    delete AppState.timeLoggerState[cardId];
+                    AppState.save('customCards');
+                    AppState.save('cardProps');
+                    AppState.save('pomodoroState');
+                    AppState.save('timeLoggerState');
+                    renderDashboard();
+                }
+            }
+            if (e.target.classList.contains('delete-log-item')) {
+                const cardEl = e.target.closest('.card');
+                const cardId = cardEl.dataset.cardId;
+                const subject = e.target.dataset.subject;
+                const todayStr = toLocalDateString(new Date());
+
+                if (AppState.studyLogs[todayStr] && AppState.studyLogs[todayStr][subject] !== undefined) {
+                    delete AppState.studyLogs[todayStr][subject];
+                    if (Object.keys(AppState.studyLogs[todayStr]).length === 0) {
+                        delete AppState.studyLogs[todayStr];
+                    }
+                    AppState.save('studyLogs');
+                    const cardData = AppState.customCards.find(c => c.id === cardId);
+                    cardTypes['time-logger'].render(cardEl, cardData);
+                }
+            }
+            if (cardData && cardData.type === 'todo') {
+                const itemEl = e.target.closest('.todo-item');
+                if (itemEl) {
+                    const itemIndex = parseInt(itemEl.dataset.index);
+                    if (e.target.closest('.delete-todo-item')) {
+                        cardData.content.splice(itemIndex, 1);
+                    } else if (e.target.classList.contains('todo-checkbox')) {
+                        cardData.content[itemIndex].completed = !cardData.content[itemIndex].completed;
+                    }
+                    AppState.save('customCards');
+                    cardTypes.todo.render(cardEl, cardData);
+                }
+            }
+             if (cardData && cardData.type === 'line-graph' && e.target.closest('.delete-mark-item')) {
+                const itemIndex = parseInt(e.target.closest('.delete-mark-item').dataset.index);
+                cardData.content.splice(itemIndex, 1);
+                AppState.save('customCards');
+                cardTypes['line-graph'].render(cardEl, cardData);
+            }
+            if (cardData && cardData.type === 'pomodoro') {
+                if (e.target.classList.contains('pomodoro-btn')) {
+                    pomodoro.setMode(cardId, e.target.dataset.mode);
+                } else if (e.target.classList.contains('start-pause-btn')) {
+                    pomodoro.toggle(cardId);
+                } else if (e.target.classList.contains('reset-btn')) {
+                    pomodoro.reset(cardId);
+                }
+            }
+            if (cardData && cardData.type === 'time-logger') {
+                if (e.target.classList.contains('start-pause-btn')) {
+                    timeLogger.toggle(cardId);
+                } else if (e.target.classList.contains('log-btn')) {
+                    timeLogger.log(cardId);
+                } else if (e.target.classList.contains('reset-btn')) {
+                    timeLogger.reset(cardId);
+                }
+            }
+        });
+
+        D.dashboardGrid.addEventListener('change', (e) => {
+            if (e.target.classList.contains('pomodoro-duration-input')) {
+                const cardEl = e.target.closest('.card');
+                const cardId = cardEl.dataset.cardId;
+                const mode = e.target.dataset.mode;
+                let duration = parseInt(e.target.value);
+                if (duration < 1) {
+                    duration = 1;
+                    e.target.value = 1;
+                }
+                if (cardId && mode && !isNaN(duration)) {
+                    pomodoro.setDuration(cardId, mode, duration);
+                }
+            }
+            if (e.target.classList.contains('subject-select')) {
+                const cardEl = e.target.closest('.card');
+                const cardId = cardEl.dataset.cardId;
+                timeLogger.changeSubject(cardId, e.target.value);
+            }
+        });
+
+        D.dashboardGrid.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const cardEl = form.closest('.card');
+            const cardId = cardEl.dataset.cardId;
+
+            if (form.id === 'add-test-form') {
+                const { date, name } = form.elements;
+                if (date.value && name.value.trim()) {
+                    AppState.tests[date.value] = name.value.trim();
+                    AppState.save('tests');
+                    renderDashboard();
+                    form.reset();
+                }
+            } else if (form.classList.contains('add-todo-form')) {
+                const card = AppState.customCards.find(c => c.id === cardId);
+                const input = form.querySelector('input');
+                const text = input.value.trim();
+                if (text.toLowerCase() === 'coco') {
+                    activateGodMode();
+                    input.value = '';
+                    return;
+                }
+                if (text.toLowerCase() === 'doingocmakesmeexcited') {
+                    AppState.settings.theme = 'chaitanya-noob';
+                    AppState.saveSettings();
+                    applySettings();
+                    renderDashboard();
+                    input.value = '';
+                    return;
+                }
+                if (card && text) {
+                    if (!Array.isArray(card.content)) card.content = [];
+                    card.content.push({ text: text, completed: false });
+                    AppState.save('customCards');
+                    cardTypes.todo.render(cardEl, card);
+                    input.value = '';
+                }
+            } else if (form.classList.contains('add-marks-form')) {
+                const card = AppState.customCards.find(c => c.id === cardId);
+                const { name, marks, maxMarks } = form.elements;
+                if (card && name.value.trim() && marks.value && maxMarks.value) {
+                    if (!Array.isArray(card.content)) card.content = [];
+                    card.content.push({ 
+                        name: name.value.trim(), 
+                        marks: parseFloat(marks.value),
+                        maxMarks: parseFloat(maxMarks.value)
+                    });
+                    AppState.save('customCards');
+                    cardTypes['line-graph'].render(cardEl, card);
+                    form.reset();
+                }
+            } else if (form.classList.contains('update-youtube-form')) {
+                const card = AppState.customCards.find(c => c.id === cardId);
+                const input = form.querySelector('input');
+                if (card && input.value.trim()) {
+                    card.content = input.value.trim();
+                    AppState.save('customCards');
+                    cardTypes.youtube.render(cardEl, card);
+                }
+            }
+        });
+
+        // --- MODAL & SETTINGS LISTENERS ---
+        D.buttons.addCard.addEventListener('click', () => D.modals.addCard.classList.remove('hidden'));
+        D.buttons.cancelAddCard.addEventListener('click', () => D.modals.addCard.classList.add('hidden'));
+        D.inputs.cardType.addEventListener('change', (e) => {
+            const isNote = e.target.value === 'note';
+            const isYoutube = e.target.value === 'youtube';
+            D.inputs.cardContent.style.display = isNote || isYoutube ? 'block' : 'none';
+            if (isYoutube) {
+                D.inputs.cardContent.placeholder = 'Paste YouTube video URL...';
+            } else {
+                D.inputs.cardContent.placeholder = 'Card Content (for notes)';
+            }
+        });
+
+        D.forms.newCard.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const type = D.inputs.cardType.value;
+            const title = D.forms.newCard.querySelector('input[type="text"]').value.trim();
+            if (!title) return;
+            
+            const newCard = {
+                id: `custom-${Date.now()}`,
+                type,
+                title,
+                content: (type === 'note' || type === 'youtube') ? D.inputs.cardContent.value.trim() : []
+            };
+            AppState.customCards.push(newCard);
+            const props = { colspan: (type === 'line-graph' || type === 'youtube' || type === 'time-logger') ? 2 : 1 };
+            if (type === 'line-graph') props.maxMarks = 300;
+            AppState.cardProps[newCard.id] = props;
+            AppState.save('customCards');
+            AppState.save('cardProps');
+            renderDashboard();
+            D.modals.addCard.classList.add('hidden');
+            D.forms.newCard.reset();
+            D.inputs.cardContent.style.display = 'block';
+        });
+
+        const closeCustomizeModal = () => D.modals.customize.classList.add('hidden');
+        D.buttons.customize.addEventListener('click', () => D.modals.customize.classList.remove('hidden'));
+        D.buttons.closeCustomize.addEventListener('click', closeCustomizeModal);
+        D.buttons.closeCustomizeIcon.addEventListener('click', closeCustomizeModal);
+        D.modals.customize.addEventListener('click', (e) => {
+            if (e.target === D.modals.customize) {
+                closeCustomizeModal();
+            }
+        });
+
+        // Settings change listeners
+        const handleSettingsChange = () => {
+            AppState.saveSettings();
+            applySettings();
+            renderDashboard();
+        };
+        D.inputs.examType.addEventListener('change', () => { AppState.settings.examType = D.inputs.examType.value; handleSettingsChange(); });
+        D.inputs.examYear.addEventListener('change', () => { AppState.settings.examYear = D.inputs.examYear.value; handleSettingsChange(); });
+        
+        D.inputs.theme.addEventListener('change', () => { AppState.settings.theme = D.inputs.theme.value; AppState.saveSettings(); applySettings(); renderDashboard(); });
+        D.inputs.font.addEventListener('change', () => { AppState.settings.font = D.inputs.font.value; AppState.saveSettings(); applySettings(); });
+        D.inputs.bgUrl.addEventListener('input', () => { AppState.settings.bgUrl = D.inputs.bgUrl.value; AppState.saveSettings(); applySettings(); });
+        D.buttons.removeBg.addEventListener('click', () => { AppState.settings.bgUrl = ''; AppState.saveSettings(); applySettings(); });
+        
+        D.inputs.youtubeTintToggle.addEventListener('change', () => { 
+            AppState.settings.youtubeTintEnabled = D.inputs.youtubeTintToggle.checked; 
+            AppState.saveSettings(); 
+            applyYouTubeSettings(); 
+        });
+        D.inputs.youtubeBlurToggle.addEventListener('change', () => { 
+            AppState.settings.youtubeBlurEnabled = D.inputs.youtubeBlurToggle.checked; 
+            AppState.saveSettings(); 
+            applyYouTubeSettings(); 
+        });
+        D.inputs.focusShieldToggle.addEventListener('change', () => { 
+            const isEnabled = D.inputs.focusShieldToggle.checked;
+            AppState.settings.focusShieldEnabled = isEnabled; 
+            AppState.saveSettings(); 
+
+            // If disabling the shield while a timer is active, stop the focus session.
+            if (!isEnabled && AppState.activeTimer.cardId) {
+                const { cardId, type } = AppState.activeTimer;
+                if (type === 'pomodoro') {
+                    pomodoro.stop(cardId);
+                } else if (type === 'time-logger') {
+                    timeLogger.pause(cardId);
+                }
+            }
+        });
+
+        D.buttons.resetDashboard.addEventListener('click', () => {
+            showConfirmation('This will delete all custom cards and reset the layout to the default.', () => {
+                // Remove all data except settings and alert dismissal status
+                Object.keys(STORAGE_KEYS).forEach(key => {
+                    if (key !== 'settings' && key !== 'mobileAlertDismissed') {
+                        localStorage.removeItem(STORAGE_KEYS[key]);
+                    }
+                });
+                location.reload(); // Reload the page to apply defaults
+            }, 'Reset Dashboard?');
+        });
+
+        D.buttons.exportData.addEventListener('click', () => {
+            const dataToExport = {};
+            for (const key in STORAGE_KEYS) {
+                const item = localStorage.getItem(STORAGE_KEYS[key]);
+                if (item !== null) {
+                   dataToExport[key] = JSON.parse(item);
+                }
+            }
+
+            const jsonString = JSON.stringify(dataToExport, null, 2);
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            const date = new Date().toISOString().slice(0, 10);
+            a.download = `studylocus-backup-${date}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+        
+        D.buttons.importData.addEventListener('click', () => {
+            D.inputs.importFile.click();
+        });
+
+        D.inputs.importFile.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    
+                    const coreKeys = ['layout', 'customCards', 'settings'];
+                    const hasCoreKeys = coreKeys.every(key => key in importedData);
+
+                    if (!hasCoreKeys) {
+                        console.error('Import failed: The JSON file appears to be invalid or is not a valid dashboard backup.');
+                        return;
+                    }
+                    
+                    showConfirmation('This will overwrite your current dashboard configuration.', () => {
+                        localStorage.clear();
+                        for (const key in importedData) {
+                            if (key in STORAGE_KEYS) {
+                                const storageKey = STORAGE_KEYS[key];
+                                const dataToImport = importedData[key];
+                                if (dataToImport !== null && dataToImport !== undefined) {
+                                    localStorage.setItem(storageKey, JSON.stringify(dataToImport));
+                                }
+                            }
+                        }
+                        location.reload();
+                    }, 'Import Data?');
+
+                } catch (error) {
+                    console.error('Error importing data:', error);
+                } finally {
+                    D.inputs.importFile.value = '';
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        // --- MOBILE ALERT ---
+        if (window.innerWidth < 768 && localStorage.getItem(STORAGE_KEYS.mobileAlertDismissed) !== 'true') {
+            D.mobileAlert.classList.remove('hidden');
+        }
+        D.buttons.closeAlert.addEventListener('click', () => {
+            D.mobileAlert.classList.add('hidden');
+            localStorage.setItem(STORAGE_KEYS.mobileAlertDismissed, 'true');
+        });
+        
+        // --- INFO & CONFIRM & ZEN MODALS ---
+        D.buttons.info.addEventListener('click', () => D.modals.info.classList.remove('hidden'));
+        D.buttons.closeInfo.addEventListener('click', () => D.modals.info.classList.add('hidden'));
+        
+        D.buttons.zenModeBtn.addEventListener('click', () => {
+            D.body.classList.add('zen-mode');
+            D.buttons.exitZenBtn.classList.remove('hidden');
+        });
+
+        D.buttons.exitZenBtn.addEventListener('click', () => {
+            D.body.classList.remove('zen-mode');
+            D.buttons.exitZenBtn.classList.add('hidden');
+        });
+
+        D.buttons.confirmCancel.addEventListener('click', () => {
+            D.modals.confirm.classList.add('hidden');
+            confirmCallback = null;
+        });
+
+        D.buttons.confirmOk.addEventListener('click', () => {
+            if (typeof confirmCallback === 'function') {
+                confirmCallback();
+            }
+            D.modals.confirm.classList.add('hidden');
+            confirmCallback = null;
+        });
+        
+        // --- POMODORO LOGIC ---
+        // [YOUR EXISTING `pomodoro` and `timeLogger` objects go here... No changes needed.]
+        const pomodoro = {
+            tick(cardId) {
+                const state = AppState.pomodoroState[cardId];
+                if (state.time > 0) {
+                    state.time--;
+                    this.updateDisplay(cardId);
+                } else {
+                    this.stop(cardId);
+                    new Tone.Synth().toDestination().triggerAttackRelease("C5", "0.5");
+                }
+            },
+            updateDisplay(cardId) {
+                const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
+                if (cardEl) cardTypes.pomodoro.render(cardEl, { id: cardId });
+                const state = AppState.pomodoroState[cardId];
+                if(state.isRunning) {
+                    const minutes = Math.floor(state.time / 60).toString().padStart(2, '0');
+                    const seconds = (state.time % 60).toString().padStart(2, '0');
+                    document.title = `${minutes}:${seconds} - Time to focus!`;
+                } else {
+                    const { examType, examYear } = AppState.settings;
+                    document.title = `${examType} ${examYear} | StudyLocus`;
+                }
+                AppState.save('pomodoroState');
+            },
+            start(cardId, isResume = false) {
+                const state = AppState.pomodoroState[cardId];
+                if (state.isRunning) return;
+                state.isRunning = true;
+
+                if (!isResume) {
+                     if (AppState.activeTimer.cardId !== cardId || AppState.activeTimer.type !== 'pomodoro') {
+                        AppState.activeTimer.unfocusedTime = 0;
+                        const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
+                        if (cardEl) {
+                            const focusStatusEl = cardEl.querySelector('.focus-status');
+                            if (focusStatusEl) focusStatusEl.textContent = '';
+                        }
+                    }
+                    AppState.activeTimer.cardId = cardId;
+                    AppState.activeTimer.type = 'pomodoro';
+                    if(AppState.settings.focusShieldEnabled) enterFocusMode();
+                }
+
+                state.intervalId = setInterval(() => this.tick(cardId), 1000);
+                this.updateDisplay(cardId);
+            },
+            _internalPause(cardId) {
+                const state = AppState.pomodoroState[cardId];
+                clearInterval(state.intervalId);
+                state.isRunning = false;
+                this.updateDisplay(cardId);
+            },
+            stop(cardId) {
+                const state = AppState.pomodoroState[cardId];
+                clearInterval(state.intervalId);
+                if(AppState.activeTimer.cardId === cardId) {
+                    AppState.activeTimer.cardId = null;
+                    AppState.activeTimer.type = null;
+                    if(AppState.settings.focusShieldEnabled) exitFocusMode();
+                }
+                state.isRunning = false;
+                this.updateDisplay(cardId);
+            },
+            toggle(cardId) {
+                const state = AppState.pomodoroState[cardId];
+                state.isRunning ? this.stop(cardId) : this.start(cardId);
+            },
+            reset(cardId) {
+                const state = AppState.pomodoroState[cardId];
+                this.stop(cardId);
+                state.time = state.durations[state.mode] * 60;
+                this.updateDisplay(cardId);
+            },
+            setMode(cardId, mode) {
+                const state = AppState.pomodoroState[cardId];
+                state.mode = mode;
+                this.reset(cardId);
+            },
+            setDuration(cardId, mode, duration) {
+                const state = AppState.pomodoroState[cardId];
+                state.durations[mode] = duration;
+                if (state.mode === mode) {
+                    this.reset(cardId);
+                }
+                AppState.save('pomodoroState');
+            }
+        };
+
+        // --- TIME LOGGER LOGIC ---
+        const timeLogger = {
+            tick(cardId) {
+                const state = AppState.timeLoggerState[cardId];
+                if (state && state.isRunning) {
+                    state.accumulatedTime++;
+                    this.updateDisplay(cardId, state);
+                }
+            },
+            updateDisplay(cardId, state) {
+                const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
+                if (cardEl) {
+                    cardEl.querySelector('.timer-display').textContent = formatSeconds(state.accumulatedTime);
+                }
+            },
+            start(cardId, isResume = false) {
+                const state = AppState.timeLoggerState[cardId];
+                if (state.isRunning) return;
+                state.isRunning = true;
+
+                if (!isResume) {
+                    if (AppState.activeTimer.cardId !== cardId || AppState.activeTimer.type !== 'time-logger') {
+                        AppState.activeTimer.unfocusedTime = 0;
+                         const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
+                        if (cardEl) {
+                            const focusStatusEl = cardEl.querySelector('.focus-status');
+                            if (focusStatusEl) focusStatusEl.textContent = '';
+                        }
+                    }
+                    AppState.activeTimer.cardId = cardId;
+                    AppState.activeTimer.type = 'time-logger';
+                    if(AppState.settings.focusShieldEnabled) enterFocusMode();
+                }
+                
+                state.intervalId = setInterval(() => this.tick(cardId), 1000);
+                const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
+                if(cardEl) cardEl.querySelector('.start-pause-btn').textContent = 'PAUSE';
+                AppState.save('timeLoggerState');
+            },
+            _internalPause(cardId) {
+                const state = AppState.timeLoggerState[cardId];
+                if (!state.isRunning) return;
+                clearInterval(state.intervalId);
+                state.intervalId = null;
+                state.isRunning = false;
+                const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
+                if(cardEl) cardEl.querySelector('.start-pause-btn').textContent = 'START';
+                AppState.save('timeLoggerState');
+            },
+            pause(cardId) {
+                const state = AppState.timeLoggerState[cardId];
+                if (!state.isRunning) return;
+                clearInterval(state.intervalId);
+                state.intervalId = null;
+                state.isRunning = false;
+                 if(AppState.activeTimer.cardId === cardId) {
+                    AppState.activeTimer.cardId = null;
+                    AppState.activeTimer.type = null;
+                    if(AppState.settings.focusShieldEnabled) exitFocusMode();
+                }
+                const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
+                if(cardEl) cardEl.querySelector('.start-pause-btn').textContent = 'START';
+                AppState.save('timeLoggerState');
+            },
+            toggle(cardId) {
+                const state = AppState.timeLoggerState[cardId];
+                if (state.isRunning) {
+                    this.pause(cardId);
+                } else {
+                    this.start(cardId);
+                }
+            },
+            log(cardId) {
+                this.pause(cardId);
+                const state = AppState.timeLoggerState[cardId];
+                
+                // Minimum 1 minute log time check
+                if (state.accumulatedTime < 60) {
+                    const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
+                    if (cardEl) {
+                        const messageEl = cardEl.querySelector('.log-message');
+                        if (messageEl) {
+                            messageEl.textContent = 'Minimum log time is 1 minute.';
+                            setTimeout(() => {
+                                if (messageEl) messageEl.textContent = '';
+                            }, 3000);
+                        }
+                    }
+                    return; // Abort logging
+                }
+
+                const todayStr = toLocalDateString(new Date());
+                if (!AppState.studyLogs[todayStr]) {
+                    AppState.studyLogs[todayStr] = {};
+                }
+                
+                const currentSubject = state.currentSubject;
+                if (!AppState.studyLogs[todayStr][currentSubject]) {
+                    AppState.studyLogs[todayStr][currentSubject] = 0;
+                }
+                
+                AppState.studyLogs[todayStr][currentSubject] += state.accumulatedTime;
+                AppState.save('studyLogs');
+
+                
+                const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
+                if(cardEl) {
+                    const cardData = AppState.customCards.find(c => c.id === cardId);
+                    cardTypes['time-logger'].render(cardEl, cardData); 
+                }
+                this.reset(cardId); // Reset after logging and re-rendering
+            },
+            reset(cardId) {
+                this.pause(cardId);
+                const state = AppState.timeLoggerState[cardId];
+                state.accumulatedTime = 0;
+                this.updateDisplay(cardId, state);
+                AppState.save('timeLoggerState');
+            },
+            changeSubject(cardId, subject) {
+                const state = AppState.timeLoggerState[cardId];
+                const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
+                
+                if (subject === 'add_new') {
+                    const newSubject = prompt('Enter new subject name:');
+                    if (newSubject && newSubject.trim()) {
+                        if (!AppState.settings.userSubjects) {
+                            AppState.settings.userSubjects = [];
+                        }
+                        AppState.settings.userSubjects.push(newSubject.trim());
+                        AppState.saveSettings();
+                        state.currentSubject = newSubject.trim();
+                        renderDashboard(); // This will re-render all cards to update the dropdowns
+                    } else {
+                        // Reset select if user cancels
+                        if(cardEl) cardEl.querySelector('.subject-select').value = state.currentSubject;
+                    }
+                } else if (state) {
+                    state.currentSubject = subject;
+                    AppState.save('timeLoggerState');
+                }
+            }
+        };
+        
+        // --- GOD MODE ---
+        // [YOUR EXISTING `godMode` logic goes here... No changes needed.]
+        let godModeBackup = null;
+
+        function createGodModeBackup() {
+            if (!godModeBackup) {
+                godModeBackup = {
+                    theme: AppState.settings.theme,
+                    customCards: JSON.parse(JSON.stringify(AppState.customCards)),
+                    tests: JSON.parse(JSON.stringify(AppState.tests)),
+                    layout: [...AppState.layout]
+                };
+            }
+        }
+
+        function activateGodMode() {
+            createGodModeBackup();
+            D.godModePanel.classList.remove('hidden');
+            new Tone.Synth().toDestination().triggerAttackRelease("C4", "0.5");
+        }
+
+        D.body.addEventListener('click', (e) => {
+            if(e.target.closest('#god-mode-panel')) {
+                const buttonId = e.target.id;
+
+                if(buttonId === 'god-mode-close-btn') {
+                    D.godModePanel.classList.add('hidden');
+                    if (godModeBackup) {
+                        AppState.settings.theme = godModeBackup.theme;
+                        AppState.customCards = godModeBackup.customCards;
+                        AppState.tests = godModeBackup.tests;
+                        AppState.layout = godModeBackup.layout;
+                        
+                        godModeBackup = null;
+                        
+                        applySettings();
+                        renderDashboard();
+                    }
+                }
+                if(buttonId === 'god-mode-theme-btn') {
+                    const themeSelect = D.inputs.theme;
+                    if (!themeSelect.querySelector('[value="god-mode"]')) {
+                        const godOption = document.createElement('option');
+                        godOption.value = 'god-mode';
+                        godOption.textContent = '--- GOD MODE ---';
+                        themeSelect.appendChild(godOption);
+                    }
+                    AppState.settings.theme = 'god-mode';
+                    applySettings();
+                    renderDashboard();
+                }
+                if(buttonId === 'god-mode-complete-tasks-btn') {
+                     AppState.customCards.forEach(card => {
+                        if (card.type === 'todo' && Array.isArray(card.content)) {
+                            card.content.forEach(task => task.completed = true);
+                        }
+                    });
+                    renderDashboard();
+                }
+                if(buttonId === 'god-mode-perfect-score-btn') {
+                    const graphCard = AppState.customCards.find(c => c.type === 'line-graph');
+                    if (graphCard && Array.isArray(graphCard.content)) {
+                        const maxMarks = AppState.settings.examType === 'NEET' ? 720 : 300;
+                        graphCard.content.push({ name: 'God Tier', marks: maxMarks, maxMarks: maxMarks });
+                        renderDashboard();
+                    }
+                }
+                if(buttonId === 'god-mode-timewarp-btn') {
+                    const newTests = {};
+                    Object.keys(AppState.tests).forEach(dateStr => {
+                        const date = new Date(dateStr + 'T00:00:00');
+                        date.setDate(date.getDate() + 7);
+                        const newDateStr = toLocalDateString(date);
+                        newTests[newDateStr] = AppState.tests[dateStr];
+                    });
+                    AppState.tests = newTests;
+                    renderDashboard();
+                }
+                if(buttonId === 'god-mode-scramble-btn') {
+                    let array = AppState.layout;
+                    for (let i = array.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [array[i], array[j]] = [array[j], array[i]];
+                    }
+                    renderDashboard();
+                }
+                if(buttonId === 'god-mode-nuke-btn') {
+                    D.dashboardGrid.querySelectorAll('.card').forEach((card, i) => {
+                        card.style.animation = `fall-apart 1s ease-in-out ${i * 0.05}s forwards`;
+                    });
+                    setTimeout(() => {
+                        showConfirmation("Dashboard nuked. Restore?", () => {
+                            D.dashboardGrid.innerHTML = '';
+                            renderDashboard();
+                        }, "KABOOM!");
+                    }, 1500);
+                }
+            }
+        });
+
+        // --- EASTER EGG ---
+        // [YOUR EXISTING Easter egg logic goes here... No changes needed.]
+        let clickTimer = null;
+        D.mainTitle.addEventListener('click', (e) => {
+            if (e.detail === 3) {
+                clearTimeout(clickTimer);
+                D.inputs.theme.querySelector('[value="alakh-pandey"]').classList.remove('hidden');
+                AppState.settings.theme = 'alakh-pandey';
+                AppState.saveSettings();
+                applySettings();
+                renderDashboard();
+            }
+        });
+        
+        // --- FOCUS SHIELD ---
+        // [YOUR EXISTING Focus Shield logic goes here... No changes needed.]
+        function enterFocusMode() {
+            try {
+                if(document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen();
+                }
+            } catch(e) {
+                console.warn("Fullscreen request failed.", e);
+            }
+            document.addEventListener('visibilitychange', handleVisibilityChange);
+            document.addEventListener('fullscreenchange', handleFullscreenChange);
+        }
+
+        function exitFocusMode() {
+            try {
+                if(document.fullscreenElement && document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            } catch(e) {
+                console.warn("Exit fullscreen request failed.", e);
+            }
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+            document.removeEventListener('fullscreenchange', handleFullscreenChange);
+            
+            const { cardId, type } = AppState.activeTimer;
+            const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
+            if(cardEl) {
+                const focusStatusEl = cardEl.querySelector('.focus-status');
+                if(focusStatusEl) focusStatusEl.textContent = '';
+            }
+        }
+
+        function handleFullscreenChange() {
+            if (!document.fullscreenElement && AppState.activeTimer.cardId) {
+                const { cardId, type } = AppState.activeTimer;
+                if(type === 'pomodoro') pomodoro.stop(cardId);
+                if(type === 'time-logger') timeLogger.pause(cardId);
+            }
+        }
+
+        function handleVisibilityChange() {
+            const { cardId, type } = AppState.activeTimer;
+            if(!cardId) return;
+
+            const timerObj = type === 'pomodoro' ? pomodoro : timeLogger;
+            const state = type === 'pomodoro' ? AppState.pomodoroState[cardId] : AppState.timeLoggerState[cardId];
+
+            if (document.visibilityState === 'hidden') {
+                if (state.isRunning) {
+                    AppState.activeTimer.unfocusedStart = Date.now();
+                    if(type === 'pomodoro') timerObj._internalPause(cardId);
+                    if(type === 'time-logger') timerObj._internalPause(cardId);
+                }
+            } else {
+                 if (AppState.activeTimer.unfocusedStart > 0) { // Only resume if it was auto-paused
+                    const unfocusedDuration = Math.round((Date.now() - AppState.activeTimer.unfocusedStart) / 1000);
+                    AppState.activeTimer.unfocusedTime += unfocusedDuration;
+                    
+                    const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
+                    if(cardEl) {
+                        const focusStatusEl = cardEl.querySelector('.focus-status');
+                        if(focusStatusEl) focusStatusEl.textContent = `Unfocused for ${formatSecondsToReadable(AppState.activeTimer.unfocusedTime)}`;
+                    }
+                    AppState.activeTimer.unfocusedStart = 0; // Clear start time after calculating
+                    
+                    if(type === 'pomodoro') timerObj.start(cardId, true); // Resume with isResume flag
+                    if(type === 'time-logger') timerObj.start(cardId, true); // Resume with isResume flag
+                }
+            }
+        }
+
+        // --- INITIALIZATION ---
+        updateAuthUI(); // ✨ New: Initial UI render for auth
+        applySettings();
+        renderDashboard();
+        new Sortable(D.dashboardGrid, {
+            animation: 150, handle: '.drag-handle', ghostClass: 'sortable-ghost', chosenClass: 'sortable-chosen',
+            onEnd: () => {
+                AppState.layout = [...D.dashboardGrid.children].map(item => item.dataset.cardId);
+                AppState.save('layout');
+            },
+        });
+        setInterval(() => {
+            const countdownCard = D.dashboardGrid.querySelector('[data-card-id="countdown"]');
+            if (countdownCard) cardTypes.countdown.render(countdownCard);
+            const timeCard = D.dashboardGrid.querySelector('[data-card-id="time"]');
+            if (timeCard) cardTypes.time.render(timeCard);
+        }, 1000);
+    });
+    </script>
+</body>
+</html>
