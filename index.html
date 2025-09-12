@@ -32,6 +32,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+	<script src="firebase-config.js"></script>
     <style>
         :root {
             --bg-color: #0d1117;
@@ -904,13 +905,14 @@
         </div>
         <button id="god-mode-close-btn" class="absolute top-2 right-2 text-secondary hover:text-primary" aria-label="Close God Mode Panel">&times;</button>
     </div>
-    <script src="firebase-config.js"></script>
+    
     <script>
     // --- 🔥 START: Firebase Configuration ---
     // IMPORTANT: Replace this with your project's Firebase credentials.
     // You can find this in your Firebase project settings.
     
     // Initialize Firebase
+	
     const auth = firebase.auth();
     const db = firebase.firestore();
     let currentUser = null;
