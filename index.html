@@ -32,7 +32,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-	<script src="firebase-config.js"></script>
+
     <style>
         :root {
             --bg-color: #0d1117;
@@ -910,9 +910,18 @@
     // --- 🔥 START: Firebase Configuration ---
     // IMPORTANT: Replace this with your project's Firebase credentials.
     // You can find this in your Firebase project settings.
-    
+    const firebaseConfig = {
+    apiKey: "*",
+    authDomain: "studydashboard-2a3eb.firebaseapp.com",
+    projectId: "studydashboard-2a3eb",
+    storageBucket: "studydashboard-2a3eb.firebasestorage.app",
+    messagingSenderId: "79210973277",
+    appId: "1:79210973277:web:cc0a5fa86729fd6d3f65b4",
+    measurementId: "G-TE7Z0SR8L1"
+  };
+
     // Initialize Firebase
-	
+	firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
     let currentUser = null;
