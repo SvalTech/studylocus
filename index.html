@@ -2150,148 +2150,125 @@ const loadDataFromFirestore = (cloudData) => {
         };
 
         // --- TIME LOGGER LOGIC ---
-        const timeLogger = {
-            tick(cardId) {
-                const state = AppState.timeLoggerState[cardId];
-                if (state && state.isRunning) {
-                    state.accumulatedTime++;
-                    this.updateDisplay(cardId, state);
-                }
-            },
-            updateDisplay(cardId, state) {
-                const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
-                if (cardEl) {
-                    cardEl.querySelector('.timer-display').textContent = formatSeconds(state.accumulatedTime);
-                }
-            },
-            start(cardId, isResume = false) {
-                const state = AppState.timeLoggerState[cardId];
-                if (state.isRunning) return;
-                state.isRunning = true;
-
-                if (!isResume) {
-                    if (AppState.activeTimer.cardId !== cardId || AppState.activeTimer.type !== 'time-logger') {
-                        AppState.activeTimer.unfocusedTime = 0;
-                         const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
-                        if (cardEl) {
-                            const focusStatusEl = cardEl.querySelector('.focus-status');
-                            if (focusStatusEl) focusStatusEl.textContent = '';
-                        }
-                    }
-                    AppState.activeTimer.cardId = cardId;
-                    AppState.activeTimer.type = 'time-logger';
-                    if(AppState.settings.focusShieldEnabled) enterFocusMode();
-                }
-                
-                state.intervalId = setInterval(() => this.tick(cardId), 1000);
-                const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
-                if(cardEl) cardEl.querySelector('.start-pause-btn').textContent = 'PAUSE';
-                AppState.save('timeLoggerState');
-            },
-            _internalPause(cardId) {
-                const state = AppState.timeLoggerState[cardId];
-                if (!state.isRunning) return;
-                clearInterval(state.intervalId);
-                state.intervalId = null;
-                state.isRunning = false;
-                const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
-                if(cardEl) cardEl.querySelector('.start-pause-btn').textContent = 'START';
-                AppState.save('timeLoggerState');
-            },
-            pause(cardId) {
-                const state = AppState.timeLoggerState[cardId];
-                if (!state.isRunning) return;
-                clearInterval(state.intervalId);
-                state.intervalId = null;
-                state.isRunning = false;
-                 if(AppState.activeTimer.cardId === cardId) {
-                    AppState.activeTimer.cardId = null;
-                    AppState.activeTimer.type = null;
-                    if(AppState.settings.focusShieldEnabled) exitFocusMode();
-                }
-                const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
-                if(cardEl) cardEl.querySelector('.start-pause-btn').textContent = 'START';
-                AppState.save('timeLoggerState');
-            },
-            toggle(cardId) {
-                const state = AppState.timeLoggerState[cardId];
-                if (state.isRunning) {
-                    this.pause(cardId);
-                } else {
-                    this.start(cardId);
-                }
-            },
-            log(cardId) {
-                this.pause(cardId);
-                const state = AppState.timeLoggerState[cardId];
-                
-                // Minimum 1 minute log time check
-                if (state.accumulatedTime < 60) {
-                    const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
-                    if (cardEl) {
-                        const messageEl = cardEl.querySelector('.log-message');
-                        if (messageEl) {
-                            messageEl.textContent = 'Minimum log time is 1 minute.';
-                            setTimeout(() => {
-                                if (messageEl) messageEl.textContent = '';
-                            }, 3000);
-                        }
-                    }
-                    return; // Abort logging
-                }
-
-                const todayStr = toLocalDateString(new Date());
-                if (!AppState.studyLogs[todayStr]) {
-                    AppState.studyLogs[todayStr] = {};
-                }
-                
-                const currentSubject = state.currentSubject;
-                if (!AppState.studyLogs[todayStr][currentSubject]) {
-                    AppState.studyLogs[todayStr][currentSubject] = 0;
-                }
-                
-                AppState.studyLogs[todayStr][currentSubject] += state.accumulatedTime;
-                AppState.save('studyLogs');
-
-                
-                const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
-                if(cardEl) {
-                    const cardData = AppState.customCards.find(c => c.id === cardId);
-                    cardTypes['time-logger'].render(cardEl, cardData); 
-                }
-                this.reset(cardId); // Reset after logging and re-rendering
-            },
-            reset(cardId) {
-                this.pause(cardId);
-                const state = AppState.timeLoggerState[cardId];
-                state.accumulatedTime = 0;
-                this.updateDisplay(cardId, state);
-                AppState.save('timeLoggerState');
-            },
-            changeSubject(cardId, subject) {
-                const state = AppState.timeLoggerState[cardId];
-                const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
-                
-                if (subject === 'add_new') {
-                    const newSubject = prompt('Enter new subject name:');
-                    if (newSubject && newSubject.trim()) {
-                        if (!AppState.settings.userSubjects) {
-                            AppState.settings.userSubjects = [];
-                        }
-                        AppState.settings.userSubjects.push(newSubject.trim());
-                        AppState.saveSettings();
-                        state.currentSubject = newSubject.trim();
-                        renderDashboard(); // This will re-render all cards to update the dropdowns
-                    } else {
-                        // Reset select if user cancels
-                        if(cardEl) cardEl.querySelector('.subject-select').value = state.currentSubject;
-                    }
-                } else if (state) {
-                    state.currentSubject = subject;
-                    AppState.save('timeLoggerState');
-                }
-            }
-        };
+        const timeLogger = {
+            tick(cardId) {
+                const state = AppState.timeLoggerState[cardId];
+                if (state && state.isRunning && state.startTime) {
+                    const elapsed = Date.now() - state.startTime;
+                    const currentTotalSeconds = state.accumulatedTime + Math.round(elapsed / 1000);
+                    const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
+                    if (cardEl) {
+                        cardEl.querySelector('.timer-display').textContent = formatSeconds(currentTotalSeconds);
+                    }
+                }
+            },
+            start(cardId, isResume = false) {
+                const state = AppState.timeLoggerState[cardId];
+                if (state.isRunning) return;
+                state.isRunning = true;
+                state.startTime = Date.now();
+                if (!isResume) {
+                    if (AppState.activeTimer.cardId !== cardId || AppState.activeTimer.type !== 'time-logger') {
+                        AppState.activeTimer.unfocusedTime = 0;
+                        const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
+                        if (cardEl) {
+                            const focusStatusEl = cardEl.querySelector('.focus-status');
+                            if (focusStatusEl) focusStatusEl.textContent = '';
+                        }
+                    }
+                    AppState.activeTimer.cardId = cardId;
+                    AppState.activeTimer.type = 'time-logger';
+                    if (AppState.settings.focusShieldEnabled) enterFocusMode();
+                }
+                state.intervalId = setInterval(() => this.tick(cardId), 1000);
+                const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
+                if (cardEl) cardEl.querySelector('.start-pause-btn').textContent = 'PAUSE';
+                AppState.save('timeLoggerState');
+            },
+            pause(cardId, shouldRender = true) {
+                const state = AppState.timeLoggerState[cardId];
+                if (!state.isRunning) return;
+                clearInterval(state.intervalId);
+                state.intervalId = null;
+                if (state.startTime) {
+                    const elapsed = Date.now() - state.startTime;
+                    state.accumulatedTime += Math.round(elapsed / 1000);
+                }
+                state.startTime = null;
+                state.isRunning = false;
+                if (AppState.activeTimer.cardId === cardId) {
+                    AppState.activeTimer.cardId = null;
+                    AppState.activeTimer.type = null;
+                    if (AppState.settings.focusShieldEnabled) exitFocusMode();
+                }
+                AppState.save('timeLoggerState');
+                if (shouldRender) {
+                    renderDashboard();
+                }
+            },
+            _internalPause(cardId) {
+                const state = AppState.timeLoggerState[cardId];
+                if (!state.isRunning) return;
+                clearInterval(state.intervalId);
+                state.isRunning = false;
+                const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
+                if (cardEl) cardEl.querySelector('.start-pause-btn').textContent = 'START';
+            },
+            toggle(cardId) {
+                const state = AppState.timeLoggerState[cardId];
+                state.isRunning ? this.pause(cardId) : this.start(cardId);
+            },
+            log(cardId) {
+                this.pause(cardId, false); // Pause without re-rendering
+                const state = AppState.timeLoggerState[cardId];
+                if (state.accumulatedTime < 60) {
+                    const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
+                    if (cardEl) {
+                        const messageEl = cardEl.querySelector('.log-message');
+                        if (messageEl) {
+                            messageEl.textContent = 'Minimum log time is 1 minute.';
+                            setTimeout(() => { if (messageEl) messageEl.textContent = ''; }, 3000);
+                        }
+                    }
+                    this.start(cardId);
+                    return;
+                }
+                const todayStr = toLocalDateString(new Date());
+                if (!AppState.studyLogs[todayStr]) AppState.studyLogs[todayStr] = {};
+                const currentSubject = state.currentSubject;
+                AppState.studyLogs[todayStr][currentSubject] = (AppState.studyLogs[todayStr][currentSubject] || 0) + state.accumulatedTime;
+                AppState.save('studyLogs');
+                state.accumulatedTime = 0;
+                AppState.save('timeLoggerState');
+                renderDashboard();
+            },
+            reset(cardId) {
+                this.pause(cardId, false);
+                const state = AppState.timeLoggerState[cardId];
+                state.accumulatedTime = 0;
+                AppState.save('timeLoggerState');
+                renderDashboard();
+            },
+            changeSubject(cardId, subject) {
+                const state = AppState.timeLoggerState[cardId];
+                const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
+                if (subject === 'add_new') {
+                    const newSubject = prompt('Enter new subject name:');
+                    if (newSubject && newSubject.trim()) {
+                        if (!AppState.settings.userSubjects) AppState.settings.userSubjects = [];
+                        AppState.settings.userSubjects.push(newSubject.trim());
+                        AppState.saveSettings();
+                        state.currentSubject = newSubject.trim();
+                        renderDashboard();
+                    } else {
+                        if (cardEl) cardEl.querySelector('.subject-select').value = state.currentSubject;
+                    }
+             } else if (state) {
+                    state.currentSubject = subject;
+                    AppState.save('timeLoggerState');
+                }
+            }
+        };
         
         // --- GOD MODE ---
         // [YOUR EXISTING `godMode` logic goes here... No changes needed.]
