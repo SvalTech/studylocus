@@ -1126,32 +1126,57 @@
         };
 
         const updateAuthUI = () => {
-            if (currentUser) {
-                // ✨ FIX: Button is now a responsive circle on mobile, and a pill on desktop.
-                D.authContainer.innerHTML = `
-                    <button id="sign-out-btn" title="Sign Out" class="flex items-center justify-center w-10 h-10 rounded-full transition-colors hover:bg-white/20 sm:w-auto sm:h-auto sm:px-2 sm:py-1">
-                        <img src="${currentUser.photoURL}" alt="${currentUser.displayName}" class="w-8 h-8 rounded-full" />
-                        <span class="text-sm font-semibold hidden sm:inline ml-2">${currentUser.displayName.split(' ')[0]}</span>
-                    </button>
+            if (currentUser) {
+                // User is signed in, create a dropdown menu.
+                D.authContainer.innerHTML = `
+                    <div class="relative" id="user-menu-container">
+                        <button id="user-menu-button" title="User Menu" class="flex items-center justify-center w-10 h-10 rounded-full transition-colors hover:bg-white/20 sm:w-auto sm:h-auto sm:px-2 sm:py-1">
+                            <img src="${currentUser.photoURL}" alt="${currentUser.displayName}" class="w-8 h-8 rounded-full pointer-events-none" />
+                            <span class="text-sm font-semibold hidden sm:inline ml-2 pointer-events-none">${currentUser.displayName.split(' ')[0]}</span>
+                        </button>
+                        <div id="user-menu-dropdown" class="card absolute right-0 mt-2 w-48 p-2 hidden z-50">
+                            <div class="px-2 py-1 mb-1 border-b" style="border-color: var(--border-color);">
+                                <p class="text-sm font-semibold truncate" title="${currentUser.displayName}">${currentUser.displayName}</p>
+                                <p class="text-xs text-secondary truncate" title="${currentUser.email}">${currentUser.email}</p>
+                            </div>
+                            <button id="sign-out-btn" class="w-full text-left flex items-center gap-2 p-2 rounded-md hover:bg-white/10 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                                <span>Sign Out</span>
+                            </button>
+                        </div>
+                    </div>
                 `;
-                D.authContainer.querySelector('#sign-out-btn').addEventListener('click', signOut);
-            } else {
-                 // ✨ FIX: "Sign In" is now an icon on mobile and includes text on desktop.
-                 D.authContainer.innerHTML = `
-                    <button id="sign-in-btn" class="flex items-center justify-center w-10 h-10 rounded-full transition-colors hover:bg-white/20 sm:w-auto sm:px-3 sm:py-2">
-                        <!-- Google G Icon SVG -->
-                        <svg class="w-5 h-5" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M47.532 24.552c0-1.566-.14-3.084-.404-4.548H24.5v8.58h12.944c-.566 2.76-2.213 5.108-4.72 6.708v5.524h7.112c4.162-3.832 6.596-9.42 6.596-16.264z" fill="#4285F4"/>
-                            <path d="M24.5 48c6.48 0 11.944-2.14 15.928-5.788l-7.112-5.524c-2.14 1.44-4.884 2.292-7.816 2.292-6.004 0-11.084-4.04-12.9-9.492H4.42v5.7c3.48 6.912 10.32 11.532 18.08 11.532l2 .28z" fill="#34A853"/>
-                            <path d="M11.6 28.98c-.34-.996-.54-2.052-.54-3.144s.2-2.148.54-3.144V16.992H4.42C2.852 20.04 2 23.436 2 27.024c0 3.588.852 6.984 2.42 10.032l7.18-5.7v-.376z" fill="#FBBC05"/>
-                            <path d="M24.5 9.8c3.516 0 6.66 1.212 9.128 3.54l6.32-6.32C36.44.88 30.98 0 24.5 0 16.74 0 9.9 4.62 6.42 11.532l7.18 5.7c1.816-5.452 6.896-9.432 12.9-9.432z" fill="#EA4335"/>
-                        </svg>
-                        <span class="text-sm font-semibold hidden sm:inline ml-2">Sign In</span>
-                    </button>
-                `;
-                D.authContainer.querySelector('#sign-in-btn').addEventListener('click', signIn);
-            }
-        };
+                
+                // --- Add event listeners for the new dropdown ---
+                const userMenuButton = D.authContainer.querySelector('#user-menu-button');
+                const userMenuDropdown = D.authContainer.querySelector('#user-menu-dropdown');
+                const signOutBtn = D.authContainer.querySelector('#sign-out-btn');
+
+                // Toggle dropdown visibility when the user icon is clicked
+                userMenuButton.addEventListener('click', (event) => {
+                    event.stopPropagation(); // Prevents the 'click outside' listener from closing it immediately
+                    userMenuDropdown.classList.toggle('hidden');
+                });
+                
+                // Sign out when the "Sign Out" button inside the dropdown is clicked
+                signOutBtn.addEventListener('click', signOut);
+
+            } else {
+                // User is signed out, show the regular sign-in button.
+                D.authContainer.innerHTML = `
+                    <button id="sign-in-btn" class="flex items-center justify-center w-10 h-10 rounded-full transition-colors hover:bg-white/20 sm:w-auto sm:px-3 sm:py-2">
+                        <svg class="w-5 h-5" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M47.532 24.552c0-1.566-.14-3.084-.404-4.548H24.5v8.58h12.944c-.566 2.76-2.213 5.108-4.72 6.708v5.524h7.112c4.162-3.832 6.596-9.42 6.596-16.264z" fill="#4285F4"/>
+                            <path d="M24.5 48c6.48 0 11.944-2.14 15.928-5.788l-7.112-5.524c-2.14 1.44-4.884 2.292-7.816 2.292-6.004 0-11.084-4.04-12.9-9.492H4.42v5.7c3.48 6.912 10.32 11.532 18.08 11.532l2 .28z" fill="#34A853"/>
+                            <path d="M11.6 28.98c-.34-.996-.54-2.052-.54-3.144s.2-2.148.54-3.144V16.992H4.42C2.852 20.04 2 23.436 2 27.024c0 3.588.852 6.984 2.42 10.032l7.18-5.7v-.376z" fill="#FBBC05"/>
+                            <path d="M24.5 9.8c3.516 0 6.66 1.212 9.128 3.54l6.32-6.32C36.44.88 30.98 0 24.5 0 16.74 0 9.9 4.62 6.42 11.532l7.18 5.7c1.816-5.452 6.896-9.432 12.9-9.432z" fill="#EA4335"/>
+                        </svg>
+                        <span class="text-sm font-semibold hidden sm:inline ml-2">Sign In</span>
+                    </button>
+                `;
+                D.authContainer.querySelector('#sign-in-btn').addEventListener('click', signIn);
+            }
+        };
         
         const handleUserLogin = async (user) => {
             updateAuthUI();
@@ -2061,93 +2086,96 @@ const loadDataFromFirestore = (cloudData) => {
         // --- POMODORO LOGIC ---
         // [YOUR EXISTING `pomodoro` and `timeLogger` objects go here... No changes needed.]
         const pomodoro = {
-            tick(cardId) {
-                const state = AppState.pomodoroState[cardId];
-                if (state.time > 0) {
-                    state.time--;
-                    this.updateDisplay(cardId);
-                } else {
-                    this.stop(cardId);
-                    new Tone.Synth().toDestination().triggerAttackRelease("C5", "0.5");
-                }
-            },
-            updateDisplay(cardId) {
-                const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
-                if (cardEl) cardTypes.pomodoro.render(cardEl, { id: cardId });
-                const state = AppState.pomodoroState[cardId];
-                if(state.isRunning) {
-                    const minutes = Math.floor(state.time / 60).toString().padStart(2, '0');
-                    const seconds = (state.time % 60).toString().padStart(2, '0');
-                    document.title = `${minutes}:${seconds} - Time to focus!`;
-                } else {
-                    const { examType, examYear } = AppState.settings;
-                    document.title = `${examType} ${examYear} | StudyLocus`;
-                }
-                AppState.save('pomodoroState');
-            },
-            start(cardId, isResume = false) {
-                const state = AppState.pomodoroState[cardId];
-                if (state.isRunning) return;
-                state.isRunning = true;
+            tick(cardId) {
+                const state = AppState.pomodoroState[cardId];
+                if (state.time > 0) {
+                    state.time--;
+                    this.updateDisplay(cardId);
+                } else {
+                    this.stop(cardId);
+                    new Tone.Synth().toDestination().triggerAttackRelease("C5", "0.5");
+                }
+            },
+            updateDisplay(cardId) {
+                const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
+                if (cardEl) cardTypes.pomodoro.render(cardEl, { id: cardId });
+                const state = AppState.pomodoroState[cardId];
+                if(state.isRunning) {
+                    const minutes = Math.floor(state.time / 60).toString().padStart(2, '0');
+                    const seconds = (state.time % 60).toString().padStart(2, '0');
+                    document.title = `${minutes}:${seconds} - Time to focus!`;
+                } else {
+                    const { examType, examYear } = AppState.settings;
+                    document.title = `${examType} ${examYear} | StudyLocus`;
+                }
+                // AppState.save('pomodoroState'); // <-- THIS LINE IS REMOVED
+            },
+            start(cardId, isResume = false) {
+                const state = AppState.pomodoroState[cardId];
+                if (state.isRunning) return;
+                state.isRunning = true;
 
-                if (!isResume) {
-                     if (AppState.activeTimer.cardId !== cardId || AppState.activeTimer.type !== 'pomodoro') {
-                        AppState.activeTimer.unfocusedTime = 0;
-                        const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
-                        if (cardEl) {
-                            const focusStatusEl = cardEl.querySelector('.focus-status');
-                            if (focusStatusEl) focusStatusEl.textContent = '';
-                        }
-                    }
-                    AppState.activeTimer.cardId = cardId;
-                    AppState.activeTimer.type = 'pomodoro';
-                    if(AppState.settings.focusShieldEnabled) enterFocusMode();
-                }
+                if (!isResume) {
+                     if (AppState.activeTimer.cardId !== cardId || AppState.activeTimer.type !== 'pomodoro') {
+                        AppState.activeTimer.unfocusedTime = 0;
+                        const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
+                        if (cardEl) {
+                            const focusStatusEl = cardEl.querySelector('.focus-status');
+                            if (focusStatusEl) focusStatusEl.textContent = '';
+                        }
+                    }
+                    AppState.activeTimer.cardId = cardId;
+                    AppState.activeTimer.type = 'pomodoro';
+                    if(AppState.settings.focusShieldEnabled) enterFocusMode();
+                }
 
-                state.intervalId = setInterval(() => this.tick(cardId), 1000);
-                this.updateDisplay(cardId);
-            },
-            _internalPause(cardId) {
-                const state = AppState.pomodoroState[cardId];
-                clearInterval(state.intervalId);
-                state.isRunning = false;
-                this.updateDisplay(cardId);
-            },
-            stop(cardId) {
-                const state = AppState.pomodoroState[cardId];
-                clearInterval(state.intervalId);
-                if(AppState.activeTimer.cardId === cardId) {
-                    AppState.activeTimer.cardId = null;
-                    AppState.activeTimer.type = null;
-                    if(AppState.settings.focusShieldEnabled) exitFocusMode();
-                }
-                state.isRunning = false;
-                this.updateDisplay(cardId);
-            },
-            toggle(cardId) {
-                const state = AppState.pomodoroState[cardId];
-                state.isRunning ? this.stop(cardId) : this.start(cardId);
-            },
-            reset(cardId) {
-                const state = AppState.pomodoroState[cardId];
-                this.stop(cardId);
-                state.time = state.durations[state.mode] * 60;
-                this.updateDisplay(cardId);
-            },
-            setMode(cardId, mode) {
-                const state = AppState.pomodoroState[cardId];
-                state.mode = mode;
-                this.reset(cardId);
-            },
-            setDuration(cardId, mode, duration) {
-                const state = AppState.pomodoroState[cardId];
-                state.durations[mode] = duration;
-                if (state.mode === mode) {
-                    this.reset(cardId);
-                }
-                AppState.save('pomodoroState');
-            }
-        };
+                state.intervalId = setInterval(() => this.tick(cardId), 1000);
+                this.updateDisplay(cardId);
+                AppState.save('pomodoroState'); // <-- ADDED
+            },
+            _internalPause(cardId) {
+                const state = AppState.pomodoroState[cardId];
+                clearInterval(state.intervalId);
+                state.isRunning = false;
+                this.updateDisplay(cardId);
+            },
+            stop(cardId) {
+                const state = AppState.pomodoroState[cardId];
+                clearInterval(state.intervalId);
+                if(AppState.activeTimer.cardId === cardId) {
+                    AppState.activeTimer.cardId = null;
+                    AppState.activeTimer.type = null;
+                    if(AppState.settings.focusShieldEnabled) exitFocusMode();
+                }
+                state.isRunning = false;
+                this.updateDisplay(cardId);
+                AppState.save('pomodoroState'); // <-- ADDED
+            },
+            toggle(cardId) {
+                const state = AppState.pomodoroState[cardId];
+                state.isRunning ? this.stop(cardId) : this.start(cardId);
+            },
+            reset(cardId) {
+                const state = AppState.pomodoroState[cardId];
+                this.stop(cardId);
+                state.time = state.durations[state.mode] * 60;
+                this.updateDisplay(cardId);
+                AppState.save('pomodoroState'); // <-- ADDED
+            },
+            setMode(cardId, mode) {
+                const state = AppState.pomodoroState[cardId];
+                state.mode = mode;
+                this.reset(cardId);
+            },
+            setDuration(cardId, mode, duration) {
+                const state = AppState.pomodoroState[cardId];
+                state.durations[mode] = duration;
+                if (state.mode === mode) {
+                    this.reset(cardId);
+                }
+                AppState.save('pomodoroState');
+            }
+        };
 
         // --- TIME LOGGER LOGIC ---
         const timeLogger = {
@@ -2455,6 +2483,13 @@ const loadDataFromFirestore = (cloudData) => {
                 }
             }
         }
+        document.addEventListener('click', () => {
+            const userMenuDropdown = document.getElementById('user-menu-dropdown');
+            // Check if the dropdown exists and is not hidden
+            if (userMenuDropdown && !userMenuDropdown.classList.contains('hidden')) {
+                userMenuDropdown.classList.add('hidden');
+            }
+        });
 
         // --- INITIALIZATION ---
         updateAuthUI(); // ✨ New: Initial UI render for auth
