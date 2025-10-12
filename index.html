@@ -693,6 +693,10 @@
             <div class="card-header">
                 <h2 class="text-lg font-semibold card-title">Study Logger</h2>
                 <div class="card-header-controls">
+					<button class="pip-btn" title="Show in floating window" aria-label="Show in floating window">
+			            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.75 4.75h-8.5a2 2 0 0 0-2 2v8.5a2 2 0 0 0 2 2h8.5a2 2 0 0 0 2-2v-8.5a2 2 0 0 0-2-2Z"/><path d="M19.25 8.75h-8.5a2 2 0 0 1-2-2v-2.5"/><path d="M17.5 15.5V14"/><path d="m15 12 5 5"/></svg>
+			        </button>
+
                     <button class="toggle-colspan-btn" title="Toggle size" aria-label="Toggle card size"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m6 6v-4m0 4h-4"/><path d="M3 3l6 6"/><path d="M3 3v4m0-4h4"/></svg></button>
                     <button class="delete-card-btn" title="Delete card" aria-label="Delete card"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg></button>
                     <span class="drag-handle" aria-label="Drag to reorder"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
@@ -1096,6 +1100,10 @@
             godModePanel: document.getElementById('god-mode-panel'),
         };
 
+		let pipWindow = null;
+		let activePipCardId = null;
+		let activePipType = null;
+
         // --- 🔥 START: Firebase Auth and Sync Logic ---
 
         // Listen for authentication state changes
@@ -1295,7 +1303,191 @@ const loadDataFromFirestore = (cloudData) => {
             if (m > 0 || h > 0) str += `${m}m`;
             if (str === '') str = `${s % 60}s`
             return str.trim();
-        }
+        } 
+
+
+		function handleVisibilityChangeForPip() {
+		    if (document.visibilityState === 'visible' && pipWindow) {
+		        pipWindow.close();
+		    }
+		}
+		
+		// Function to keep the floating window's time synchronized
+		function updatePipDisplay() {
+		    if (!pipWindow || !activePipCardId) return;
+		
+		    const mainTimerDisplay = document.querySelector(`[data-card-id="${activePipCardId}"] .timer-display`);
+		    const pipTimerDisplay = pipWindow.document.getElementById('pip-timer');
+		
+		    if (mainTimerDisplay && pipTimerDisplay) {
+		        pipTimerDisplay.textContent = mainTimerDisplay.textContent;
+		    }
+		}
+
+		function updatePipControls() {
+		    if (!pipWindow || !activePipCardId) return;
+		
+		    // Get the current state of the timer from the main page
+		    const state = AppState.timeLoggerState[activePipCardId];
+		    if (!state) return;
+		
+		    // Find the buttons inside the PiP window's document
+		    const pipStartPauseBtn = pipWindow.document.getElementById('pip-start-pause-btn');
+		    const pipLogBtn = pipWindow.document.getElementById('pip-log-btn');
+		
+		    if (pipStartPauseBtn) {
+		        pipStartPauseBtn.textContent = state.isRunning ? 'Pause' : 'Start';
+		    }
+		    // You could also disable/enable other buttons here if needed
+		    if (pipLogBtn) {
+		        pipLogBtn.disabled = state.accumulatedTime < 60; // Disable log if less than 1 min
+		    }
+		}
+		
+		// Main function to create and manage the floating window
+		async function togglePipWindow(cardId, type) {
+		    if (!('documentPictureInPicture' in window)) {
+		        alert('Your browser does not support the Document Picture-in-Picture API required for this feature. Please try a recent version of Chrome or Edge on a desktop computer.');
+		        return;
+		    }
+		
+		    if (pipWindow) pipWindow.close();
+		    
+		    try {
+		        const pipOptions = { width: 320, height: 155 };
+		        const newPipWindow = await documentPictureInPicture.requestWindow(pipOptions);
+		        
+		        pipWindow = newPipWindow;
+		        activePipCardId = cardId;
+		        activePipType = type;
+		
+		        // --- Stylesheet Copying from Main Page (Important for variables) ---
+		        [...document.styleSheets].forEach((styleSheet) => {
+		            try {
+		                const cssRules = [...styleSheet.cssRules].map((rule) => rule.cssText).join('');
+		                const style = document.createElement('style');
+		                style.textContent = cssRules;
+		                pipWindow.document.head.appendChild(style);
+		            } catch (e) { console.warn('Cannot read cross-origin stylesheet', e); }
+		        });
+		
+		        // ▼▼▼ NEW: DEDICATED STYLE BLOCK FOR THE PIP WINDOW ▼▼▼
+		        const pipStyles = document.createElement('style');
+		        pipStyles.textContent = `
+		            body {
+		                background-color: var(--card-bg-color);
+		                color: var(--text-primary);
+		                font-family: var(--font-family);
+		                display: flex;
+		                flex-direction: column;
+		                align-items: center;
+		                justify-content: center;
+		                text-align: center;
+		                padding: 1rem;
+		                margin: 0;
+		                box-sizing: border-box;
+		                overflow: hidden;
+		            }
+		            h2 {
+		                font-size: 0.9rem;
+		                margin: 0 0 0.5rem 0;
+		                color: var(--text-secondary);
+		                font-weight: 600;
+		            }
+		            #pip-timer {
+		                font-size: 2.75rem;
+		                font-weight: 700;
+		                letter-spacing: 0.05em;
+		                font-family: 'Fira Code', monospace; /* Using a monospace font for timers looks great */
+		            }
+		            #pip-controls {
+		                display: flex;
+		                gap: 0.75rem;
+		                margin-top: 1rem;
+		            }
+		            #pip-controls button {
+		                padding: 0.5rem 1.25rem;
+		                font-size: 0.9rem;
+		                font-weight: 600;
+		                border: none;
+		                border-radius: 8px;
+		                cursor: pointer;
+		                transition: transform 0.1s ease, filter 0.1s ease;
+		            }
+		            #pip-controls button:hover {
+		                transform: translateY(-2px);
+		                filter: brightness(1.1);
+		            }
+		            #pip-start-pause-btn {
+		                background-color: var(--accent-color);
+		                color: white; /* Default to white for most themes */
+		            }
+		            #pip-log-btn {
+		                background-color: #16a34a; /* A nice, consistent green */
+		                color: white;
+		            }
+		            #pip-log-btn:disabled {
+		                background-color: #4b5563; /* Gray out when disabled */
+		                cursor: not-allowed;
+		                transform: none;
+		                filter: none;
+		            }
+		            #pip-reset-btn {
+		                background-color: transparent;
+		                color: var(--text-secondary);
+		            }
+		            /* Fix for themes where button text should be dark */
+		            [data-theme="light"] #pip-start-pause-btn,
+		            [data-theme="alakh-pandey"] #pip-start-pause-btn {
+		                 color: var(--bg-color);
+		            }
+		        `;
+		        pipWindow.document.head.appendChild(pipStyles);
+		        // Set the theme on the PiP body to match the main page
+		        pipWindow.document.body.dataset.theme = document.body.dataset.theme || 'default';
+		
+		        // --- Create Elements (Now with IDs for styling) ---
+		        const titleEl = document.createElement('h2');
+		        titleEl.textContent = document.querySelector(`[data-card-id="${cardId}"] .card-title`).textContent;
+		        
+		        const timerEl = document.createElement('div');
+		        timerEl.id = 'pip-timer';
+		
+		        const controlsContainer = document.createElement('div');
+		        controlsContainer.id = 'pip-controls';
+		
+		        const startPausePipBtn = document.createElement('button');
+		        startPausePipBtn.id = 'pip-start-pause-btn';
+		        startPausePipBtn.addEventListener('click', () => window.timeLogger.toggle(activePipCardId));
+		
+		        const logPipBtn = document.createElement('button');
+		        logPipBtn.id = 'pip-log-btn';
+		        logPipBtn.textContent = 'Log';
+		        logPipBtn.addEventListener('click', () => window.timeLogger.log(activePipCardId));
+		
+		        const resetPipBtn = document.createElement('button');
+		        resetPipBtn.id = 'pip-reset-btn';
+		        resetPipBtn.textContent = 'Reset';
+		        resetPipBtn.addEventListener('click', () => window.timeLogger.reset(activePipCardId));
+		
+		        controlsContainer.append(startPausePipBtn, logPipBtn, resetPipBtn);
+		        pipWindow.document.body.append(titleEl, timerEl, controlsContainer);
+		        
+		        // --- Event Listeners and Initial Update ---
+		        document.addEventListener('visibilitychange', handleVisibilityChangeForPip);
+		        pipWindow.addEventListener('pagehide', () => {
+		            pipWindow = null; activePipCardId = null; activePipType = null;
+		            document.removeEventListener('visibilitychange', handleVisibilityChangeForPip);
+		        });
+		        
+		        updatePipDisplay();
+		        updatePipControls();
+		
+		    } catch (err) {
+		        console.error("PiP Error:", err);
+		        pipWindow = null;
+		    }
+}
         
         // --- CARD TYPE DEFINITIONS ---
         // [YOUR EXISTING `cardTypes` OBJECT GOES HERE... No changes needed inside it.]
@@ -1748,6 +1940,15 @@ const loadDataFromFirestore = (cloudData) => {
                     cardTypes['time-logger'].render(cardEl, cardData);
                 }
             }
+
+			if (e.target.closest('.pip-btn')) {
+		        const cardData = AppState.customCards.find(c => c.id === cardId);
+		        // We only want this for the Study Logger
+		        if (cardData && cardData.type === 'time-logger') {
+		            togglePipWindow(cardId, cardData.type);
+		        }
+		    }
+			 
             if (cardData && cardData.type === 'todo') {
                 const itemEl = e.target.closest('.todo-item');
                 if (itemEl) {
@@ -2169,7 +2370,7 @@ const loadDataFromFirestore = (cloudData) => {
         };
 
         // --- TIME LOGGER LOGIC ---
-        const timeLogger = {
+        window.timeLogger = {
             tick(cardId) {
                 const state = AppState.timeLoggerState[cardId];
                 if (state && state.isRunning && state.startTime) {
@@ -2178,6 +2379,7 @@ const loadDataFromFirestore = (cloudData) => {
                     const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
                     if (cardEl) {
                         cardEl.querySelector('.timer-display').textContent = formatSeconds(currentTotalSeconds);
+						updatePipDisplay(); 
                     }
                 }
             },
@@ -2203,6 +2405,7 @@ const loadDataFromFirestore = (cloudData) => {
                 const cardEl = D.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
                 if (cardEl) cardEl.querySelector('.start-pause-btn').textContent = 'PAUSE';
                 AppState.save('timeLoggerState');
+				updatePipControls();
             },
             pause(cardId, shouldRender = true) {
                 const state = AppState.timeLoggerState[cardId];
@@ -2224,6 +2427,8 @@ const loadDataFromFirestore = (cloudData) => {
                 if (shouldRender) {
                     renderDashboard();
                 }
+				updatePipDisplay();
+				updatePipControls();
             },
             _internalPause(cardId) {
                 const state = AppState.timeLoggerState[cardId];
@@ -2260,6 +2465,8 @@ const loadDataFromFirestore = (cloudData) => {
                 state.accumulatedTime = 0;
                 AppState.save('timeLoggerState');
                 renderDashboard();
+				updatePipDisplay();
+				updatePipControls();
             },
             reset(cardId) {
                 this.pause(cardId, false);
@@ -2267,6 +2474,8 @@ const loadDataFromFirestore = (cloudData) => {
                 state.accumulatedTime = 0;
                 AppState.save('timeLoggerState');
                 renderDashboard();
+				updatePipDisplay();
+				updatePipControls();
             },
             changeSubject(cardId, subject) {
                 const state = AppState.timeLoggerState[cardId];
