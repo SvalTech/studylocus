@@ -275,6 +275,22 @@
         header .space-x-2 > button { transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease; }
         header .space-x-2 > button:hover { transform: translateY(-2px); box-shadow: var(--accent-glow); }
         
+		#customize-modal.modal-overlay {
+		    /* Align the modal card to the top instead of the center */
+		    align-items: flex-start;
+		    
+		    /* Add some padding to the top and bottom for spacing */
+		    padding-top: 2rem;
+		    padding-bottom: 2rem;
+		
+		    /* This is the key: allow the entire overlay to scroll if the card is too tall */
+		    overflow-y: auto;
+		}
+		
+		/* Optional but recommended: Prevent the card from shrinking if the overlay is a flex container */
+		#customize-modal.modal-overlay > .card {
+		    flex-shrink: 0;
+		}
         [data-theme="cyberpunk"] .btn-primary,
         [data-theme="rose-gold"] .btn-primary,
         [data-theme="ocean"] .btn-primary,
