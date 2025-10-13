@@ -925,6 +925,14 @@
     </div>
     
     <script>
+
+	function debounce(func, delay) {
+        let timeout;
+        return function(...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), delay);
+        };
+    }
     // --- 🔥 START: Firebase Configuration ---
     // IMPORTANT: Replace this with your project's Firebase credentials.
     // You can find this in your Firebase project settings.
@@ -1252,32 +1260,46 @@ const loadDataFromFirestore = (cloudData) => {
         };
         
         const showSyncStatus = (status) => {
-            clearTimeout(syncTimeout);
-            D.syncStatus.textContent = status;
-            D.syncStatus.style.opacity = 1;
-            if(status !== "Saving...") {
-                syncTimeout = setTimeout(() => { D.syncStatus.style.opacity = 0; }, 2000);
-            }
-        };
-        
-        // This is the core function that syncs a specific piece of data to Firestore
-        const syncKeyToFirestore = (key) => {
-            if (!currentUser) return;
-            
-            showSyncStatus("Saving...");
-            const userDocRef = db.collection('users').doc(currentUser.uid);
-            const dataToSync = localStorage.getItem(STORAGE_KEYS[key]);
-            
-            if (dataToSync) {
-                const payload = { [key]: JSON.parse(dataToSync) };
-                userDocRef.set(payload, { merge: true })
-                    .then(() => showSyncStatus("All changes saved"))
-                    .catch(e => {
-                        showSyncStatus("Sync Error");
-                        console.error("Firestore sync error:", e);
-                    });
-            }
-        };
+		    clearTimeout(syncTimeout);
+		    D.syncStatus.textContent = status;
+		    D.syncStatus.style.opacity = 1;
+		    if(status !== "Saving...") {
+		        syncTimeout = setTimeout(() => { D.syncStatus.style.opacity = 0; }, 2000);
+		    }
+		};
+
+		// NEW: This is the function that actually writes to Firestore. 
+		// We wrap it in our debounce helper.
+		const debouncedSync = debounce((key) => {
+		    if (!currentUser) return;
+		    const userDocRef = db.collection('users').doc(currentUser.uid);
+		    const dataToSync = localStorage.getItem(STORAGE_KEYS[key]);
+		
+		    if (dataToSync) {
+		        const payload = { [key]: JSON.parse(dataToSync) };
+		        userDocRef.set(payload, { merge: true })
+		            .then(() => {
+		                console.log(`Debounced sync for '${key}' successful.`);
+		                showSyncStatus("All changes saved");
+		            })
+		            .catch(e => {
+		                showSyncStatus("Sync Error");
+		                console.error("Firestore sync error:", e);
+		            });
+		    }
+		}, 30000); // Wait 30 seconds after the last change before saving to the database.
+		
+		// MODIFIED: This function is what the rest of your app calls.
+		// It now gives IMMEDIATE feedback but uses the debounced function for the actual save.
+		const syncKeyToFirestore = (key) => {
+		    if (!currentUser) return;
+		
+		    // 1. Show "Saving..." message instantly so the user knows their change is registered.
+		    showSyncStatus("Saving..."); 
+		
+		    // 2. Call the debounced function, which will wait before writing to Firestore.
+		    debouncedSync(key);
+		};
 
         // --- 🔥 END: Firebase Auth and Sync Logic ---
 
