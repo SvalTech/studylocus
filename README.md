@@ -40,4 +40,4 @@ A customizable, minimalist, and feature-rich dashboard designed to help students
 
 ## 📄 License
 
-This project is open-source and available under the **MIT License**. 
+This project is available under the **MIT License**. 
