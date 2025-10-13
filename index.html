@@ -616,29 +616,45 @@
     </template>
 
     <template id="line-graph-card-template">
-        <div class="card custom-card" data-card-type="line-graph">
-            <div class="card-header">
-                <h2 class="text-lg font-semibold card-title">Graph</h2>
-                <div class="card-header-controls">
-                    <button class="toggle-colspan-btn" title="Toggle size" aria-label="Toggle card size"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m6 6v-4m0 4h-4"/><path d="M3 3l6 6"/><path d="M3 3v4m0-4h4"/></svg></button>
+	    <div class="card custom-card" data-card-type="line-graph">
+			
+	        <div class="card-header">
+	            <h2 class="text-lg font-semibold card-title">Graph</h2>
+	            <div class="card-header-controls">
+	                <button class="toggle-colspan-btn" title="Toggle size" aria-label="Toggle card size"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m6 6v-4m0 4h-4"/><path d="M3 3l6 6"/><path d="M3 3v4m0-4h4"/></svg></button>
                     <button class="delete-card-btn" title="Delete card" aria-label="Delete card"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg></button>
                     <span class="drag-handle" aria-label="Drag to reorder"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
-                </div>
-            </div>
-            <div class="card-content">
-                <div class="mb-4 h-64">
-                    <canvas class="marks-chart"></canvas>
-                </div>
-                <form class="add-marks-form flex flex-col sm:flex-row gap-2 mb-3">
-                    <input type="text" name="name" placeholder="Paper Name" class="form-input rounded-md p-2 w-full sm:w-auto flex-grow text-sm" required>
-                    <input type="number" name="marks" placeholder="Marks" class="form-input rounded-md p-2 w-full sm:w-20 text-sm" required>
-                    <input type="number" name="maxMarks" placeholder="Total" class="form-input rounded-md p-2 w-full sm:w-20 text-sm" required>
-                    <button type="submit" class="btn-primary font-bold py-2 px-3 rounded-md text-sm" aria-label="Add mark entry">+</button>
-                </form>
-                <ul class="marks-list space-y-1 max-h-24 overflow-y-auto no-scrollbar"></ul>
-            </div>
-        </div>
-    </template>
+	            </div>
+	        </div>
+	        <div class="card-content">
+	            <div class="mb-2 h-64 relative">
+	                <canvas class="marks-chart"></canvas>
+	            </div>
+	            
+	            <!-- ▼▼▼ ADD THIS NEW DIV FOR TOGGLE BUTTONS ▼▼▼ -->
+	            <div class="chart-toggles flex justify-center gap-2 mb-4">
+	                <button data-subject="total" class="text-sm px-3 py-1 rounded-md border active" style="border-color: var(--accent-color); background-color: var(--accent-color); color: white;">Total</button>
+	                <button data-subject="physics" class="text-sm px-3 py-1 rounded-md border border-gray-600">Physics</button>
+	                <button data-subject="chemistry" class="text-sm px-3 py-1 rounded-md border border-gray-600">Chemistry</button>
+	                <button data-subject="maths" class="text-sm px-3 py-1 rounded-md border border-gray-600">Maths/Bio</button>
+	            </div>
+	            <!-- ▲▲▲ END OF NEW DIV ▲▲▲ -->
+	
+	            <!-- ▼▼▼ REPLACE THE OLD FORM WITH THIS NEW ONE ▼▼▼ -->
+	            <form class="add-marks-form grid grid-cols-2 gap-2 mb-3">
+	                <input type="text" name="name" placeholder="Paper Name" class="form-input rounded-md p-2 text-sm col-span-2" required>
+	                <input type="number" name="phy" placeholder="Phy" class="form-input rounded-md p-2 text-sm w-full" required>
+	                <input type="number" name="chem" placeholder="Chem" class="form-input rounded-md p-2 text-sm w-full" required>
+	                <input type="number" name="math" placeholder="Math/Bio" class="form-input rounded-md p-2 text-sm w-full" required>
+	                <input type="number"name="maxMarks" placeholder="Max Marks" class="form-input rounded-md p-2 text-sm w-full" required>
+	                <button type="submit" class="btn-primary font-bold py-2 px-3 rounded-md text-sm col-span-2" aria-label="Add mark entry">Add Entry</button>
+	            </form>
+	            <!-- ▲▲▲ END OF NEW FORM ▲▲▲ -->
+	            
+	            <ul class="marks-list space-y-1 max-h-24 overflow-y-auto no-scrollbar"></ul>
+	        </div>
+	    </div>
+	</template>
     
     <template id="pomodoro-card-template">
         <div class="card custom-card" data-card-type="pomodoro">
@@ -1287,7 +1303,7 @@ const loadDataFromFirestore = (cloudData) => {
 		                console.error("Firestore sync error:", e);
 		            });
 		    }
-		}, 30000); // Wait 30 seconds after the last change before saving to the database.
+		}, 10000); // Wait 30 seconds after the last change before saving to the database.
 		
 		// MODIFIED: This function is what the rest of your app calls.
 		// It now gives IMMEDIATE feedback but uses the debounced function for the actual save.
@@ -1655,64 +1671,125 @@ const loadDataFromFirestore = (cloudData) => {
                 }
             },
             'line-graph': {
-                templateId: 'line-graph-card-template',
-                render: (cardEl, cardData) => {
-                    const listEl = cardEl.querySelector('.marks-list');
-                    listEl.innerHTML = '';
-                    
-                    cardData.content.forEach((item, index) => {
-                        const li = document.createElement('li');
-                        li.className = 'flex justify-between items-center text-xs bg-gray-800 p-1 rounded';
-                        li.innerHTML = `<span>${item.name}: <strong>${item.marks} / ${item.maxMarks}</strong></span><button data-index="${index}" class="delete-mark-item text-red-500 px-1" aria-label="Delete mark entry">×</button>`;
-                        listEl.appendChild(li);
-                    });
+			    templateId: 'line-graph-card-template',
+			    render: (cardEl, cardData) => {
+			        // --- 1. Render the list of marks (now with subject details) ---
+			        const listEl = cardEl.querySelector('.marks-list');
+			        listEl.innerHTML = '';
+			        cardData.content.forEach((item, index) => {
+			            const li = document.createElement('li');
+			            li.className = 'flex justify-between items-center text-xs bg-gray-800 p-2 rounded';
+			            li.innerHTML = `
+			                <div class="flex-grow">
+			                    <strong>${item.name}</strong>: ${item.total ?? item.marks} / ${item.maxMarks}
+			                    <span class="text-gray-400 ml-2">${item.subjects ? `(P:${item.subjects.physics}, C:${item.subjects.chemistry}, M:${item.subjects.maths})` : '(No subject data)'}</span>
+			                </div>
+			                <button data-index="${index}" class="delete-mark-item text-red-500 px-1" aria-label="Delete mark entry">×</button>`;
+			            listEl.appendChild(li);
+			        });
+			
+			        // --- 2. Destroy old chart instance if it exists ---
+			        const ctx = cardEl.querySelector('.marks-chart').getContext('2d');
+			        if (AppState.chartInstances[cardData.id]) {
+			            AppState.chartInstances[cardData.id].destroy();
+			        }
+			
+			        // --- 3. Prepare data for the new multi-line chart ---
+			        const subjectColors = {
+			            total: getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim(),
+			            physics: '#3b82f6', // Blue
+			            chemistry: '#10b981', // Green
+			            maths: '#f97316'  // Orange
+			        };
+			
+			        const datasets = ['total', 'physics', 'chemistry', 'maths'].map(subject => {
+			            return {
+			                label: subject.charAt(0).toUpperCase() + subject.slice(1),
+			                data: cardData.content.map(d => {
+							    if (subject === 'total') {
+							        return d.total ?? d.marks; // Use new 'total' if it exists, otherwise fall back to old 'marks'
+							    }
+							    return d.subjects ? d.subjects[subject] : null; // If subject data exists use it, otherwise return null
+							}),
+			                borderColor: subjectColors[subject],
+			                backgroundColor: `${subjectColors[subject]}20`, // Transparent version for area fill
+			                fill: true,
+			                tension: 0.3,
+			                pointBackgroundColor: subjectColors[subject],
+			                borderWidth: 2,
+			                // Hide subject lines by default
+			                hidden: subject !== 'total' 
+			            };
+			        });
+			
+			        const maxMarkValue = cardData.content.length > 0 ? Math.max(...cardData.content.map(d => d.maxMarks || 0)) : 300;
 
-                    const ctx = cardEl.querySelector('.marks-chart').getContext('2d');
-                    if (AppState.chartInstances[cardData.id]) {
-                        AppState.chartInstances[cardData.id].destroy();
-                    }
-                    
-                    const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
-                    const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim();
-                    const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--border-color').trim();
-                    
-                    const gradient = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height);
-                    gradient.addColorStop(0, `${accentColor}40`);
-                    gradient.addColorStop(1, `${accentColor}00`);
-
-                    const maxMarkValue = cardData.content.length > 0 ? Math.max(...cardData.content.map(d => d.maxMarks || 0)) : 300;
-
-                    AppState.chartInstances[cardData.id] = new Chart(ctx, {
-                        type: 'line',
-                        data: {
-                            labels: cardData.content.map(d => d.name),
-                            datasets: [{
-                                label: 'Marks',
-                                data: cardData.content.map(d => d.marks),
-                                borderColor: accentColor,
-                                backgroundColor: gradient,
-                                fill: true,
-                                tension: 0.3,
-                                pointBackgroundColor: accentColor,
-                                pointBorderColor: 'var(--card-bg-color)',
-                                pointHoverBackgroundColor: '#fff',
-                                pointHoverBorderColor: accentColor,
-                                pointRadius: 4,
-                                pointHoverRadius: 6,
-                                borderWidth: 2
-                            }]
-                        },
-                        options: {
-                            responsive: true, maintainAspectRatio: false,
-                            plugins: { legend: { display: false } },
-                            scales: {
-                                y: { beginAtZero: true, max: maxMarkValue, ticks: { color: textColor }, grid: { color: gridColor } },
-                                x: { ticks: { color: textColor }, grid: { color: 'transparent' } }
-                            }
-                        }
-                    });
-                }
-            },
+					// ▼▼▼ ADD THESE LINES TO GET THE ACTUAL COLOR VALUES ▼▼▼
+					const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim();
+					const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--border-color').trim();
+					// ▲▲▲ END OF NEW LINES ▲▲▲
+					
+					// --- 4. Create the new Chart.js instance (with corrected colors) ---
+					const chart = new Chart(ctx, {
+					    type: 'line',
+					    data: {
+					        labels: cardData.content.map(d => d.name),
+					        datasets: datasets
+					    },
+					    options: {
+					        responsive: true, maintainAspectRatio: false,
+					        plugins: { legend: { display: false } },
+					        scales: {
+					            // ▼▼▼ USE THE JAVASCRIPT VARIABLES HERE, NOT THE CSS 'var()' STRINGS ▼▼▼
+					            y: { 
+					                beginAtZero: true, 
+					                max: maxMarkValue, 
+					                ticks: { color: textColor }, 
+					                grid: { color: gridColor } 
+					            },
+					            x: { 
+					                ticks: { color: textColor }, 
+					                grid: { color: 'transparent' } 
+					            }
+					            // ▲▲▲ END OF CORRECTION ▲▲▲
+					        }
+					    }
+					});
+AppState.chartInstances[cardData.id] = chart;
+			
+			        // --- 5. Add event listener for our new toggle buttons ---
+			        const toggles = cardEl.querySelector('.chart-toggles');
+			        toggles.addEventListener('click', (e) => {
+			            if (e.target.tagName === 'BUTTON') {
+			                const subject = e.target.dataset.subject;
+			                const datasetIndex = chart.data.datasets.findIndex(d => d.label.toLowerCase() === subject);
+			
+			                if (datasetIndex > -1) {
+			                    chart.data.datasets[datasetIndex].hidden = !chart.data.datasets[datasetIndex].hidden;
+			                    chart.update();
+			
+			                    // Update button styles
+			                    toggles.querySelectorAll('button').forEach(btn => {
+			                        const dsIndex = chart.data.datasets.findIndex(d => d.label.toLowerCase() === btn.dataset.subject);
+			                        if (!chart.data.datasets[dsIndex].hidden) {
+			                            btn.style.backgroundColor = subjectColors[btn.dataset.subject];
+			                            btn.style.borderColor = subjectColors[btn.dataset.subject];
+			                            btn.style.color = 'white';
+			                        } else {
+			                            btn.style.backgroundColor = 'transparent';
+			                            btn.style.borderColor = '#4b5563'; // gray-600
+			                            btn.style.color = 'var(--text-primary)';
+			                        }
+			                    });
+			                }
+			            }
+			        });
+			
+			        // Trigger a click to initialize button styles correctly
+			        toggles.querySelector('button').click();
+			        toggles.querySelector('button').click(); // Double click to restore initial state
+			    }
+			},
             pomodoro: {
                 templateId: 'pomodoro-card-template',
                 render: (cardEl, cardData) => {
@@ -2087,20 +2164,34 @@ const loadDataFromFirestore = (cloudData) => {
                     input.value = '';
                 }
             } else if (form.classList.contains('add-marks-form')) {
-                const card = AppState.customCards.find(c => c.id === cardId);
-                const { name, marks, maxMarks } = form.elements;
-                if (card && name.value.trim() && marks.value && maxMarks.value) {
-                    if (!Array.isArray(card.content)) card.content = [];
-                    card.content.push({ 
-                        name: name.value.trim(), 
-                        marks: parseFloat(marks.value),
-                        maxMarks: parseFloat(maxMarks.value)
-                    });
-                    AppState.save('customCards');
-                    cardTypes['line-graph'].render(cardEl, card);
-                    form.reset();
-                }
-            } else if (form.classList.contains('update-youtube-form')) {
+			    const card = AppState.customCards.find(c => c.id === cardId);
+			    // ▼▼▼ REPLACE THE OLD LOGIC WITH THIS ▼▼▼
+			    const { name, phy, chem, math, maxMarks } = form.elements;
+			
+			    if (card && name.value.trim() && phy.value && chem.value && math.value && maxMarks.value) {
+			        if (!Array.isArray(card.content)) card.content = [];
+			
+			        const phyScore = parseFloat(phy.value);
+			        const chemScore = parseFloat(chem.value);
+			        const mathScore = parseFloat(math.value);
+			        const totalScore = phyScore + chemScore + mathScore;
+			
+			        card.content.push({
+			            name: name.value.trim(),
+			            maxMarks: parseFloat(maxMarks.value),
+			            total: totalScore,
+			            subjects: {
+			                physics: phyScore,
+			                chemistry: chemScore,
+			                maths: mathScore
+			            }
+			        });
+			        AppState.save('customCards');
+			        cardTypes['line-graph'].render(cardEl, card);
+			        form.reset();
+			    }
+			    // ▲▲▲ END OF REPLACEMENT ▲▲▲
+			} else if (form.classList.contains('update-youtube-form')) {
                 const card = AppState.customCards.find(c => c.id === cardId);
                 const input = form.querySelector('input');
                 if (card && input.value.trim()) {
