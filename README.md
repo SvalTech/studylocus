@@ -36,8 +36,3 @@ A customizable, minimalist, and feature-rich dashboard designed to help students
 * **SortableJS** for drag-and-drop functionality.
 * **Chart.js** for rendering the line graph.
 
----
-
-## 📄 License
-
-This project is available under the **MIT License**. 
