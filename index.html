@@ -601,8 +601,1422 @@
     </div>
     
     <script>
+		function debounce(t, e) {
+		    let o;
+		    return function (...n) {
+		        clearTimeout(o), (o = setTimeout(() => t.apply(this, n), e));
+		    };
+		}
+		const firebaseConfig = {
+		    apiKey: "AIzaSyAO9ya8gHtVbMfxcnAAJrz6FdYWvIRqgBY",
+		    authDomain: "studydashboard-2a3eb.firebaseapp.com",
+		    projectId: "studydashboard-2a3eb",
+		    storageBucket: "studydashboard-2a3eb.firebasestorage.app",
+		    messagingSenderId: "79210973277",
+		    appId: "1:79210973277:web:cc0a5fa86729fd6d3f65b4",
+		    measurementId: "G-TE7Z0SR8L1",
+		};
+		firebase.initializeApp(firebaseConfig);
+		const auth = firebase.auth(),
+		    db = firebase.firestore();
+		let currentUser = null,
+		    syncTimeout = null;
+		document.addEventListener("DOMContentLoaded", () => {
+		    const t = {
+		            tests: "jeePartTests_v2",
+		            layout: "jeeDashboardLayout_v3",
+		            customCards: "jeeCustomCards_v3",
+		            settings: "jeeDashboardSettings_v3",
+		            mobileAlertDismissed: "jeeMobileAlertDismissed_v1",
+		            cardProps: "jeeCardProps_v2",
+		            pomodoroState: "jeePomodoroState_v1",
+		            timeLoggerState: "jeeTimeLoggerState_v1",
+		            studyLogs: "jeeStudyLogs_v1",
+		        },
+		        e = {
+		            JEE: { 2026: new Date("2026-01-21T00:00:00"), 2027: new Date("2027-01-21T00:00:00") },
+		            NEET: { 2026: new Date("2026-05-03T00:00:00"), 2027: new Date("2027-05-02T00:00:00") },
+		        },
+		        o = JSON.parse(localStorage.getItem(t.settings)),
+		        n = {
+		            tests: JSON.parse(localStorage.getItem(t.tests)) || {},
+		            customCards: JSON.parse(localStorage.getItem(t.customCards)) || [
+		                {
+		                    id: "default-todo",
+		                    type: "todo",
+		                    title: "My Tasks",
+		                    content: [
+		                        { text: "Solve 20 Physics problems", completed: !1 },
+		                        { text: "Revise Organic Chemistry", completed: !0 },
+		                        { text: "Take a short break!", completed: !1 },
+		                    ],
+		                },
+		                {
+		                    id: "default-line-graph",
+		                    type: "line-graph",
+		                    title: "Mock Test Progress",
+		                    content: [
+		                        { name: "Test 1", marks: 120, maxMarks: 300 },
+		                        { name: "Test 2", marks: 145, maxMarks: 300 },
+		                        { name: "Test 3", marks: 160, maxMarks: 300 },
+		                    ],
+		                },
+		                {
+		                    id: "default-note",
+		                    type: "note",
+		                    title: "Welcome!",
+		                    content:
+		                        "Welcome to your new dashboard! You can drag, resize, and delete these cards. Add your own from the top right. Best of luck in your journey!",
+		                },
+		                { id: "default-study-logger", type: "time-logger", title: "Study Log", content: [] },
+		            ],
+		            layout: JSON.parse(localStorage.getItem(t.layout)) || [
+		                "countdown",
+		                "graph",
+		                "default-todo",
+		                "default-study-logger",
+		                "default-note",
+		                "default-line-graph",
+		                "tests",
+		                "quote",
+		                "time",
+		            ],
+		            settings: {
+		                theme: "default",
+		                font: "'Inter', sans-serif",
+		                bgUrl: "",
+		                examType: "JEE",
+		                examYear: "2026",
+		                youtubeTintEnabled: !0,
+		                youtubeBlurEnabled: !1,
+		                focusShieldEnabled: !1,
+		                userSubjects: [],
+		                ...o,
+		            },
+		            cardProps: JSON.parse(localStorage.getItem(t.cardProps)) || {
+		                graph: { colspan: 2 },
+		                "default-line-graph": { colspan: 1 },
+		                "default-study-logger": { colspan: 1 },
+		            },
+		            pomodoroState: JSON.parse(localStorage.getItem(t.pomodoroState)) || {},
+		            timeLoggerState: JSON.parse(localStorage.getItem(t.timeLoggerState)) || {},
+		            studyLogs: JSON.parse(localStorage.getItem(t.studyLogs)) || {},
+		            chartInstances: {},
+		            activeTimer: { cardId: null, type: null, unfocusedTime: 0, unfocusedStart: 0 },
+		            save(e) {
+		                localStorage.setItem(t[e], JSON.stringify(this[e])), v(e);
+		            },
+		            saveSettings() {
+		                localStorage.setItem(t.settings, JSON.stringify(this.settings)), v("settings");
+		            },
+		        },
+		        a = [
+		            { text: "The secret of getting ahead is getting started.", author: "Mark Twain" },
+		            { text: "It’s not whether you get knocked down, it’s whether you get up.", author: "Vince Lombardi" },
+		            { text: "Success is the sum of small efforts, repeated day in and day out.", author: "Robert Collier" },
+		            { text: "The expert in anything was once a beginner.", author: "Helen Hayes" },
+		            { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" },
+		            {
+		                text: "The difference between ordinary and extraordinary is that little extra.",
+		                author: "Jimmy Johnson",
+		            },
+		            { text: "A person who never made a mistake never tried anything new.", author: "Albert Einstein" },
+		            { text: "The harder I work, the luckier I get.", author: "Samuel Goldwyn" },
+		            {
+		                text: "Success is not final, failure is not fatal: it is the courage to continue that counts.",
+		                author: "Winston Churchill",
+		            },
+		            { text: "Strive for progress, not perfection.", author: "Unknown" },
+		            {
+		                text: "Genius is one percent inspiration and ninety-nine percent perspiration.",
+		                author: "Thomas A. Edison",
+		            },
+		            { text: "It does not matter how slowly you go as long as you do not stop.", author: "Confucius" },
+		            { text: "Doubt kills more dreams than failure ever will.", author: "Suzy Kassem" },
+		            { text: "Push yourself, because no one else is going to do it for you.", author: "Unknown" },
+		            { text: "If you want to shine like a sun, first burn like a sun.", author: "A. P. J. Abdul Kalam" },
+		            {
+		                text: "The important thing is not to stop questioning. Curiosity has its own reason for existing.",
+		                author: "Albert Einstein",
+		            },
+		            {
+		                text: "We are what we repeatedly do. Excellence, then, is not an act, but a habit.",
+		                author: "Aristotle",
+		            },
+		            { text: "The chapters you study today will decide the chapters of your life tomorrow.", author: "Unknown" },
+		            { text: "Your toughest competition is the person you were yesterday.", author: "Unknown" },
+		            { text: "Rank is just a number. Knowledge and skill are the real assets.", author: "Unknown" },
+		            {
+		                text: "Dream is not that which you see while sleeping it is something that does not let you sleep.",
+		                author: "A. P. J. Abdul Kalam",
+		            },
+		            {
+		                text: "Focus on the process, not the outcome. The right process will lead to the right outcome.",
+		                author: "Unknown",
+		            },
+		        ],
+		        s = [
+		            { text: "Kyu nahi ho rahi padhai?", author: "Alakh Pandey" },
+		            { text: "System phaad denge!", author: "A wise man" },
+		            { text: "Physics is not a subject, it's an emotion.", author: "Alakh Pandey" },
+		            { text: "Aag laga denge!", author: "Revolutionaries" },
+		            { text: "Mehnat karta hu bhai", author: "Basava Reddy" },
+		        ],
+		        r = [
+		            { text: "Chaitanya is a noob 🤓", author: "Everyone" },
+		            { text: "I love Organic Chemistry 🤓", author: "Chaitanya (probably)" },
+		            { text: "Isomerism is my favorite topic 🤓", author: "Definitely Chaitanya" },
+		            { text: "Just like us guys 🤓", author: "Chaitanya the moron" },
+		        ],
+		        i = {
+		            body: document.body,
+		            mainTitle: document.getElementById("main-title"),
+		            dashboardGrid: document.getElementById("dashboard-grid"),
+		            authContainer: document.getElementById("auth-container"),
+		            syncStatus: document.getElementById("sync-status"),
+		            modals: {
+		                addCard: document.getElementById("add-card-modal"),
+		                customize: document.getElementById("customize-modal"),
+		                info: document.getElementById("info-modal"),
+		                confirm: document.getElementById("confirm-modal"),
+		            },
+		            buttons: {
+		                addCard: document.getElementById("add-card-btn"),
+		                cancelAddCard: document.getElementById("cancel-add-card"),
+		                customize: document.getElementById("customize-btn"),
+		                closeCustomize: document.getElementById("close-customize"),
+		                closeCustomizeIcon: document.getElementById("close-customize-icon-btn"),
+		                removeBg: document.getElementById("remove-bg-btn"),
+		                closeAlert: document.getElementById("close-alert-btn"),
+		                resetDashboard: document.getElementById("reset-dashboard-btn"),
+		                info: document.getElementById("info-btn"),
+		                closeInfo: document.getElementById("close-info-modal"),
+		                exportData: document.getElementById("export-data-btn"),
+		                importData: document.getElementById("import-data-btn"),
+		                confirmOk: document.getElementById("confirm-ok-btn"),
+		                confirmCancel: document.getElementById("confirm-cancel-btn"),
+		                zenModeBtn: document.getElementById("zen-mode-btn"),
+		                exitZenBtn: document.getElementById("exit-zen-btn"),
+		                godModeClose: document.getElementById("god-mode-close-btn"),
+		            },
+		            forms: { newCard: document.getElementById("new-card-form") },
+		            inputs: {
+		                cardType: document.getElementById("new-card-type"),
+		                cardContent: document.getElementById("new-card-content"),
+		                theme: document.getElementById("theme-select"),
+		                font: document.getElementById("font-select"),
+		                bgUrl: document.getElementById("bg-image-url"),
+		                examType: document.getElementById("exam-type-select"),
+		                examYear: document.getElementById("exam-year-select"),
+		                importFile: document.getElementById("import-file-input"),
+		                youtubeTintToggle: document.getElementById("youtube-tint-toggle"),
+		                youtubeBlurToggle: document.getElementById("youtube-blur-toggle"),
+		                focusShieldToggle: document.getElementById("focus-shield-toggle"),
+		            },
+		            mobileAlert: document.getElementById("mobile-alert"),
+		            confirmTitle: document.getElementById("confirm-title"),
+		            confirmMessage: document.getElementById("confirm-message"),
+		            godModePanel: document.getElementById("god-mode-panel"),
+		        };
+		    let d = null,
+		        l = null,
+		        c = null;
+		    auth.onAuthStateChanged((t) => {
+		        t ? ((currentUser = t), p(t)) : ((currentUser = null), g());
+		    });
+		    const u = () => {
+		            const t = new firebase.auth.GoogleAuthProvider();
+		            auth.signInWithPopup(t).catch((t) => {
+		                console.error("Authentication Error:", t);
+		            });
+		        },
+		        m = () => {
+		            sessionStorage.removeItem("cloud_data_loaded"), auth.signOut();
+		        },
+		        g = () => {
+		            if (currentUser) {
+		                i.authContainer.innerHTML = `\n                    <div class="relative" id="user-menu-container">\n                        <button id="user-menu-button" title="User Menu" class="flex items-center justify-center w-10 h-10 rounded-full transition-colors hover:bg-white/20 sm:w-auto sm:h-auto sm:px-2 sm:py-1">\n                            <img src="${currentUser.photoURL}" alt="${currentUser.displayName}" class="w-8 h-8 rounded-full pointer-events-none" />\n                            <span class="text-sm font-semibold hidden sm:inline ml-2 pointer-events-none">${currentUser.displayName.split(" ")[0]}</span>\n                        </button>\n                        <div id="user-menu-dropdown" class="card absolute right-0 mt-2 w-48 p-2 hidden z-50">\n                            <div class="px-2 py-1 mb-1 border-b" style="border-color: var(--border-color);">\n                                <p class="text-sm font-semibold truncate" title="${currentUser.displayName}">${currentUser.displayName}</p>\n                                <p class="text-xs text-secondary truncate" title="${currentUser.email}">${currentUser.email}</p>\n                            </div>\n                            <button id="sign-out-btn" class="w-full text-left flex items-center gap-2 p-2 rounded-md hover:bg-white/10 transition-colors">\n                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>\n                                <span>Sign Out</span>\n                            </button>\n                        </div>\n                    </div>\n                `;
+		                const t = i.authContainer.querySelector("#user-menu-button"),
+		                    e = i.authContainer.querySelector("#user-menu-dropdown"),
+		                    o = i.authContainer.querySelector("#sign-out-btn");
+		                t.addEventListener("click", (t) => {
+		                    t.stopPropagation(), e.classList.toggle("hidden");
+		                }),
+		                    o.addEventListener("click", m);
+		            } else
+		                (i.authContainer.innerHTML =
+		                    '<button id="sign-in-btn" class="flex items-center justify-center w-10 h-10 rounded-full transition-colors hover:bg-white/20 sm:w-auto sm:px-3 sm:py-2"><svg class="w-5 h-5" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">\n                            <path d="M47.532 24.552c0-1.566-.14-3.084-.404-4.548H24.5v8.58h12.944c-.566 2.76-2.213 5.108-4.72 6.708v5.524h7.112c4.162-3.832 6.596-9.42 6.596-16.264z" fill="#4285F4"/><path d="M24.5 48c6.48 0 11.944-2.14 15.928-5.788l-7.112-5.524c-2.14 1.44-4.884 2.292-7.816 2.292-6.004 0-11.084-4.04-12.9-9.492H4.42v5.7c3.48 6.912 10.32 11.532 18.08 11.532l2 .28z" fill="#34A853"/><path d="M11.6 28.98c-.34-.996-.54-2.052-.54-3.144s.2-2.148.54-3.144V16.992H4.42C2.852 20.04 2 23.436 2 27.024c0 3.588.852 6.984 2.42 10.032l7.18-5.7v-.376z" fill="#FBBC05"/><path d="M24.5 9.8c3.516 0 6.66 1.212 9.128 3.54l6.32-6.32C36.44.88 30.98 0 24.5 0 16.74 0 9.9 4.62 6.42 11.532l7.18 5.7c1.816-5.452 6.896-9.432 12.9-9.432z" fill="#EA4335"/>\n                        </svg><span class="text-sm font-semibold hidden sm:inline ml-2">Sign In</span></button>'),
+		                    i.authContainer.querySelector("#sign-in-btn").addEventListener("click", u);
+		        },
+		        p = async (t) => {
+		            g();
+		            const e = db.collection("users").doc(t.uid),
+		                o = await e.get();
+		            o.exists ? h(o.data()) : y(e);
+		        },
+		        h = (e) => {
+		            if ("true" === sessionStorage.getItem("cloud_data_loaded"))
+		                return void console.log("Cloud data already loaded this session. Skipping redundant load.");
+		            console.log("Loading data from cloud...");
+		            let o = !1;
+		            for (const n in t)
+		                if (e[n]) {
+		                    const a = localStorage.getItem(t[n]),
+		                        s = JSON.stringify(e[n]);
+		                    a !== s && (localStorage.setItem(t[n], s), (o = !0));
+		                }
+		            o && (sessionStorage.setItem("cloud_data_loaded", "true"), location.reload());
+		        },
+		        y = (e) => {
+		            console.log("New user detected. Migrating local data to cloud...");
+		            const o = {};
+		            for (const e in t) {
+		                const n = localStorage.getItem(t[e]);
+		                n && (o[e] = JSON.parse(n));
+		            }
+		            Object.keys(o).length > 0 &&
+		                e
+		                    .set(o)
+		                    .then(() => b("Synced"))
+		                    .catch((t) => console.error("Migration failed:", t));
+		        },
+		        b = (t) => {
+		            clearTimeout(syncTimeout),
+		                (i.syncStatus.textContent = t),
+		                (i.syncStatus.style.opacity = 1),
+		                "Saving..." !== t &&
+		                    (syncTimeout = setTimeout(() => {
+		                        i.syncStatus.style.opacity = 0;
+		                    }, 2e3));
+		        },
+		        f = debounce((e) => {
+		            if (!currentUser) return;
+		            const o = db.collection("users").doc(currentUser.uid),
+		                n = localStorage.getItem(t[e]);
+		            if (n) {
+		                const t = { [e]: JSON.parse(n) };
+		                o.set(t, { merge: !0 })
+		                    .then(() => {
+		                        console.log(`Debounced sync for '${e}' successful.`), b("All changes saved");
+		                    })
+		                    .catch((t) => {
+		                        b("Sync Error"), console.error("Firestore sync error:", t);
+		                    });
+		            }
+		        }, 1e4),
+		        v = (t) => {
+		            currentUser && (b("Saving..."), f(t));
+		        };
+		    let S = null;
+		    function x(t, e, o = "Are you sure?") {
+		        (i.confirmTitle.textContent = o),
+		            (i.confirmMessage.textContent = t),
+		            (S = e),
+		            i.modals.confirm.classList.remove("hidden");
+		    }
+		    const L = (t) =>
+		            `${t.getFullYear()}-${(t.getMonth() + 1).toString().padStart(2, "0")}-${t.getDate().toString().padStart(2, "0")}`,
+		        E = () => {
+		            const { examType: t, examYear: o } = n.settings;
+		            return e[t]?.[o] || new Date();
+		        },
+		        w = (t) =>
+		            `${Math.floor(t / 3600)
+		                .toString()
+		                .padStart(2, "0")}:${Math.floor((t % 3600) / 60)
+		                .toString()
+		                .padStart(2, "0")}:${Math.floor(t % 60)
+		                .toString()
+		                .padStart(2, "0")}`,
+		        T = (t) => {
+		            const e = Math.floor(t / 3600),
+		                o = Math.floor((t % 3600) / 60);
+		            let n = "";
+		            return (
+		                e > 0 && (n += `${e}h `), (o > 0 || e > 0) && (n += `${o}m`), "" === n && (n = (t % 60) + "s"), n.trim()
+		            );
+		        };
+		    function I() {
+		        "visible" === document.visibilityState && d && d.close();
+		    }
+		    function C() {
+		        if (!d || !l) return;
+		        const t = document.querySelector(`[data-card-id="${l}"] .timer-display`),
+		            e = d.document.getElementById("pip-timer");
+		        t && e && (e.textContent = t.textContent);
+		    }
+		    function k() {
+		        if (!d || !l) return;
+		        const t = n.timeLoggerState[l];
+		        if (!t) return;
+		        const e = d.document.getElementById("pip-start-pause-btn"),
+		            o = d.document.getElementById("pip-log-btn");
+		        e && (e.textContent = t.isRunning ? "Pause" : "Start"), o && (o.disabled = t.accumulatedTime < 60);
+		    }
+		    const B = {
+		        countdown: {
+		            templateId: "countdown-template",
+		            isDefault: !0,
+		            render: (t) => {
+		                const e = E() - new Date();
+		                (t.querySelector('[data-value="days"]').innerText = Math.floor(e / 864e5)
+		                    .toString()
+		                    .padStart(2, "0")),
+		                    (t.querySelector('[data-value="hours"]').innerText = Math.floor((e / 36e5) % 24)
+		                        .toString()
+		                        .padStart(2, "0")),
+		                    (t.querySelector('[data-value="minutes"]').innerText = Math.floor((e / 6e4) % 60)
+		                        .toString()
+		                        .padStart(2, "0")),
+		                    (t.querySelector('[data-value="seconds"]').innerText = Math.floor((e / 1e3) % 60)
+		                        .toString()
+		                        .padStart(2, "0"));
+		            },
+		        },
+		        time: {
+		            templateId: "time-template",
+		            isDefault: !0,
+		            render: (t) => {
+		                const e = new Date();
+		                (t.querySelector('[data-value="time"]').textContent = e.toLocaleTimeString("en-US", {
+		                    hour: "2-digit",
+		                    minute: "2-digit",
+		                    second: "2-digit",
+		                    hour12: !0,
+		                })),
+		                    (t.querySelector('[data-value="date"]').textContent = e.toLocaleDateString("en-US", {
+		                        weekday: "long",
+		                        year: "numeric",
+		                        month: "long",
+		                        day: "numeric",
+		                    }));
+		            },
+		        },
+		        graph: {
+		            templateId: "graph-template",
+		            isDefault: !0,
+		            render: (t) => {
+		                const e = t.querySelector("#contribution-graph");
+		                e.innerHTML = "";
+		                const o = new Date();
+		                o.setHours(0, 0, 0, 0);
+		                const a = new Date().getFullYear();
+		                let s = new Date(`${a}-01-01T00:00:00`);
+		                const r = E();
+		                for (r.setHours(0, 0, 0, 0); s <= r; ) {
+		                    const t = document.createElement("div"),
+		                        a = document.createElement("span"),
+		                        i = L(s);
+		                    (t.className = "day"), (t.dataset.date = i), (a.className = "tooltip");
+		                    let d = "day-future",
+		                        l = s.toDateString();
+		                    if (
+		                        (s < o && (d = "day-past"),
+		                        s.getTime() === o.getTime() && ((d = "day-today"), (l += " - Today")),
+		                        n.tests[i])
+		                    ) {
+		                        d = "day-part-test";
+		                        const t = Math.ceil((new Date(i) - o) / 864e5);
+		                        l = `${n.tests[i]} (${t} days from now)`;
+		                    }
+		                    s.getTime() === r.getTime() && ((d = "day-exam"), (l += " - Exam!")),
+		                        t.classList.add(d),
+		                        (a.textContent = l),
+		                        t.appendChild(a),
+		                        e.appendChild(t),
+		                        s.setDate(s.getDate() + 1);
+		                }
+		            },
+		        },
+		        tests: {
+		            templateId: "tests-template",
+		            isDefault: !0,
+		            render: (t) => {
+		                const e = t.querySelector("#test-list");
+		                e.innerHTML = "";
+		                const o = Object.keys(n.tests).sort();
+		                0 !== o.length
+		                    ? o.forEach((t) => {
+		                          const o = document.createElement("li");
+		                          (o.className = "flex justify-between items-center bg-gray-800 p-2 rounded-md"),
+		                              (o.innerHTML = `<div class="flex flex-col"><span class="font-semibold text-sm">${n.tests[t]}</span><span class="text-xs text-secondary">${new Date(t + "T00:00:00").toDateString()}</span></div><button data-date="${t}" class="delete-test-btn text-red-500 hover:text-red-400 font-semibold text-xs">Delete</button>`),
+		                              e.appendChild(o);
+		                      })
+		                    : (e.innerHTML = '<li class="text-secondary px-2 text-sm">No tests scheduled.</li>');
+		            },
+		        },
+		        quote: {
+		            templateId: "quote-template",
+		            isDefault: !0,
+		            render: (t) => {
+		                let e = a;
+		                "alakh-pandey" === n.settings.theme && (e = s), "chaitanya-noob" === n.settings.theme && (e = r);
+		                const { text: o, author: i } = e[Math.floor(Math.random() * e.length)];
+		                (t.querySelector("#quote").textContent = `"${o}"`), (t.querySelector("#author").textContent = `- ${i}`);
+		            },
+		        },
+		        note: {
+		            templateId: "note-card-template",
+		            render: (t, e) => {
+		                t.querySelector(".card-content").textContent = e.content;
+		            },
+		        },
+		        todo: {
+		            templateId: "todo-card-template",
+		            render: (t, e) => {
+		                const o = t.querySelector(".todo-list"),
+		                    n = t.querySelector(".progress-bar");
+		                if (((o.innerHTML = ""), Array.isArray(e.content))) {
+		                    const t = e.content.length,
+		                        a = e.content.filter((t) => t.completed).length,
+		                        s = t > 0 ? (a / t) * 100 : 0;
+		                    (n.style.width = `${s}%`),
+		                        0 === t
+		                            ? (o.innerHTML =
+		                                  '<li class="text-secondary px-2 text-sm">No tasks yet. Add one below!</li>')
+		                            : e.content.forEach((t, e) => {
+		                                  const n = document.createElement("li");
+		                                  (n.className =
+		                                      "flex items-center gap-3 p-2 rounded-md hover:bg-white/5 transition-colors todo-item " +
+		                                      (t.completed ? "completed" : "")),
+		                                      (n.dataset.index = e),
+		                                      (n.innerHTML = `<input type="checkbox" ${t.completed ? "checked" : ""} class="todo-checkbox"><span class="flex-grow text-sm">${t.text}</span><button class="delete-todo-item" aria-label="Delete task">×</button>`),
+		                                      o.appendChild(n);
+		                              });
+		                }
+		            },
+		        },
+		        "line-graph": {
+		            templateId: "line-graph-card-template",
+		            render: (t, e) => {
+		                const o = t.querySelector(".marks-list");
+		                (o.innerHTML = ""),
+		                    e.content.forEach((t, e) => {
+		                        const n = document.createElement("li");
+		                        (n.className = "flex justify-between items-center text-xs bg-gray-800 p-2 rounded"),
+		                            (n.innerHTML = `\n\t\t\t                <div class="flex-grow">\n\t\t\t                    <strong>${t.name}</strong>: ${t.total ?? t.marks} / ${t.maxMarks}\n\t\t\t                    <span class="text-gray-400 ml-2">${t.subjects ? `(P:${t.subjects.physics}, C:${t.subjects.chemistry}, M:${t.subjects.maths})` : "(No subject data)"}</span>\n\t\t\t                </div>\n\t\t\t                <button data-index="${e}" class="delete-mark-item text-red-500 px-1" aria-label="Delete mark entry">×</button>`),
+		                            o.appendChild(n);
+		                    });
+		                const a = t.querySelector(".marks-chart").getContext("2d");
+		                n.chartInstances[e.id] && n.chartInstances[e.id].destroy();
+		                const s = {
+		                        total: getComputedStyle(document.documentElement).getPropertyValue("--accent-color").trim(),
+		                        physics: "#3b82f6",
+		                        chemistry: "#10b981",
+		                        maths: "#f97316",
+		                    },
+		                    r = ["total", "physics", "chemistry", "maths"].map((t) => ({
+		                        label: t.charAt(0).toUpperCase() + t.slice(1),
+		                        data: e.content.map((e) =>
+		                            "total" === t ? (e.total ?? e.marks) : e.subjects ? e.subjects[t] : null
+		                        ),
+		                        borderColor: s[t],
+		                        backgroundColor: `${s[t]}20`,
+		                        fill: !0,
+		                        tension: 0.3,
+		                        pointBackgroundColor: s[t],
+		                        borderWidth: 2,
+		                        hidden: "total" !== t,
+		                    })),
+		                    i = e.content.length > 0 ? Math.max(...e.content.map((t) => t.maxMarks || 0)) : 300,
+		                    d = getComputedStyle(document.documentElement).getPropertyValue("--text-secondary").trim(),
+		                    l = getComputedStyle(document.documentElement).getPropertyValue("--border-color").trim(),
+		                    c = new Chart(a, {
+		                        type: "line",
+		                        data: { labels: e.content.map((t) => t.name), datasets: r },
+		                        options: {
+		                            responsive: !0,
+		                            maintainAspectRatio: !1,
+		                            plugins: { legend: { display: !1 } },
+		                            scales: {
+		                                y: { beginAtZero: !0, max: i, ticks: { color: d }, grid: { color: l } },
+		                                x: { ticks: { color: d }, grid: { color: "transparent" } },
+		                            },
+		                        },
+		                    });
+		                n.chartInstances[e.id] = c;
+		                const u = t.querySelector(".chart-toggles");
+		                u.addEventListener("click", (t) => {
+		                    if ("BUTTON" === t.target.tagName) {
+		                        const e = t.target.dataset.subject,
+		                            o = c.data.datasets.findIndex((t) => t.label.toLowerCase() === e);
+		                        o > -1 &&
+		                            ((c.data.datasets[o].hidden = !c.data.datasets[o].hidden),
+		                            c.update(),
+		                            u.querySelectorAll("button").forEach((t) => {
+		                                const e = c.data.datasets.findIndex((e) => e.label.toLowerCase() === t.dataset.subject);
+		                                c.data.datasets[e].hidden
+		                                    ? ((t.style.backgroundColor = "transparent"),
+		                                      (t.style.borderColor = "#4b5563"),
+		                                      (t.style.color = "var(--text-primary)"))
+		                                    : ((t.style.backgroundColor = s[t.dataset.subject]),
+		                                      (t.style.borderColor = s[t.dataset.subject]),
+		                                      (t.style.color = "white"));
+		                            }));
+		                    }
+		                }),
+		                    u.querySelector("button").click(),
+		                    u.querySelector("button").click();
+		            },
+		        },
+		        pomodoro: {
+		            templateId: "pomodoro-card-template",
+		            render: (t, e) => {
+		                const o = n.pomodoroState[e.id] || {
+		                    mode: "pomodoro",
+		                    time: 1500,
+		                    isRunning: !1,
+		                    intervalId: null,
+		                    durations: { pomodoro: 25, shortBreak: 5, longBreak: 15 },
+		                };
+		                n.pomodoroState[e.id] = o;
+		                const a = Math.floor(o.time / 60)
+		                        .toString()
+		                        .padStart(2, "0"),
+		                    s = (o.time % 60).toString().padStart(2, "0");
+		                (t.querySelector(".timer-display").textContent = `${a}:${s}`),
+		                    t.querySelectorAll(".pomodoro-btn").forEach((t) => {
+		                        t.classList.toggle("active", t.dataset.mode === o.mode);
+		                    }),
+		                    (t.querySelector(".start-pause-btn").textContent = o.isRunning ? "PAUSE" : "START"),
+		                    (t.querySelector('[data-mode="pomodoro"].pomodoro-duration-input').value = o.durations.pomodoro),
+		                    (t.querySelector('[data-mode="shortBreak"].pomodoro-duration-input').value =
+		                        o.durations.shortBreak),
+		                    (t.querySelector('[data-mode="longBreak"].pomodoro-duration-input').value = o.durations.longBreak);
+		            },
+		        },
+		        youtube: {
+		            templateId: "youtube-card-template",
+		            render: (t, e) => {
+		                const o = t.querySelector(".youtube-iframe"),
+		                    a = e.content;
+		                let s = "";
+		                if (a)
+		                    try {
+		                        const t = new URL(a);
+		                        s = t.hostname.includes("youtu.be") ? t.pathname.slice(1) : t.searchParams.get("v");
+		                    } catch (t) {
+		                        console.error("Invalid YouTube URL");
+		                    }
+		                o.src = s ? `https://www.youtube.com/embed/${s}` : "";
+		                const r = t.querySelector(".youtube-container");
+		                r.classList.toggle("tint-disabled", !n.settings.youtubeTintEnabled),
+		                    r.classList.toggle("blurred", n.settings.youtubeBlurEnabled);
+		            },
+		        },
+		        "time-logger": {
+		            templateId: "time-logger-card-template",
+		            render: (t, e) => {
+		                const o = n.timeLoggerState[e.id] || {
+		                    isRunning: !1,
+		                    accumulatedTime: 0,
+		                    currentSubject: "Physics",
+		                    intervalId: null,
+		                };
+		                (n.timeLoggerState[e.id] = o),
+		                    (t.querySelector(".timer-display").textContent = w(o.accumulatedTime)),
+		                    (t.querySelector(".start-pause-btn").textContent = o.isRunning ? "PAUSE" : "START");
+		                const a = `subject-select-${e.id}`;
+		                t.querySelector('label[for="subject-select"]').setAttribute("for", a);
+		                const s = t.querySelector(".subject-select");
+		                s.id = a;
+		                const r = [
+		                    ...new Set([
+		                        "Physics",
+		                        "Chemistry",
+		                        "Maths",
+		                        "Biology",
+		                        "Zoology",
+		                        "Botany",
+		                        ...(n.settings.userSubjects || []),
+		                    ]),
+		                ];
+		                (s.innerHTML =
+		                    r.map((t) => `<option>${t}</option>`).join("") +
+		                    '<option value="add_new">Add New Subject...</option>'),
+		                    (s.value = o.currentSubject);
+		                const i = t.querySelector(".study-log-list"),
+		                    d = t.querySelector(".total-study-time");
+		                i.innerHTML = "";
+		                const l = L(new Date()),
+		                    c = n.studyLogs[l] || {},
+		                    u = Object.values(c).reduce((t, e) => t + e, 0);
+		                d && (d.textContent = `Total: ${T(u)}`),
+		                    0 === Object.keys(c).length
+		                        ? (i.innerHTML = '<li class="text-secondary px-2 text-sm">No sessions logged today.</li>')
+		                        : Object.entries(c).forEach(([t, e]) => {
+		                              const o = document.createElement("li");
+		                              (o.className = "flex justify-between items-center"),
+		                                  (o.innerHTML = `<span>${t}</span><div class="flex items-center gap-2"><span class="font-semibold">${T(e)}</span><button data-subject="${t}" class="delete-log-item text-red-500 hover:text-red-400 font-semibold px-2 py-1 text-xs leading-none rounded-sm" aria-label="Delete ${t} log">×</button></div>`),
+		                                  i.appendChild(o);
+		                          });
+		            },
+		        },
+		    };
+		    function q() {
+		        Object.values(n.chartInstances).forEach((t) => t.destroy()),
+		            (n.chartInstances = {}),
+		            (i.dashboardGrid.innerHTML = "");
+		        const t = n.customCards.map((t) => t.id);
+		        (n.layout = n.layout.filter((e) => B[e]?.isDefault || t.includes(e))),
+		            n.customCards.forEach((t) => {
+		                n.layout.includes(t.id) || n.layout.push(t.id);
+		            }),
+		            n.save("layout"),
+		            n.layout.forEach((t) => {
+		                const e = n.customCards.find((e) => e.id === t),
+		                    o = e ? e.type : t,
+		                    a = B[o];
+		                if (a) {
+		                    const s = document.getElementById(a.templateId).content.cloneNode(!0),
+		                        r = s.querySelector(".card");
+		                    r.dataset.cardId = t;
+		                    const d = n.cardProps[t] || {
+		                        colspan: "graph" === o || "line-graph" === o || "youtube" === o || "time-logger" === o ? 2 : 1,
+		                    };
+		                    if (((n.cardProps[t] = d), 2 === d.colspan && r.classList.add("md:col-span-2"), e))
+		                        r.querySelector(".card-title").textContent = e.title;
+		                    else if ("chaitanya-noob" === n.settings.theme) {
+		                        const t = r.querySelector("h2");
+		                        t && (t.textContent += " 🤓");
+		                    }
+		                    i.dashboardGrid.appendChild(s);
+		                }
+		            }),
+		            i.dashboardGrid.querySelectorAll(".card").forEach((t, e) => {
+		                const o = t.dataset.cardId,
+		                    a = n.customCards.find((t) => t.id === o),
+		                    s = a ? a.type : o,
+		                    r = B[s];
+		                r && r.render(t, a);
+		            });
+		    }
+		    function D() {
+		        const t = n.settings.youtubeTintEnabled,
+		            e = n.settings.youtubeBlurEnabled;
+		        i.inputs.youtubeTintToggle && (i.inputs.youtubeTintToggle.checked = t),
+		            i.inputs.youtubeBlurToggle && (i.inputs.youtubeBlurToggle.checked = e),
+		            document.querySelectorAll('[data-card-type="youtube"] .youtube-container').forEach((o) => {
+		                o.classList.toggle("tint-disabled", !t), o.classList.toggle("blurred", e);
+		            });
+		    }
+		    function M() {
+		        (document.documentElement.dataset.theme = n.settings.theme),
+		            (i.body.style.fontFamily = n.settings.font),
+		            "alakh-pandey" === n.settings.theme
+		                ? (i.body.style.backgroundImage = "url(https://i.imgflip.com/8otyfs.jpg)")
+		                : "chaitanya-noob" === n.settings.theme
+		                  ? (i.body.style.backgroundImage =
+		                        "url(https://i.ibb.co/pv4BYhMs/Whats-App-Image-2025-08-06-at-16-12-41-4f47e159.jpg)")
+		                  : "god-mode" === n.settings.theme
+		                    ? (i.body.style.backgroundImage =
+		                          "url('https://i.pinimg.com/originals/c5/9a/d2/c59ad2bd4ad2fbacd04017debc679ddb.gif')")
+		                    : (i.body.style.backgroundImage = n.settings.bgUrl ? `url(${n.settings.bgUrl})` : "none");
+		        const { examType: t, examYear: e } = n.settings;
+		        (i.mainTitle.textContent = `${t} ${e}`),
+		            (i.inputs.theme.value = n.settings.theme),
+		            (i.inputs.font.value = n.settings.font),
+		            (i.inputs.bgUrl.value = n.settings.bgUrl),
+		            (i.inputs.examType.value = n.settings.examType),
+		            (i.inputs.examYear.value = n.settings.examYear),
+		            (i.inputs.focusShieldToggle.checked = n.settings.focusShieldEnabled),
+		            D();
+		    }
+		    i.dashboardGrid.addEventListener("click", (t) => {
+		        const e = t.target.closest(".card");
+		        if (!e) return;
+		        const o = e.dataset.cardId;
+		        if (
+		            ("quote" === o && B.quote.render(e),
+		            t.target.closest(".delete-test-btn") &&
+		                (delete n.tests[t.target.closest(".delete-test-btn").dataset.date], n.save("tests"), q()),
+		            t.target.classList.contains("day"))
+		        ) {
+		            const e = t.target.dataset.date;
+		            if (n.tests[e]) delete n.tests[e], n.save("tests"), q();
+		            else {
+		                const t = i.dashboardGrid.querySelector("#add-test-form");
+		                t && ((t.date.value = e), t.name.focus());
+		            }
+		        }
+		        const a = n.customCards.find((t) => t.id === o);
+		        if (t.target.closest(".toggle-colspan-btn")) {
+		            const t = n.cardProps[o] || { colspan: 1 };
+		            (t.colspan = 2 === t.colspan ? 1 : 2), (n.cardProps[o] = t), n.save("cardProps"), q();
+		        }
+		        if (
+		            (t.target.closest(".delete-card-btn") &&
+		                a &&
+		                ((n.customCards = n.customCards.filter((t) => t.id !== o)),
+		                delete n.cardProps[o],
+		                delete n.pomodoroState[o],
+		                delete n.timeLoggerState[o],
+		                n.save("customCards"),
+		                n.save("cardProps"),
+		                n.save("pomodoroState"),
+		                n.save("timeLoggerState"),
+		                q()),
+		            t.target.classList.contains("delete-log-item"))
+		        ) {
+		            const e = t.target.closest(".card"),
+		                o = e.dataset.cardId,
+		                a = t.target.dataset.subject,
+		                s = L(new Date());
+		            if (n.studyLogs[s] && void 0 !== n.studyLogs[s][a]) {
+		                delete n.studyLogs[s][a],
+		                    0 === Object.keys(n.studyLogs[s]).length && delete n.studyLogs[s],
+		                    n.save("studyLogs");
+		                const t = n.customCards.find((t) => t.id === o);
+		                B["time-logger"].render(e, t);
+		            }
+		        }
+		        if (t.target.closest(".pip-btn")) {
+		            const t = n.customCards.find((t) => t.id === o);
+		            t &&
+		                "time-logger" === t.type &&
+		                (async function (t, e) {
+		                    if ("documentPictureInPicture" in window) {
+		                        d && d.close();
+		                        try {
+		                            const o = { width: 320, height: 155 },
+		                                n = await documentPictureInPicture.requestWindow(o);
+		                            (d = n),
+		                                (l = t),
+		                                (c = e),
+		                                [...document.styleSheets].forEach((t) => {
+		                                    try {
+		                                        const e = [...t.cssRules].map((t) => t.cssText).join(""),
+		                                            o = document.createElement("style");
+		                                        (o.textContent = e), d.document.head.appendChild(o);
+		                                    } catch (t) {
+		                                        console.warn("Cannot read cross-origin stylesheet", t);
+		                                    }
+		                                });
+		                            const a = document.createElement("style");
+		                            (a.textContent =
+		                                '\n\t\t            body {\n\t\t                background-color: var(--card-bg-color);\n\t\t                color: var(--text-primary);\n\t\t                font-family: var(--font-family);\n\t\t                display: flex;\n\t\t                flex-direction: column;\n\t\t                align-items: center;\n\t\t                justify-content: center;\n\t\t                text-align: center;\n\t\t                padding: 1rem;\n\t\t                margin: 0;\n\t\t                box-sizing: border-box;\n\t\t                overflow: hidden;\n\t\t            }\n\t\t            h2 {\n\t\t                font-size: 0.9rem;\n\t\t                margin: 0 0 0.5rem 0;\n\t\t                color: var(--text-secondary);\n\t\t                font-weight: 600;\n\t\t            }\n\t\t            #pip-timer {\n\t\t\t\t\t    \n\t\t\t\t\t    font-size: clamp(1.5rem, 25vh, 7.5rem);\n\t\t\t\t\t    font-weight: 700;\n\t\t\t\t\t    line-height: 1; /* Helps with vertical alignment */\n\t\t\t\t\t    letter-spacing: 0.05em;\n\t\t\t\t\t    font-family: \'Fira Code\', monospace;\n\t\t\t\t\t}\n\t\t            #pip-controls {\n\t\t                display: flex;\n\t\t                gap: 0.75rem;\n\t\t                margin-top: 1rem;\n\t\t            }\n\t\t            #pip-controls button {\n\t\t                padding: 0.5rem 1.25rem;\n\t\t                font-size: 0.9rem;\n\t\t                font-weight: 600;\n\t\t                border: none;\n\t\t                border-radius: 8px;\n\t\t                cursor: pointer;\n\t\t                transition: transform 0.1s ease, filter 0.1s ease;\n\t\t            }\n\t\t            #pip-controls button:hover {\n\t\t                transform: translateY(-2px);\n\t\t                filter: brightness(1.1);\n\t\t            }\n\t\t            #pip-start-pause-btn {\n\t\t                background-color: var(--accent-color);\n\t\t                color: white; /* Default to white for most themes */\n\t\t            }\n\t\t            #pip-log-btn {\n\t\t                background-color: #16a34a; /* A nice, consistent green */\n\t\t                color: white;\n\t\t            }\n\t\t            #pip-log-btn:disabled {\n\t\t                background-color: #4b5563; /* Gray out when disabled */\n\t\t                cursor: not-allowed;\n\t\t                transform: none;\n\t\t                filter: none;\n\t\t            }\n\t\t            #pip-reset-btn {\n\t\t                background-color: transparent;\n\t\t                color: var(--text-secondary);\n\t\t            }\n\t\t            /* Fix for themes where button text should be dark */\n\t\t            [data-theme="light"] #pip-start-pause-btn,\n\t\t            [data-theme="alakh-pandey"] #pip-start-pause-btn {\n\t\t                 color: var(--bg-color);\n\t\t            }\n\t\t        '),
+		                                d.document.head.appendChild(a),
+		                                (d.document.body.dataset.theme = document.body.dataset.theme || "default");
+		                            const s = document.createElement("h2");
+		                            s.textContent = document.querySelector(`[data-card-id="${t}"] .card-title`).textContent;
+		                            const r = document.createElement("div");
+		                            r.id = "pip-timer";
+		                            const i = document.createElement("div");
+		                            i.id = "pip-controls";
+		                            const u = document.createElement("button");
+		                            (u.id = "pip-start-pause-btn"),
+		                                u.addEventListener("click", () => window.timeLogger.toggle(l));
+		                            const m = document.createElement("button");
+		                            (m.id = "pip-log-btn"),
+		                                (m.textContent = "Log"),
+		                                m.addEventListener("click", () => window.timeLogger.log(l));
+		                            const g = document.createElement("button");
+		                            (g.id = "pip-reset-btn"),
+		                                (g.textContent = "Reset"),
+		                                g.addEventListener("click", () => window.timeLogger.reset(l)),
+		                                i.append(u, m, g),
+		                                d.document.body.append(s, r, i),
+		                                document.addEventListener("visibilitychange", I),
+		                                d.addEventListener("pagehide", () => {
+		                                    (d = null),
+		                                        (l = null),
+		                                        (c = null),
+		                                        document.removeEventListener("visibilitychange", I);
+		                                }),
+		                                C(),
+		                                k();
+		                        } catch (t) {
+		                            console.error("PiP Error:", t), (d = null);
+		                        }
+		                    } else
+		                        alert(
+		                            "Your browser does not support the Document Picture-in-Picture API required for this feature. Please try a recent version of Chrome or Edge on a desktop computer."
+		                        );
+		                })(o, t.type);
+		        }
+		        if (a && "todo" === a.type) {
+		            const o = t.target.closest(".todo-item");
+		            if (o) {
+		                const s = parseInt(o.dataset.index);
+		                t.target.closest(".delete-todo-item")
+		                    ? a.content.splice(s, 1)
+		                    : t.target.classList.contains("todo-checkbox") &&
+		                      (a.content[s].completed = !a.content[s].completed),
+		                    n.save("customCards"),
+		                    B.todo.render(e, a);
+		            }
+		        }
+		        if (a && "line-graph" === a.type && t.target.closest(".delete-mark-item")) {
+		            const o = parseInt(t.target.closest(".delete-mark-item").dataset.index);
+		            a.content.splice(o, 1), n.save("customCards"), B["line-graph"].render(e, a);
+		        }
+		        a &&
+		            "pomodoro" === a.type &&
+		            (t.target.classList.contains("pomodoro-btn")
+		                ? $.setMode(o, t.target.dataset.mode)
+		                : t.target.classList.contains("start-pause-btn")
+		                  ? $.toggle(o)
+		                  : t.target.classList.contains("reset-btn") && $.reset(o)),
+		            a &&
+		                "time-logger" === a.type &&
+		                (t.target.classList.contains("start-pause-btn")
+		                    ? timeLogger.toggle(o)
+		                    : t.target.classList.contains("log-btn")
+		                      ? timeLogger.log(o)
+		                      : t.target.classList.contains("reset-btn") && timeLogger.reset(o));
+		    }),
+		        i.dashboardGrid.addEventListener("change", (t) => {
+		            if (t.target.classList.contains("pomodoro-duration-input")) {
+		                const e = t.target.closest(".card").dataset.cardId,
+		                    o = t.target.dataset.mode;
+		                let n = parseInt(t.target.value);
+		                n < 1 && ((n = 1), (t.target.value = 1)), e && o && !isNaN(n) && $.setDuration(e, o, n);
+		            }
+		            if (t.target.classList.contains("subject-select")) {
+		                const e = t.target.closest(".card").dataset.cardId;
+		                timeLogger.changeSubject(e, t.target.value);
+		            }
+		        }),
+		        i.dashboardGrid.addEventListener("submit", (t) => {
+		            t.preventDefault();
+		            const e = t.target,
+		                o = e.closest(".card"),
+		                a = o.dataset.cardId;
+		            if ("add-test-form" === e.id) {
+		                const { date: t, name: o } = e.elements;
+		                t.value && o.value.trim() && ((n.tests[t.value] = o.value.trim()), n.save("tests"), q(), e.reset());
+		            } else if (e.classList.contains("add-todo-form")) {
+		                const t = n.customCards.find((t) => t.id === a),
+		                    s = e.querySelector("input"),
+		                    r = s.value.trim();
+		                if ("coco" === r.toLowerCase())
+		                    return (
+		                        P ||
+		                            (P = {
+		                                theme: n.settings.theme,
+		                                customCards: JSON.parse(JSON.stringify(n.customCards)),
+		                                tests: JSON.parse(JSON.stringify(n.tests)),
+		                                layout: [...n.layout],
+		                            }),
+		                        i.godModePanel.classList.remove("hidden"),
+		                        new Tone.Synth().toDestination().triggerAttackRelease("C4", "0.5"),
+		                        void (s.value = "")
+		                    );
+		                if ("doingocmakesmeexcited" === r.toLowerCase())
+		                    return (n.settings.theme = "chaitanya-noob"), n.saveSettings(), M(), q(), void (s.value = "");
+		                t &&
+		                    r &&
+		                    (Array.isArray(t.content) || (t.content = []),
+		                    t.content.push({ text: r, completed: !1 }),
+		                    n.save("customCards"),
+		                    B.todo.render(o, t),
+		                    (s.value = ""));
+		            } else if (e.classList.contains("add-marks-form")) {
+		                const t = n.customCards.find((t) => t.id === a),
+		                    { name: s, phy: r, chem: i, math: d, maxMarks: l } = e.elements;
+		                if (t && s.value.trim() && r.value && i.value && d.value && l.value) {
+		                    Array.isArray(t.content) || (t.content = []);
+		                    const a = parseFloat(r.value),
+		                        c = parseFloat(i.value),
+		                        u = parseFloat(d.value),
+		                        m = a + c + u;
+		                    t.content.push({
+		                        name: s.value.trim(),
+		                        maxMarks: parseFloat(l.value),
+		                        total: m,
+		                        subjects: { physics: a, chemistry: c, maths: u },
+		                    }),
+		                        n.save("customCards"),
+		                        B["line-graph"].render(o, t),
+		                        e.reset();
+		                }
+		            } else if (e.classList.contains("update-youtube-form")) {
+		                const t = n.customCards.find((t) => t.id === a),
+		                    s = e.querySelector("input");
+		                t && s.value.trim() && ((t.content = s.value.trim()), n.save("customCards"), B.youtube.render(o, t));
+		            }
+		        }),
+		        i.buttons.addCard.addEventListener("click", () => i.modals.addCard.classList.remove("hidden")),
+		        i.buttons.cancelAddCard.addEventListener("click", () => i.modals.addCard.classList.add("hidden")),
+		        i.inputs.cardType.addEventListener("change", (t) => {
+		            const e = "note" === t.target.value,
+		                o = "youtube" === t.target.value;
+		            (i.inputs.cardContent.style.display = e || o ? "block" : "none"),
+		                (i.inputs.cardContent.placeholder = o ? "Paste YouTube video URL..." : "Card Content (for notes)");
+		        }),
+		        i.forms.newCard.addEventListener("submit", (t) => {
+		            t.preventDefault();
+		            const e = i.inputs.cardType.value,
+		                o = i.forms.newCard.querySelector('input[type="text"]').value.trim();
+		            if (!o) return;
+		            const a = {
+		                id: `custom-${Date.now()}`,
+		                type: e,
+		                title: o,
+		                content: "note" === e || "youtube" === e ? i.inputs.cardContent.value.trim() : [],
+		            };
+		            n.customCards.push(a);
+		            const s = { colspan: "line-graph" === e || "youtube" === e || "time-logger" === e ? 2 : 1 };
+		            "line-graph" === e && (s.maxMarks = 300),
+		                (n.cardProps[a.id] = s),
+		                n.save("customCards"),
+		                n.save("cardProps"),
+						n.layout.push(a.id), // 1. Add the new card's ID ('a.id') to the layout array ('n.layout')
+					    n.save("layout"),
+		                q(),
+		                i.modals.addCard.classList.add("hidden"),
+		                i.forms.newCard.reset(),
+		                (i.inputs.cardContent.style.display = "block");
+		        });
+		    const A = () => i.modals.customize.classList.add("hidden");
+		    i.buttons.customize.addEventListener("click", () => i.modals.customize.classList.remove("hidden")),
+		        i.buttons.closeCustomize.addEventListener("click", A),
+		        i.buttons.closeCustomizeIcon.addEventListener("click", A),
+		        i.modals.customize.addEventListener("click", (t) => {
+		            t.target === i.modals.customize && A();
+		        });
+		    const j = () => {
+		        n.saveSettings(), M(), q();
+		    };
+		    i.inputs.examType.addEventListener("change", () => {
+		        (n.settings.examType = i.inputs.examType.value), j();
+		    }),
+		        i.inputs.examYear.addEventListener("change", () => {
+		            (n.settings.examYear = i.inputs.examYear.value), j();
+		        }),
+		        i.inputs.theme.addEventListener("change", () => {
+		            (n.settings.theme = i.inputs.theme.value), n.saveSettings(), M(), q();
+		        }),
+		        i.inputs.font.addEventListener("change", () => {
+		            (n.settings.font = i.inputs.font.value), n.saveSettings(), M();
+		        }),
+		        i.inputs.bgUrl.addEventListener("input", () => {
+		            (n.settings.bgUrl = i.inputs.bgUrl.value), n.saveSettings(), M();
+		        }),
+		        i.buttons.removeBg.addEventListener("click", () => {
+		            (n.settings.bgUrl = ""), n.saveSettings(), M();
+		        }),
+		        i.inputs.youtubeTintToggle.addEventListener("change", () => {
+		            (n.settings.youtubeTintEnabled = i.inputs.youtubeTintToggle.checked), n.saveSettings(), D();
+		        }),
+		        i.inputs.youtubeBlurToggle.addEventListener("change", () => {
+		            (n.settings.youtubeBlurEnabled = i.inputs.youtubeBlurToggle.checked), n.saveSettings(), D();
+		        }),
+		        i.inputs.focusShieldToggle.addEventListener("change", () => {
+		            const t = i.inputs.focusShieldToggle.checked;
+		            if (((n.settings.focusShieldEnabled = t), n.saveSettings(), !t && n.activeTimer.cardId)) {
+		                const { cardId: t, type: e } = n.activeTimer;
+		                "pomodoro" === e ? $.stop(t) : "time-logger" === e && timeLogger.pause(t);
+		            }
+		        }),
+		        i.buttons.resetDashboard.addEventListener("click", () => {
+		            x(
+		                "This will delete all custom cards and reset the layout to the default.",
+		                () => {
+		                    Object.keys(t).forEach((e) => {
+		                        "settings" !== e && "mobileAlertDismissed" !== e && localStorage.removeItem(t[e]);
+		                    }),
+		                        location.reload();
+		                },
+		                "Reset Dashboard?"
+		            );
+		        }),
+		        i.buttons.exportData.addEventListener("click", () => {
+		            const e = {};
+		            for (const o in t) {
+		                const n = localStorage.getItem(t[o]);
+		                null !== n && (e[o] = JSON.parse(n));
+		            }
+		            const o = JSON.stringify(e, null, 2),
+		                n = new Blob([o], { type: "application/json" }),
+		                a = URL.createObjectURL(n),
+		                s = document.createElement("a");
+		            s.href = a;
+		            const r = new Date().toISOString().slice(0, 10);
+		            (s.download = `studylocus-backup-${r}.json`),
+		                document.body.appendChild(s),
+		                s.click(),
+		                document.body.removeChild(s),
+		                URL.revokeObjectURL(a);
+		        }),
+		        i.buttons.importData.addEventListener("click", () => {
+		            i.inputs.importFile.click();
+		        }),
+		        i.inputs.importFile.addEventListener("change", (e) => {
+		            const o = e.target.files[0];
+		            if (!o) return;
+		            const n = new FileReader();
+		            (n.onload = (e) => {
+		                try {
+		                    const o = JSON.parse(e.target.result);
+		                    if (!["layout", "customCards", "settings"].every((t) => t in o))
+		                        return void console.error(
+		                            "Import failed: The JSON file appears to be invalid or is not a valid dashboard backup."
+		                        );
+		                    x(
+		                        "This will overwrite your current dashboard configuration.",
+		                        () => {
+		                            localStorage.clear();
+		                            for (const e in o)
+		                                if (e in t) {
+		                                    const n = t[e],
+		                                        a = o[e];
+		                                    null != a && localStorage.setItem(n, JSON.stringify(a));
+		                                }
+		                            location.reload();
+		                        },
+		                        "Import Data?"
+		                    );
+		                } catch (t) {
+		                    console.error("Error importing data:", t);
+		                } finally {
+		                    i.inputs.importFile.value = "";
+		                }
+		            }),
+		                n.readAsText(o);
+		        }),
+		        window.innerWidth < 768 &&
+		            "true" !== localStorage.getItem(t.mobileAlertDismissed) &&
+		            i.mobileAlert.classList.remove("hidden"),
+		        i.buttons.closeAlert.addEventListener("click", () => {
+		            i.mobileAlert.classList.add("hidden"), localStorage.setItem(t.mobileAlertDismissed, "true");
+		        }),
+		        i.buttons.info.addEventListener("click", () => i.modals.info.classList.remove("hidden")),
+		        i.buttons.closeInfo.addEventListener("click", () => i.modals.info.classList.add("hidden")),
+		        i.buttons.zenModeBtn.addEventListener("click", () => {
+		            i.body.classList.add("zen-mode"), i.buttons.exitZenBtn.classList.remove("hidden");
+		        }),
+		        i.buttons.exitZenBtn.addEventListener("click", () => {
+		            i.body.classList.remove("zen-mode"), i.buttons.exitZenBtn.classList.add("hidden");
+		        }),
+		        i.buttons.confirmCancel.addEventListener("click", () => {
+		            i.modals.confirm.classList.add("hidden"), (S = null);
+		        }),
+		        i.buttons.confirmOk.addEventListener("click", () => {
+		            "function" == typeof S && S(), i.modals.confirm.classList.add("hidden"), (S = null);
+		        });
+		    const $ = {
+		        tick(t) {
+		            const e = n.pomodoroState[t];
+		            e.time > 0
+		                ? (e.time--, this.updateDisplay(t))
+		                : (this.stop(t), new Tone.Synth().toDestination().triggerAttackRelease("C5", "0.5"));
+		        },
+		        updateDisplay(t) {
+		            const e = i.dashboardGrid.querySelector(`[data-card-id="${t}"]`);
+		            e && B.pomodoro.render(e, { id: t });
+		            const o = n.pomodoroState[t];
+		            if (o.isRunning) {
+		                const t = Math.floor(o.time / 60)
+		                        .toString()
+		                        .padStart(2, "0"),
+		                    e = (o.time % 60).toString().padStart(2, "0");
+		                document.title = `${t}:${e} - Time to focus!`;
+		            } else {
+		                const { examType: t, examYear: e } = n.settings;
+		                document.title = `${t} ${e} | StudyLocus`;
+		            }
+		        },
+		        start(t, e = !1) {
+		            const o = n.pomodoroState[t];
+		            if (!o.isRunning) {
+		                if (((o.isRunning = !0), !e)) {
+		                    if (n.activeTimer.cardId !== t || "pomodoro" !== n.activeTimer.type) {
+		                        n.activeTimer.unfocusedTime = 0;
+		                        const e = i.dashboardGrid.querySelector(`[data-card-id="${t}"]`);
+		                        if (e) {
+		                            const t = e.querySelector(".focus-status");
+		                            t && (t.textContent = "");
+		                        }
+		                    }
+		                    (n.activeTimer.cardId = t), (n.activeTimer.type = "pomodoro"), n.settings.focusShieldEnabled && O();
+		                }
+		                (o.intervalId = setInterval(() => this.tick(t), 1e3)), this.updateDisplay(t), n.save("pomodoroState");
+		            }
+		        },
+		        _internalPause(t) {
+		            const e = n.pomodoroState[t];
+		            clearInterval(e.intervalId), (e.isRunning = !1), this.updateDisplay(t);
+		        },
+		        stop(t) {
+		            const e = n.pomodoroState[t];
+		            clearInterval(e.intervalId),
+		                n.activeTimer.cardId === t &&
+		                    ((n.activeTimer.cardId = null), (n.activeTimer.type = null), n.settings.focusShieldEnabled && U()),
+		                (e.isRunning = !1),
+		                this.updateDisplay(t),
+		                n.save("pomodoroState");
+		        },
+		        toggle(t) {
+		            n.pomodoroState[t].isRunning ? this.stop(t) : this.start(t);
+		        },
+		        reset(t) {
+		            const e = n.pomodoroState[t];
+		            this.stop(t), (e.time = 60 * e.durations[e.mode]), this.updateDisplay(t), n.save("pomodoroState");
+		        },
+		        setMode(t, e) {
+		            (n.pomodoroState[t].mode = e), this.reset(t);
+		        },
+		        setDuration(t, e, o) {
+		            const a = n.pomodoroState[t];
+		            (a.durations[e] = o), a.mode === e && this.reset(t), n.save("pomodoroState");
+		        },
+		    };
+		    window.timeLogger = {
+		        tick(t) {
+		            const e = n.timeLoggerState[t];
+		            if (e && e.isRunning && e.startTime) {
+		                const o = Date.now() - e.startTime,
+		                    n = e.accumulatedTime + Math.round(o / 1e3),
+		                    a = i.dashboardGrid.querySelector(`[data-card-id="${t}"]`);
+		                a && ((a.querySelector(".timer-display").textContent = w(n)), C());
+		            }
+		        },
+		        start(t) {
+		            const e = n.timeLoggerState[t];
+		            if (!e || e.isRunning) return;
+		            (e.isRunning = !0),
+		                (e.startTime = Date.now()),
+		                (n.activeTimer.cardId = t),
+		                (n.activeTimer.type = "time-logger"),
+		                n.settings.focusShieldEnabled && O(),
+		                (e.intervalId = setInterval(() => this.tick(t), 1e3));
+		            const o = i.dashboardGrid.querySelector(`[data-card-id="${t}"]`);
+		            o && (o.querySelector(".start-pause-btn").textContent = "PAUSE"), n.save("timeLoggerState"), k();
+		        },
+		        pause(t, e = !0) {
+		            const o = n.timeLoggerState[t];
+		            if (!o || !o.isRunning) return;
+		            clearInterval(o.intervalId);
+		            const a = Date.now() - o.startTime;
+		            if (
+		                ((o.accumulatedTime += Math.round(a / 1e3)),
+		                (o.isRunning = !1),
+		                (o.startTime = null),
+		                (o.intervalId = null),
+		                n.activeTimer.cardId === t &&
+		                    ((n.activeTimer.cardId = null), (n.activeTimer.type = null), n.settings.focusShieldEnabled && U()),
+		                n.save("timeLoggerState"),
+		                e)
+		            ) {
+		                const e = i.dashboardGrid.querySelector(`[data-card-id="${t}"]`);
+		                e && B["time-logger"].render(e, { id: t });
+		            }
+		            k(), C();
+		        },
+		        toggle(t) {
+		            n.timeLoggerState[t].isRunning ? this.pause(t) : this.start(t);
+		        },
+		        log(t) {
+		            this.pause(t, !1);
+		            const e = n.timeLoggerState[t];
+		            if (e.accumulatedTime < 60) {
+		                const e = i.dashboardGrid.querySelector(`[data-card-id="${t}"]`);
+		                if (e) {
+		                    const t = e.querySelector(".log-message");
+		                    t &&
+		                        ((t.textContent = "Minimum log time is 1 minute."),
+		                        setTimeout(() => {
+		                            t && (t.textContent = "");
+		                        }, 3e3));
+		                }
+		                return void this.start(t);
+		            }
+		            const o = L(new Date());
+		            n.studyLogs[o] || (n.studyLogs[o] = {});
+		            const a = e.currentSubject;
+		            (n.studyLogs[o][a] = (n.studyLogs[o][a] || 0) + e.accumulatedTime),
+		                n.save("studyLogs"),
+		                (e.accumulatedTime = 0),
+		                n.save("timeLoggerState"),
+		                q(),
+		                C(),
+		                k();
+		        },
+		        reset(t) {
+		            this.pause(t, !1);
+		            (n.timeLoggerState[t].accumulatedTime = 0), n.save("timeLoggerState"), q(), C(), k();
+		        },
+		        changeSubject(t, e) {
+		            const o = n.timeLoggerState[t],
+		                a = i.dashboardGrid.querySelector(`[data-card-id="${t}"]`);
+		            if ("add_new" === e) {
+		                const t = prompt("Enter new subject name:");
+		                t && t.trim()
+		                    ? (n.settings.userSubjects || (n.settings.userSubjects = []),
+		                      n.settings.userSubjects.push(t.trim()),
+		                      n.saveSettings(),
+		                      (o.currentSubject = t.trim()),
+		                      q())
+		                    : a && (a.querySelector(".subject-select").value = o.currentSubject);
+		            } else o && ((o.currentSubject = e), n.save("timeLoggerState"));
+		        },
+		    };
+		    let P = null;
+		    i.body.addEventListener("click", (t) => {
+		        if (t.target.closest("#god-mode-panel")) {
+		            const e = t.target.id;
+		            if (
+		                ("god-mode-close-btn" === e &&
+		                    (i.godModePanel.classList.add("hidden"),
+		                    P &&
+		                        ((n.settings.theme = P.theme),
+		                        (n.customCards = P.customCards),
+		                        (n.tests = P.tests),
+		                        (n.layout = P.layout),
+		                        (P = null),
+		                        M(),
+		                        q())),
+		                "god-mode-theme-btn" === e)
+		            ) {
+		                const t = i.inputs.theme;
+		                if (!t.querySelector('[value="god-mode"]')) {
+		                    const e = document.createElement("option");
+		                    (e.value = "god-mode"), (e.textContent = "--- GOD MODE ---"), t.appendChild(e);
+		                }
+		                (n.settings.theme = "god-mode"), M(), q();
+		            }
+		            if (
+		                ("god-mode-complete-tasks-btn" === e &&
+		                    (n.customCards.forEach((t) => {
+		                        "todo" === t.type && Array.isArray(t.content) && t.content.forEach((t) => (t.completed = !0));
+		                    }),
+		                    q()),
+		                "god-mode-perfect-score-btn" === e)
+		            ) {
+		                const t = n.customCards.find((t) => "line-graph" === t.type);
+		                if (t && Array.isArray(t.content)) {
+		                    const e = "NEET" === n.settings.examType ? 720 : 300;
+		                    t.content.push({ name: "God Tier", marks: e, maxMarks: e }), q();
+		                }
+		            }
+		            if ("god-mode-timewarp-btn" === e) {
+		                const t = {};
+		                Object.keys(n.tests).forEach((e) => {
+		                    const o = new Date(e + "T00:00:00");
+		                    o.setDate(o.getDate() + 7);
+		                    const a = L(o);
+		                    t[a] = n.tests[e];
+		                }),
+		                    (n.tests = t),
+		                    q();
+		            }
+		            if ("god-mode-scramble-btn" === e) {
+		                let t = n.layout;
+		                for (let e = t.length - 1; e > 0; e--) {
+		                    const o = Math.floor(Math.random() * (e + 1));
+		                    [t[e], t[o]] = [t[o], t[e]];
+		                }
+		                q();
+		            }
+		            "god-mode-nuke-btn" === e &&
+		                (i.dashboardGrid.querySelectorAll(".card").forEach((t, e) => {
+		                    t.style.animation = `fall-apart 1s ease-in-out ${0.05 * e}s forwards`;
+		                }),
+		                setTimeout(() => {
+		                    x(
+		                        "Dashboard nuked. Restore?",
+		                        () => {
+		                            (i.dashboardGrid.innerHTML = ""), q();
+		                        },
+		                        "KABOOM!"
+		                    );
+		                }, 1500));
+		        }
+		    });
+		    function O() {
+		        try {
+		            document.documentElement.requestFullscreen && document.documentElement.requestFullscreen();
+		        } catch (t) {
+		            console.warn("Fullscreen request failed.", t);
+		        }
+		        document.addEventListener("visibilitychange", R), document.addEventListener("fullscreenchange", N);
+		    }
+		    function U() {
+		        try {
+		            document.fullscreenElement && document.exitFullscreen && document.exitFullscreen();
+		        } catch (t) {
+		            console.warn("Exit fullscreen request failed.", t);
+		        }
+		        document.removeEventListener("visibilitychange", R), document.removeEventListener("fullscreenchange", N);
+		        const { cardId: t, type: e } = n.activeTimer,
+		            o = i.dashboardGrid.querySelector(`[data-card-id="${t}"]`);
+		        if (o) {
+		            const t = o.querySelector(".focus-status");
+		            t && (t.textContent = "");
+		        }
+		    }
+		    function N() {
+		        if (!document.fullscreenElement && n.activeTimer.cardId) {
+		            const { cardId: t, type: e } = n.activeTimer;
+		            "pomodoro" === e && $.stop(t), "time-logger" === e && timeLogger.pause(t);
+		        }
+		    }
+		    function R() {
+		        const { cardId: t, type: e } = n.activeTimer;
+		        if (!t || "time-logger" !== e) return;
+		        const o = timeLogger,
+		            a = n.timeLoggerState[t];
+		        if (a)
+		            if ("hidden" === document.visibilityState) a.isRunning && o.pause(t, !1);
+		            else if ("visible" === document.visibilityState && a.isRunning) {
+		                const e = (Date.now() - a.startTime) / 1e3;
+		                (a.accumulatedTime += Math.round(e)), o.start(t);
+		            }
+		    }
+		    i.mainTitle.addEventListener("click", (t) => {
+		        3 === t.detail &&
+		            (clearTimeout(null),
+		            i.inputs.theme.querySelector('[value="alakh-pandey"]').classList.remove("hidden"),
+		            (n.settings.theme = "alakh-pandey"),
+		            n.saveSettings(),
+		            M(),
+		            q());
+		    }),
+		        document.addEventListener("click", () => {
+		            const t = document.getElementById("user-menu-dropdown");
+		            t && !t.classList.contains("hidden") && t.classList.add("hidden");
+		        }),
+		        g(),
+		        M(),
+		        q(),
+		        new Sortable(i.dashboardGrid, {
+		            animation: 150,
+		            handle: ".drag-handle",
+		            ghostClass: "sortable-ghost",
+		            chosenClass: "sortable-chosen",
+		            onEnd: () => {
+		                (n.layout = [...i.dashboardGrid.children].map((t) => t.dataset.cardId)), n.save("layout");
+		            },
+		        }),
+		        setInterval(() => {
+		            const t = i.dashboardGrid.querySelector('[data-card-id="countdown"]');
+		            t && B.countdown.render(t);
+		            const e = i.dashboardGrid.querySelector('[data-card-id="time"]');
+		            e && B.time.render(e);
+		        }, 1e3),
+		        window.addEventListener("beforeunload", () => {
+		            n.activeTimer.cardId &&
+		                "time-logger" === n.activeTimer.type &&
+		                (console.log("Unload event: Forcing final save for active study logger."),
+		                timeLogger.pause(n.activeTimer.cardId, !1));
+		        });
+		    const z = document.getElementById("info-modal"),
+		        J = z.querySelectorAll(".tab-btn"),
+		        G = z.querySelectorAll(".tab-content");
+		    z.addEventListener("click", (t) => {
+		        const e = t.target.closest(".tab-btn");
+		        if (!e) return;
+		        const o = e.dataset.tab;
+		        J.forEach((t) => {
+		            t.classList.toggle("active", t.dataset.tab === o);
+		        }),
+		            G.forEach((t) => {
+		                t.classList.toggle("hidden", t.id !== `tab-${o}`);
+		            });
+		    });
+		});
 
-	function debounce(t,e){let o;return function(...n){clearTimeout(o),o=setTimeout((()=>t.apply(this,n)),e)}}const firebaseConfig={apiKey:"AIzaSyAO9ya8gHtVbMfxcnAAJrz6FdYWvIRqgBY",authDomain:"studydashboard-2a3eb.firebaseapp.com",projectId:"studydashboard-2a3eb",storageBucket:"studydashboard-2a3eb.firebasestorage.app",messagingSenderId:"79210973277",appId:"1:79210973277:web:cc0a5fa86729fd6d3f65b4",measurementId:"G-TE7Z0SR8L1"};firebase.initializeApp(firebaseConfig);const auth=firebase.auth(),db=firebase.firestore();let currentUser=null,syncTimeout=null;document.addEventListener("DOMContentLoaded",(()=>{const t={tests:"jeePartTests_v2",layout:"jeeDashboardLayout_v3",customCards:"jeeCustomCards_v3",settings:"jeeDashboardSettings_v3",mobileAlertDismissed:"jeeMobileAlertDismissed_v1",cardProps:"jeeCardProps_v2",pomodoroState:"jeePomodoroState_v1",timeLoggerState:"jeeTimeLoggerState_v1",studyLogs:"jeeStudyLogs_v1"},e={JEE:{2026:new Date("2026-01-21T00:00:00"),2027:new Date("2027-01-21T00:00:00")},NEET:{2026:new Date("2026-05-03T00:00:00"),2027:new Date("2027-05-02T00:00:00")}},o=JSON.parse(localStorage.getItem(t.settings)),n={tests:JSON.parse(localStorage.getItem(t.tests))||{},customCards:JSON.parse(localStorage.getItem(t.customCards))||[{id:"default-todo",type:"todo",title:"My Tasks",content:[{text:"Solve 20 Physics problems",completed:!1},{text:"Revise Organic Chemistry",completed:!0},{text:"Take a short break!",completed:!1}]},{id:"default-line-graph",type:"line-graph",title:"Mock Test Progress",content:[{name:"Test 1",marks:120,maxMarks:300},{name:"Test 2",marks:145,maxMarks:300},{name:"Test 3",marks:160,maxMarks:300}]},{id:"default-note",type:"note",title:"Welcome!",content:"Welcome to your new dashboard! You can drag, resize, and delete these cards. Add your own from the top right. Best of luck in your journey!"},{id:"default-study-logger",type:"time-logger",title:"Study Log",content:[]}],layout:JSON.parse(localStorage.getItem(t.layout))||["countdown","graph","default-todo","default-study-logger","default-note","default-line-graph","tests","quote","time"],settings:{theme:"default",font:"'Inter', sans-serif",bgUrl:"",examType:"JEE",examYear:"2026",youtubeTintEnabled:!0,youtubeBlurEnabled:!1,focusShieldEnabled:!1,userSubjects:[],...o},cardProps:JSON.parse(localStorage.getItem(t.cardProps))||{graph:{colspan:2},"default-line-graph":{colspan:1},"default-study-logger":{colspan:1}},pomodoroState:JSON.parse(localStorage.getItem(t.pomodoroState))||{},timeLoggerState:JSON.parse(localStorage.getItem(t.timeLoggerState))||{},studyLogs:JSON.parse(localStorage.getItem(t.studyLogs))||{},chartInstances:{},activeTimer:{cardId:null,type:null,unfocusedTime:0,unfocusedStart:0},save(e){localStorage.setItem(t[e],JSON.stringify(this[e])),v(e)},saveSettings(){localStorage.setItem(t.settings,JSON.stringify(this.settings)),v("settings")}},a=[{text:"The secret of getting ahead is getting started.",author:"Mark Twain"},{text:"It’s not whether you get knocked down, it’s whether you get up.",author:"Vince Lombardi"},{text:"Success is the sum of small efforts, repeated day in and day out.",author:"Robert Collier"},{text:"The expert in anything was once a beginner.",author:"Helen Hayes"},{text:"Believe you can and you're halfway there.",author:"Theodore Roosevelt"},{text:"The difference between ordinary and extraordinary is that little extra.",author:"Jimmy Johnson"},{text:"A person who never made a mistake never tried anything new.",author:"Albert Einstein"},{text:"The harder I work, the luckier I get.",author:"Samuel Goldwyn"},{text:"Success is not final, failure is not fatal: it is the courage to continue that counts.",author:"Winston Churchill"},{text:"Strive for progress, not perfection.",author:"Unknown"},{text:"Genius is one percent inspiration and ninety-nine percent perspiration.",author:"Thomas A. Edison"},{text:"It does not matter how slowly you go as long as you do not stop.",author:"Confucius"},{text:"Doubt kills more dreams than failure ever will.",author:"Suzy Kassem"},{text:"Push yourself, because no one else is going to do it for you.",author:"Unknown"},{text:"If you want to shine like a sun, first burn like a sun.",author:"A. P. J. Abdul Kalam"},{text:"The important thing is not to stop questioning. Curiosity has its own reason for existing.",author:"Albert Einstein"},{text:"We are what we repeatedly do. Excellence, then, is not an act, but a habit.",author:"Aristotle"},{text:"The chapters you study today will decide the chapters of your life tomorrow.",author:"Unknown"},{text:"Your toughest competition is the person you were yesterday.",author:"Unknown"},{text:"Rank is just a number. Knowledge and skill are the real assets.",author:"Unknown"},{text:"Dream is not that which you see while sleeping it is something that does not let you sleep.",author:"A. P. J. Abdul Kalam"},{text:"Focus on the process, not the outcome. The right process will lead to the right outcome.",author:"Unknown"}],s=[{text:"Kyu nahi ho rahi padhai?",author:"Alakh Pandey"},{text:"System phaad denge!",author:"A wise man"},{text:"Physics is not a subject, it's an emotion.",author:"Alakh Pandey"},{text:"Aag laga denge!",author:"Revolutionaries"},{text:"Mehnat karta hu bhai",author:"Basava Reddy"}],r=[{text:"Chaitanya is a noob 🤓",author:"Everyone"},{text:"I love Organic Chemistry 🤓",author:"Chaitanya (probably)"},{text:"Isomerism is my favorite topic 🤓",author:"Definitely Chaitanya"},{text:"Just like us guys 🤓",author:"Chaitanya the moron"}],i={body:document.body,mainTitle:document.getElementById("main-title"),dashboardGrid:document.getElementById("dashboard-grid"),authContainer:document.getElementById("auth-container"),syncStatus:document.getElementById("sync-status"),modals:{addCard:document.getElementById("add-card-modal"),customize:document.getElementById("customize-modal"),info:document.getElementById("info-modal"),confirm:document.getElementById("confirm-modal")},buttons:{addCard:document.getElementById("add-card-btn"),cancelAddCard:document.getElementById("cancel-add-card"),customize:document.getElementById("customize-btn"),closeCustomize:document.getElementById("close-customize"),closeCustomizeIcon:document.getElementById("close-customize-icon-btn"),removeBg:document.getElementById("remove-bg-btn"),closeAlert:document.getElementById("close-alert-btn"),resetDashboard:document.getElementById("reset-dashboard-btn"),info:document.getElementById("info-btn"),closeInfo:document.getElementById("close-info-modal"),exportData:document.getElementById("export-data-btn"),importData:document.getElementById("import-data-btn"),confirmOk:document.getElementById("confirm-ok-btn"),confirmCancel:document.getElementById("confirm-cancel-btn"),zenModeBtn:document.getElementById("zen-mode-btn"),exitZenBtn:document.getElementById("exit-zen-btn"),godModeClose:document.getElementById("god-mode-close-btn")},forms:{newCard:document.getElementById("new-card-form")},inputs:{cardType:document.getElementById("new-card-type"),cardContent:document.getElementById("new-card-content"),theme:document.getElementById("theme-select"),font:document.getElementById("font-select"),bgUrl:document.getElementById("bg-image-url"),examType:document.getElementById("exam-type-select"),examYear:document.getElementById("exam-year-select"),importFile:document.getElementById("import-file-input"),youtubeTintToggle:document.getElementById("youtube-tint-toggle"),youtubeBlurToggle:document.getElementById("youtube-blur-toggle"),focusShieldToggle:document.getElementById("focus-shield-toggle")},mobileAlert:document.getElementById("mobile-alert"),confirmTitle:document.getElementById("confirm-title"),confirmMessage:document.getElementById("confirm-message"),godModePanel:document.getElementById("god-mode-panel")};let d=null,l=null,c=null;auth.onAuthStateChanged((t=>{t?(currentUser=t,p(t)):(currentUser=null,g())}));const u=()=>{const t=new firebase.auth.GoogleAuthProvider;auth.signInWithPopup(t).catch((t=>{console.error("Authentication Error:",t)}))},m=()=>{sessionStorage.removeItem("cloud_data_loaded"),auth.signOut()},g=()=>{if(currentUser){i.authContainer.innerHTML=`\n                    <div class="relative" id="user-menu-container">\n                        <button id="user-menu-button" title="User Menu" class="flex items-center justify-center w-10 h-10 rounded-full transition-colors hover:bg-white/20 sm:w-auto sm:h-auto sm:px-2 sm:py-1">\n                            <img src="${currentUser.photoURL}" alt="${currentUser.displayName}" class="w-8 h-8 rounded-full pointer-events-none" />\n                            <span class="text-sm font-semibold hidden sm:inline ml-2 pointer-events-none">${currentUser.displayName.split(" ")[0]}</span>\n                        </button>\n                        <div id="user-menu-dropdown" class="card absolute right-0 mt-2 w-48 p-2 hidden z-50">\n                            <div class="px-2 py-1 mb-1 border-b" style="border-color: var(--border-color);">\n                                <p class="text-sm font-semibold truncate" title="${currentUser.displayName}">${currentUser.displayName}</p>\n                                <p class="text-xs text-secondary truncate" title="${currentUser.email}">${currentUser.email}</p>\n                            </div>\n                            <button id="sign-out-btn" class="w-full text-left flex items-center gap-2 p-2 rounded-md hover:bg-white/10 transition-colors">\n                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>\n                                <span>Sign Out</span>\n                            </button>\n                        </div>\n                    </div>\n                `;const t=i.authContainer.querySelector("#user-menu-button"),e=i.authContainer.querySelector("#user-menu-dropdown"),o=i.authContainer.querySelector("#sign-out-btn");t.addEventListener("click",(t=>{t.stopPropagation(),e.classList.toggle("hidden")})),o.addEventListener("click",m)}else i.authContainer.innerHTML='<button id="sign-in-btn" class="flex items-center justify-center w-10 h-10 rounded-full transition-colors hover:bg-white/20 sm:w-auto sm:px-3 sm:py-2"><svg class="w-5 h-5" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">\n                            <path d="M47.532 24.552c0-1.566-.14-3.084-.404-4.548H24.5v8.58h12.944c-.566 2.76-2.213 5.108-4.72 6.708v5.524h7.112c4.162-3.832 6.596-9.42 6.596-16.264z" fill="#4285F4"/><path d="M24.5 48c6.48 0 11.944-2.14 15.928-5.788l-7.112-5.524c-2.14 1.44-4.884 2.292-7.816 2.292-6.004 0-11.084-4.04-12.9-9.492H4.42v5.7c3.48 6.912 10.32 11.532 18.08 11.532l2 .28z" fill="#34A853"/><path d="M11.6 28.98c-.34-.996-.54-2.052-.54-3.144s.2-2.148.54-3.144V16.992H4.42C2.852 20.04 2 23.436 2 27.024c0 3.588.852 6.984 2.42 10.032l7.18-5.7v-.376z" fill="#FBBC05"/><path d="M24.5 9.8c3.516 0 6.66 1.212 9.128 3.54l6.32-6.32C36.44.88 30.98 0 24.5 0 16.74 0 9.9 4.62 6.42 11.532l7.18 5.7c1.816-5.452 6.896-9.432 12.9-9.432z" fill="#EA4335"/>\n                        </svg><span class="text-sm font-semibold hidden sm:inline ml-2">Sign In</span></button>',i.authContainer.querySelector("#sign-in-btn").addEventListener("click",u)},p=async t=>{g();const e=db.collection("users").doc(t.uid),o=await e.get();o.exists?h(o.data()):y(e)},h=e=>{if("true"===sessionStorage.getItem("cloud_data_loaded"))return void console.log("Cloud data already loaded this session. Skipping redundant load.");console.log("Loading data from cloud...");let o=!1;for(const n in t)if(e[n]){const a=localStorage.getItem(t[n]),s=JSON.stringify(e[n]);a!==s&&(localStorage.setItem(t[n],s),o=!0)}o&&(sessionStorage.setItem("cloud_data_loaded","true"),location.reload())},y=e=>{console.log("New user detected. Migrating local data to cloud...");const o={};for(const e in t){const n=localStorage.getItem(t[e]);n&&(o[e]=JSON.parse(n))}Object.keys(o).length>0&&e.set(o).then((()=>b("Synced"))).catch((t=>console.error("Migration failed:",t)))},b=t=>{clearTimeout(syncTimeout),i.syncStatus.textContent=t,i.syncStatus.style.opacity=1,"Saving..."!==t&&(syncTimeout=setTimeout((()=>{i.syncStatus.style.opacity=0}),2e3))},f=debounce((e=>{if(!currentUser)return;const o=db.collection("users").doc(currentUser.uid),n=localStorage.getItem(t[e]);if(n){const t={[e]:JSON.parse(n)};o.set(t,{merge:!0}).then((()=>{console.log(`Debounced sync for '${e}' successful.`),b("All changes saved")})).catch((t=>{b("Sync Error"),console.error("Firestore sync error:",t)}))}}),1e4),v=t=>{currentUser&&(b("Saving..."),f(t))};let S=null;function x(t,e,o="Are you sure?"){i.confirmTitle.textContent=o,i.confirmMessage.textContent=t,S=e,i.modals.confirm.classList.remove("hidden")}const L=t=>`${t.getFullYear()}-${(t.getMonth()+1).toString().padStart(2,"0")}-${t.getDate().toString().padStart(2,"0")}`,E=()=>{const{examType:t,examYear:o}=n.settings;return e[t]?.[o]||new Date},w=t=>`${Math.floor(t/3600).toString().padStart(2,"0")}:${Math.floor(t%3600/60).toString().padStart(2,"0")}:${Math.floor(t%60).toString().padStart(2,"0")}`,T=t=>{const e=Math.floor(t/3600),o=Math.floor(t%3600/60);let n="";return e>0&&(n+=`${e}h `),(o>0||e>0)&&(n+=`${o}m`),""===n&&(n=t%60+"s"),n.trim()};function I(){"visible"===document.visibilityState&&d&&d.close()}function C(){if(!d||!l)return;const t=document.querySelector(`[data-card-id="${l}"] .timer-display`),e=d.document.getElementById("pip-timer");t&&e&&(e.textContent=t.textContent)}function k(){if(!d||!l)return;const t=n.timeLoggerState[l];if(!t)return;const e=d.document.getElementById("pip-start-pause-btn"),o=d.document.getElementById("pip-log-btn");e&&(e.textContent=t.isRunning?"Pause":"Start"),o&&(o.disabled=t.accumulatedTime<60)}const B={countdown:{templateId:"countdown-template",isDefault:!0,render:t=>{const e=E()-new Date;t.querySelector('[data-value="days"]').innerText=Math.floor(e/864e5).toString().padStart(2,"0"),t.querySelector('[data-value="hours"]').innerText=Math.floor(e/36e5%24).toString().padStart(2,"0"),t.querySelector('[data-value="minutes"]').innerText=Math.floor(e/6e4%60).toString().padStart(2,"0"),t.querySelector('[data-value="seconds"]').innerText=Math.floor(e/1e3%60).toString().padStart(2,"0")}},time:{templateId:"time-template",isDefault:!0,render:t=>{const e=new Date;t.querySelector('[data-value="time"]').textContent=e.toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:!0}),t.querySelector('[data-value="date"]').textContent=e.toLocaleDateString("en-US",{weekday:"long",year:"numeric",month:"long",day:"numeric"})}},graph:{templateId:"graph-template",isDefault:!0,render:t=>{const e=t.querySelector("#contribution-graph");e.innerHTML="";const o=new Date;o.setHours(0,0,0,0);const a=(new Date).getFullYear();let s=new Date(`${a}-01-01T00:00:00`);const r=E();for(r.setHours(0,0,0,0);s<=r;){const t=document.createElement("div"),a=document.createElement("span"),i=L(s);t.className="day",t.dataset.date=i,a.className="tooltip";let d="day-future",l=s.toDateString();if(s<o&&(d="day-past"),s.getTime()===o.getTime()&&(d="day-today",l+=" - Today"),n.tests[i]){d="day-part-test";const t=Math.ceil((new Date(i)-o)/864e5);l=`${n.tests[i]} (${t} days from now)`}s.getTime()===r.getTime()&&(d="day-exam",l+=" - Exam!"),t.classList.add(d),a.textContent=l,t.appendChild(a),e.appendChild(t),s.setDate(s.getDate()+1)}}},tests:{templateId:"tests-template",isDefault:!0,render:t=>{const e=t.querySelector("#test-list");e.innerHTML="";const o=Object.keys(n.tests).sort();0!==o.length?o.forEach((t=>{const o=document.createElement("li");o.className="flex justify-between items-center bg-gray-800 p-2 rounded-md",o.innerHTML=`<div class="flex flex-col"><span class="font-semibold text-sm">${n.tests[t]}</span><span class="text-xs text-secondary">${new Date(t+"T00:00:00").toDateString()}</span></div><button data-date="${t}" class="delete-test-btn text-red-500 hover:text-red-400 font-semibold text-xs">Delete</button>`,e.appendChild(o)})):e.innerHTML='<li class="text-secondary px-2 text-sm">No tests scheduled.</li>'}},quote:{templateId:"quote-template",isDefault:!0,render:t=>{let e=a;"alakh-pandey"===n.settings.theme&&(e=s),"chaitanya-noob"===n.settings.theme&&(e=r);const{text:o,author:i}=e[Math.floor(Math.random()*e.length)];t.querySelector("#quote").textContent=`"${o}"`,t.querySelector("#author").textContent=`- ${i}`}},note:{templateId:"note-card-template",render:(t,e)=>{t.querySelector(".card-content").textContent=e.content}},todo:{templateId:"todo-card-template",render:(t,e)=>{const o=t.querySelector(".todo-list"),n=t.querySelector(".progress-bar");if(o.innerHTML="",Array.isArray(e.content)){const t=e.content.length,a=e.content.filter((t=>t.completed)).length,s=t>0?a/t*100:0;n.style.width=`${s}%`,0===t?o.innerHTML='<li class="text-secondary px-2 text-sm">No tasks yet. Add one below!</li>':e.content.forEach(((t,e)=>{const n=document.createElement("li");n.className="flex items-center gap-3 p-2 rounded-md hover:bg-white/5 transition-colors todo-item "+(t.completed?"completed":""),n.dataset.index=e,n.innerHTML=`<input type="checkbox" ${t.completed?"checked":""} class="todo-checkbox"><span class="flex-grow text-sm">${t.text}</span><button class="delete-todo-item" aria-label="Delete task">×</button>`,o.appendChild(n)}))}}},"line-graph":{templateId:"line-graph-card-template",render:(t,e)=>{const o=t.querySelector(".marks-list");o.innerHTML="",e.content.forEach(((t,e)=>{const n=document.createElement("li");n.className="flex justify-between items-center text-xs bg-gray-800 p-2 rounded",n.innerHTML=`\n\t\t\t                <div class="flex-grow">\n\t\t\t                    <strong>${t.name}</strong>: ${t.total??t.marks} / ${t.maxMarks}\n\t\t\t                    <span class="text-gray-400 ml-2">${t.subjects?`(P:${t.subjects.physics}, C:${t.subjects.chemistry}, M:${t.subjects.maths})`:"(No subject data)"}</span>\n\t\t\t                </div>\n\t\t\t                <button data-index="${e}" class="delete-mark-item text-red-500 px-1" aria-label="Delete mark entry">×</button>`,o.appendChild(n)}));const a=t.querySelector(".marks-chart").getContext("2d");n.chartInstances[e.id]&&n.chartInstances[e.id].destroy();const s={total:getComputedStyle(document.documentElement).getPropertyValue("--accent-color").trim(),physics:"#3b82f6",chemistry:"#10b981",maths:"#f97316"},r=["total","physics","chemistry","maths"].map((t=>({label:t.charAt(0).toUpperCase()+t.slice(1),data:e.content.map((e=>"total"===t?e.total??e.marks:e.subjects?e.subjects[t]:null)),borderColor:s[t],backgroundColor:`${s[t]}20`,fill:!0,tension:.3,pointBackgroundColor:s[t],borderWidth:2,hidden:"total"!==t}))),i=e.content.length>0?Math.max(...e.content.map((t=>t.maxMarks||0))):300,d=getComputedStyle(document.documentElement).getPropertyValue("--text-secondary").trim(),l=getComputedStyle(document.documentElement).getPropertyValue("--border-color").trim(),c=new Chart(a,{type:"line",data:{labels:e.content.map((t=>t.name)),datasets:r},options:{responsive:!0,maintainAspectRatio:!1,plugins:{legend:{display:!1}},scales:{y:{beginAtZero:!0,max:i,ticks:{color:d},grid:{color:l}},x:{ticks:{color:d},grid:{color:"transparent"}}}}});n.chartInstances[e.id]=c;const u=t.querySelector(".chart-toggles");u.addEventListener("click",(t=>{if("BUTTON"===t.target.tagName){const e=t.target.dataset.subject,o=c.data.datasets.findIndex((t=>t.label.toLowerCase()===e));o>-1&&(c.data.datasets[o].hidden=!c.data.datasets[o].hidden,c.update(),u.querySelectorAll("button").forEach((t=>{const e=c.data.datasets.findIndex((e=>e.label.toLowerCase()===t.dataset.subject));c.data.datasets[e].hidden?(t.style.backgroundColor="transparent",t.style.borderColor="#4b5563",t.style.color="var(--text-primary)"):(t.style.backgroundColor=s[t.dataset.subject],t.style.borderColor=s[t.dataset.subject],t.style.color="white")})))}})),u.querySelector("button").click(),u.querySelector("button").click()}},pomodoro:{templateId:"pomodoro-card-template",render:(t,e)=>{const o=n.pomodoroState[e.id]||{mode:"pomodoro",time:1500,isRunning:!1,intervalId:null,durations:{pomodoro:25,shortBreak:5,longBreak:15}};n.pomodoroState[e.id]=o;const a=Math.floor(o.time/60).toString().padStart(2,"0"),s=(o.time%60).toString().padStart(2,"0");t.querySelector(".timer-display").textContent=`${a}:${s}`,t.querySelectorAll(".pomodoro-btn").forEach((t=>{t.classList.toggle("active",t.dataset.mode===o.mode)})),t.querySelector(".start-pause-btn").textContent=o.isRunning?"PAUSE":"START",t.querySelector('[data-mode="pomodoro"].pomodoro-duration-input').value=o.durations.pomodoro,t.querySelector('[data-mode="shortBreak"].pomodoro-duration-input').value=o.durations.shortBreak,t.querySelector('[data-mode="longBreak"].pomodoro-duration-input').value=o.durations.longBreak}},youtube:{templateId:"youtube-card-template",render:(t,e)=>{const o=t.querySelector(".youtube-iframe"),a=e.content;let s="";if(a)try{const t=new URL(a);s=t.hostname.includes("youtu.be")?t.pathname.slice(1):t.searchParams.get("v")}catch(t){console.error("Invalid YouTube URL")}o.src=s?`https://www.youtube.com/embed/${s}`:"";const r=t.querySelector(".youtube-container");r.classList.toggle("tint-disabled",!n.settings.youtubeTintEnabled),r.classList.toggle("blurred",n.settings.youtubeBlurEnabled)}},"time-logger":{templateId:"time-logger-card-template",render:(t,e)=>{const o=n.timeLoggerState[e.id]||{isRunning:!1,accumulatedTime:0,currentSubject:"Physics",intervalId:null};n.timeLoggerState[e.id]=o,t.querySelector(".timer-display").textContent=w(o.accumulatedTime),t.querySelector(".start-pause-btn").textContent=o.isRunning?"PAUSE":"START";const a=`subject-select-${e.id}`;t.querySelector('label[for="subject-select"]').setAttribute("for",a);const s=t.querySelector(".subject-select");s.id=a;const r=[...new Set(["Physics","Chemistry","Maths","Biology","Zoology","Botany",...n.settings.userSubjects||[]])];s.innerHTML=r.map((t=>`<option>${t}</option>`)).join("")+'<option value="add_new">Add New Subject...</option>',s.value=o.currentSubject;const i=t.querySelector(".study-log-list"),d=t.querySelector(".total-study-time");i.innerHTML="";const l=L(new Date),c=n.studyLogs[l]||{},u=Object.values(c).reduce(((t,e)=>t+e),0);d&&(d.textContent=`Total: ${T(u)}`),0===Object.keys(c).length?i.innerHTML='<li class="text-secondary px-2 text-sm">No sessions logged today.</li>':Object.entries(c).forEach((([t,e])=>{const o=document.createElement("li");o.className="flex justify-between items-center",o.innerHTML=`<span>${t}</span><div class="flex items-center gap-2"><span class="font-semibold">${T(e)}</span><button data-subject="${t}" class="delete-log-item text-red-500 hover:text-red-400 font-semibold px-2 py-1 text-xs leading-none rounded-sm" aria-label="Delete ${t} log">×</button></div>`,i.appendChild(o)}))}}};function q(){Object.values(n.chartInstances).forEach((t=>t.destroy())),n.chartInstances={},i.dashboardGrid.innerHTML="";const t=n.customCards.map((t=>t.id));n.layout=n.layout.filter((e=>B[e]?.isDefault||t.includes(e))),n.customCards.forEach((t=>{n.layout.includes(t.id)||n.layout.push(t.id)})),n.save("layout"),n.layout.forEach((t=>{const e=n.customCards.find((e=>e.id===t)),o=e?e.type:t,a=B[o];if(a){const s=document.getElementById(a.templateId).content.cloneNode(!0),r=s.querySelector(".card");r.dataset.cardId=t;const d=n.cardProps[t]||{colspan:"graph"===o||"line-graph"===o||"youtube"===o||"time-logger"===o?2:1};if(n.cardProps[t]=d,2===d.colspan&&r.classList.add("md:col-span-2"),e)r.querySelector(".card-title").textContent=e.title;else if("chaitanya-noob"===n.settings.theme){const t=r.querySelector("h2");t&&(t.textContent+=" 🤓")}i.dashboardGrid.appendChild(s)}})),i.dashboardGrid.querySelectorAll(".card").forEach(((t,e)=>{const o=t.dataset.cardId,a=n.customCards.find((t=>t.id===o)),s=a?a.type:o,r=B[s];r&&r.render(t,a)}))}function D(){const t=n.settings.youtubeTintEnabled,e=n.settings.youtubeBlurEnabled;i.inputs.youtubeTintToggle&&(i.inputs.youtubeTintToggle.checked=t),i.inputs.youtubeBlurToggle&&(i.inputs.youtubeBlurToggle.checked=e),document.querySelectorAll('[data-card-type="youtube"] .youtube-container').forEach((o=>{o.classList.toggle("tint-disabled",!t),o.classList.toggle("blurred",e)}))}function M(){document.documentElement.dataset.theme=n.settings.theme,i.body.style.fontFamily=n.settings.font,"alakh-pandey"===n.settings.theme?i.body.style.backgroundImage="url(https://i.imgflip.com/8otyfs.jpg)":"chaitanya-noob"===n.settings.theme?i.body.style.backgroundImage="url(https://i.ibb.co/pv4BYhMs/Whats-App-Image-2025-08-06-at-16-12-41-4f47e159.jpg)":"god-mode"===n.settings.theme?i.body.style.backgroundImage="url('https://i.pinimg.com/originals/c5/9a/d2/c59ad2bd4ad2fbacd04017debc679ddb.gif')":i.body.style.backgroundImage=n.settings.bgUrl?`url(${n.settings.bgUrl})`:"none";const{examType:t,examYear:e}=n.settings;i.mainTitle.textContent=`${t} ${e}`,i.inputs.theme.value=n.settings.theme,i.inputs.font.value=n.settings.font,i.inputs.bgUrl.value=n.settings.bgUrl,i.inputs.examType.value=n.settings.examType,i.inputs.examYear.value=n.settings.examYear,i.inputs.focusShieldToggle.checked=n.settings.focusShieldEnabled,D()}i.dashboardGrid.addEventListener("click",(t=>{const e=t.target.closest(".card");if(!e)return;const o=e.dataset.cardId;if("quote"===o&&B.quote.render(e),t.target.closest(".delete-test-btn")&&(delete n.tests[t.target.closest(".delete-test-btn").dataset.date],n.save("tests"),q()),t.target.classList.contains("day")){const e=t.target.dataset.date;if(n.tests[e])delete n.tests[e],n.save("tests"),q();else{const t=i.dashboardGrid.querySelector("#add-test-form");t&&(t.date.value=e,t.name.focus())}}const a=n.customCards.find((t=>t.id===o));if(t.target.closest(".toggle-colspan-btn")){const t=n.cardProps[o]||{colspan:1};t.colspan=2===t.colspan?1:2,n.cardProps[o]=t,n.save("cardProps"),q()}if(t.target.closest(".delete-card-btn")&&a&&(n.customCards=n.customCards.filter((t=>t.id!==o)),delete n.cardProps[o],delete n.pomodoroState[o],delete n.timeLoggerState[o],n.save("customCards"),n.save("cardProps"),n.save("pomodoroState"),n.save("timeLoggerState"),q()),t.target.classList.contains("delete-log-item")){const e=t.target.closest(".card"),o=e.dataset.cardId,a=t.target.dataset.subject,s=L(new Date);if(n.studyLogs[s]&&void 0!==n.studyLogs[s][a]){delete n.studyLogs[s][a],0===Object.keys(n.studyLogs[s]).length&&delete n.studyLogs[s],n.save("studyLogs");const t=n.customCards.find((t=>t.id===o));B["time-logger"].render(e,t)}}if(t.target.closest(".pip-btn")){const t=n.customCards.find((t=>t.id===o));t&&"time-logger"===t.type&&async function(t,e){if("documentPictureInPicture"in window){d&&d.close();try{const o={width:320,height:155},n=await documentPictureInPicture.requestWindow(o);d=n,l=t,c=e,[...document.styleSheets].forEach((t=>{try{const e=[...t.cssRules].map((t=>t.cssText)).join(""),o=document.createElement("style");o.textContent=e,d.document.head.appendChild(o)}catch(t){console.warn("Cannot read cross-origin stylesheet",t)}}));const a=document.createElement("style");a.textContent='\n\t\t            body {\n\t\t                background-color: var(--card-bg-color);\n\t\t                color: var(--text-primary);\n\t\t                font-family: var(--font-family);\n\t\t                display: flex;\n\t\t                flex-direction: column;\n\t\t                align-items: center;\n\t\t                justify-content: center;\n\t\t                text-align: center;\n\t\t                padding: 1rem;\n\t\t                margin: 0;\n\t\t                box-sizing: border-box;\n\t\t                overflow: hidden;\n\t\t            }\n\t\t            h2 {\n\t\t                font-size: 0.9rem;\n\t\t                margin: 0 0 0.5rem 0;\n\t\t                color: var(--text-secondary);\n\t\t                font-weight: 600;\n\t\t            }\n\t\t            #pip-timer {\n\t\t\t\t\t    \n\t\t\t\t\t    font-size: clamp(1.5rem, 25vh, 7.5rem);\n\t\t\t\t\t    font-weight: 700;\n\t\t\t\t\t    line-height: 1; /* Helps with vertical alignment */\n\t\t\t\t\t    letter-spacing: 0.05em;\n\t\t\t\t\t    font-family: \'Fira Code\', monospace;\n\t\t\t\t\t}\n\t\t            #pip-controls {\n\t\t                display: flex;\n\t\t                gap: 0.75rem;\n\t\t                margin-top: 1rem;\n\t\t            }\n\t\t            #pip-controls button {\n\t\t                padding: 0.5rem 1.25rem;\n\t\t                font-size: 0.9rem;\n\t\t                font-weight: 600;\n\t\t                border: none;\n\t\t                border-radius: 8px;\n\t\t                cursor: pointer;\n\t\t                transition: transform 0.1s ease, filter 0.1s ease;\n\t\t            }\n\t\t            #pip-controls button:hover {\n\t\t                transform: translateY(-2px);\n\t\t                filter: brightness(1.1);\n\t\t            }\n\t\t            #pip-start-pause-btn {\n\t\t                background-color: var(--accent-color);\n\t\t                color: white; /* Default to white for most themes */\n\t\t            }\n\t\t            #pip-log-btn {\n\t\t                background-color: #16a34a; /* A nice, consistent green */\n\t\t                color: white;\n\t\t            }\n\t\t            #pip-log-btn:disabled {\n\t\t                background-color: #4b5563; /* Gray out when disabled */\n\t\t                cursor: not-allowed;\n\t\t                transform: none;\n\t\t                filter: none;\n\t\t            }\n\t\t            #pip-reset-btn {\n\t\t                background-color: transparent;\n\t\t                color: var(--text-secondary);\n\t\t            }\n\t\t            /* Fix for themes where button text should be dark */\n\t\t            [data-theme="light"] #pip-start-pause-btn,\n\t\t            [data-theme="alakh-pandey"] #pip-start-pause-btn {\n\t\t                 color: var(--bg-color);\n\t\t            }\n\t\t        ',d.document.head.appendChild(a),d.document.body.dataset.theme=document.body.dataset.theme||"default";const s=document.createElement("h2");s.textContent=document.querySelector(`[data-card-id="${t}"] .card-title`).textContent;const r=document.createElement("div");r.id="pip-timer";const i=document.createElement("div");i.id="pip-controls";const u=document.createElement("button");u.id="pip-start-pause-btn",u.addEventListener("click",(()=>window.timeLogger.toggle(l)));const m=document.createElement("button");m.id="pip-log-btn",m.textContent="Log",m.addEventListener("click",(()=>window.timeLogger.log(l)));const g=document.createElement("button");g.id="pip-reset-btn",g.textContent="Reset",g.addEventListener("click",(()=>window.timeLogger.reset(l))),i.append(u,m,g),d.document.body.append(s,r,i),document.addEventListener("visibilitychange",I),d.addEventListener("pagehide",(()=>{d=null,l=null,c=null,document.removeEventListener("visibilitychange",I)})),C(),k()}catch(t){console.error("PiP Error:",t),d=null}}else alert("Your browser does not support the Document Picture-in-Picture API required for this feature. Please try a recent version of Chrome or Edge on a desktop computer.")}(o,t.type)}if(a&&"todo"===a.type){const o=t.target.closest(".todo-item");if(o){const s=parseInt(o.dataset.index);t.target.closest(".delete-todo-item")?a.content.splice(s,1):t.target.classList.contains("todo-checkbox")&&(a.content[s].completed=!a.content[s].completed),n.save("customCards"),B.todo.render(e,a)}}if(a&&"line-graph"===a.type&&t.target.closest(".delete-mark-item")){const o=parseInt(t.target.closest(".delete-mark-item").dataset.index);a.content.splice(o,1),n.save("customCards"),B["line-graph"].render(e,a)}a&&"pomodoro"===a.type&&(t.target.classList.contains("pomodoro-btn")?$.setMode(o,t.target.dataset.mode):t.target.classList.contains("start-pause-btn")?$.toggle(o):t.target.classList.contains("reset-btn")&&$.reset(o)),a&&"time-logger"===a.type&&(t.target.classList.contains("start-pause-btn")?timeLogger.toggle(o):t.target.classList.contains("log-btn")?timeLogger.log(o):t.target.classList.contains("reset-btn")&&timeLogger.reset(o))})),i.dashboardGrid.addEventListener("change",(t=>{if(t.target.classList.contains("pomodoro-duration-input")){const e=t.target.closest(".card").dataset.cardId,o=t.target.dataset.mode;let n=parseInt(t.target.value);n<1&&(n=1,t.target.value=1),e&&o&&!isNaN(n)&&$.setDuration(e,o,n)}if(t.target.classList.contains("subject-select")){const e=t.target.closest(".card").dataset.cardId;timeLogger.changeSubject(e,t.target.value)}})),i.dashboardGrid.addEventListener("submit",(t=>{t.preventDefault();const e=t.target,o=e.closest(".card"),a=o.dataset.cardId;if("add-test-form"===e.id){const{date:t,name:o}=e.elements;t.value&&o.value.trim()&&(n.tests[t.value]=o.value.trim(),n.save("tests"),q(),e.reset())}else if(e.classList.contains("add-todo-form")){const t=n.customCards.find((t=>t.id===a)),s=e.querySelector("input"),r=s.value.trim();if("coco"===r.toLowerCase())return P||(P={theme:n.settings.theme,customCards:JSON.parse(JSON.stringify(n.customCards)),tests:JSON.parse(JSON.stringify(n.tests)),layout:[...n.layout]}),i.godModePanel.classList.remove("hidden"),(new Tone.Synth).toDestination().triggerAttackRelease("C4","0.5"),void(s.value="");if("doingocmakesmeexcited"===r.toLowerCase())return n.settings.theme="chaitanya-noob",n.saveSettings(),M(),q(),void(s.value="");t&&r&&(Array.isArray(t.content)||(t.content=[]),t.content.push({text:r,completed:!1}),n.save("customCards"),B.todo.render(o,t),s.value="")}else if(e.classList.contains("add-marks-form")){const t=n.customCards.find((t=>t.id===a)),{name:s,phy:r,chem:i,math:d,maxMarks:l}=e.elements;if(t&&s.value.trim()&&r.value&&i.value&&d.value&&l.value){Array.isArray(t.content)||(t.content=[]);const a=parseFloat(r.value),c=parseFloat(i.value),u=parseFloat(d.value),m=a+c+u;t.content.push({name:s.value.trim(),maxMarks:parseFloat(l.value),total:m,subjects:{physics:a,chemistry:c,maths:u}}),n.save("customCards"),B["line-graph"].render(o,t),e.reset()}}else if(e.classList.contains("update-youtube-form")){const t=n.customCards.find((t=>t.id===a)),s=e.querySelector("input");t&&s.value.trim()&&(t.content=s.value.trim(),n.save("customCards"),B.youtube.render(o,t))}})),i.buttons.addCard.addEventListener("click",(()=>i.modals.addCard.classList.remove("hidden"))),i.buttons.cancelAddCard.addEventListener("click",(()=>i.modals.addCard.classList.add("hidden"))),i.inputs.cardType.addEventListener("change",(t=>{const e="note"===t.target.value,o="youtube"===t.target.value;i.inputs.cardContent.style.display=e||o?"block":"none",i.inputs.cardContent.placeholder=o?"Paste YouTube video URL...":"Card Content (for notes)"})),i.forms.newCard.addEventListener("submit",(t=>{t.preventDefault();const e=i.inputs.cardType.value,o=i.forms.newCard.querySelector('input[type="text"]').value.trim();if(!o)return;const a={id:`custom-${Date.now()}`,type:e,title:o,content:"note"===e||"youtube"===e?i.inputs.cardContent.value.trim():[]};n.customCards.push(a);const s={colspan:"line-graph"===e||"youtube"===e||"time-logger"===e?2:1};"line-graph"===e&&(s.maxMarks=300),n.cardProps[a.id]=s,n.save("customCards"),n.save("cardProps"),q(),i.modals.addCard.classList.add("hidden"),i.forms.newCard.reset(),i.inputs.cardContent.style.display="block"}));const A=()=>i.modals.customize.classList.add("hidden");i.buttons.customize.addEventListener("click",(()=>i.modals.customize.classList.remove("hidden"))),i.buttons.closeCustomize.addEventListener("click",A),i.buttons.closeCustomizeIcon.addEventListener("click",A),i.modals.customize.addEventListener("click",(t=>{t.target===i.modals.customize&&A()}));const j=()=>{n.saveSettings(),M(),q()};i.inputs.examType.addEventListener("change",(()=>{n.settings.examType=i.inputs.examType.value,j()})),i.inputs.examYear.addEventListener("change",(()=>{n.settings.examYear=i.inputs.examYear.value,j()})),i.inputs.theme.addEventListener("change",(()=>{n.settings.theme=i.inputs.theme.value,n.saveSettings(),M(),q()})),i.inputs.font.addEventListener("change",(()=>{n.settings.font=i.inputs.font.value,n.saveSettings(),M()})),i.inputs.bgUrl.addEventListener("input",(()=>{n.settings.bgUrl=i.inputs.bgUrl.value,n.saveSettings(),M()})),i.buttons.removeBg.addEventListener("click",(()=>{n.settings.bgUrl="",n.saveSettings(),M()})),i.inputs.youtubeTintToggle.addEventListener("change",(()=>{n.settings.youtubeTintEnabled=i.inputs.youtubeTintToggle.checked,n.saveSettings(),D()})),i.inputs.youtubeBlurToggle.addEventListener("change",(()=>{n.settings.youtubeBlurEnabled=i.inputs.youtubeBlurToggle.checked,n.saveSettings(),D()})),i.inputs.focusShieldToggle.addEventListener("change",(()=>{const t=i.inputs.focusShieldToggle.checked;if(n.settings.focusShieldEnabled=t,n.saveSettings(),!t&&n.activeTimer.cardId){const{cardId:t,type:e}=n.activeTimer;"pomodoro"===e?$.stop(t):"time-logger"===e&&timeLogger.pause(t)}})),i.buttons.resetDashboard.addEventListener("click",(()=>{x("This will delete all custom cards and reset the layout to the default.",(()=>{Object.keys(t).forEach((e=>{"settings"!==e&&"mobileAlertDismissed"!==e&&localStorage.removeItem(t[e])})),location.reload()}),"Reset Dashboard?")})),i.buttons.exportData.addEventListener("click",(()=>{const e={};for(const o in t){const n=localStorage.getItem(t[o]);null!==n&&(e[o]=JSON.parse(n))}const o=JSON.stringify(e,null,2),n=new Blob([o],{type:"application/json"}),a=URL.createObjectURL(n),s=document.createElement("a");s.href=a;const r=(new Date).toISOString().slice(0,10);s.download=`studylocus-backup-${r}.json`,document.body.appendChild(s),s.click(),document.body.removeChild(s),URL.revokeObjectURL(a)})),i.buttons.importData.addEventListener("click",(()=>{i.inputs.importFile.click()})),i.inputs.importFile.addEventListener("change",(e=>{const o=e.target.files[0];if(!o)return;const n=new FileReader;n.onload=e=>{try{const o=JSON.parse(e.target.result);if(!["layout","customCards","settings"].every((t=>t in o)))return void console.error("Import failed: The JSON file appears to be invalid or is not a valid dashboard backup.");x("This will overwrite your current dashboard configuration.",(()=>{localStorage.clear();for(const e in o)if(e in t){const n=t[e],a=o[e];null!=a&&localStorage.setItem(n,JSON.stringify(a))}location.reload()}),"Import Data?")}catch(t){console.error("Error importing data:",t)}finally{i.inputs.importFile.value=""}},n.readAsText(o)})),window.innerWidth<768&&"true"!==localStorage.getItem(t.mobileAlertDismissed)&&i.mobileAlert.classList.remove("hidden"),i.buttons.closeAlert.addEventListener("click",(()=>{i.mobileAlert.classList.add("hidden"),localStorage.setItem(t.mobileAlertDismissed,"true")})),i.buttons.info.addEventListener("click",(()=>i.modals.info.classList.remove("hidden"))),i.buttons.closeInfo.addEventListener("click",(()=>i.modals.info.classList.add("hidden"))),i.buttons.zenModeBtn.addEventListener("click",(()=>{i.body.classList.add("zen-mode"),i.buttons.exitZenBtn.classList.remove("hidden")})),i.buttons.exitZenBtn.addEventListener("click",(()=>{i.body.classList.remove("zen-mode"),i.buttons.exitZenBtn.classList.add("hidden")})),i.buttons.confirmCancel.addEventListener("click",(()=>{i.modals.confirm.classList.add("hidden"),S=null})),i.buttons.confirmOk.addEventListener("click",(()=>{"function"==typeof S&&S(),i.modals.confirm.classList.add("hidden"),S=null}));const $={tick(t){const e=n.pomodoroState[t];e.time>0?(e.time--,this.updateDisplay(t)):(this.stop(t),(new Tone.Synth).toDestination().triggerAttackRelease("C5","0.5"))},updateDisplay(t){const e=i.dashboardGrid.querySelector(`[data-card-id="${t}"]`);e&&B.pomodoro.render(e,{id:t});const o=n.pomodoroState[t];if(o.isRunning){const t=Math.floor(o.time/60).toString().padStart(2,"0"),e=(o.time%60).toString().padStart(2,"0");document.title=`${t}:${e} - Time to focus!`}else{const{examType:t,examYear:e}=n.settings;document.title=`${t} ${e} | StudyLocus`}},start(t,e=!1){const o=n.pomodoroState[t];if(!o.isRunning){if(o.isRunning=!0,!e){if(n.activeTimer.cardId!==t||"pomodoro"!==n.activeTimer.type){n.activeTimer.unfocusedTime=0;const e=i.dashboardGrid.querySelector(`[data-card-id="${t}"]`);if(e){const t=e.querySelector(".focus-status");t&&(t.textContent="")}}n.activeTimer.cardId=t,n.activeTimer.type="pomodoro",n.settings.focusShieldEnabled&&O()}o.intervalId=setInterval((()=>this.tick(t)),1e3),this.updateDisplay(t),n.save("pomodoroState")}},_internalPause(t){const e=n.pomodoroState[t];clearInterval(e.intervalId),e.isRunning=!1,this.updateDisplay(t)},stop(t){const e=n.pomodoroState[t];clearInterval(e.intervalId),n.activeTimer.cardId===t&&(n.activeTimer.cardId=null,n.activeTimer.type=null,n.settings.focusShieldEnabled&&U()),e.isRunning=!1,this.updateDisplay(t),n.save("pomodoroState")},toggle(t){n.pomodoroState[t].isRunning?this.stop(t):this.start(t)},reset(t){const e=n.pomodoroState[t];this.stop(t),e.time=60*e.durations[e.mode],this.updateDisplay(t),n.save("pomodoroState")},setMode(t,e){n.pomodoroState[t].mode=e,this.reset(t)},setDuration(t,e,o){const a=n.pomodoroState[t];a.durations[e]=o,a.mode===e&&this.reset(t),n.save("pomodoroState")}};window.timeLogger={tick(t){const e=n.timeLoggerState[t];if(e&&e.isRunning&&e.startTime){const o=Date.now()-e.startTime,n=e.accumulatedTime+Math.round(o/1e3),a=i.dashboardGrid.querySelector(`[data-card-id="${t}"]`);a&&(a.querySelector(".timer-display").textContent=w(n),C())}},start(t){const e=n.timeLoggerState[t];if(!e||e.isRunning)return;e.isRunning=!0,e.startTime=Date.now(),n.activeTimer.cardId=t,n.activeTimer.type="time-logger",n.settings.focusShieldEnabled&&O(),e.intervalId=setInterval((()=>this.tick(t)),1e3);const o=i.dashboardGrid.querySelector(`[data-card-id="${t}"]`);o&&(o.querySelector(".start-pause-btn").textContent="PAUSE"),n.save("timeLoggerState"),k()},pause(t,e=!0){const o=n.timeLoggerState[t];if(!o||!o.isRunning)return;clearInterval(o.intervalId);const a=Date.now()-o.startTime;if(o.accumulatedTime+=Math.round(a/1e3),o.isRunning=!1,o.startTime=null,o.intervalId=null,n.activeTimer.cardId===t&&(n.activeTimer.cardId=null,n.activeTimer.type=null,n.settings.focusShieldEnabled&&U()),n.save("timeLoggerState"),e){const e=i.dashboardGrid.querySelector(`[data-card-id="${t}"]`);e&&B["time-logger"].render(e,{id:t})}k(),C()},toggle(t){n.timeLoggerState[t].isRunning?this.pause(t):this.start(t)},log(t){this.pause(t,!1);const e=n.timeLoggerState[t];if(e.accumulatedTime<60){const e=i.dashboardGrid.querySelector(`[data-card-id="${t}"]`);if(e){const t=e.querySelector(".log-message");t&&(t.textContent="Minimum log time is 1 minute.",setTimeout((()=>{t&&(t.textContent="")}),3e3))}return void this.start(t)}const o=L(new Date);n.studyLogs[o]||(n.studyLogs[o]={});const a=e.currentSubject;n.studyLogs[o][a]=(n.studyLogs[o][a]||0)+e.accumulatedTime,n.save("studyLogs"),e.accumulatedTime=0,n.save("timeLoggerState"),q(),C(),k()},reset(t){this.pause(t,!1);n.timeLoggerState[t].accumulatedTime=0,n.save("timeLoggerState"),q(),C(),k()},changeSubject(t,e){const o=n.timeLoggerState[t],a=i.dashboardGrid.querySelector(`[data-card-id="${t}"]`);if("add_new"===e){const t=prompt("Enter new subject name:");t&&t.trim()?(n.settings.userSubjects||(n.settings.userSubjects=[]),n.settings.userSubjects.push(t.trim()),n.saveSettings(),o.currentSubject=t.trim(),q()):a&&(a.querySelector(".subject-select").value=o.currentSubject)}else o&&(o.currentSubject=e,n.save("timeLoggerState"))}};let P=null;i.body.addEventListener("click",(t=>{if(t.target.closest("#god-mode-panel")){const e=t.target.id;if("god-mode-close-btn"===e&&(i.godModePanel.classList.add("hidden"),P&&(n.settings.theme=P.theme,n.customCards=P.customCards,n.tests=P.tests,n.layout=P.layout,P=null,M(),q())),"god-mode-theme-btn"===e){const t=i.inputs.theme;if(!t.querySelector('[value="god-mode"]')){const e=document.createElement("option");e.value="god-mode",e.textContent="--- GOD MODE ---",t.appendChild(e)}n.settings.theme="god-mode",M(),q()}if("god-mode-complete-tasks-btn"===e&&(n.customCards.forEach((t=>{"todo"===t.type&&Array.isArray(t.content)&&t.content.forEach((t=>t.completed=!0))})),q()),"god-mode-perfect-score-btn"===e){const t=n.customCards.find((t=>"line-graph"===t.type));if(t&&Array.isArray(t.content)){const e="NEET"===n.settings.examType?720:300;t.content.push({name:"God Tier",marks:e,maxMarks:e}),q()}}if("god-mode-timewarp-btn"===e){const t={};Object.keys(n.tests).forEach((e=>{const o=new Date(e+"T00:00:00");o.setDate(o.getDate()+7);const a=L(o);t[a]=n.tests[e]})),n.tests=t,q()}if("god-mode-scramble-btn"===e){let t=n.layout;for(let e=t.length-1;e>0;e--){const o=Math.floor(Math.random()*(e+1));[t[e],t[o]]=[t[o],t[e]]}q()}"god-mode-nuke-btn"===e&&(i.dashboardGrid.querySelectorAll(".card").forEach(((t,e)=>{t.style.animation=`fall-apart 1s ease-in-out ${.05*e}s forwards`})),setTimeout((()=>{x("Dashboard nuked. Restore?",(()=>{i.dashboardGrid.innerHTML="",q()}),"KABOOM!")}),1500))}}));function O(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen()}catch(t){console.warn("Fullscreen request failed.",t)}document.addEventListener("visibilitychange",R),document.addEventListener("fullscreenchange",N)}function U(){try{document.fullscreenElement&&document.exitFullscreen&&document.exitFullscreen()}catch(t){console.warn("Exit fullscreen request failed.",t)}document.removeEventListener("visibilitychange",R),document.removeEventListener("fullscreenchange",N);const{cardId:t,type:e}=n.activeTimer,o=i.dashboardGrid.querySelector(`[data-card-id="${t}"]`);if(o){const t=o.querySelector(".focus-status");t&&(t.textContent="")}}function N(){if(!document.fullscreenElement&&n.activeTimer.cardId){const{cardId:t,type:e}=n.activeTimer;"pomodoro"===e&&$.stop(t),"time-logger"===e&&timeLogger.pause(t)}}function R(){const{cardId:t,type:e}=n.activeTimer;if(!t||"time-logger"!==e)return;const o=timeLogger,a=n.timeLoggerState[t];if(a)if("hidden"===document.visibilityState)a.isRunning&&o.pause(t,!1);else if("visible"===document.visibilityState&&a.isRunning){const e=(Date.now()-a.startTime)/1e3;a.accumulatedTime+=Math.round(e),o.start(t)}}i.mainTitle.addEventListener("click",(t=>{3===t.detail&&(clearTimeout(null),i.inputs.theme.querySelector('[value="alakh-pandey"]').classList.remove("hidden"),n.settings.theme="alakh-pandey",n.saveSettings(),M(),q())})),document.addEventListener("click",(()=>{const t=document.getElementById("user-menu-dropdown");t&&!t.classList.contains("hidden")&&t.classList.add("hidden")})),g(),M(),q(),new Sortable(i.dashboardGrid,{animation:150,handle:".drag-handle",ghostClass:"sortable-ghost",chosenClass:"sortable-chosen",onEnd:()=>{n.layout=[...i.dashboardGrid.children].map((t=>t.dataset.cardId)),n.save("layout")}}),setInterval((()=>{const t=i.dashboardGrid.querySelector('[data-card-id="countdown"]');t&&B.countdown.render(t);const e=i.dashboardGrid.querySelector('[data-card-id="time"]');e&&B.time.render(e)}),1e3),window.addEventListener("beforeunload",(()=>{n.activeTimer.cardId&&"time-logger"===n.activeTimer.type&&(console.log("Unload event: Forcing final save for active study logger."),timeLogger.pause(n.activeTimer.cardId,!1))}));const z=document.getElementById("info-modal"),J=z.querySelectorAll(".tab-btn"),G=z.querySelectorAll(".tab-content");z.addEventListener("click",(t=>{const e=t.target.closest(".tab-btn");if(!e)return;const o=e.dataset.tab;J.forEach((t=>{t.classList.toggle("active",t.dataset.tab===o)})),G.forEach((t=>{t.classList.toggle("hidden",t.id!==`tab-${o}`)}))}))}));
     </script>
 </body>
 </html>
