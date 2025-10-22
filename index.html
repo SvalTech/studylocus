@@ -703,13 +703,13 @@
 		            studyLogs: JSON.parse(localStorage.getItem(t.studyLogs)) || {},
 		            chartInstances: {},
 		            activeTimer: { cardId: null, type: null, unfocusedTime: 0, unfocusedStart: 0 },
-		            save(e) {
-		                localStorage.setItem(t[e], JSON.stringify(this[e])), v(e);
-		            },
-		            saveSettings() {
-		                localStorage.setItem(t.settings, JSON.stringify(this.settings)), v("settings");
-		            },
-		        },
+		            save(e) { // 'e' is the key like 'customCards'
+					    const dataString = JSON.stringify(this[e]);
+					    const timestamp = Date.now();
+					    localStorage.setItem(t[e], dataString); // Save data normally
+					    localStorage.setItem(t[e] + "_timestamp", timestamp.toString()); // Save timestamp separately
+					    v(e); // Trigger sync
+					},}
 		        a = [
 		            { text: "The secret of getting ahead is getting started.", author: "Mark Twain" },
 		            { text: "It’s not whether you get knocked down, it’s whether you get up.", author: "Vince Lombardi" },
@@ -854,19 +854,51 @@
 		                o = await e.get();
 		            o.exists ? h(o.data()) : y(e);
 		        },
-		        h = (e) => {
-		            if ("true" === sessionStorage.getItem("cloud_data_loaded"))
-		                return void console.log("Cloud data already loaded this session. Skipping redundant load.");
-		            console.log("Loading data from cloud...");
-		            let o = !1;
-		            for (const n in t)
-		                if (e[n]) {
-		                    const a = localStorage.getItem(t[n]),
-		                        s = JSON.stringify(e[n]);
-		                    a !== s && (localStorage.setItem(t[n], s), (o = !0));
-		                }
-		            o && (sessionStorage.setItem("cloud_data_loaded", "true"), location.reload());
-		        },
+		        h = (e) => { // 'e' is cloudData (which now contains { data: ..., _lastModified: ... })
+				    console.log("Processing data loaded from cloud...");
+				    let o = !1; // Tracks if AppState 'n' needs updating
+				
+				    for (const key in t) {
+				        const storageKey = t[key];
+				        const timestampStorageKey = storageKey + "_timestamp";
+				
+				        const cloudWrappedData = e[key];
+				        const cloudData = cloudWrappedData?.data; // The actual data
+				        const cloudTimestamp = cloudWrappedData?._lastModified ?? 0;
+				
+				        const localTimestampString = localStorage.getItem(timestampStorageKey);
+				        const localTimestamp = localTimestampString ? parseInt(localTimestampString) : 0;
+				
+				        if (cloudTimestamp > 0) { // Only if cloud data exists
+				            if (cloudTimestamp >= localTimestamp) {
+				                // Cloud is newer or same age
+				                const cloudDataString = JSON.stringify(cloudData);
+				                const currentLocalDataString = localStorage.getItem(storageKey);
+				
+				                if (currentLocalDataString !== cloudDataString) {
+				                    console.log(`Cloud is newer for key '${key}'. Updating local storage and AppState.`);
+				                    localStorage.setItem(storageKey, cloudDataString); // Update local data
+				                    localStorage.setItem(timestampStorageKey, cloudTimestamp.toString()); // Update local timestamp
+				
+				                    if (n.hasOwnProperty(key)) {
+				                        n[key] = cloudData; // Update live AppState
+				                        o = !0;
+				                    }
+				                }
+				            } else {
+				                console.log(`Local data is newer for key '${key}'. Skipping Firestore overwrite.`);
+				            }
+				        }
+				    }
+				
+				    if (o) {
+				        console.log("AppState updated from sync. Re-rendering dashboard.");
+				        q(); // Re-render
+				    } else {
+				        console.log("No AppState updates needed from sync.");
+				    }
+				},
+				// ▲▲▲ END OF CORRECTED h() FUNCTION ▲▲▲
 		        y = (e) => {
 		            console.log("New user detected. Migrating local data to cloud...");
 		            const o = {};
@@ -889,21 +921,46 @@
 		                        i.syncStatus.style.opacity = 0;
 		                    }, 2e3));
 		        },
-		        f = debounce((e) => {
-		            if (!currentUser) return;
-		            const o = db.collection("users").doc(currentUser.uid),
-		                n = localStorage.getItem(t[e]);
-		            if (n) {
-		                const t = { [e]: JSON.parse(n) };
-		                o.set(t, { merge: !0 })
-		                    .then(() => {
-		                        console.log(`Debounced sync for '${e}' successful.`), b("All changes saved");
-		                    })
-		                    .catch((t) => {
-		                        b("Sync Error"), console.error("Firestore sync error:", t);
-		                    });
-		            }
-		        }, 1e4),
+		        f = debounce((e) => { // 'e' is the key
+				    if (!currentUser) return;
+				    const o = db.collection("users").doc(currentUser.uid); // 'o' is userDocRef
+				
+				    // 1. Get the data string from localStorage
+				    const dataString = localStorage.getItem(t[e]); // 't' is STORAGE_KEYS
+				    // 2. Get the timestamp string from localStorage
+				    const timestampString = localStorage.getItem(t[e] + "_timestamp");
+				
+				    // Proceed only if both data and timestamp exist
+				    if (dataString && timestampString) {
+				        try {
+				            // 3. Parse the timestamp
+				            const timestamp = parseInt(timestampString);
+				            
+				            // 4. Create the payload for Firestore, wrapping data and timestamp
+				            const payload = {
+				                [e]: { // Use the key ('customCards', 'layout', etc.)
+				                    data: JSON.parse(dataString), // The actual data
+				                    _lastModified: timestamp      // The timestamp
+				                }
+				            };
+				
+				            // 5. Send the wrapped object to Firestore using set with merge
+				            o.set(payload, { merge: true })
+				                .then(() => {
+				                    console.log(`Debounced sync for '${e}' successful (Timestamp: ${timestamp}).`);
+				                    b("All changes saved"); // 'b' is showSyncStatus
+				                })
+				                .catch((err) => {
+				                    b("Sync Error"), console.error(`Firestore sync error for key ${e}:`, err);
+				                });
+				        } catch (parseError) {
+				             console.error(`Error parsing data/timestamp before syncing key ${e}:`, parseError);
+				             b("Sync Error");
+				        }
+				    } else {
+				        console.warn(`Skipping sync for key ${e}: Missing data or timestamp in localStorage.`);
+				    }
+				}, 3000); // Using the 3-second delay
 		        v = (t) => {
 		            currentUser && (b("Saving..."), f(t));
 		        };
