@@ -1281,7 +1281,7 @@
                             if (appState.tests[dateString]) {
                                 dayClass = "day-part-test";
                                 const daysFromNow = Math.ceil((new Date(dateString) - today) / (1000 * 60 * 60 * 24));
-                                tooltipText = `${appState.tests[dateString]} (${daysFromNow} days from now)`;
+                                tooltipText = `${appState.tests[dateString]} (${daysFromNow-1} days from now)`;
                             }
                             if (currentDate.getTime() === examDate.getTime()) {
                                 dayClass = "day-exam";
