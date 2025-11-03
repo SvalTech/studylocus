@@ -871,10 +871,6 @@ select.form-input option {
                 * Saves the 'settings' object specifically.
                 */
                 saveSettings() {
-                    // --- FIX: Add a timestamp to track the latest change ---
-                    this.settings.lastUpdated = Date.now();
-                    // --- END FIX ---
-                    
                     localStorage.setItem(LOCAL_STORAGE_KEYS.settings, JSON.stringify(this.settings));
                     triggerSync("settings");
                 },
@@ -1112,10 +1108,6 @@ select.form-input option {
             * Reloads the page if any local data was overwritten.
             * @param {Object} cloudData Data from Firestore.
             */
-            /**
-            * Merges cloud data with local data, preferring the newest data based on timestamps.
-            * @param {Object} cloudData Data from Firestore.
-            */
             const mergeCloudDataWithLocal = (cloudData) => {
                 // Prevent redundant loads within the same session
                 if (sessionStorage.getItem("cloud_data_loaded") === "true") {
@@ -1124,55 +1116,22 @@ select.form-input option {
                 }
                 console.log("Loading data from cloud...");
 
-                let isStateUpdated = false; // Flag if we need to re-render
-
-                // --- NEW TIMESTAMP-BASED LOGIC ---
+                let isReloadNeeded = false;
                 for (const key in LOCAL_STORAGE_KEYS) {
-                    const localDataString = localStorage.getItem(LOCAL_STORAGE_KEYS[key]);
-                    const cloudData = cloudData[key];
-                    
-                    if (cloudData) {
-                        // Cloud has data
-                        const cloudDataString = JSON.stringify(cloudData);
-                        let localData = localDataString ? JSON.parse(localDataString) : null;
-
-                        // --- Timestamp check (specifically for settings) ---
-                        if (key === 'settings' && localData) {
-                            const localTime = localData.lastUpdated || 0;
-                            const cloudTime = cloudData.lastUpdated || 0;
-
-                            if (localTime > cloudTime) {
-                                // Local is newer, so push it to the cloud
-                                console.log("Local settings are newer. Syncing to cloud.");
-                                triggerSync(key);
-                                continue; // Skip to the next key
-                            }
-                        }
-                        // --- End Timestamp check ---
+                    if (cloudData[key]) {
+                        const localDataString = localStorage.getItem(LOCAL_STORAGE_KEYS[key]);
+                        const cloudDataString = JSON.stringify(cloudData[key]);
 
                         if (localDataString !== cloudDataString) {
-                            // Cloud is newer (or local had no timestamp), so overwrite local
                             localStorage.setItem(LOCAL_STORAGE_KEYS[key], cloudDataString);
-                            appState[key] = cloudData; // IMPORTANT: Update in-memory state
-                            isStateUpdated = true;
+                            isReloadNeeded = true;
                         }
-                    } else if (localDataString) {
-                        // Local has data but cloud doesn't. Push local up.
-                        console.log(`Local ${key} found, syncing to cloud.`);
-                        triggerSync(key);
                     }
                 }
-                // --- END NEW LOGIC ---
 
-                if (isStateUpdated) {
+                if (isReloadNeeded) {
                     sessionStorage.setItem("cloud_data_loaded", "true");
-                    
-                    // --- FIX: Re-render the dashboard WITHOUT a page reload ---
-                    // location.reload(); // <-- REMOVED this. This was causing the data loss.
-                    console.log("Cloud data merged. Re-rendering dashboard...");
-                    applySettings();
-                    renderDashboard();
-                    // --- END FIX ---
+                    location.reload();
                 }
             };
 
@@ -1216,47 +1175,38 @@ select.form-input option {
 
             /**
             * Debounced function to save a specific state key to Firestore.
-            * @param {string} key The key of the appState to sync (e.g., 'settings').
-            * @param {object} dataObject The actual data object to save.
+            * @param {string} key The key of the appState to sync (e.g., 'tests', 'settings').
             */
-            const debouncedSyncToFirestore = debounce((key, dataObject) => {
+            const debouncedSyncToFirestore = debounce((key) => {
                 if (!currentUser) return;
 
                 const userDocRef = db.collection("users").doc(currentUser.uid);
-                
-                // --- FIX: Use the dataObject that was passed in ---
-                const dataToSync = { [key]: dataObject };
-                // --- END FIX ---
+                const dataString = localStorage.getItem(LOCAL_STORAGE_KEYS[key]);
 
-                userDocRef
-                    .set(dataToSync, { merge: true })
-                    .then(() => {
-                        console.log(`Debounced sync for '${key}' successful.`);
-                        showSyncStatus("All changes saved");
-                    })
-                    .catch((error) => {
-                        showSyncStatus("Sync Error");
-                        // --- IMPORTANT: This is the error to look for in the console! ---
-                        console.error("Firestore sync error:", error);
-                    });
-            }, 2000); // 2-second debounce
+                if (dataString) {
+                    const dataToSync = { [key]: JSON.parse(dataString) };
+                    userDocRef
+                        .set(dataToSync, { merge: true })
+                        .then(() => {
+                            console.log(`Debounced sync for '${key}' successful.`);
+                            showSyncStatus("All changes saved");
+                        })
+                        .catch((error) => {
+                            showSyncStatus("Sync Error");
+                            console.error("Firestore sync error:", error);
+                        });
+                }
+            }, 5000); // 5-second debounce
 
-           /**
+            /**
             * Triggers a debounced Firestore sync for a given state key.
             * @param {string} key The key of the appState to sync.
             */
             const triggerSync = (key) => {
-                if (!currentUser) return;
-
-                // --- FIX: Read the data NOW, not later ---
-                const dataString = localStorage.getItem(LOCAL_STORAGE_KEYS[key]);
-                if (dataString) {
-                    const dataObject = JSON.parse(dataString);
+                if (currentUser) {
                     showSyncStatus("Saving...");
-                    // Pass the actual data object to the debounced function
-                    debouncedSyncToFirestore(key, dataObject);
+                    debouncedSyncToFirestore(key);
                 }
-                // --- END FIX ---
             };
 
             // --- Modals & Utility Functions ---
@@ -1969,29 +1919,17 @@ select.form-input option {
                     renderDashboard();
                 }
 
-				// Delete custom card
+                // Delete custom card
                 if (event.target.closest(".delete-card-btn") && cardData) {
                     appState.customCards = appState.customCards.filter((card) => card.id !== cardId);
-                    
-                    // --- FIX: Filter layout *immediately* ---
-                    appState.layout = appState.layout.filter((id) => id !== cardId);
-                    // --- END FIX ---
-                    
                     delete appState.cardProps[cardId];
                     delete appState.pomodoroState[cardId];
                     delete appState.timeLoggerState[cardId];
-                    
                     appState.save("customCards");
-                    
-                    // --- FIX: Save the filtered layout immediately ---
-                    appState.save("layout"); 
-                    // --- END FIX ---
-                    
                     appState.save("cardProps");
                     appState.save("pomodoroState");
                     appState.save("timeLoggerState");
-                    
-                    renderDashboard(); // This will now use the already-cleaned layout
+                    renderDashboard();
                 }
 
                 // Delete study log item
