@@ -228,7 +228,7 @@ select.form-input option {
 
     <footer class="text-center py-4 mt-4">
         <p class="text-xs text-secondary">
-            ©️ <a href="https://github.com/svalordev" target="_blank" rel="noopener noreferrer" class="hover:underline" style="color: var(--accent-color);">Shaurya Pratap Singh</a> 2025 | <a href="https://sval.tech/studylocus/termsandconditions.html" rel="noopener noreferrer" class="hover:underline" style="color: var(--accent-color);">Terms and Conditions</a> 
+            © <a href="https://github.com/svalordev" target="_blank" rel="noopener noreferrer" class="hover:underline" style="color: var(--accent-color);">Shaurya Pratap Singh</a> 2025 | <a href="https://sval.tech/studylocus/termsandconditions.html" rel="noopener noreferrer" class="hover:underline" style="color: var(--accent-color);">Terms and Conditions</a> | <a href="https://sval.tech/studylocus/privacypolicy.html" rel="noopener noreferrer" class="hover:underline" style="color: var(--accent-color);">Privacy Policy</a> 
     </footer>
 
     <template id="countdown-template">
@@ -517,7 +517,7 @@ select.form-input option {
                  <label for="new-card-title" class="sr-only">Card Title</label>
                 <input type="text" id="new-card-title" placeholder="Card Title" class="form-input rounded-md p-2 w-full mb-3" required>
                  <label for="new-card-content" class="sr-only">Card Content</label>
-                <textarea id="new-card-content" placeholder="Card Content (URL for YouTube)" rows="4" class="form-input rounded-md p-2 w-full mb-4"></textarea>
+                <textarea id="new-card-content" placeholder="Card Content" rows="4" class="form-input rounded-md p-2 w-full mb-4"></textarea>
                 <div class="flex justify-end gap-3">
                     <button type="button" id="cancel-add-card" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md">Cancel</button>
                     <button type="submit" class="btn-primary font-bold py-2 px-4 rounded-md">Add</button>
@@ -864,7 +864,10 @@ select.form-input option {
                 */
                 save(key) {
                     localStorage.setItem(LOCAL_STORAGE_KEYS[key], JSON.stringify(this[key]));
-                    triggerSync(key);
+                    if (currentUser) {
+			            showSyncStatus("Saving..."); // Show "Saving..." immediately
+			            debouncedSaveAllToFirestore(); 
+			        }
                 },
 
                 /**
@@ -872,7 +875,10 @@ select.form-input option {
                 */
                 saveSettings() {
                     localStorage.setItem(LOCAL_STORAGE_KEYS.settings, JSON.stringify(this.settings));
-                    triggerSync("settings");
+                    if (currentUser) {
+			            showSyncStatus("Saving...");
+			            debouncedSaveAllToFirestore();
+			        }
                 },
             };
 
@@ -1085,77 +1091,105 @@ select.form-input option {
                 }
             };
 
+			/**
+			 * Debounced function to save the ENTIRE local app state to Firestore.
+			 * This bundles all changes (layout, cards, tests) into one write.
+			 */
+			const debouncedSaveAllToFirestore = debounce(() => {
+			    if (!currentUser) return;
+			
+			    console.log("Debounced save triggered. Saving all data to cloud...");
+			    const userDocRef = db.collection("users").doc(currentUser.uid);
+			
+			    // 1. Get all data from localStorage (which is our up-to-date cache)
+			    const localData = {};
+			    for (const key in LOCAL_STORAGE_KEYS) {
+			        const dataString = localStorage.getItem(LOCAL_STORAGE_KEYS[key]);
+			        if (dataString) {
+			            localData[key] = JSON.parse(dataString);
+			        }
+			    }
+			
+			    // 2. Send it all to Firestore in ONE 'set' operation
+			    userDocRef
+			        .set(localData, { merge: true }) // Use merge to not overwrite other fields
+			        .then(() => {
+			            // We don't need showSyncStatus("All changes saved") here
+			            // The onSnapshot listener (Step 1) will handle this automatically!
+			            console.log("Debounced save successful.");
+			        })
+			        .catch((error) => {
+			            showSyncStatus("Sync Error");
+			            console.error("Firestore save error:", error);
+			        });
+			}, 2000); // 2-second debounce is plenty. 5 is too long.
+
             // --- Firestore Data Sync ---
 
-            /**
-            * Loads user data from Firestore or migrates local data if new user.
-            * @param {firebase.User} user The authenticated user object.
-            */
-            const loadUserData = async (user) => {
-                updateAuthUI();
-                const userDocRef = db.collection("users").doc(user.uid);
-                const userDoc = await userDocRef.get();
-
-                if (userDoc.exists) {
-                    mergeCloudDataWithLocal(userDoc.data());
-                } else {
-                    migrateLocalDataToCloud(userDocRef);
-                }
-            };
-
-            /**
-            * Merges cloud data with local data, preferring cloud data.
-            * Reloads the page if any local data was overwritten.
-            * @param {Object} cloudData Data from Firestore.
-            */
-            const mergeCloudDataWithLocal = (cloudData) => {
-                // Prevent redundant loads within the same session
-                if (sessionStorage.getItem("cloud_data_loaded") === "true") {
-                    console.log("Cloud data already loaded this session. Skipping redundant load.");
-                    return;
-                }
-                console.log("Loading data from cloud...");
-
-                let isReloadNeeded = false;
-                for (const key in LOCAL_STORAGE_KEYS) {
-                    if (cloudData[key]) {
-                        const localDataString = localStorage.getItem(LOCAL_STORAGE_KEYS[key]);
-                        const cloudDataString = JSON.stringify(cloudData[key]);
-
-                        if (localDataString !== cloudDataString) {
-                            localStorage.setItem(LOCAL_STORAGE_KEYS[key], cloudDataString);
-                            isReloadNeeded = true;
-                        }
-                    }
-                }
-
-                if (isReloadNeeded) {
-                    sessionStorage.setItem("cloud_data_loaded", "true");
-                    location.reload();
-                }
-            };
-
-            /**
-            * For new users, migrates existing localStorage data to Firestore.
-            * @param {firebase.firestore.DocumentReference} userDocRef Reference to the user's Firestore document.
-            */
-            const migrateLocalDataToCloud = (userDocRef) => {
-                console.log("New user detected. Migrating local data to cloud...");
-                const localData = {};
-                for (const key in LOCAL_STORAGE_KEYS) {
-                    const dataString = localStorage.getItem(LOCAL_STORAGE_KEYS[key]);
-                    if (dataString) {
-                        localData[key] = JSON.parse(dataString);
-                    }
-                }
-
-                if (Object.keys(localData).length > 0) {
-                    userDocRef
-                        .set(localData)
-                        .then(() => showSyncStatus("Synced"))
-                        .catch((error) => console.error("Migration failed:", error));
-                }
-            };
+			            /**
+			 * Loads user data from Firestore or migrates local data if new user.
+			 * @param {firebase.User} user The authenticated user object.
+			 */
+			const loadUserData = async (user) => {
+			    updateAuthUI();
+			    const userDocRef = db.collection("users").doc(user.uid);
+			
+			    // 1. Check if the document exists
+			    const userDoc = await userDocRef.get();
+			
+			    if (!userDoc.exists) {
+			        // 2. NEW USER: This part is fine. Migrate local data to the cloud ONCE.
+			        console.log("New user detected. Migrating local data to cloud...");
+			        migrateLocalDataToCloud(userDocRef); // Your existing function is good for this
+			    }
+			
+			    // 3. (THE BIG CHANGE)
+			    // Attach a REAL-TIME LISTENER to the user's document.
+			    // This will replace your 'mergeCloudDataWithLocal' and the awful page reload.
+			    userDocRef.onSnapshot(
+			        (doc) => {
+			            console.log("Received cloud data snapshot...");
+			            const cloudData = doc.data();
+			
+			            if (cloudData) {
+			                let isStateUpdated = false;
+			
+			                // 4. Merge cloud data into your local appState
+			                // (This is the "merge" without the page reload)
+			                for (const key in LOCAL_STORAGE_KEYS) {
+			                    if (cloudData[key]) {
+			                        // Check if data is actually different to avoid needless re-renders
+			                        const localString = JSON.stringify(appState[key]);
+			                        const cloudString = JSON.stringify(cloudData[key]);
+			                        
+			                        if (localString !== cloudString) {
+			                            appState[key] = cloudData[key];
+			                            // Also update the localStorage cache for the next offline load
+			                            localStorage.setItem(LOCAL_STORAGE_KEYS[key], cloudString);
+			                            isStateUpdated = true;
+			                        }
+			                    }
+			                }
+			
+			                // 5. If anything changed, just re-render the dashboard. NO RELOAD.
+			                if (isStateUpdated) {
+			                    console.log("Cloud data merged. Re-rendering dashboard...");
+			                    applySettings(); // Apply new settings
+			                    renderDashboard(); // Re-render cards
+			                }
+			            }
+			
+			            // 6. (BONUS) Use this to show a 100% accurate sync status!
+			            // This replaces your manual showSyncStatus("All changes saved")
+			            const status = doc.metadata.hasPendingWrites ? "Syncing..." : "All changes saved";
+			            showSyncStatus(status);
+			        },
+			        (error) => {
+			            console.error("Firestore snapshot error: ", error);
+			            showSyncStatus("Sync Error");
+			        }
+			    );
+			};
 
             /**
             * Displays a sync status message (e.g., "Saving...", "All changes saved").
@@ -1173,30 +1207,6 @@ select.form-input option {
                 }
             };
 
-            /**
-            * Debounced function to save a specific state key to Firestore.
-            * @param {string} key The key of the appState to sync (e.g., 'tests', 'settings').
-            */
-            const debouncedSyncToFirestore = debounce((key) => {
-                if (!currentUser) return;
-
-                const userDocRef = db.collection("users").doc(currentUser.uid);
-                const dataString = localStorage.getItem(LOCAL_STORAGE_KEYS[key]);
-
-                if (dataString) {
-                    const dataToSync = { [key]: JSON.parse(dataString) };
-                    userDocRef
-                        .set(dataToSync, { merge: true })
-                        .then(() => {
-                            console.log(`Debounced sync for '${key}' successful.`);
-                            showSyncStatus("All changes saved");
-                        })
-                        .catch((error) => {
-                            showSyncStatus("Sync Error");
-                            console.error("Firestore sync error:", error);
-                        });
-                }
-            }, 5000); // 5-second debounce
 
             /**
             * Triggers a debounced Firestore sync for a given state key.
@@ -1205,7 +1215,7 @@ select.form-input option {
             const triggerSync = (key) => {
                 if (currentUser) {
                     showSyncStatus("Saving...");
-                    debouncedSyncToFirestore(key);
+                    debouncedSaveAllToFirestore();
                 }
             };
 
