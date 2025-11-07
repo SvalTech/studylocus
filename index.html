@@ -162,7 +162,7 @@ select.form-input option {
 /* --- END OF FIX FOR DROPDOWN LEGIBILITY --- */
 .pomodoro-btn.active,.todo-checkbox:checked,.youtube-container::after{background-color:var(--accent-color)}.no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}.no-scrollbar::-webkit-scrollbar{display:none}.delete-card-btn:hover{color:#ef4444!important}.pomodoro-btn.active,[data-theme=light] .pomodoro-btn.active{color:#fff}.aspect-w-16{position:relative;padding-bottom:56.25%}.aspect-w-16>*{position:absolute;height:100%;width:100%;left:0}.fab-container{position:fixed;bottom:1.5rem;right:1.5rem;z-index:40}.fab-menu{visibility:hidden;opacity:0;transform:translateY(10px);transition:.2s ease-out;position:absolute;bottom:100%;right:0;margin-bottom:.5rem}.fab-container:hover .fab-menu{visibility:visible;opacity:1;transform:translateY(0)}.todo-checkbox{-webkit-appearance:none;-moz-appearance:none;appearance:none;width:1.25rem;height:1.25rem;border-radius:.25rem;border:1px solid var(--border-color);background-color:transparent;cursor:pointer;position:relative;transition:background-color .2s ease-in-out,border-color .2s ease-in-out}.todo-checkbox:checked{border-color:var(--accent-color)}.todo-checkbox:checked::after{content:'✔';position:absolute;color:#fff;top:50%;left:50%;transform:translate(-50%,-50%);font-size:.8rem}[data-theme=light] .todo-checkbox:checked::after{color:var(--card-bg-color)}body.zen-mode .card-header-controls,body.zen-mode .delete-mark-item,body.zen-mode .delete-test-btn,body.zen-mode .delete-todo-item,body.zen-mode .fab-container,body.zen-mode .log-btn,body.zen-mode .pomodoro-btn,body.zen-mode .pomodoro-settings,body.zen-mode .reset-btn,body.zen-mode footer,body.zen-mode form,body.zen-mode header{display:none}body.zen-mode .card:hover{transform:none;box-shadow:var(--card-shadow)}body.zen-mode .card-header{justify-content:center}.youtube-container{position:relative;border-radius:.375rem;overflow:hidden}.youtube-container::after{content:'';position:absolute;top:0;left:0;width:100%;height:100%;opacity:.2;mix-blend-mode:screen;pointer-events:none;transition:background-color .5s,opacity .5s;z-index:1}.youtube-container.tint-disabled::after{opacity:0}.youtube-iframe{transition:filter .3s ease-in-out}.youtube-container.blurred .youtube-iframe{filter:blur(16px)}.form-input-toggle{-webkit-appearance:none;appearance:none;position:relative;width:38px;height:22px;border-radius:9999px;background-color:rgba(255,255,255,.2);border:1px solid var(--border-color);transition:background-color .2s ease-in-out;cursor:pointer}.form-input-toggle::before{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background-color:#fff;transition:transform .2s ease-in-out}.form-input-toggle:checked{background-color:var(--accent-color)}.form-input-toggle:checked::before{transform:translateX(16px)}.legend-item{display:flex;align-items:center;gap:.5rem}.legend-color{width:12px;height:12px;border-radius:2px}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0}@keyframes fall-apart{0%{transform:translateY(0) rotate(0);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}#sync-status{transition:opacity .5s}
         /* ✨ END: Firebase Auth UI Styles */
-#loading-overlay .loader-icon { color: var(--accent-color); /* Use your accent color for the icon */ animation: icon-sync-spin 2s ease-in-out infinite; } @keyframes icon-sync-spin { 0% { transform: rotate(0deg) scale(0.9); opacity: 0.7; } 50% { transform: rotate(180deg) scale(1); opacity: 1; } 100% { transform: rotate(360deg) scale(0.9); opacity: 0.7; } } /* Animated Loading Bar (keep this as is) */ #loading-overlay .loader-bar-container { width: 150px; height: 4px; background-color: var(--border-color); border-radius: 2px; overflow: hidden; } #loading-overlay .loader-bar { width: 100%; height: 100%; background-color: var(--accent-color); border-radius: 2px; animation: loading-bar-indeterminate 2s infinite ease-in-out; } @keyframes loading-bar-indeterminate { 0% { transform: translateX(-100%); } 50% { transform: translateX(0%); } 100% { transform: translateX(100%); } }    </style>
+    </style>
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -192,15 +192,6 @@ select.form-input option {
   gtag('config', 'G-TCK0S6VC58');
 </script>
 <body class="antialiased">
-	<div id="loading-overlay" style="position: fixed; inset: 0; background-color: var(--bg-color); z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5rem;">
-	    
-	    <div style="display: flex; flex-direction: column; align-items: center; gap: 0.75rem;">
-	        <p style="color: var(--text-secondary); font-size: 0.875rem; font-weight: 600; letter-spacing: 0.5px;">Syncing your dashboard...</p>
-	        <div class="loader-bar-container">
-	            <div class="loader-bar"></div>
-	        </div>
-	    </div>
-	</div>
     <div id="bg-overlay"></div>
     <div class="container mx-auto px-2 sm:px-4 py-6">
         <header class="flex justify-between items-center mb-6">
@@ -1005,7 +996,7 @@ select.form-input option {
             // Disable controls until Firebase auth state is resolved
             domElements.buttons.addCard.disabled = true;
             domElements.dashboardGrid.style.pointerEvents = "none";
-            domElements.dashboardGrid.style.opacity = "0";
+            domElements.dashboardGrid.style.opacity = "0.5";
 
             // --- Picture-in-Picture (PiP) State ---
             let pipWindow = null;
@@ -1043,22 +1034,14 @@ select.form-input option {
                 auth.signOut();
             };
 
+            /**
+            * Enables dashboard controls after auth state is determined.
+            */
             const enableAppControls = () => {
-                domElements.buttons.addCard.disabled = false;
-                domElements.dashboardGrid.style.pointerEvents = "auto";
-                domElements.dashboardGrid.style.opacity = "1";
-
-                /* ▼▼▼ ADD THIS BLOCK TO HIDE THE LOADER ▼▼▼ */
-                const overlay = document.getElementById("loading-overlay");
-                if (overlay) {
-                    overlay.style.transition = "opacity 0.3s ease-out";
-                    overlay.style.opacity = "0";
-                    setTimeout(() => {
-                        overlay.style.display = "none";
-                    }, 300); // Wait for fade-out
-                }
-                /* ▲▲▲ END OF FIX ▲▲▲ */
-            };
+                domElements.buttons.addCard.disabled = false;
+                domElements.dashboardGrid.style.pointerEvents = "auto";
+                domElements.dashboardGrid.style.opacity = "1";
+            };
 
             /**
             * Updates the auth container UI based on the current user state.
@@ -1213,7 +1196,7 @@ select.form-input option {
                             console.error("Firestore sync error:", error);
                         });
                 }
-            }, 3000); // 3-second debounce
+            }, 5000); // 5-second debounce
 
             /**
             * Triggers a debounced Firestore sync for a given state key.
