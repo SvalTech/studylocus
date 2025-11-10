@@ -1112,7 +1112,7 @@ select.form-input option {
 			
 			    // 2. Send it all to Firestore in ONE 'set' operation
 			    userDocRef
-			        .set(localData, { merge: true }) // Use merge to not overwrite other fields
+			        .set(localData)
 			        .then(() => {
 			            // We don't need showSyncStatus("All changes saved") here
 			            // The onSnapshot listener (Step 1) will handle this automatically!
@@ -1745,25 +1745,39 @@ select.form-input option {
                 domElements.dashboardGrid.innerHTML = ""; // Clear the grid
 
                 // Filter layout to remove IDs of deleted custom cards
-                const customCardIds = appState.customCards.map((card) => card.id);
-                if (!Array.isArray(appState.layout)) {
-                    // Fallback for corrupted layout
-                    appState.layout = [
-                        "countdown",
-                        "graph",
-                        "default-todo",
-                        "default-study-logger",
-                        "default-note",
-                        "default-line-graph",
-                        "tests",
-                        "quote",
-                        "time",
-                    ];
-                }
-                appState.layout = appState.layout.filter(
-                    (cardId) => cardRenderers[cardId]?.isDefault || customCardIds.includes(cardId)
-                );
-                appState.save("layout");
+                let layoutChanged = false;
+                const customCardIds = appState.customCards.map((card) => card.id);
+
+                if (!Array.isArray(appState.layout)) {
+                    // Fallback for corrupted layout
+                    appState.layout = [
+                        "countdown", "graph", "default-todo", "default-study-logger",
+                        "default-note", "default-line-graph", "tests", "quote", "time",
+                    ];
+                    layoutChanged = true;
+                }
+
+                // 1. Filter layout to remove IDs of deleted custom cards
+                const originalLength = appState.layout.length;
+                appState.layout = appState.layout.filter(
+                    (cardId) => cardRenderers[cardId]?.isDefault || customCardIds.includes(cardId)
+                );
+                if (appState.layout.length !== originalLength) {
+                    layoutChanged = true;
+                }
+
+                // 2. Add any new custom cards to the layout if they're not already there
+                appState.customCards.forEach((card) => {
+                    if (!appState.layout.includes(card.id)) {
+                        appState.layout.push(card.id);
+                        layoutChanged = true;
+                    }
+                });
+
+                // 3. Only save if the layout actually changed
+                if (layoutChanged) {
+                    appState.save("layout");
+                }
 
                 // Add any new custom cards to the layout if they're not already there
                 appState.customCards.forEach((card) => {
