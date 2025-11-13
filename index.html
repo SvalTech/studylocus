@@ -243,8 +243,7 @@ select.form-input option {
             <div id="countdown-timer" class="flex justify-center space-x-2 sm:space-x-4 md:space-x-8 text-center py-2">
                 <div><div data-value="days" class="font-bold">00</div><div class="text-xs sm:text-sm text-secondary">Days</div></div>
                 <div><div data-value="hours" class="font-bold">00</div><div class="text-xs sm:text-sm text-secondary">Hours</div></div>
-                <div><div data-value="minutes" class="font-bold">00</div><div class="text-xs sm:text-sm text-secondary">Minutes</div></div>
-                <div><div data-value="seconds" class="font-bold">00</div><div class="text-xs sm:text-sm text-secondary">Seconds</div></div>
+				<div><div data-value="minutes" class="font-bold">00</div><div class="text-xs sm:text-sm text-secondary">Minutes</div></div>
             </div>
         </div>
     </template>
@@ -591,7 +590,7 @@ select.form-input option {
                      </div>
                  </div>
                  <div>
-                     <label class="block text-sm font-medium text-secondary mb-1">Focus Mode</label>
+                     <label class="block text-sm font-medium text-secondary mb-1">Focus Mode (running timelogger stops when you switch tabs) + (full screen on pc)</label>
                      <div class="space-y-2 mt-2 p-3 rounded-md" style="background-color: rgba(0,0,0,0.2);">
                          <label for="focus-shield-toggle" class="flex items-center justify-between cursor-pointer">
                              <span class="text-sm">Enable Focus Shield</span>
@@ -629,7 +628,7 @@ select.form-input option {
     </div>
 
     <div id="mobile-alert" class="fixed bottom-4 left-4 right-4 bg-yellow-400 text-black p-3 text-center text-sm rounded-lg shadow-lg flex justify-between items-center hidden z-50">
-        <span>Welcome to StudyLocus by SvalTech! 🚀 This is your personalized JEE/NEET dashboard. Drag, drop, and click the '+' button to add powerful tools to your space. Use the customise button to customise the dashboard to your liking. For more details, check the Information tab and good luck with your exam!</span>
+        <span>Welcome to StudyLocus! This is your personalized JEE/NEET dashboard. Drag, drop, and click the '+' button to add different cards to your space. Use the customise button to customise the dashboard to your liking. For more details, check the Information tab.</span>
         <button id="close-alert-btn" class="font-bold text-lg ml-4" aria-label="Close mobile alert">&times;</button>
     </div>
 
@@ -1356,9 +1355,9 @@ select.form-input option {
                         cardElement.querySelector('[data-value="minutes"]').innerText = Math.floor((diff / (1000 * 60)) % 60)
                             .toString()
                             .padStart(2, "0");
-                        cardElement.querySelector('[data-value="seconds"]').innerText = Math.floor((diff / 1000) % 60)
-                            .toString()
-                            .padStart(2, "0");
+                        // cardElement.querySelector('[data-value="seconds"]').innerText = Math.floor((diff / 1000) % 60)
+                        //     .toString()
+                        //     .padStart(2, "0");
                     },
                 },
                 time: {
@@ -1687,9 +1686,15 @@ select.form-input option {
 
                         // Update subject dropdown
                         const labelFor = `subject-select-${cardData.id}`;
-                        cardElement.querySelector('label[for="subject-select"]').setAttribute("for", labelFor);
-                        const selectEl = cardElement.querySelector(".subject-select");
-                        selectEl.id = labelFor;
+                        const selectEl = cardElement.querySelector(".subject-select");
+                        const labelEl = selectEl.previousElementSibling; // Find the label relative to the select box
+
+                        // Check if we found the label and it is a LABEL tag
+                        if (labelEl && labelEl.tagName === 'LABEL') {
+                            labelEl.setAttribute("for", labelFor);
+                        }
+                        
+                        selectEl.id = labelFor;
 
                         const allSubjects = [
                             ...new Set([
@@ -2165,21 +2170,23 @@ select.form-input option {
 
                         // 1. Copy all stylesheets
                         [...document.styleSheets].forEach((styleSheet) => {
-                            try {
-                                const cssText = [...styleSheet.cssRules].map((rule) => rule.cssText).join("");
-                                const style = document.createElement("style");
-                                style.textContent = cssText;
-                                pipWindow.document.head.appendChild(style);
-                            } catch (e) {
-                                console.warn("Cannot read cross-origin stylesheet", e);
-                            }
-                        });
-
+                            if (styleSheet.href) {
+                                // It's a linked stylesheet (e.g., Google Fonts, Tailwind CDN)
+                                const link = document.createElement("link");
+                                link.rel = "stylesheet";
+                                link.href = styleSheet.href;
+                                pipWindow.document.head.appendChild(link);
+                            } else if (styleSheet.ownerNode) {
+                                // It's an inline <style> tag, clone it
+                                const style = styleSheet.ownerNode.cloneNode(true);
+                                pipWindow.document.head.appendChild(style);
+                            }
+                        });
                         // 2. Add PiP-specific styles
                         const pipStyle = document.createElement("style");
                         pipStyle.textContent = `
                             body {
-                                background-color: var(--card-bg-color);
+                                background-color: #000000;
                                 color: var(--text-primary);
                                 font-family: var(--font-family);
                                 display: flex;
@@ -2251,7 +2258,10 @@ select.form-input option {
                         pipWindow.document.head.appendChild(pipStyle);
 
                         // 3. Set theme
-                        pipWindow.document.body.dataset.theme = document.body.dataset.theme || "default";
+                        const currentTheme = document.documentElement.dataset.theme;
+                        if (currentTheme && currentTheme !== "default") {
+                            pipWindow.document.documentElement.dataset.theme = currentTheme;
+                        }
 
                         // 4. Create PiP body content
                         const titleEl = document.createElement("h2");
