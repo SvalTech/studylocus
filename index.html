@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -500,6 +501,32 @@ select.form-input option {
         </div>
     </template>
 
+
+    <template id="analytics-card-template">
+        <div class="card custom-card" data-card-type="analytics">
+            <div class="card-header">
+                <h2 class="text-lg font-semibold card-title">Study Analytics</h2>
+                <div class="card-header-controls">
+                    <button class="toggle-colspan-btn" title="Toggle size"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m6 6v-4m0 4h-4"/><path d="M3 3l6 6"/><path d="M3 3v4m0-4h4"/></svg></button>
+                    <button class="delete-card-btn" title="Delete card"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg></button>
+                    <span class="drag-handle"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+                </div>
+            </div>
+            <div class="card-content">
+                <div class="flex justify-center gap-2 mb-4">
+                    <button data-range="7" class="range-btn text-sm px-3 py-1 rounded-md border active" style="border-color: var(--accent-color); background-color: var(--accent-color); color: white;">Last 7 Days</button>
+                    <button data-range="30" class="range-btn text-sm px-3 py-1 rounded-md border border-gray-600 text-secondary hover:text-primary">Last 30 Days</button>
+                </div>
+                <div class="h-64 relative">
+                    <canvas class="analytics-chart"></canvas>
+                </div>
+                <div class="mt-4 flex flex-wrap justify-center gap-4 text-xs text-secondary statistics-summary">
+                    <!-- Stats injected here via JS -->
+                </div>
+            </div>
+        </div>
+    </template>
+
     <div id="add-card-modal" class="modal-overlay hidden">
         <div class="card w-11/12 max-w-md">
             <h2 class="text-xl font-semibold mb-4">Add New Card</h2>
@@ -508,6 +535,7 @@ select.form-input option {
                 <select id="new-card-type" class="form-input rounded-md p-2 w-full mb-3">
                     <option value="note">Note</option>
                     <option value="todo">To-Do List</option>
+                    <option value="analytics">Study Analytics</option> 
                     <option value="line-graph">Line Graph</option>
                     <option value="pomodoro">Pomodoro Timer</option>
                     <option value="youtube">YouTube Video</option>
@@ -1674,6 +1702,143 @@ select.form-input option {
                         container.classList.toggle("blurred", appState.settings.youtubeBlurEnabled);
                     },
                 },
+                analytics: {
+                    templateId: "analytics-card-template",
+                    render: (cardElement, cardData) => {
+                        // 1. Helper: Get Data
+                        const getChartData = (days) => {
+                            const labels = [];
+                            const dataPoints = [];
+                            let totalSecondsRange = 0;
+
+                            for (let i = days - 1; i >= 0; i--) {
+                                const d = new Date();
+                                d.setDate(d.getDate() - i);
+                                
+                                const year = d.getFullYear();
+                                const month = (d.getMonth() + 1).toString().padStart(2, "0");
+                                const day = d.getDate().toString().padStart(2, "0");
+                                const isoDate = `${year}-${month}-${day}`;
+                                
+                                const label = days === 7 
+                                    ? d.toLocaleDateString('en-US', { weekday: 'short' }) 
+                                    : d.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+                                labels.push(label);
+
+                                let dailySeconds = 0;
+                                if (appState.studyLogs[isoDate]) {
+                                    Object.values(appState.studyLogs[isoDate]).forEach(sec => dailySeconds += sec);
+                                }
+                                
+                                dataPoints.push(dailySeconds / 3600); 
+                                totalSecondsRange += dailySeconds;
+                            }
+                            return { labels, dataPoints, totalSecondsRange };
+                        };
+
+                        // 2. Setup
+                        const ctx = cardElement.querySelector(".analytics-chart").getContext("2d");
+                        const rangeBtns = cardElement.querySelectorAll(".range-btn");
+                        
+                        // Styles
+                        const styles = getComputedStyle(document.documentElement);
+                        const accentColor = styles.getPropertyValue("--accent-color").trim() || '#3b82f6';
+                        const textColor = styles.getPropertyValue("--text-secondary").trim() || '#8b949e';
+                        const gridColor = styles.getPropertyValue("--border-color").trim() || '#30363d';
+
+                        // 3. Render Function
+                        const renderChart = (range) => {
+                            const { labels, dataPoints, totalSecondsRange } = getChartData(range);
+                            
+                            // Summary Text
+                            const totalH = Math.floor(totalSecondsRange / 3600);
+                            const totalM = Math.floor((totalSecondsRange % 3600) / 60);
+                            const displayTotal = totalH > 0 ? `${totalH}h ${totalM}m` : `${totalM}m`;
+                            const avgHours = (totalSecondsRange / 3600 / range).toFixed(2);
+
+                            const summaryEl = cardElement.querySelector(".statistics-summary");
+                            if (summaryEl) {
+                                summaryEl.innerHTML = `
+                                    <span class="mr-4">Total: <strong style="color:${accentColor}">${displayTotal}</strong></span>
+                                    <span>Average: <strong>${avgHours}h/day</strong></span>
+                                `;
+                            }
+
+                            // Chart
+                            if (appState.chartInstances[cardData.id]) {
+                                appState.chartInstances[cardData.id].destroy();
+                            }
+
+                            appState.chartInstances[cardData.id] = new Chart(ctx, {
+                                type: 'bar',
+                                data: {
+                                    labels: labels,
+                                    datasets: [{
+                                        label: 'Hours',
+                                        data: dataPoints,
+                                        backgroundColor: accentColor,
+                                        hoverBackgroundColor: accentColor,
+                                        borderRadius: 4,
+                                        barPercentage: 0.6
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    animation: { duration: 0 },
+                                    plugins: { 
+                                        legend: { display: false },
+                                        tooltip: {
+                                            callbacks: {
+                                                label: (context) => {
+                                                    const val = context.raw;
+                                                    if (val > 0 && val < 1) return ` ${Math.round(val * 60)} mins`;
+                                                    return ` ${val.toFixed(2)} hrs`;
+                                                }
+                                            }
+                                        }
+                                    },
+                                    scales: {
+                                        y: {
+                                            beginAtZero: true,
+                                            grid: { color: gridColor, drawBorder: false },
+                                            border: { display: false },
+                                            ticks: { color: textColor, callback: (val) => (val % 1 === 0 ? val : val.toFixed(1)) + 'h' }
+                                        },
+                                        x: {
+                                            grid: { display: false, drawBorder: false },
+                                            ticks: { color: textColor }
+                                        }
+                                    }
+                                }
+                            });
+
+                            // Update Button Styles - THIS NOW WORKS CORRECTLY
+                            rangeBtns.forEach(btn => {
+                                if(parseInt(btn.dataset.range) === range) {
+                                    btn.style.backgroundColor = accentColor;
+                                    btn.style.borderColor = accentColor;
+                                    btn.style.color = "#fff";
+                                } else {
+                                    btn.style.backgroundColor = "transparent";
+                                    btn.style.borderColor = gridColor;
+                                    btn.style.color = textColor;
+                                }
+                            });
+                        };
+
+                        // 4. Initialize
+                        renderChart(7);
+
+                        // 5. Simplified Event Listeners (Fixed)
+                        rangeBtns.forEach(btn => {
+                            btn.addEventListener('click', (e) => {
+                                const range = parseInt(e.target.dataset.range);
+                                renderChart(range);
+                            });
+                        });
+                    }
+                },
                 "time-logger": {
                     templateId: "time-logger-card-template",
                     render: (cardElement, cardData) => {
@@ -2343,7 +2508,8 @@ select.form-input option {
                 appState.customCards.push(newCard);
 
                 const newCardProps = {
-                    colspan: cardType === "line-graph" || cardType === "youtube" || cardType === "time-logger" ? 2 : 1,
+                    // Add 'analytics' to this check
+                    colspan: cardType === "line-graph" || cardType === "youtube" || cardType === "time-logger" || cardType === "analytics" ? 2 : 1,
                 };
                 if (cardType === "line-graph") {
                     newCardProps.maxMarks = 300; // Default max marks
