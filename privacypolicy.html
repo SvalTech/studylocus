@@ -3,95 +3,204 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Privacy Policy - StudyLocus</title>
+    <title>Privacy Policy | StudyLocus</title>
+    <meta name="description" content="Privacy Policy for StudyLocus Dashboard">
+    
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Fira+Code&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+
     <style>
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #111827; /* Dark background */
-            color: #d1d5db; /* Light gray text */
-            line-height: 1.7;
-            margin: 0;
-            padding: 0;
+        :root {
+            /* Deep Space Theme (Default) */
+            --bg-color: #0d1117;
+            --card-bg-color: rgba(22, 27, 34, 0.4);
+            --border-color: #30363d;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+            --accent-color: #58a6ff;
+            --accent-glow: 0 0 15px rgba(88, 166, 255, 0.3);
+            --font-family: 'Inter', sans-serif;
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
 
-        .container {
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.8;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Glassmorphism Card Style matching main dashboard */
+        .glass-card {
+            background-color: var(--card-bg-color);
+            border: 1px solid color-mix(in srgb, var(--accent-color) 40%, var(--border-color));
+            border-radius: 24px;
+            padding: 4rem; /* Increased padding for better layout */
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: var(--card-shadow);
             max-width: 800px;
-            margin: 2rem auto;
-            padding: 2rem;
-            background-color: #1f2937; /* Darker card background */
-            border-radius: 12px;
-            border: 1px solid #374151; /* Subtle border */
+            margin: 4rem auto;
+            width: 90%;
         }
 
         h1, h2, h3 {
-            color: #ffffff; /* White headings */
+            color: #ffffff;
             font-weight: 700;
-            margin-top: 1.5em;
-            margin-bottom: 0.5em;
+            line-height: 1.3;
         }
 
         h1 {
-            font-size: 2.25rem;
-            border-bottom: 2px solid #374151;
-            padding-bottom: 0.5rem;
+            font-size: 2.5rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1.5rem;
+            margin-top: 0;
+            margin-bottom: 2rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
 
         h2 {
-            font-size: 1.5rem;
+            font-size: 1.75rem;
+            color: var(--accent-color);
+            margin-top: 3.5rem; /* Large space before new sections */
+            margin-bottom: 1.5rem;
         }
 
         h3 {
             font-size: 1.25rem;
-            color: #9ca3af; /* Muted subheading */
+            color: #ffffff;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
         }
 
         p {
-            margin-bottom: 1.25rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            font-size: 1.05rem;
         }
 
         a {
-            color: #60a5fa; /* Accent blue */
+            color: var(--accent-color);
             text-decoration: none;
+            transition: color 0.2s, text-shadow 0.2s;
         }
 
         a:hover {
+            color: #79c0ff;
             text-decoration: underline;
+            text-shadow: var(--accent-glow);
         }
 
         ul {
             padding-left: 1.5rem;
-            margin-bottom: 1.25rem;
+            margin-bottom: 2rem;
+            color: var(--text-primary);
         }
 
         li {
-            margin-bottom: 0.5rem;
+            margin-bottom: 1rem; /* More space between list items */
+            list-style-type: disc;
+            padding-left: 0.5rem;
+        }
+        
+        li::marker {
+            color: var(--accent-color);
+        }
+
+        strong {
+            color: #ffffff;
+            font-weight: 600;
         }
 
         code {
-            background-color: #374151;
+            background-color: rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
             padding: 0.2rem 0.4rem;
-            border-radius: 4px;
+            border-radius: 6px;
             font-size: 0.9em;
-            font-family: monospace;
+            font-family: 'Fira Code', monospace;
+            color: var(--accent-color);
         }
 
         .nav-link {
-            display: inline-block;
-            margin-bottom: 1rem; /* Reduced space from 2rem */
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 3rem;
             font-weight: 600;
+            padding: 0.75rem 1.25rem;
+            border-radius: 12px;
+            background-color: rgba(255,255,255,0.05);
+            border: 1px solid var(--border-color);
+            transition: all 0.2s;
+            color: var(--text-primary);
+        }
+
+        .nav-link:hover {
+            background-color: rgba(255,255,255,0.1);
+            border-color: var(--accent-color);
+            text-decoration: none;
+            box-shadow: var(--accent-glow);
+            color: #ffffff;
+        }
+
+        /* Footer matching main site */
+        footer {
+            margin-top: auto;
+            text-align: center;
+            padding: 3rem 0;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        /* Background overlay similar to dashboard */
+        #bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.5);
+            z-index: -1;
+        }
+
+        @media (max-width: 640px) {
+            .glass-card {
+                padding: 2rem;
+                width: 95%;
+                border-radius: 16px;
+                margin: 2rem auto;
+            }
+            h1 {
+                font-size: 1.75rem;
+            }
+            h2 {
+                font-size: 1.4rem;
+                margin-top: 2.5rem;
+            }
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <a href="index.html" class="nav-link">&larr; Back to StudyLocus</a>
+    <div id="bg-overlay"></div>
+
+    <div class="glass-card">
+        <a href="https://sval.tech/studylocus/" class="nav-link">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+            Back to Dashboard
+        </a>
         
-        <h1>Privacy Policy for StudyLocus</h1>
-        <p><strong>Effective Date:</strong> November 7, 2025</p>
+        <h1>Privacy Policy</h1>
+        <p class="text-sm" style="color: var(--text-secondary); margin-top: -1.5rem; margin-bottom: 3rem;">Effective Date: November 7, 2025</p>
 
         <h2>1. Introduction</h2>
         <p>
@@ -120,7 +229,7 @@
                 <strong>Usage Data (Analytics):</strong> We use Google Analytics to collect information about how you interact with our Service. This may include your IP address (often anonymized), browser type, device type, pages visited, and the time and date of your visits. We use this data to understand how our Service is being used and to make improvements.
             </li>
             <li>
-                <strong>Local Storage Data:</strong> The app uses your browser's `localStorage` to save a copy of your data (like your card layout and content) directly on your device. This allows the app to load quickly and work offline. This data is not sent to us unless you are signed in, at which point it is synced with your secure cloud account.
+                <strong>Local Storage Data:</strong> The app uses your browser's <code>localStorage</code> to save a copy of your data (like your card layout and content) directly on your device. This allows the app to load quickly and work offline. This data is not sent to us unless you are signed in, at which point it is synced with your secure cloud account.
             </li>
         </ul>
 
@@ -131,10 +240,10 @@
                 <strong>We Do Not Access Your Content:</strong> Your personal data (tasks, notes, test scores, logs) is your own. We do not access, view, or analyze this content for any purpose. All data storage and syncing is automated and is not monitored by us.
             </li>
             <li>
-                <strong>To Provide and Sync Your Service:</strong> The *only* use of your personal data is to securely store it in your private cloud account (Firebase Firestore) and automatically sync it across any devices where you are logged in.
+                <strong>To Provide and Sync Your Service:</strong> The <em>only</em> use of your personal data is to securely store it in your private cloud account (Firebase Firestore) and automatically sync it across any devices where you are logged in.
             </li>
             <li>
-                <strong>To Personalize Your Experience:</strong> We use your saved settings (`settings`) to customize the app's theme, font, and layout to your preferences.
+                <strong>To Personalize Your Experience:</strong> We use your saved settings (<code>settings</code>) to customize the app's theme, font, and layout to your preferences.
             </li>
             <li>
                 <strong>To Maintain and Improve Our Service:</strong> We use anonymous Google Analytics data to identify bugs, understand user behavior, and improve the app's features and performance.
@@ -162,7 +271,7 @@
             Your user-generated content and account information are stored securely on Google's Firebase Firestore servers. We rely on the robust security measures provided by Google to protect your data.
         </p>
         <p>
-            Data stored in your browser's `localStorage` is only as secure as the device and browser you are using.
+            Data stored in your browser's <code>localStorage</code> is only as secure as the device and browser you are using.
         </p>
         <p>
             While we and our service providers take reasonable measures to protect your information, no method of transmission over the Internet or method of electronic storage is 100% secure.
@@ -213,11 +322,15 @@
             If you have any questions about this Privacy Policy or wish to make a data deletion request, please contact the project maintainer, Shaurya Pratap Singh, at:
         </p>
         <ul>
-            <li><strong>Email:</strong> shaurya.p.singh21@gmail.com</li>
+            <li><strong>Email:</strong> <a href="mailto:shaurya.p.singh21@gmail.com">shaurya.p.singh21@gmail.com</a></li>
             <li><strong>GitHub Project:</strong> <a href="https://github.com/svalordev" target="_blank" rel="noopener noreferrer">https://github.com/svalordev</a></li>
         </ul>
 
     </div>
+
+    <footer>
+        <p>© Shaurya Pratap Singh 2025 | StudyLocus</p>
+    </footer>
 
 </body>
 </html>
