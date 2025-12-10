@@ -592,6 +592,7 @@ select.form-input option {
                          <select id="exam-year-select" class="form-input rounded-md p-2 w-full">
                              <option value="2026">2026</option>
                              <option value="2027">2027</option>
+                             <option value="2028">2028</option>
                          </select>
                      </div>
                  </div>
@@ -842,8 +843,8 @@ select.form-input option {
             * Default target exam dates.
             */
             const EXAM_DATES = {
-                JEE: { 2026: new Date("2026-01-21T00:00:00"), 2027: new Date("2027-01-21T00:00:00") },
-                NEET: { 2026: new Date("2026-05-03T00:00:00"), 2027: new Date("2027-05-02T00:00:00") },
+                JEE: { 2026: new Date("2026-01-21T00:00:00"), 2027: new Date("2027-01-21T00:00:00"), 2028: new Date("2028-01-21T00:00:00") },
+                NEET: { 2026: new Date("2026-05-03T00:00:00"), 2027: new Date("2027-05-02T00:00:00"), 2028: new Date("2028-05-02T00:00:00") },
             };
 
             // Load initial state from localStorage
