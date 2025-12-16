@@ -72,9 +72,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 type: "todo",
                 title: "My Tasks",
                 content: [
-                    { text: "Solve 20 Physics problems", completed: false },
+                    { text: "Solve 20 Electrostatics problems", completed: false },
                     { text: "Revise Organic Chemistry", completed: true },
-                    { text: "Take a short break!", completed: false },
+                    
                 ],
             },
             {
@@ -82,9 +82,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 type: "line-graph",
                 title: "Mock Test Progress",
                 content: [
-                    { name: "Test 1", marks: 120, maxMarks: 300 },
-                    { name: "Test 2", marks: 145, maxMarks: 300 },
-                    { name: "Test 3", marks: 160, maxMarks: 300 },
+                    { name: "Test 1", marks: 120, subjects: {chemistry: 40, physics: 60, maths: 20}, maxMarks: 300 },
+                    { name: "Test 2", marks: 145, subjects: {chemistry: 50, physics: 70, maths: 25}, maxMarks: 300 },
+                    { name: "Test 3", marks: 160, subjects: {chemistry: 50, physics: 80, maths: 30}, maxMarks: 300 },
                 ],
             },
             {
@@ -92,7 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 type: "note",
                 title: "Welcome!",
                 content:
-                    "Welcome to your new dashboard! You can drag, resize, and delete these cards. Add your own from the top right. Best of luck in your journey!",
+                    "Welcome to your new dashboard! You can drag, resize, and delete these cards. Add your own from the top right customise button. Best of luck in your journey! You can delete this card now.",
             },
             { id: "default-study-logger", type: "time-logger", title: "Study Log", content: [] },
         ],
