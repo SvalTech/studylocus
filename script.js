@@ -334,7 +334,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // User is signed in
             const userMenuHTML = `
                             <div class="relative" id="user-menu-container">
-                                <button id="user-menu-button" title="User Menu" class="flex items-center justify-center w-10 h-10 rounded-full transition-colors hover:bg-white/20 sm:w-auto sm:h-auto sm:px-2 sm:py-1">
+                                <button id="user-menu-button" title="User Menu" class="flex items-center justify-center w-10 h-10 rounded-full transition-colors hover:bg-white/20 ">
                                     <img src="${currentUser.photoURL}" alt="${currentUser.displayName}" class="w-8 h-8 rounded-full pointer-events-none" />
                                     <!-- <span class="text-sm font-semibold hidden sm:inline ml-2 pointer-events-none">${currentUser.displayName.split(" ")[0]}</span> -->
                                 </button>
