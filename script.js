@@ -1296,7 +1296,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const subTheme = ["cyberpunk", "god-mode"].includes(appState.settings.theme) ? appState.settings.theme : "";
         document.documentElement.dataset.subTheme = subTheme;
         // Apply riced mode
-        document.documentElement.dataset.ricedMode = appState.settings.ricedModeEnabled ? "true" : "false";
+        document.documentElement.dataset.ricedMode = "false";
         // Apply font
         domElements.body.style.fontFamily = appState.settings.font;
         // Apply background
@@ -1322,7 +1322,7 @@ document.addEventListener("DOMContentLoaded", () => {
         domElements.inputs.examType.value = appState.settings.examType;
         domElements.inputs.examYear.value = appState.settings.examYear;
         domElements.inputs.focusShieldToggle.checked = appState.settings.focusShieldEnabled;
-        domElements.inputs.ricedModeToggle.checked = appState.settings.ricedModeEnabled;
+        // domElements.inputs.ricedModeToggle.checked = "false";
 
         updateYouTubeCardStyles();
     }
@@ -1864,12 +1864,12 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // --- Riced Mode ---
-    domElements.inputs.ricedModeToggle.addEventListener("change", () => {
-        appState.settings.ricedModeEnabled = domElements.inputs.ricedModeToggle.checked;
-        appState.saveSettings();
-        applySettings();
-    });
+    // // --- Riced Mode ---
+    // domElements.inputs.ricedModeToggle.addEventListener("change", () => {
+    //     appState.settings.ricedModeEnabled = false;
+    //     appState.saveSettings();
+    //     applySettings();
+    // });
 
     // --- Data Management (Reset, Export, Import) ---
     domElements.buttons.resetDashboard.addEventListener("click", () => {
