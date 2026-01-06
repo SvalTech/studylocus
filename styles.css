@@ -605,9 +605,9 @@ body {
     border-radius: 16px;
     /* Increased Corner Radius */
     padding: 1.25rem;
-    backdrop-filter: blur(20px);
+    backdrop-filter: blur(40px);
     /* Increased Blur */
-    -webkit-backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(40px);
     /* Increased Blur */
     box-shadow: var(--card-shadow)
 }
