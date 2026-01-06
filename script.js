@@ -72,8 +72,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 type: "todo",
                 title: "My Tasks",
                 content: [
-                    { text: "Solve 20 Electrostatics problems", completed: false },
-                    { text: "Revise Organic Chemistry", completed: true },
+                    
                     
                 ],
             },
