@@ -32,6 +32,7 @@ const db = firebase.firestore();
 // --- Global State ---
 let currentUser = null;
 let syncTimeout = null;
+let unsubscribeFirestore = null;
 // --- DOM Ready Event Listener ---
 document.addEventListener("DOMContentLoaded", () => {
     /**
@@ -409,6 +410,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     */
     const signOutUser = () => {
+        if (unsubscribeFirestore) {
+        unsubscribeFirestore(); // Stop listening to the database
+        unsubscribeFirestore = null;
+    }
+    
+        // Clear local app state to prevent the next user from seeing old data briefly
+        // (Optional but recommended)
+        domElements.dashboardGrid.innerHTML = "";
         sessionStorage.removeItem("cloud_data_loaded"); // Force cloud reload on next login
         auth.signOut();
     };
@@ -571,12 +580,17 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!userDoc.exists) {
             // 2. NEW USER: This part is fine. Migrate local data to the cloud ONCE.
             console.log("New user detected. Migrating local data to cloud...");
-            migrateLocalDataToCloud(userDocRef); // Your existing function is good for this
+            await migrateLocalDataToCloud(userDocRef); // Your existing function is good for this
+        }
+
+
+        if (unsubscribeFirestore) {
+            unsubscribeFirestore();
         }
         // 3. (THE BIG CHANGE)
         // Attach a REAL-TIME LISTENER to the user's document.
         // This will replace your 'mergeCloudDataWithLocal' and the awful page reload.
-        userDocRef.onSnapshot(
+        unsubscribeFirestore = userDocRef.onSnapshot(
             (doc) => {
                 console.log("Received cloud data snapshot...");
                 const cloudData = doc.data();
@@ -996,66 +1010,92 @@ function sanitizeDashboardState() {
             render: (cardElement, cardData) => {
                 const marksListEl = cardElement.querySelector(".marks-list");
                 marksListEl.innerHTML = "";
-                // 1. Calculate Statistics
+                
+                // 1. Calculate Statistics & Render List
                 let totalScoreSum = 0;
                 let count = 0;
+                
                 cardData.content.forEach((entry, index) => {
                     const currentTotal = entry.total ?? entry.marks;
                     totalScoreSum += currentTotal;
                     count++;
+
+                    // --- NEW LOGIC: EXTRACT SUBJECT MARKS ---
+                    const s = entry.subjects || {};
+                    const phy = s.physics || 0;
+                    const chem = s.chemistry || 0;
+                    const math = s.maths || 0;
+                    // ----------------------------------------
+
                     const listItem = document.createElement("li");
-                    listItem.className = "flex justify-between items-center text-xs bg-gray-800/50 hover:bg-gray-800 p-1.5 rounded transition-colors";
+                    // Added 'items-start' to align content to top
+                    listItem.className = "flex justify-between items-start text-xs bg-gray-800/50 hover:bg-gray-800 p-1.5 rounded transition-colors mb-1"; 
+                    
+                    // Modified InnerHTML to include subject row
                     listItem.innerHTML = `
-
-                        <div class="flex-grow truncate">
-
-                            <span class="font-bold text-white">${entry.name}</span>
-
-                            <span class="text-secondary mx-1">|</span>
-
-                            <span class="${currentTotal >= (cardData.targetScore || 0) ? 'text-green-400' : 'text-yellow-400'}">${currentTotal}</span>
-
-                            <span class="text-gray-600 text-[10px]">/${entry.maxMarks}</span>
-
+                        <div class="flex-grow flex flex-col">
+                            <div class="flex items-center">
+                                <span class="font-bold text-white mr-2">${entry.name}</span>
+                                <span class="${currentTotal >= (cardData.targetScore || 0) ? 'text-green-400' : 'text-yellow-400'} font-bold">${currentTotal}</span>
+                                <span class="text-gray-600 text-[10px]">/${entry.maxMarks}</span>
+                            </div>
+                            
+                            <div class="flex gap-2 text-[10px] font-mono mt-0.5 opacity-80">
+                                <span class="text-blue-400" title="Physics">P: ${phy}</span>
+                                <span class="text-green-400" title="Chemistry">C: ${chem}</span>
+                                <span class="text-orange-400" title="Maths">M: ${math}</span>
+                            </div>
                         </div>
 
-                        <button data-index="${index}" class="delete-mark-item text-gray-500 hover:text-red-500 px-1 transition-colors" aria-label="Delete">×</button>`;
+                        <button data-index="${index}" class="delete-mark-item text-gray-500 hover:text-red-500 px-1 pt-1 transition-colors" aria-label="Delete">×</button>`;
+                    
                     marksListEl.appendChild(listItem);
                 });
+
                 // 2. Display Mean Score
                 const meanScore = count > 0 ? (totalScoreSum / count).toFixed(1) : 0;
                 cardElement.querySelector(".mean-score-display").textContent = meanScore;
+
                 // 3. Handle Target Score Input
                 const targetInput = cardElement.querySelector(".target-score-input");
                 targetInput.value = cardData.targetScore || "";
-                // Remove old listener to prevent duplicates (cloning usually handles this, but safety first)
+                
+                // Remove old listener and add new one
                 const newTargetInput = targetInput.cloneNode(true);
                 targetInput.parentNode.replaceChild(newTargetInput, targetInput);
+                
                 newTargetInput.addEventListener("change", (e) => {
                     const val = parseFloat(e.target.value);
                     cardData.targetScore = isNaN(val) ? 0 : val;
                     appState.save("customCards");
-                    // Re-render specifically this card to update graph
                     cardRenderers["line-graph"].render(cardElement, cardData);
                 });
-                // 4. Chart Setup
+
+                // 4. Chart Setup (Standard Chart.js logic)
                 const ctx = cardElement.querySelector(".marks-chart").getContext("2d");
+                
+                // Destroy old chart instance if exists
                 if (appState.chartInstances[cardData.id]) {
                     appState.chartInstances[cardData.id].destroy();
                 }
+
+                // Get styles for chart colors
                 const styles = getComputedStyle(document.documentElement);
                 const accentColor = styles.getPropertyValue("--accent-color").trim();
                 const textColorSecondary = styles.getPropertyValue("--text-secondary").trim();
                 const borderColor = styles.getPropertyValue("--border-color").trim();
+
                 const subjectColors = {
                     total: accentColor,
                     physics: "#3b82f6",
                     chemistry: "#10b981",
                     maths: "#f97316",
                 };
+
+                // Create Datasets
                 const datasets = ["total", "physics", "chemistry", "maths"].map((subject) => ({
                     label: subject.charAt(0).toUpperCase() + subject.slice(1),
-                    data: cardData.content.map((entry) => subject === "total" ? (entry.total ?? entry.marks) : entry.subjects ? entry.subjects[subject] : null),
+                    data: cardData.content.map((entry) => subject === "total" ? (entry.total ?? entry.marks) : (entry.subjects ? entry.subjects[subject] : 0)),
                     borderColor: subjectColors[subject],
                     backgroundColor: `${subjectColors[subject]}20`,
                     fill: true,
@@ -1064,20 +1104,24 @@ function sanitizeDashboardState() {
                     borderWidth: 2,
                     hidden: subject !== "total",
                 }));
-                // 5. Add Target Line Dataset
+
+                // Add Target Line
                 if (cardData.targetScore && cardData.targetScore > 0) {
                     datasets.push({
                         label: "Target",
                         data: new Array(cardData.content.length).fill(cardData.targetScore),
-                        borderColor: "#ef4444", // Red color
-                        borderDash: [6, 6], // Dotted line
+                        borderColor: "#ef4444",
+                        borderDash: [6, 6],
                         pointRadius: 0,
                         borderWidth: 1,
                         fill: false,
-                        order: 0 // Draw on top
+                        order: 0
                     });
                 }
+
+                // Determine Max Y Axis
                 const maxY = cardData.content.length > 0 ? Math.max(...cardData.content.map((entry) => entry.maxMarks || 300)) : 300;
+
                 const chartInstance = new Chart(ctx, {
                     type: "line",
                     data: {
@@ -1092,17 +1136,11 @@ function sanitizeDashboardState() {
                             intersect: false,
                         },
                         plugins: {
-                            legend: {
-                                display: false
-                            },
+                            legend: { display: false },
                             tooltip: {
-                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                                titleFont: {
-                                    size: 11
-                                },
-                                bodyFont: {
-                                    size: 11
-                                },
+                                backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                                titleFont: { size: 11 },
+                                bodyFont: { size: 11 },
                                 padding: 8,
                                 displayColors: true
                             }
@@ -1110,52 +1148,41 @@ function sanitizeDashboardState() {
                         scales: {
                             y: {
                                 beginAtZero: true,
-                                max: maxY, // Dynamic max based on input
-                                ticks: {
-                                    color: textColorSecondary,
-                                    font: {
-                                        size: 10
-                                    }
-                                },
-                                grid: {
-                                    color: borderColor
-                                },
+                                max: maxY,
+                                ticks: { color: textColorSecondary, font: { size: 10 } },
+                                grid: { color: borderColor },
                             },
                             x: {
-                                ticks: {
-                                    color: textColorSecondary,
-                                    font: {
-                                        size: 10
-                                    }
-                                },
-                                grid: {
-                                    display: false
-                                },
+                                ticks: { color: textColorSecondary, font: { size: 10 } },
+                                grid: { display: false },
                             },
                         },
                     },
                 });
+
                 appState.chartInstances[cardData.id] = chartInstance;
-                // Handle Toggles
+
+                // 5. Handle Toggles (Same as before)
                 const togglesContainer = cardElement.querySelector(".chart-toggles");
-                // Clear existing listeners by cloning
                 const newTogglesContainer = togglesContainer.cloneNode(true);
                 togglesContainer.parentNode.replaceChild(newTogglesContainer, togglesContainer);
+
                 newTogglesContainer.addEventListener("click", (event) => {
                     if (event.target.tagName === "BUTTON") {
                         const subject = event.target.dataset.subject;
-                        const datasetIndex = chartInstance.data.datasets.findIndex(
-                            (d) => d.label.toLowerCase() === subject);
+                        const datasetIndex = chartInstance.data.datasets.findIndex((d) => d.label.toLowerCase() === subject);
+                        
                         if (datasetIndex > -1) {
                             const meta = chartInstance.getDatasetMeta(datasetIndex);
                             meta.hidden = meta.hidden === null ? !chartInstance.data.datasets[datasetIndex].hidden : null;
                             chartInstance.update();
-                            // Update button styles
+
+                            // Update buttons visually
                             newTogglesContainer.querySelectorAll("button").forEach((btn) => {
                                 const btnSubject = btn.dataset.subject;
-                                const dsIndex = chartInstance.data.datasets.findIndex(
-                                    (d) => d.label.toLowerCase() === btnSubject);
+                                const dsIndex = chartInstance.data.datasets.findIndex((d) => d.label.toLowerCase() === btnSubject);
                                 const isHidden = chartInstance.getDatasetMeta(dsIndex).hidden;
+                                
                                 if (isHidden || (isHidden === null && chartInstance.data.datasets[dsIndex].hidden)) {
                                     btn.style.backgroundColor = "transparent";
                                     btn.style.borderColor = "#4b5563";
@@ -1169,10 +1196,10 @@ function sanitizeDashboardState() {
                         }
                     }
                 });
-                // Initialize toggle button state visually
+
+                // Init buttons state
                 newTogglesContainer.querySelectorAll("button").forEach((btn) => {
                     const btnSubject = btn.dataset.subject;
-                    // Physics/Chem/Math are hidden by default in dataset config, Total is visible
                     if (btnSubject !== 'total') {
                         btn.style.backgroundColor = "transparent";
                         btn.style.borderColor = "#4b5563";
@@ -2362,29 +2389,40 @@ function sanitizeDashboardState() {
         reader.onload = (e) => {
             try {
                 const importedData = JSON.parse(e.target.result);
-                // Basic validation
-                if (!["layout", "customCards", "settings"].every((key) => key in importedData)) {
-                    console.error("Import failed: The JSON file appears to be invalid or is not a valid dashboard backup.");
+
+                // Validation
+                if (!importedData.layout || !importedData.customCards) {
+                    alert("Invalid backup file.");
                     return;
                 }
-                showConfirmModal("This will overwrite your current dashboard configuration.",
-                    () => {
-                        localStorage.clear();
-                        for (const key in importedData) {
-                            if (key in LOCAL_STORAGE_KEYS) {
-                                const storageKey = LOCAL_STORAGE_KEYS[key];
-                                const value = importedData[key];
-                                if (value != null) {
-                                    localStorage.setItem(storageKey, JSON.stringify(value));
-                                }
-                            }
+
+                showConfirmModal("This will overwrite your dashboard.", () => {
+                    // 1. Update State & LocalStorage
+                    for (const key in LOCAL_STORAGE_KEYS) {
+                        if (importedData[key]) {
+                            appState[key] = importedData[key];
+                            localStorage.setItem(LOCAL_STORAGE_KEYS[key], JSON.stringify(importedData[key]));
                         }
-                        location.reload();
-                    }, "Import Data?");
+                    }
+
+                    // 2. Sanitize
+                    sanitizeDashboardState();
+
+                    // 3. Force Cloud Save (User is logged in, so update cloud to match import)
+                    if (currentUser) {
+                        debouncedSaveAllToFirestore();
+                    }
+
+                    // 4. Update UI (NO RELOAD)
+                    applySettings();
+                    renderDashboard();
+                    showSyncStatus("Import Successful");
+                }, "Import Data?");
             } catch (error) {
-                console.error("Error importing data:", error);
+                console.error(error);
+                alert("Error reading file.");
             } finally {
-                domElements.inputs.importFile.value = ""; // Reset file input
+                domElements.inputs.importFile.value = "";
             }
         };
         reader.readAsText(file);
