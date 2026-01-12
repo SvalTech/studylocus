@@ -654,7 +654,11 @@ body {
     align-items: center;
     gap: .25rem
 }
-
+@media screen and (max-width: 768px) {
+    input, select, textarea {
+        font-size: 16px !important; /* Prevents auto-zoom on iOS */
+    }
+}
 .card-header-controls button {
     color: var(--text-secondary);
     padding: .25rem;
@@ -1311,4 +1315,29 @@ body.zen-mode .card-header {
     .toggle-colspan-btn {
         display: none !important;
     }
+}
+
+/* --- Fix for iOS Date Inputs --- */
+input[type="date"] {
+    /* 1. Remove the default iOS glossy styling */
+    -webkit-appearance: none;
+    appearance: none;
+    
+    /* 2. Fix invisible text issue */
+    background-color: rgba(31, 41, 55, 1); /* Matches bg-gray-800 */
+    color: white;
+    
+    /* 3. Ensure proper height/padding on touch screens */
+    min-height: 40px; 
+    padding: 0.5rem;
+    border-radius: 0.375rem; /* Matches rounded-md */
+    
+    /* 4. Force the native iOS picker wheel to be Dark Mode */
+    color-scheme: dark; 
+}
+
+/* Fix specific alignment of the date text inside the box */
+input[type="date"]::-webkit-date-and-time-value {
+    text-align: left;
+    min-height: 1.5em; /* Prevents text from being cut off */
 }
