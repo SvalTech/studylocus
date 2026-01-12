@@ -441,10 +441,10 @@ document.addEventListener("DOMContentLoaded", () => {
             migrateLocalDataToCloud(userDocRef); // Your existing function is good for this
         }
 
+        // 3. (THE BIG CHANGE)
+        // Attach a REAL-TIME LISTENER to the user's document.
+        // This will replace your 'mergeCloudDataWithLocal' and the awful page reload.
         userDocRef.onSnapshot(
-            // vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-            { includeMetadataChanges: true }, // <--- ADD THIS LINE HERE
-            // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
             (doc) => {
                 console.log("Received cloud data snapshot...");
                 const cloudData = doc.data();
@@ -453,35 +453,32 @@ document.addEventListener("DOMContentLoaded", () => {
                     let isStateUpdated = false;
 
                     // 4. Merge cloud data into your local appState
+                    // (This is the "merge" without the page reload)
                     for (const key in LOCAL_STORAGE_KEYS) {
                         if (cloudData[key]) {
+                            // Check if data is actually different to avoid needless re-renders
                             const localString = JSON.stringify(appState[key]);
                             const cloudString = JSON.stringify(cloudData[key]);
 
-                            // Only update if the actual CONTENT is different
-                            // (We ignore it if it's just a metadata/status update)
                             if (localString !== cloudString) {
-                                // Double check: If we have pending writes, don't overwrite local changes with old cloud data!
-                                if (!doc.metadata.hasPendingWrites) { 
-                                     appState[key] = cloudData[key];
-                                     localStorage.setItem(LOCAL_STORAGE_KEYS[key], cloudString);
-                                     isStateUpdated = true;
-                                }
+                                appState[key] = cloudData[key];
+                                // Also update the localStorage cache for the next offline load
+                                localStorage.setItem(LOCAL_STORAGE_KEYS[key], cloudString);
+                                isStateUpdated = true;
                             }
                         }
                     }
 
-                    // 5. Re-render only if DATA changed
+                    // 5. If anything changed, just re-render the dashboard. NO RELOAD.
                     if (isStateUpdated) {
                         console.log("Cloud data merged. Re-rendering dashboard...");
-                        applySettings();
-                        renderDashboard();
+                        applySettings(); // Apply new settings
+                        renderDashboard(); // Re-render cards
                     }
                 }
 
-                // 6. UPDATE SYNC STATUS
-                // Now that we have {includeMetadataChanges: true}, this will fire twice:
-                // Once for "Syncing..." (Local) and again for "All changes saved" (Server)
+                // 6. (BONUS) Use this to show a 100% accurate sync status!
+                // This replaces your manual showSyncStatus("All changes saved")
                 const status = doc.metadata.hasPendingWrites ? "Syncing..." : "All changes saved";
                 showSyncStatus(status);
             },
@@ -493,30 +490,19 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     /**
-     * Displays a sync status message (e.g., "Saving...", "All changes saved").
-     * @param {string} message The message to display.
-     */
+    * Displays a sync status message (e.g., "Saving...", "All changes saved").
+    * @param {string} message The message to display.
+    */
     const showSyncStatus = (message) => {
         const toast = domElements.syncStatusToast;
-
-        // 1. ALWAYS clear any pending timeout immediately.
-        // This prevents a previous "hide" command from cutting off a new message.
-        if (syncTimeout) {
-            clearTimeout(syncTimeout);
-            syncTimeout = null;
-        }
-
-        // 2. Update text and show the toast
         toast.textContent = message;
         toast.classList.add("show");
 
-        // 3. Only set a new timeout to hide if the state is "Finished" or "Error".
-        // If the state is "Saving..." or "Syncing...", we keep it visible indefinitely
-        // until a success message comes in to replace it.
         if (message !== "Saving..." && message !== "Syncing...") {
+            clearTimeout(syncTimeout);
             syncTimeout = setTimeout(() => {
                 toast.classList.remove("show");
-            }, 3000); // Increased to 3s for better readability
+            }, 2000);
         }
     };
 
