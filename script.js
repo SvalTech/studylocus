@@ -1298,11 +1298,16 @@ document.addEventListener("DOMContentLoaded", () => {
     * Re-renders the entire dashboard grid based on the current `appState`.
     */
     function renderDashboard() {
+        // --- FIX: Remove duplicates from layout immediately ---
+        // This ensures that even if the database has ["A", "A"], we only render "A" once.
+        appState.layout = [...new Set(appState.layout)]; 
+        // -----------------------------------------------------
+
         // Destroy all existing chart instances to prevent memory leaks
         Object.values(appState.chartInstances).forEach((chart) => chart.destroy());
         appState.chartInstances = {};
 
-        domElements.dashboardGrid.innerHTML = ""; // Clear the grid
+        domElements.dashboardGrid.innerHTML = ""; //
 
         // Filter layout to remove IDs of deleted custom cards
         let layoutChanged = false;
