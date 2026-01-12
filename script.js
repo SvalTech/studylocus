@@ -519,8 +519,44 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Firestore save error:", error);
         });
     }, 2000); // 2-second debounce is plenty. 5 is too long.
+
+
+/**
+     * Helper function to migrate data from LocalStorage to Firestore
+     * for a first-time cloud user.
+     */
+    const migrateLocalDataToCloud = async (userDocRef) => {
+        const migrationData = {};
+        
+        // Loop through all defined keys and grab data from LocalStorage
+        for (const key in LOCAL_STORAGE_KEYS) {
+            const storageKey = LOCAL_STORAGE_KEYS[key];
+            const item = localStorage.getItem(storageKey);
+            if (item) {
+                try {
+                    migrationData[key] = JSON.parse(item);
+                } catch (e) {
+                    console.warn(`Failed to parse ${key} during migration.`);
+                }
+            }
+        }
+
+        // Write the gathered data to the new user's Firestore document
+        try {
+            await userDocRef.set(migrationData);
+            console.log("Local data successfully migrated to cloud.");
+            showSyncStatus("Data Migrated");
+        } catch (error) {
+            console.error("Error migrating data to cloud:", error);
+            showSyncStatus("Migration Failed");
+        }
+    };
+
     // --- Firestore Data Sync ---
     /**
+
+
+        
 
 * Loads user data from Firestore or migrates local data if new user.
 
