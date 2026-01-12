@@ -70,7 +70,12 @@
     gtag('config', 'G-TCK0S6VC58');
 </script>
 
-<body class="antialiased">
+<body class="antialiased relative min-h-screen">
+
+    <div id="app-background" class="fixed inset-0 w-full h-full -z-50 pointer-events-none">
+        </div>
+
+    <div id="bg-overlay" class="fixed inset-0 w-full h-full -z-40 pointer-events-none"></div>
     <!-- Riced Linux Header -->
     <header class="top-bar">
         <div class="top-bar-left">
@@ -473,7 +478,7 @@
                     <input type="text" placeholder="Add a new task..." class="form-input rounded-md p-2 w-full text-sm"
                         required>
                     <button type="submit"
-                        class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded-md text-sm"
+                        class=" btn-primary py-2 px-3 rounded-md text-sm"
                         aria-label="Add task">+</button>
                 </form>
             </div>
@@ -481,76 +486,50 @@
     </template>
 
     <template id="line-graph-card-template">
-        <div class="card custom-card" data-card-type="line-graph">
-
-            <div class="card-header">
-                <h2 class="text-lg font-semibold card-title">Graph</h2>
-                <div class="card-header-controls">
-                    <button class="toggle-colspan-btn" title="Toggle size" aria-label="Toggle card size"><svg
-                            xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 21l-6-6m6 6v-4m0 4h-4" />
-                            <path d="M3 3l6 6" />
-                            <path d="M3 3v4m0-4h4" />
-                        </svg></button>
-                    <button class="delete-card-btn" title="Delete card" aria-label="Delete card"><svg
-                            xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M3 6h18"></path>
-                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-                        </svg></button>
-                    <span class="drag-handle" aria-label="Drag to reorder"><svg xmlns="http://www.w3.org/2000/svg"
-                            width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="9" cy="12" r="1" />
-                            <circle cx="9" cy="5" r="1" />
-                            <circle cx="9" cy="19" r="1" />
-                            <circle cx="15" cy="12" r="1" />
-                            <circle cx="15" cy="5" r="1" />
-                            <circle cx="15" cy="19" r="1" />
-                        </svg></span>
-                </div>
-            </div>
-            <div class="card-content">
-                <div class="mb-2 h-64 relative">
-                    <canvas class="marks-chart"></canvas>
-                </div>
-
-                <!-- ▼▼▼ ADD THIS NEW DIV FOR TOGGLE BUTTONS ▼▼▼ -->
-                <div class="chart-toggles flex justify-center gap-2 mb-4">
-                    <button data-subject="total" class="text-sm px-3 py-1 rounded-md border active"
-                        style="border-color: var(--accent-color); background-color: var(--accent-color); color: white;">Total</button>
-                    <button data-subject="physics"
-                        class="text-sm px-3 py-1 rounded-md border border-gray-600">Physics</button>
-                    <button data-subject="chemistry"
-                        class="text-sm px-3 py-1 rounded-md border border-gray-600">Chemistry</button>
-                    <button data-subject="maths"
-                        class="text-sm px-3 py-1 rounded-md border border-gray-600">Maths/Bio</button>
-                </div>
-                <!-- ▲▲▲ END OF NEW DIV ▲▲▲ -->
-
-                <!-- ▼▼▼ REPLACE THE OLD FORM WITH THIS NEW ONE ▼▼▼ -->
-                <form class="add-marks-form grid grid-cols-2 gap-2 mb-3">
-                    <input type="text" name="name" placeholder="Paper Name"
-                        class="form-input rounded-md p-2 text-sm col-span-2" required>
-                    <input type="number" name="phy" placeholder="Phy" class="form-input rounded-md p-2 text-sm w-full"
-                        required>
-                    <input type="number" name="chem" placeholder="Chem" class="form-input rounded-md p-2 text-sm w-full"
-                        required>
-                    <input type="number" name="math" placeholder="Math/Bio"
-                        class="form-input rounded-md p-2 text-sm w-full" required>
-                    <input type="number" name="maxMarks" placeholder="Max Marks"
-                        class="form-input rounded-md p-2 text-sm w-full" required>
-                    <button type="submit" class="btn-primary font-bold py-2 px-3 rounded-md text-sm col-span-2"
-                        aria-label="Add mark entry">Add Entry</button>
-                </form>
-                <!-- ▲▲▲ END OF NEW FORM ▲▲▲ -->
-
-                <ul class="marks-list space-y-1 max-h-24 overflow-y-auto no-scrollbar"></ul>
+    <div class="card custom-card" data-card-type="line-graph">
+        <div class="card-header pb-2">
+            <h2 class="text-lg font-semibold card-title">Graph</h2>
+            <div class="card-header-controls">
+                <button class="toggle-colspan-btn" title="Toggle size"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m6 6v-4m0 4h-4"/><path d="M3 3l6 6"/><path d="M3 3v4m0-4h4"/></svg></button>
+                <button class="delete-card-btn" title="Delete card"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></button>
+                <span class="drag-handle"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
             </div>
         </div>
-    </template>
+        <div class="card-content">
+            <div class="flex justify-between items-center mb-2 px-1 text-xs">
+                <div class="font-mono text-secondary">
+                    Avg: <span class="mean-score-display text-white font-bold">0</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <label class="text-secondary">Target:</label>
+                    <input type="number" class="target-score-input bg-gray-800 border border-gray-700 rounded px-1 w-16 text-right focus:outline-none focus:border-blue-500 transition-colors" placeholder="0">
+                </div>
+            </div>
+
+            <div class="mb-3 h-48 relative">
+                <canvas class="marks-chart"></canvas>
+            </div>
+
+            <div class="chart-toggles flex justify-center gap-1 mb-3">
+                <button data-subject="total" class="text-xs px-2 py-0.5 rounded border active transition-colors" style="border-color: var(--accent-color); background-color: var(--accent-color); color: white;">Total</button>
+                <button data-subject="physics" class="text-xs px-2 py-0.5 rounded border border-gray-600 text-secondary hover:text-white transition-colors">Phy</button>
+                <button data-subject="chemistry" class="text-xs px-2 py-0.5 rounded border border-gray-600 text-secondary hover:text-white transition-colors">Chem</button>
+                <button data-subject="maths" class="text-xs px-2 py-0.5 rounded border border-gray-600 text-secondary hover:text-white transition-colors">Math/Bio</button>
+            </div>
+
+            <form class="add-marks-form grid grid-cols-4 gap-2 mb-3">
+                <input type="text" name="name" placeholder="Test Name" class="form-input rounded p-1.5 text-xs col-span-4" required>
+                <input type="number" name="phy" placeholder="P" class="form-input rounded p-1.5 text-xs text-center" required>
+                <input type="number" name="chem" placeholder="C" class="form-input rounded p-1.5 text-xs text-center" required>
+                <input type="number" name="math" placeholder="M/B" class="form-input rounded p-1.5 text-xs text-center" required>
+                <input type="number" name="maxMarks" placeholder="Max" class="form-input rounded p-1.5 text-xs text-center" required>
+                <button type="submit" class="btn-primary font-bold py-1 rounded text-xs col-span-4">Add Entry</button>
+            </form>
+
+            <ul class="marks-list space-y-1 max-h-20 overflow-y-auto no-scrollbar"></ul>
+        </div>
+    </div>
+</template>
 
     <template id="pomodoro-card-template">
         <div class="card custom-card" data-card-type="pomodoro">
@@ -674,66 +653,58 @@
             <div class="card-header">
                 <h2 class="text-lg font-semibold card-title">Study Logger</h2>
                 <div class="card-header-controls">
-                    <button class="pip-btn" title="Show in floating window" aria-label="Show in floating window">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path
-                                d="M12.75 4.75h-8.5a2 2 0 0 0-2 2v8.5a2 2 0 0 0 2 2h8.5a2 2 0 0 0 2-2v-8.5a2 2 0 0 0-2-2Z" />
-                            <path d="M19.25 8.75h-8.5a2 2 0 0 1-2-2v-2.5" />
-                            <path d="M17.5 15.5V14" />
-                            <path d="m15 12 5 5" />
-                        </svg>
+                    <button class="pip-btn" title="Show in floating window">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.75 4.75h-8.5a2 2 0 0 0-2 2v8.5a2 2 0 0 0 2 2h8.5a2 2 0 0 0 2-2v-8.5a2 2 0 0 0-2-2Z" /><path d="M19.25 8.75h-8.5a2 2 0 0 1-2-2v-2.5" /><path d="M17.5 15.5V14" /><path d="m15 12 5 5" /></svg>
                     </button>
-
-                    <button class="toggle-colspan-btn" title="Toggle size" aria-label="Toggle card size"><svg
-                            xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 21l-6-6m6 6v-4m0 4h-4" />
-                            <path d="M3 3l6 6" />
-                            <path d="M3 3v4m0-4h4" />
-                        </svg></button>
-                    <button class="delete-card-btn" title="Delete card" aria-label="Delete card"><svg
-                            xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M3 6h18"></path>
-                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-                        </svg></button>
-                    <span class="drag-handle" aria-label="Drag to reorder"><svg xmlns="http://www.w3.org/2000/svg"
-                            width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="9" cy="12" r="1" />
-                            <circle cx="9" cy="5" r="1" />
-                            <circle cx="9" cy="19" r="1" />
-                            <circle cx="15" cy="12" r="1" />
-                            <circle cx="15" cy="5" r="1" />
-                            <circle cx="15" cy="19" r="1" />
-                        </svg></span>
+                    <button class="toggle-colspan-btn" title="Toggle size">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m6 6v-4m0 4h-4" /><path d="M3 3l6 6" /><path d="M3 3v4m0-4h4" /></svg>
+                    </button>
+                    <button class="delete-card-btn" title="Delete card">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                    </button>
+                    <span class="drag-handle">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+                    </span>
                 </div>
             </div>
             <div class="card-content text-center">
                 <div class="timer-display text-5xl font-bold my-4 tabular-nums">00:00:00</div>
                 <div class="focus-status text-xs text-yellow-400 mb-2 h-4"></div>
+                
                 <div class="flex flex-col sm:flex-row gap-2 mb-4 items-center justify-center">
-                    <label for="subject-select" class="text-sm text-secondary sr-only sm:not-sr-only">Subject:</label>
-                    <select id="subject-select" class="subject-select form-input rounded-md p-2 text-sm flex-grow">
-                    </select>
+                    <label class="text-sm text-secondary sr-only sm:not-sr-only">Subject:</label>
+                    <select class="subject-select form-input rounded-md p-2 text-sm flex-grow"></select>
                 </div>
+
                 <div class="flex justify-center gap-4">
                     <button class="start-pause-btn btn-primary font-bold py-2 px-8 text-lg rounded-md">START</button>
-                    <button
-                        class="log-btn bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-md">LOG</button>
+                    <button class="log-btn btn-primary font-bold py-2 px-8 text-lg rounded-md">LOG</button>
                     <button class="reset-btn text-secondary hover:text-primary">Reset</button>
                 </div>
+                
                 <p class="log-message text-red-500 text-xs mt-2 h-4"></p>
                 <div class="w-full border-t border-[var(--border-color)] my-3"></div>
+                
                 <div class="flex justify-between items-center mb-2">
                     <h3 class="text-md font-semibold text-left">Today's Log</h3>
                     <span class="total-study-time text-sm font-bold text-secondary"></span>
                 </div>
-                <ul class="study-log-list space-y-2 max-h-32 overflow-y-auto no-scrollbar text-left text-sm">
-                </ul>
-            </div>
+                
+                <ul class="study-log-list space-y-2 max-h-32 overflow-y-auto no-scrollbar text-left text-sm"></ul>
+
+                <div class="manual-entry-container mt-4 pt-2 border-t border-gray-700/50">
+                    <button class="toggle-manual-form text-xs text-secondary hover:text-white flex items-center gap-1 mx-auto transition-colors">
+                        <span>+ Add Manual Entry</span>
+                    </button>
+                    <form class="manual-log-form hidden flex flex-col gap-2 mt-2">
+                        <div class="flex gap-2">
+                            <select class="manual-subject-select form-input rounded p-1.5 text-xs bg-gray-800 flex-grow" required></select>
+                            <input type="number" name="minutes" placeholder="Mins" class="form-input rounded p-1.5 text-xs w-16 bg-gray-800 text-center" min="1" required>
+                            <button type="submit" class="btn-primary text-xs px-3 py-1 rounded font-bold">Add</button>
+                        </div>
+                    </form>
+                </div>
+                </div>
         </div>
     </template>
 
@@ -830,20 +801,35 @@
             <h2 class="text-xl font-semibold mb-4">Customize Dashboard</h2>
             <div class="space-y-4">
                 <div>
-                    <label for="exam-type-select" class="block text-sm font-medium text-secondary mb-1">Target
-                        Exam</label>
+                <label for="exam-type-select" class="block text-sm font-medium text-secondary mb-1">Target Exam</label>
+                <div class="grid grid-cols-2 gap-2">
+                    <select id="exam-type-select" class="form-input rounded-md p-2 w-full">
+                        <option value="JEE">JEE Main</option>
+                        <option value="NEET">NEET</option>
+                    </select>
+                    <select id="exam-year-select" class="form-input rounded-md p-2 w-full">
+                        <option value="2026">2026</option>
+                        <option value="2027">2027</option>
+                        <option value="2028">2028</option>
+                    </select>
+                </div>
+
+                <div id="jee-details-container" class="mt-3 p-3 rounded-lg border border-dashed border-gray-700 bg-black/20 hidden">
                     <div class="grid grid-cols-2 gap-2">
-                        <select id="exam-type-select" class="form-input rounded-md p-2 w-full">
-                            <option value="JEE">JEE</option>
-                            <option value="NEET">NEET</option>
-                        </select>
-                        <label for="exam-year-select" class="sr-only">Exam Year</label>
-                        <select id="exam-year-select" class="form-input rounded-md p-2 w-full">
-                            <option value="2026">2026</option>
-                            <option value="2027">2027</option>
-                            <option value="2028">2028</option>
-                        </select>
+                        <div>
+                            <label class="block text-xs text-secondary mb-1">Session</label>
+                            <select id="jee-session-select" class="form-input rounded-md p-2 w-full text-sm">
+                                <option value="January">January</option>
+                                <option value="April">April</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-secondary mb-1">Shift Date (Optional)</label>
+                            <input type="date" id="jee-shift-input" class="form-input rounded-md p-2 w-full text-sm">
+                        </div>
                     </div>
+                    <p class="text-[10px] text-secondary mt-2 italic">Select specific exam date if announced, otherwise defaults will be used.</p>
+                </div>
                 </div>
                 <div>
                     <label for="theme-select" class="block text-sm font-medium text-secondary mb-1">Theme</label>
@@ -870,12 +856,15 @@
                     </select>
                 </div>
                 <div>
-                    <label for="bg-image-url" class="block text-sm font-medium text-secondary mb-1">Background Image
-                        URL</label>
+                    <label class="block text-sm font-medium text-secondary mb-2">Preset Wallpapers</label>
+                    
+                    <div class="grid grid-cols-4 gap-2 mb-4" id="preset-wallpaper-grid"></div>
+
+                    <label for="bg-image-url" class="block text-sm font-medium text-secondary mb-1">Or paste a custom URL</label>
                     <div class="flex gap-2">
                         <input type="text" id="bg-image-url"
-                            placeholder="Paste image URL (Ending with .jpg, .png, .webp, etc.)"
-                            class="form-input rounded-md p-2 w-full">
+                            placeholder="Paste image URL (.jpg, .png, .gif)"
+                            class="form-input rounded-md p-2 w-full text-xs">
                         <button id="remove-bg-btn"
                             class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-md"
                             aria-label="Remove background image">X</button>

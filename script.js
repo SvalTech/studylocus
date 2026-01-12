@@ -57,6 +57,14 @@ document.addEventListener("DOMContentLoaded", () => {
         NEET: { 2026: new Date("2026-05-03T00:00:00"), 2027: new Date("2027-05-02T00:00:00"), 2028: new Date("2028-05-02T00:00:00") },
     };
 
+    const EXAM_DEFAULTS = {
+        JEE: {
+            January: { 2026: "2026-01-21", 2027: "2027-01-21", 2028: "2028-01-21" },
+            April:   { 2026: "2026-04-05", 2027: "2027-04-05", 2028: "2028-04-05" }
+        },
+        NEET: { 2026: "2026-05-03", 2027: "2027-05-02", 2028: "2028-05-07" }
+    };
+
     // Load initial state from localStorage
     const parsedSettings = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEYS.settings));
 
@@ -112,6 +120,8 @@ document.addEventListener("DOMContentLoaded", () => {
             bgUrl: "",
             examType: "JEE",
             examYear: "2026",
+            jeeSession: "January", 
+            jeeShiftDate: "",
             youtubeTintEnabled: true,
             youtubeBlurEnabled: false,
             focusShieldEnabled: false,
@@ -266,6 +276,9 @@ document.addEventListener("DOMContentLoaded", () => {
             youtubeBlurToggle: document.getElementById("youtube-blur-toggle"),
             focusShieldToggle: document.getElementById("focus-shield-toggle"),
             ricedModeToggle: document.getElementById("riced-mode-toggle"),
+            jeeSession: document.getElementById("jee-session-select"), // NEW
+            jeeShift: document.getElementById("jee-shift-input"),      // NEW
+            jeeContainer: document.getElementById("jee-details-container"),
         },
         mobileAlert: document.getElementById("mobile-alert"),
         confirmTitle: document.getElementById("confirm-title"),
@@ -428,10 +441,10 @@ document.addEventListener("DOMContentLoaded", () => {
             migrateLocalDataToCloud(userDocRef); // Your existing function is good for this
         }
 
-        // 3. (THE BIG CHANGE)
-        // Attach a REAL-TIME LISTENER to the user's document.
-        // This will replace your 'mergeCloudDataWithLocal' and the awful page reload.
         userDocRef.onSnapshot(
+            // vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+            { includeMetadataChanges: true }, // <--- ADD THIS LINE HERE
+            // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
             (doc) => {
                 console.log("Received cloud data snapshot...");
                 const cloudData = doc.data();
@@ -440,32 +453,35 @@ document.addEventListener("DOMContentLoaded", () => {
                     let isStateUpdated = false;
 
                     // 4. Merge cloud data into your local appState
-                    // (This is the "merge" without the page reload)
                     for (const key in LOCAL_STORAGE_KEYS) {
                         if (cloudData[key]) {
-                            // Check if data is actually different to avoid needless re-renders
                             const localString = JSON.stringify(appState[key]);
                             const cloudString = JSON.stringify(cloudData[key]);
 
+                            // Only update if the actual CONTENT is different
+                            // (We ignore it if it's just a metadata/status update)
                             if (localString !== cloudString) {
-                                appState[key] = cloudData[key];
-                                // Also update the localStorage cache for the next offline load
-                                localStorage.setItem(LOCAL_STORAGE_KEYS[key], cloudString);
-                                isStateUpdated = true;
+                                // Double check: If we have pending writes, don't overwrite local changes with old cloud data!
+                                if (!doc.metadata.hasPendingWrites) { 
+                                     appState[key] = cloudData[key];
+                                     localStorage.setItem(LOCAL_STORAGE_KEYS[key], cloudString);
+                                     isStateUpdated = true;
+                                }
                             }
                         }
                     }
 
-                    // 5. If anything changed, just re-render the dashboard. NO RELOAD.
+                    // 5. Re-render only if DATA changed
                     if (isStateUpdated) {
                         console.log("Cloud data merged. Re-rendering dashboard...");
-                        applySettings(); // Apply new settings
-                        renderDashboard(); // Re-render cards
+                        applySettings();
+                        renderDashboard();
                     }
                 }
 
-                // 6. (BONUS) Use this to show a 100% accurate sync status!
-                // This replaces your manual showSyncStatus("All changes saved")
+                // 6. UPDATE SYNC STATUS
+                // Now that we have {includeMetadataChanges: true}, this will fire twice:
+                // Once for "Syncing..." (Local) and again for "All changes saved" (Server)
                 const status = doc.metadata.hasPendingWrites ? "Syncing..." : "All changes saved";
                 showSyncStatus(status);
             },
@@ -477,19 +493,30 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     /**
-    * Displays a sync status message (e.g., "Saving...", "All changes saved").
-    * @param {string} message The message to display.
-    */
+     * Displays a sync status message (e.g., "Saving...", "All changes saved").
+     * @param {string} message The message to display.
+     */
     const showSyncStatus = (message) => {
         const toast = domElements.syncStatusToast;
+
+        // 1. ALWAYS clear any pending timeout immediately.
+        // This prevents a previous "hide" command from cutting off a new message.
+        if (syncTimeout) {
+            clearTimeout(syncTimeout);
+            syncTimeout = null;
+        }
+
+        // 2. Update text and show the toast
         toast.textContent = message;
         toast.classList.add("show");
 
+        // 3. Only set a new timeout to hide if the state is "Finished" or "Error".
+        // If the state is "Saving..." or "Syncing...", we keep it visible indefinitely
+        // until a success message comes in to replace it.
         if (message !== "Saving..." && message !== "Syncing...") {
-            clearTimeout(syncTimeout);
             syncTimeout = setTimeout(() => {
                 toast.classList.remove("show");
-            }, 2000);
+            }, 3000); // Increased to 3s for better readability
         }
     };
 
@@ -537,9 +564,27 @@ document.addEventListener("DOMContentLoaded", () => {
     * Gets the target exam date based on user settings.
     * @returns {Date} The target exam date.
     */
+    /**
+     * Gets the target exam date based on user settings.
+     * Priority: User's Shift Date > Default Session Date > Default NEET Date
+     */
     const getTargetExamDate = () => {
-        const { examType, examYear } = appState.settings;
-        return EXAM_DATES[examType]?.[examYear] || new Date(); // Fallback to now
+        const { examType, examYear, jeeSession, jeeShiftDate } = appState.settings;
+
+        // 1. If JEE and user entered a specific shift date, use it
+        if (examType === "JEE" && jeeShiftDate) {
+            return new Date(jeeShiftDate + "T00:00:00"); // Assume 9 AM start
+        }
+
+        // 2. If JEE, use the default date for the selected Session & Year
+        if (examType === "JEE") {
+            const dateStr = EXAM_DEFAULTS.JEE[jeeSession]?.[examYear] || `${examYear}-01-01`;
+            return new Date(dateStr + "T00:00:00");
+        }
+
+        // 3. Fallback for NEET
+        const neetDateStr = EXAM_DEFAULTS.NEET[examYear] || `${examYear}-05-01`;
+        return new Date(neetDateStr + "T00:00:00"); // NEET usually starts at 2 PM
     };
 
     /**
@@ -677,7 +722,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 today.setHours(0, 0, 0, 0);
 
                 const currentYear = new Date().getFullYear();
-                let currentDate = new Date(`${currentYear}-01-01T00:00:00`); // Start from Jan 1st
+                let currentDate = new Date(`${currentYear}-01-01T00:00:00`); 
 
                 const examDate = getTargetExamDate();
                 examDate.setHours(0, 0, 0, 0);
@@ -693,25 +738,41 @@ document.addEventListener("DOMContentLoaded", () => {
                     tooltip.className = "tooltip";
 
                     let dayClass = "day-future";
-                    let tooltipText = currentDate.toDateString();
+                    
+                    // --- CHANGED TOOLTIP LOGIC STARTS HERE ---
+                    // 1. Basic Date Header
+                    let tooltipHTML = `<strong class="text-accent">${currentDate.toDateString()}</strong>`;
 
                     if (currentDate < today) dayClass = "day-past";
                     if (currentDate.getTime() === today.getTime()) {
                         dayClass = "day-today";
-                        tooltipText += " - Today";
+                        tooltipHTML += "<br/><span class='text-xs text-gray-400'>(Today)</span>";
                     }
+
+                    // 2. Handle Tests (Multiple supported via '|' split)
                     if (appState.tests[dateString]) {
                         dayClass = "day-part-test";
+                        
+                        const rawTests = appState.tests[dateString];
+                        // Split by '|' and create a bullet list
+                        const testList = rawTests.split('|').map(t => `• ${t.trim()}`).join('<br/>');
+                        
                         const daysFromNow = Math.ceil((new Date(dateString) - today) / (1000 * 60 * 60 * 24));
-                        tooltipText = `${appState.tests[dateString]} (${daysFromNow - 1} days from now)`;
+                        const daysLabel = daysFromNow > 0 ? `${daysFromNow} days left` : (daysFromNow < 0 ? "Completed" : "Today");
+
+                        tooltipHTML += `<div class="mt-1 pt-1 border-t border-gray-700">${testList}</div>`;
+                        tooltipHTML += `<div class="text-[10px] text-gray-500 mt-1 italic">${daysLabel}</div>`;
                     }
+
                     if (currentDate.getTime() === examDate.getTime()) {
                         dayClass = "day-exam";
-                        tooltipText += " - Exam!";
+                        tooltipHTML += "<br/>🚨 <strong>EXAM DAY</strong> 🚨";
                     }
 
                     dayCell.classList.add(dayClass);
-                    tooltip.textContent = tooltipText;
+                    tooltip.innerHTML = tooltipHTML; // Use innerHTML for formatting
+                    // --- CHANGED TOOLTIP LOGIC ENDS HERE ---
+
                     dayCell.appendChild(tooltip);
                     graphContainer.appendChild(dayCell);
 
@@ -793,29 +854,65 @@ document.addEventListener("DOMContentLoaded", () => {
             render: (cardElement, cardData) => {
                 const marksListEl = cardElement.querySelector(".marks-list");
                 marksListEl.innerHTML = "";
+                
+                // 1. Calculate Statistics
+                let totalScoreSum = 0;
+                let count = 0;
+
                 cardData.content.forEach((entry, index) => {
+                    const currentTotal = entry.total ?? entry.marks;
+                    totalScoreSum += currentTotal;
+                    count++;
+
                     const listItem = document.createElement("li");
-                    listItem.className = "flex justify-between items-center text-xs bg-gray-800 p-2 rounded";
+                    listItem.className = "flex justify-between items-center text-xs bg-gray-800/50 hover:bg-gray-800 p-1.5 rounded transition-colors";
                     listItem.innerHTML = `
-                                    <div class="flex-grow">
-                                        <strong>${entry.name}</strong>: ${entry.total ?? entry.marks} / ${entry.maxMarks}
-                                        <span class="text-gray-400 ml-2">${entry.subjects ? `(P:${entry.subjects.physics}, C:${entry.subjects.chemistry}, M:${entry.subjects.maths})` : "(No subject data)"}</span>
-                                    </div>
-                                    <button data-index="${index}" class="delete-mark-item text-red-500 px-1" aria-label="Delete mark entry">×</button>`;
+                        <div class="flex-grow truncate">
+                            <span class="font-bold text-white">${entry.name}</span>
+                            <span class="text-secondary mx-1">|</span>
+                            <span class="${currentTotal >= (cardData.targetScore || 0) ? 'text-green-400' : 'text-yellow-400'}">${currentTotal}</span>
+                            <span class="text-gray-600 text-[10px]">/${entry.maxMarks}</span>
+                        </div>
+                        <button data-index="${index}" class="delete-mark-item text-gray-500 hover:text-red-500 px-1 transition-colors" aria-label="Delete">×</button>`;
                     marksListEl.appendChild(listItem);
                 });
 
+                // 2. Display Mean Score
+                const meanScore = count > 0 ? (totalScoreSum / count).toFixed(1) : 0;
+                cardElement.querySelector(".mean-score-display").textContent = meanScore;
+
+                // 3. Handle Target Score Input
+                const targetInput = cardElement.querySelector(".target-score-input");
+                targetInput.value = cardData.targetScore || "";
+                
+                // Remove old listener to prevent duplicates (cloning usually handles this, but safety first)
+                const newTargetInput = targetInput.cloneNode(true);
+                targetInput.parentNode.replaceChild(newTargetInput, targetInput);
+                
+                newTargetInput.addEventListener("change", (e) => {
+                    const val = parseFloat(e.target.value);
+                    cardData.targetScore = isNaN(val) ? 0 : val;
+                    appState.save("customCards");
+                    // Re-render specifically this card to update graph
+                    cardRenderers["line-graph"].render(cardElement, cardData);
+                });
+
+                // 4. Chart Setup
                 const ctx = cardElement.querySelector(".marks-chart").getContext("2d");
-                // Destroy previous chart instance if it exists
                 if (appState.chartInstances[cardData.id]) {
                     appState.chartInstances[cardData.id].destroy();
                 }
 
+                const styles = getComputedStyle(document.documentElement);
+                const accentColor = styles.getPropertyValue("--accent-color").trim();
+                const textColorSecondary = styles.getPropertyValue("--text-secondary").trim();
+                const borderColor = styles.getPropertyValue("--border-color").trim();
+
                 const subjectColors = {
-                    total: getComputedStyle(document.documentElement).getPropertyValue("--accent-color").trim(),
-                    physics: "#3b82f6", // blue-500
-                    chemistry: "#10b981", // emerald-500
-                    maths: "#f97316", // orange-500
+                    total: accentColor,
+                    physics: "#3b82f6",
+                    chemistry: "#10b981",
+                    maths: "#f97316",
                 };
 
                 const datasets = ["total", "physics", "chemistry", "maths"].map((subject) => ({
@@ -824,17 +921,29 @@ document.addEventListener("DOMContentLoaded", () => {
                         subject === "total" ? (entry.total ?? entry.marks) : entry.subjects ? entry.subjects[subject] : null
                     ),
                     borderColor: subjectColors[subject],
-                    backgroundColor: `${subjectColors[subject]}20`, // transparent bg
+                    backgroundColor: `${subjectColors[subject]}20`,
                     fill: true,
                     tension: 0.3,
-                    pointBackgroundColor: subjectColors[subject],
+                    pointRadius: 3,
                     borderWidth: 2,
-                    hidden: subject !== "total", // Hide all except total initially
+                    hidden: subject !== "total", 
                 }));
 
-                const maxY = cardData.content.length > 0 ? Math.max(...cardData.content.map((entry) => entry.maxMarks || 0)) : 300;
-                const textColorSecondary = getComputedStyle(document.documentElement).getPropertyValue("--text-secondary").trim();
-                const borderColor = getComputedStyle(document.documentElement).getPropertyValue("--border-color").trim();
+                // 5. Add Target Line Dataset
+                if (cardData.targetScore && cardData.targetScore > 0) {
+                    datasets.push({
+                        label: "Target",
+                        data: new Array(cardData.content.length).fill(cardData.targetScore),
+                        borderColor: "#ef4444", // Red color
+                        borderDash: [6, 6], // Dotted line
+                        pointRadius: 0,
+                        borderWidth: 1,
+                        fill: false,
+                        order: 0 // Draw on top
+                    });
+                }
+
+                const maxY = cardData.content.length > 0 ? Math.max(...cardData.content.map((entry) => entry.maxMarks || 300)) : 300;
 
                 const chartInstance = new Chart(ctx, {
                     type: "line",
@@ -845,58 +954,86 @@ document.addEventListener("DOMContentLoaded", () => {
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false,
+                        },
                         plugins: {
                             legend: { display: false },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                titleFont: { size: 11 },
+                                bodyFont: { size: 11 },
+                                padding: 8,
+                                displayColors: true
+                            }
                         },
                         scales: {
                             y: {
                                 beginAtZero: true,
-                                max: maxY,
-                                ticks: { color: textColorSecondary },
+                                max: maxY, // Dynamic max based on input
+                                ticks: { color: textColorSecondary, font: { size: 10 } },
                                 grid: { color: borderColor },
                             },
                             x: {
-                                ticks: { color: textColorSecondary },
-                                grid: { color: "transparent" },
+                                ticks: { color: textColorSecondary, font: { size: 10 } },
+                                grid: { display: false },
                             },
                         },
                     },
                 });
                 appState.chartInstances[cardData.id] = chartInstance;
 
-                // Handle chart legend toggles
+                // Handle Toggles
                 const togglesContainer = cardElement.querySelector(".chart-toggles");
-                togglesContainer.addEventListener("click", (event) => {
+                
+                // Clear existing listeners by cloning
+                const newTogglesContainer = togglesContainer.cloneNode(true);
+                togglesContainer.parentNode.replaceChild(newTogglesContainer, togglesContainer);
+
+                newTogglesContainer.addEventListener("click", (event) => {
                     if (event.target.tagName === "BUTTON") {
                         const subject = event.target.dataset.subject;
                         const datasetIndex = chartInstance.data.datasets.findIndex(
                             (d) => d.label.toLowerCase() === subject
                         );
                         if (datasetIndex > -1) {
-                            chartInstance.data.datasets[datasetIndex].hidden = !chartInstance.data.datasets[datasetIndex].hidden;
+                            const meta = chartInstance.getDatasetMeta(datasetIndex);
+                            meta.hidden = meta.hidden === null ? !chartInstance.data.datasets[datasetIndex].hidden : null;
                             chartInstance.update();
 
                             // Update button styles
-                            togglesContainer.querySelectorAll("button").forEach((btn) => {
+                            newTogglesContainer.querySelectorAll("button").forEach((btn) => {
+                                const btnSubject = btn.dataset.subject;
                                 const dsIndex = chartInstance.data.datasets.findIndex(
-                                    (d) => d.label.toLowerCase() === btn.dataset.subject
+                                    (d) => d.label.toLowerCase() === btnSubject
                                 );
-                                if (chartInstance.data.datasets[dsIndex].hidden) {
+                                const isHidden = chartInstance.getDatasetMeta(dsIndex).hidden;
+                                
+                                if (isHidden || (isHidden === null && chartInstance.data.datasets[dsIndex].hidden)) {
                                     btn.style.backgroundColor = "transparent";
-                                    btn.style.borderColor = "#4b5563"; // gray-600
-                                    btn.style.color = "var(--text-primary)";
+                                    btn.style.borderColor = "#4b5563";
+                                    btn.style.color = "var(--text-secondary)";
                                 } else {
-                                    btn.style.backgroundColor = subjectColors[btn.dataset.subject];
-                                    btn.style.borderColor = subjectColors[btn.dataset.subject];
+                                    btn.style.backgroundColor = subjectColors[btnSubject] || accentColor;
+                                    btn.style.borderColor = subjectColors[btnSubject] || accentColor;
                                     btn.style.color = "white";
                                 }
                             });
                         }
                     }
                 });
-                // Click 'total' button twice to fix initial state (hacky, but works)
-                togglesContainer.querySelector("button").click();
-                togglesContainer.querySelector("button").click();
+                
+                // Initialize toggle button state visually
+                newTogglesContainer.querySelectorAll("button").forEach((btn) => {
+                     const btnSubject = btn.dataset.subject;
+                     // Physics/Chem/Math are hidden by default in dataset config, Total is visible
+                     if(btnSubject !== 'total') {
+                        btn.style.backgroundColor = "transparent";
+                        btn.style.borderColor = "#4b5563";
+                        btn.style.color = "var(--text-secondary)";
+                     }
+                });
             },
         },
         pomodoro: {
@@ -1120,6 +1257,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 selectEl.id = labelFor;
 
+
                 const allSubjects = [
                     ...new Set([
                         "Physics",
@@ -1135,6 +1273,13 @@ document.addEventListener("DOMContentLoaded", () => {
                     allSubjects.map((subject) => `<option>${subject}</option>`).join("") +
                     '<option value="add_new">Add New Subject...</option>';
                 selectEl.value = state.currentSubject;
+                
+                const manualSelect = cardElement.querySelector(".manual-subject-select");
+                if (manualSelect) {
+                    manualSelect.innerHTML = allSubjects.map((subject) => `<option>${subject}</option>`).join("");
+                    // Set default to current timer subject just for convenience
+                    manualSelect.value = state.currentSubject; 
+                }
 
                 // Render today's study log
                 const logListEl = cardElement.querySelector(".study-log-list");
@@ -1309,6 +1454,24 @@ document.addEventListener("DOMContentLoaded", () => {
             domElements.body.style.backgroundImage = appState.settings.bgUrl ? `url(${appState.settings.bgUrl})` : "none";
         }
 
+        const currentSession = appState.settings.jeeSession || "January";
+        const currentYear = appState.settings.examYear || "2026";
+
+        domElements.inputs.jeeSession.value = currentSession;
+        
+        // Check if user has a custom date, otherwise grab the default from your EXAM_DEFAULTS object
+        const defaultDateStr = EXAM_DEFAULTS.JEE[currentSession]?.[currentYear] || "";
+        
+        // Set the input value to the custom date OR the default date
+        domElements.inputs.jeeShift.value = appState.settings.jeeShiftDate || defaultDateStr;
+
+        // Toggle visibility of JEE options
+        if (appState.settings.examType === "JEE") {
+            domElements.inputs.jeeContainer.classList.remove("hidden");
+        } else {
+            domElements.inputs.jeeContainer.classList.add("hidden");
+        }
+
         // Update main title
         const { examType, examYear } = appState.settings;
         domElements.mainTitle.textContent = `${examType} ${examYear}`;
@@ -1443,6 +1606,18 @@ document.addEventListener("DOMContentLoaded", () => {
             cardRenderers["line-graph"].render(cardElement, cardData); // Re-render this card
         }
 
+        if (event.target.closest(".toggle-manual-form")) {
+            const form = event.target.closest(".card").querySelector(".manual-log-form");
+            form.classList.toggle("hidden");
+            const btnSpan = event.target.closest(".toggle-manual-form").querySelector("span");
+            // Update button text based on visibility
+            if (form.classList.contains("hidden")) {
+                btnSpan.textContent = "+ Add Manual Entry";
+            } else {
+                btnSpan.textContent = "- Close";
+            }
+        }
+
         // Pomodoro card actions
         if (cardData && cardData.type === "pomodoro") {
             if (event.target.classList.contains("pomodoro-btn")) {
@@ -1500,7 +1675,18 @@ document.addEventListener("DOMContentLoaded", () => {
         if (form.id === "add-test-form") {
             const { date: dateInput, name: nameInput } = form.elements;
             if (dateInput.value && nameInput.value.trim()) {
-                appState.tests[dateInput.value] = nameInput.value.trim();
+                const dateKey = dateInput.value;
+                const newTestName = nameInput.value.trim();
+
+                // CHECK: Does a test already exist for this date?
+                if (appState.tests[dateKey]) {
+                    // Append the new test with a special separator ( | )
+                    appState.tests[dateKey] = appState.tests[dateKey] + " | " + newTestName;
+                } else {
+                    // Create new entry
+                    appState.tests[dateKey] = newTestName;
+                }
+
                 appState.save("tests");
                 renderDashboard();
                 form.reset();
@@ -1544,6 +1730,37 @@ document.addEventListener("DOMContentLoaded", () => {
                 inputEl.value = "";
             }
         }
+        else if (form.classList.contains("manual-log-form")) {
+            const subject = form.querySelector(".manual-subject-select").value;
+            const minutesInput = form.querySelector('input[name="minutes"]');
+            const minutes = parseInt(minutesInput.value);
+
+            if (subject && minutes > 0) {
+                const todayStr = formatDateToISO(new Date());
+                
+                // Initialize today's log if not exists
+                if (!appState.studyLogs[todayStr]) {
+                    appState.studyLogs[todayStr] = {};
+                }
+
+                // Calculate seconds
+                const secondsToAdd = minutes * 60;
+
+                // Add to logs
+                appState.studyLogs[todayStr][subject] = (appState.studyLogs[todayStr][subject] || 0) + secondsToAdd;
+
+                // Save and Render
+                appState.save("studyLogs");
+                renderDashboard();
+                
+                // Clear input but keep form open for rapid entry
+                minutesInput.value = "";
+                
+                // Optional: Show a quick toast or console log
+                console.log(`Added ${minutes} mins to ${subject}`);
+            }
+        }
+
         // Add Marks form
         else if (form.classList.contains("add-marks-form")) {
             const cardData = appState.customCards.find((card) => card.id === cardId);
@@ -1802,6 +2019,91 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+
+    // --- WALLPAPER PRESETS LOGIC ---
+    const presetGrid = document.getElementById('preset-wallpaper-grid');
+    
+    const wallpapers = [
+        {
+            name: "Deep Space",
+            type: "img",
+            thumb: "https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=200&q=60",
+            url: "https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=1920&q=80"
+        },
+        {
+            name: "Midnight City",
+            type: "img",
+            thumb: "https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=200&q=60",
+            url: "https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=1920&q=80"
+        },
+        {
+            name: "Dark Library",
+            type: "img",
+            thumb: "https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=200&q=60",
+            url: "https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=1920&q=80"
+        },
+        {
+            name: "Zen Forest",
+            type: "img",
+            thumb: "https://images.pexels.com/photos/167699/pexels-photo-167699.jpeg?auto=compress&cs=tinysrgb&w=200",
+            url: "https://images.pexels.com/photos/167699/pexels-photo-167699.jpeg?auto=compress&cs=tinysrgb&w=1920"
+        },
+        {
+            name: "Study Desk",
+            type: "img",
+            thumb: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=200&q=60",
+            url: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1920&q=80"
+        },
+        {
+            name: "Stormy Sea",
+            type: "img",
+            thumb: "https://images.unsplash.com/photo-1505118380757-91f5f5632de0?auto=format&fit=crop&w=200&q=60",
+            url: "https://images.unsplash.com/photo-1505118380757-91f5f5632de0?auto=format&fit=crop&w=1920&q=80"
+        },
+        {
+            name: "Minimal Dark",
+            type: "img",
+            thumb: "https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?auto=format&fit=crop&w=200&q=60",
+            url: "https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?auto=format&fit=crop&w=1920&q=80"
+        },
+        {
+            name: "Cozy Rain",
+            type: "img",
+            thumb: "https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?auto=format&fit=crop&w=200&q=60",
+            url: "https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?auto=format&fit=crop&w=1920&q=80"
+        }
+    ];
+
+    if (presetGrid) {
+        wallpapers.forEach(wp => {
+            const btn = document.createElement('button');
+            // Styling the button
+            btn.className = "relative group w-full h-16 rounded-md overflow-hidden border border-gray-700 hover:border-white transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500";
+            btn.type = "button"; // Prevent form submission
+            
+            // Button Inner HTML
+            btn.innerHTML = `
+                <img src="${wp.thumb}" alt="${wp.name}" class="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity">
+                <span class="absolute bottom-0 left-0 right-0 bg-black/60 text-[9px] text-white text-center py-0.5 truncate">${wp.name}</span>
+                ${wp.type === 'gif' ? '<span class="absolute top-1 right-1 bg-indigo-600/80 text-[8px] text-white px-1 rounded">GIF</span>' : ''}
+            `;
+
+            // Click Handler
+            btn.addEventListener('click', () => {
+                // 1. Update the input field visually
+                domElements.inputs.bgUrl.value = wp.url;
+                
+                // 2. Update the App State
+                appState.settings.bgUrl = wp.url;
+                
+                // 3. Save and Apply (Reuse your existing function!)
+                saveAndApplySettings();
+            });
+
+            presetGrid.appendChild(btn);
+        });
+    }
+
     // --- Settings Event Listeners ---
     const saveAndApplySettings = () => {
         appState.saveSettings();
@@ -1815,6 +2117,12 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     domElements.inputs.examYear.addEventListener("change", () => {
         appState.settings.examYear = domElements.inputs.examYear.value;
+    
+        // --- FIX: Clear the specific date so the new year's default takes over ---
+        appState.settings.jeeShiftDate = ""; 
+        domElements.inputs.jeeShift.value = ""; 
+        // ------------------------------------------------------------------------
+
         saveAndApplySettings();
     });
     domElements.inputs.theme.addEventListener("change", () => {
@@ -1874,12 +2182,32 @@ document.addEventListener("DOMContentLoaded", () => {
     domElements.buttons.resetDashboard.addEventListener("click", () => {
         showConfirmModal(
             "This will delete all custom cards and reset the layout to the default.",
-            () => {
+            async () => { // <--- Made function async
+                // 1. Clear Local Storage
                 Object.keys(LOCAL_STORAGE_KEYS).forEach((key) => {
+                    // We keep settings (theme, etc.) but nuke data
                     if (key !== "settings" && key !== "mobileAlertDismissed") {
                         localStorage.removeItem(LOCAL_STORAGE_KEYS[key]);
                     }
                 });
+
+                // 2. Clear Cloud Data (If logged in)
+                if (currentUser) {
+                    showSyncStatus("Resetting Cloud Data...");
+                    try {
+                        // Delete the user's document from Firestore
+                        await db.collection("users").doc(currentUser.uid).delete();
+                        console.log("Cloud data deleted.");
+                    } catch (error) {
+                        console.error("Error resetting cloud data:", error);
+                        alert("Failed to reset cloud data. Check console.");
+                        return; // Stop reload if cloud delete fails
+                    }
+                }
+
+                // 3. Reload to re-initialize defaults
+                // When page loads, it sees no LocalStorage and no Cloud Data, 
+                // so it starts fresh with the default hardcoded state.
                 location.reload();
             },
             "Reset Dashboard?"
@@ -2229,6 +2557,37 @@ document.addEventListener("DOMContentLoaded", () => {
         },
     };
 
+    domElements.inputs.examType.addEventListener("change", () => {
+        appState.settings.examType = domElements.inputs.examType.value;
+        // Show/Hide container immediately
+        if (appState.settings.examType === "JEE") {
+            domElements.inputs.jeeContainer.classList.remove("hidden");
+        } else {
+            domElements.inputs.jeeContainer.classList.add("hidden");
+        }
+        saveAndApplySettings();
+    });
+
+    // Save Session (Jan/April)
+    domElements.inputs.jeeSession.addEventListener("change", () => {
+        appState.settings.jeeSession = domElements.inputs.jeeSession.value;
+        saveAndApplySettings();
+        
+        // Update Main Title dynamically
+        const { examType, examYear, jeeSession } = appState.settings;
+        const titleText = examType === "JEE" 
+            ? `JEE ${examYear}` 
+            : `${examType} ${examYear}`;
+            
+        domElements.mainTitle.textContent = titleText;
+    });
+
+    // Save Specific Shift Date
+    domElements.inputs.jeeShift.addEventListener("change", () => {
+        appState.settings.jeeShiftDate = domElements.inputs.jeeShift.value;
+        saveAndApplySettings();
+    });
+
     // --- God Mode (Easter Egg) ---
     let godModeBackup = null; // To store state before god mode
 
@@ -2509,6 +2868,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // NOTE: Removed automatic requestFullscreen() here
     };
+
+    
 
     // 2. Exit Focus Mode
     document.getElementById('exit-super-focus').addEventListener('click', () => {
