@@ -801,18 +801,50 @@
             <h2 class="text-xl font-semibold mb-4">Customize Dashboard</h2>
             <div class="space-y-4">
                 <div>
-                <label for="exam-type-select" class="block text-sm font-medium text-secondary mb-1">Target Exam</label>
-                <div class="grid grid-cols-2 gap-2">
-                    <select id="exam-type-select" class="form-input rounded-md p-2 w-full">
-                        <option value="JEE">JEE Main</option>
-                        <option value="NEET">NEET</option>
-                    </select>
-                    <select id="exam-year-select" class="form-input rounded-md p-2 w-full">
-                        <option value="2026">2026</option>
-                        <option value="2027">2027</option>
-                        <option value="2028">2028</option>
-                    </select>
+                    <label for="exam-type-select" class="block text-sm font-medium text-secondary mb-1">Target Exam</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <select id="exam-type-select" class="form-input rounded-md p-2 w-full">
+                            <option value="JEE">JEE Main</option>
+                            <option value="NEET">NEET</option>
+                            <option value="Custom">Custom</option>
+                        </select>
+                        <select id="exam-year-select" class="form-input rounded-md p-2 w-full">
+                            <option value="2026">2026</option>
+                            <option value="2027">2027</option>
+                            <option value="2028">2028</option>
+                        </select>
+                    </div>
+
+                     <div id="jee-details-container" class="mt-3 p-3 rounded-lg border border-dashed border-gray-700 bg-black/20 hidden">
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-xs text-secondary mb-1">Session</label>
+                            <select id="jee-session-select" class="form-input rounded-md p-2 w-full text-sm">
+                                <option value="January">January</option>
+                                <option value="April">April</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-secondary mb-1">Shift Date (Optional)</label>
+                            <input type="date" id="jee-shift-input" class="form-input rounded-md p-2 w-full text-sm">
+                        </div>
+                    </div>
+                    <p class="text-[10px] text-secondary mt-2 italic">Select specific exam date if announced, otherwise defaults will be used.</p>
                 </div>
+
+                    <div id="custom-exam-container" class="mt-3 p-3 rounded-lg border border-dashed border-gray-700 bg-black/20 hidden">
+                        <div class="space-y-2">
+                            <div>
+                                <label class="block text-xs text-secondary mb-1">Exam Name</label>
+                                <input type="text" id="custom-exam-name" placeholder="e.g. BITSAT / Boards" class="form-input rounded-md p-2 w-full text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-secondary mb-1">Exam Date</label>
+                                <input type="date" id="custom-exam-date" class="form-input rounded-md p-2 w-full text-sm">
+                            </div>
+                        </div>
+                    </div>
+               
 
                 <div id="jee-details-container" class="mt-3 p-3 rounded-lg border border-dashed border-gray-700 bg-black/20 hidden">
                     <div class="grid grid-cols-2 gap-2">
@@ -842,6 +874,10 @@
                         <option value="ocean">Ocean</option>
                         <option value="sunset">Sunset</option>
                         <option value="dracula">Dracula</option>
+                        <option value="coffee">Coffee Break</option>
+                        <option value="nordic">Nordic Frost</option>
+                        <option value="lavender">Lavender Haze</option>
+                        <option value="crimson">Crimson Elite</option>
                         <option value="alakh-pandey" class="hidden">Alakh Pandey</option>
                     </select>
                 </div>
@@ -951,7 +987,7 @@
             For more details, check the Information tab.</span>
         <button id="close-alert-btn" class="font-bold text-lg ml-4" aria-label="Close mobile alert">&times;</button>
     </div>
-
+    
     <div id="info-modal" class="modal-overlay hidden">
         <div class="card w-11/12 max-w-lg">
             <!-- Tab Navigation -->
@@ -975,9 +1011,15 @@
 
                 <!-- What's New Panel -->
                 <div id="tab-whats-new" class="tab-content hidden space-y-3 text-sm">
-                    <h3 class="text-md font-bold text-primary">Version 1.3 (Dec 2025)</h3>
+                    <h3 class="text-md font-bold text-primary">Version 1.4 (Jan 2026)</h3>
                     <ul class="list-disc list-inside text-secondary space-y-2">
-                        <li><strong>bug fixes</strong></li>
+                        <li>Added shift selector/session</li>
+                        <li>Fixed day tooltip hover issue.</li>
+                        <li>Preset background wallpapers.</li>
+                        <li>Enhanced Line graph card UI</li>
+                        <li>Keyboard Shortcuts (Press ?)</li>
+                        <li>More themes added</li>
+                        <li>Custom Exams added.</li>
                     </ul>
                 </div>
 
@@ -998,8 +1040,9 @@
                             target="_blank">View on GitHub</a></p><br>
                     <div class="border-t border-gray-700 my-4"></div>
                     <p>Enjoying StudyLocus? Star the project repository on Github (link above), will greatly appreciate it, Thanks!</p>
-                    <p>+ This project will stay free to use + ads (🤢) free perpetually :)</p>
+                    <p>+ This project will try to stay free to use + ads free perpetually :)</p>
                 </div>
+                
             </div>
 
             <div class="flex justify-end mt-6">
@@ -1008,7 +1051,45 @@
             </div>
         </div>
     </div>
-
+    <div id="shortcuts-modal" class="modal-overlay hidden">
+        <div class="card w-11/12 max-w-sm">
+            <div class="card-header">
+                <h2 class="text-xl font-semibold">Keyboard Shortcuts</h2>
+                <div class="card-header-controls">
+                    <kbd class="px-2 py-1 bg-gray-700 rounded text-xs text-gray-300 font-mono">?</kbd>
+                </div>
+            </div>
+            <div class="space-y-3 mt-4 text-sm">
+                <div class="flex justify-between items-center border-b border-gray-700/50 pb-2">
+                    <span class="text-secondary">Toggle Timer (Pomodoro/Log)</span>
+                    <kbd class="px-2 py-1 bg-gray-700 rounded text-xs font-mono text-white">Space</kbd>
+                </div>
+                <div class="flex justify-between items-center border-b border-gray-700/50 pb-2">
+                    <span class="text-secondary">Zen Mode</span>
+                    <kbd class="px-2 py-1 bg-gray-700 rounded text-xs font-mono text-white">Z</kbd>
+                </div>
+                <div class="flex justify-between items-center border-b border-gray-700/50 pb-2">
+                    <span class="text-secondary">Add New Card</span>
+                    <kbd class="px-2 py-1 bg-gray-700 rounded text-xs font-mono text-white">N</kbd>
+                </div>
+                <div class="flex justify-between items-center border-b border-gray-700/50 pb-2">
+                    <span class="text-secondary">Customize Menu</span>
+                    <kbd class="px-2 py-1 bg-gray-700 rounded text-xs font-mono text-white">C</kbd>
+                </div>
+                <div class="flex justify-between items-center border-b border-gray-700/50 pb-2">
+                    <span class="text-secondary">Super Focus Mode</span>
+                    <kbd class="px-2 py-1 bg-gray-700 rounded text-xs font-mono text-white">F</kbd>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-secondary">Close Modal / Blur Input</span>
+                    <kbd class="px-2 py-1 bg-gray-700 rounded text-xs font-mono text-white">Esc</kbd>
+                </div>
+            </div>
+            <div class="flex justify-end mt-6">
+                <button type="button" id="close-shortcuts-modal" class="btn-primary font-bold py-2 px-4 rounded-md">Got it</button>
+            </div>
+        </div>
+    </div>
     <div class="fab-container">
         <div class="fab-menu card p-2 space-y-1">
             <h3 class="text-sm font-bold px-2 text-secondary">sval.tech</h3>
