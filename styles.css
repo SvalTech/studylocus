@@ -1,4 +1,14 @@
+/* Add this at the very top of your CSS */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
 
+html, body {
+    width: 100%;
+    overflow-x: hidden; /* This stops the page from shifting left/right */
+    margin: 0;
+    padding: 0;
+}
 :root,
 [data-theme=alakh-pandey],
 [data-theme=dracula],
@@ -1440,4 +1450,79 @@ select.form-input option {
 [data-theme="light"] select.form-input option {
     background-color: #ffffff;
     color: #000000;
+}
+
+@media (max-width: 768px) {
+    #open-focus-mode-btn {
+        display: none !important;
+    }
+}
+/* The glass card effect for the dropdown */
+#user-menu-dropdown .card {
+    background-color: var(--card-bg-color);
+    border: 1px solid var(--border-color);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    border-radius: 12px;
+}
+
+/* Specific theme overrides */
+[data-theme="light"] #user-menu-dropdown .card {
+    background-color: rgba(255, 255, 255, 0.9);
+    border-color: #e5e7eb;
+}
+
+/* User Info Section Hover Effect */
+/* --- Auth Dropdown Styling (Blends In) --- */
+#user-menu-dropdown .card {
+    background-color: var(--card-bg-color); /* Matches Dashboard Cards */
+    border: 1px solid var(--border-color);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 8px; /* Tighter radius */
+}
+
+/* Ensure the button text color adapts to the theme */
+#sign-in-btn {
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+
+#sign-in-btn:hover {
+    border-color: var(--accent-color); /* Subtle accent color hint on hover */
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Transition logic */
+#user-menu-dropdown {
+    transition: transform 0.15s ease-out, opacity 0.15s ease-out, visibility 0.15s;
+}
+
+/* --- Icon-Only Sign In on Mobile --- */
+@media (max-width: 768px) {
+    #sign-in-btn span {
+        display: none; /* Hides the "Sign In" text */
+    }
+    #sign-in-btn {
+        padding: 6px !important; /* Equal padding for a square/circle feel */
+    }
+}
+
+@media (max-width: 768px) {
+    #user-menu-container {
+        position: static; /* Allows dropdown to be positioned relative to the parent container if needed, or stick to right */
+    }
+
+    #user-menu-dropdown {
+        right: 1rem !important; /* Force a small margin from the right edge of screen */
+        left: auto !important;
+        width: 200px !important; /* Slightly smaller width for mobile */
+        margin-top: 5px !important;
+    }
+    
+    /* Ensure the text inside doesn't break layout */
+    #user-menu-dropdown .card {
+        width: 100%;
+    }
 }
