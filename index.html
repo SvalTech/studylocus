@@ -27,12 +27,32 @@
 
     <link rel="canonical" href="https://sval.tech/studylocus/" />
     <link rel="icon" type="image/x-icon" href="favicon.ico">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Comic+Neue&family=Fira+Code&family=Inter:wght@400;600;700&family=Roboto+Slab&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue&family=Fira+Code&family=Inter:wght@400;600;700&family=Roboto+Slab&family=Poppins:wght@300;400;500;600;700&family=Oswald:wght@400;500;700&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        inter: ["'Inter'", "sans-serif"],
+                        roboto: ["'Roboto Slab'", "serif"],
+                        fira: ["'Fira Code'", "monospace"],
+                        comic: ["'Comic Neue'", "cursive"],
+                        poppins: ["'Poppins'", "sans-serif"],
+                        oswald: ["'Oswald'", "sans-serif"],
+                        space: ["'Space Grotesk'", "sans-serif"],
+                        jetbrains: ["'JetBrains Mono'", "monospace"],
+                    }
+                }
+            }
+        }
+    </script>
+
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
@@ -885,9 +905,13 @@
                 <div>
                     <label for="font-select" class="block text-sm font-medium text-secondary mb-1">Font</label>
                     <select id="font-select" class="form-input rounded-md p-2 w-full">
-                        <option value="'Inter', sans-serif">Inter (Sans-Serif)</option>
+                        <option value="'Inter', sans-serif">Inter (Default)</option>
+                        <option value="'Poppins', sans-serif">Poppins (Modern)</option>
+                        <option value="'Space Grotesk', sans-serif">Space Grotesk (Sci-Fi)</option>
+                        <option value="'Oswald', sans-serif">Oswald (Condensed)</option>
                         <option value="'Roboto Slab', serif">Roboto Slab (Serif)</option>
-                        <option value="'Fira Code', monospace">Fira Code (Monospace)</option>
+                        <option value="'Fira Code', monospace">Fira Code (Code)</option>
+                        <option value="'JetBrains Mono', monospace">JetBrains Mono (Dev)</option>
                         <option value="'Comic Neue', cursive">Comic Sans</option>
                     </select>
                 </div>
@@ -1002,11 +1026,12 @@
             <div>
                 <!-- Quick Start Panel -->
                 <div id="tab-quick-start" class="tab-content space-y-3 text-sm">
-                    <p><strong>Date changed according to new NTA circular (Oct 19 2025)</strong></p>
-                    <p><strong>🙏 NEXT MAJOR/FEATURE UPDATE AFTER JEE MAIN 2026 JAN ATTEMPT 🙏 (updation of april
-                            attempt, etc.)</strong></p>
+                    <p><strong>YOU CAN NOW CHANGE DATE ACCORDING TO UR SHIFT IN CUSTOMISE MENU !!!</strong></p>
+                    <p>Open "What's new" to see more changes !!!!</p>
+                    <p>If you liked this update, follow me on <a href="https://github.com/svalordev" style="color:aqua" target="_blank">github</a>!</p>
+                    <p><strong>GOOD LUCK FOR YOUR PREPARATION ! 🫡</strong></p>
                     <p><strong>YOU CAN CHANGE JEE/NEET AND YEAR IN CUSTOMISE MENU</strong></p>
-                
+                   
                 </div>
 
                 <!-- What's New Panel -->
@@ -1014,11 +1039,12 @@
                     <h3 class="text-md font-bold text-primary">Version 1.4 (Jan 2026)</h3>
                     <ul class="list-disc list-inside text-secondary space-y-2">
                         <li>Added shift selector/session</li>
+                        <li>Manual addition of study logs.</li>
                         <li>Fixed day tooltip hover issue.</li>
                         <li>Preset background wallpapers.</li>
                         <li>Enhanced Line graph card UI</li>
                         <li>Keyboard Shortcuts (Press ?)</li>
-                        <li>More themes added</li>
+                        <li>More themes and fonts added</li>
                         <li>Custom Exams added.</li>
                     </ul>
                 </div>
