@@ -106,169 +106,245 @@ select.form-input option {
     --day-today-color: var(--accent-color);
     --day-exam-color: #9e2a2b;
     --day-part-test-color: #1f6feb
-}
-
-[data-theme=light] {
-    --bg-color: #f0f0f0;
-    --card-bg-color: rgba(255, 255, 255, 0.4);
-    /* Reduced opacity for heavy glassmorphism */
-    --border-color: #d1d5db;
-    --text-primary: #1f2937;
-    --text-secondary: #4b5563;
-    --accent-color: #3b82f6;
-    --accent-glow: 0 0 15px rgba(59, 130, 246, 0.4);
-    --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    --day-past-color: #ebedf0;
-    --day-future-color: #9be9a8;
-    --day-today-color: var(--accent-color);
-    --day-exam-color: #da5252;
-    --day-part-test-color: #58a6ff
-}
-
+}/* --- CYBERPUNK (High Contrast Neon) --- */
 [data-theme=cyberpunk] {
-    --bg-color: #0c0a24;
-    --card-bg-color: rgba(23, 0, 61, 0.3);
-    /* Reduced opacity */
-    --border-color: #ff00f2;
-    --text-primary: #00f7ff;
-    --text-secondary: #faff00;
-    --accent-color: #ff00f2;
-    --accent-glow: 0 0 20px rgba(255, 0, 242, 0.5);
-    --card-shadow: 0 0 10px rgba(255, 0, 242, 0.3);
-    --day-past-color: #180f3d;
-    --day-future-color: #5d00ff;
-    --day-today-color: var(--accent-color);
-    --day-exam-color: #ff00f2;
-    --day-part-test-color: #faff00
+    --bg-color: #02020a; /* Void Black-Blue */
+    --card-bg-color: rgba(9, 9, 20, 0.75); /* High opacity dark glass */
+    --border-color: #00f3ff; /* Electric Cyan Border */
+    --text-primary: #e0faff; /* Pale Cyan Text (more readable than pure white) */
+    --text-secondary: #00f3ff; /* Neon Cyan for subtitles */
+    --accent-color: #ff00ff; /* Hot Neon Magenta */
+    
+    /* Aggressive Glows */
+    --accent-glow: 0 0 20px rgba(255, 0, 255, 0.7), 0 0 40px rgba(255, 0, 255, 0.3);
+    --card-shadow: 0 0 15px rgba(0, 243, 255, 0.2), inset 0 0 10px rgba(0, 243, 255, 0.05);
+
+    /* Journey Graph - High Contrast */
+    --day-past-color: #12122b;
+    --day-future-color: #2a2a50;
+    --day-today-color: #ffffff; /* Pure White Core */
+    --day-exam-color: #ff003c; /* Cyber Red */
+    --day-part-test-color: #fcee0a; /* Cyber Yellow */
 }
 
+
+
+/* --- FOREST (Organic & Calming) --- */
 [data-theme=forest] {
-    --bg-color: #1a201a;
-    --card-bg-color: rgba(32, 42, 32, 0.4);
-    /* Reduced opacity */
-    --border-color: #4a5c4a;
-    --text-primary: #d4e0d4;
-    --text-secondary: #8a9c8a;
-    --accent-color: #6a9c6a;
-    --accent-glow: 0 0 15px rgba(106, 156, 106, 0.4);
-    --day-past-color: #2f3e2f;
-    --day-future-color: #4a5c4a;
-    --day-today-color: var(--accent-color);
-    --day-exam-color: #c53030;
-    --day-part-test-color: #63b3ed
+    --bg-color: #0f1812;
+    --card-bg-color: rgba(20, 35, 25, 0.6);
+    --border-color: #2f5e38;
+    --text-primary: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --accent-color: #4ade80; /* Bright Green */
+    --accent-glow: 0 0 15px rgba(74, 222, 128, 0.3);
+    
+    /* Journey Graph */
+    --day-past-color: #18261e;
+    --day-future-color: #22543d;
+    --day-today-color: #fcd34d; /* Changed to Golden Amber for visibility */
+    --day-exam-color: #f87171;
+    --day-part-test-color: #38bdf8;
 }
 
+/* --- ROSE GOLD (Elegant & Warm) --- */
 [data-theme=rose-gold] {
-    --bg-color: #4a1c2b;
-    --card-bg-color: rgba(107, 48, 64, 0.4);
-    /* Reduced opacity */
-    --border-color: #b97a8d;
-    --text-primary: #f5e5e8;
-    --text-secondary: #d4b2bb;
-    --accent-color: #f5c6d3;
-    --accent-glow: 0 0 15px rgba(245, 198, 211, 0.4);
-    --day-past-color: #6b3040;
-    --day-future-color: #b97a8d;
-    --day-today-color: var(--accent-color);
-    --day-exam-color: #ff6d6d;
-    --day-part-test-color: #f5c6d3
+    --bg-color: #1c1014;
+    --card-bg-color: rgba(45, 25, 30, 0.6);
+    --border-color: #9f5f6c;
+    --text-primary: #fff1f2;
+    --text-secondary: #d6b4bc;
+    --accent-color: #fb7185; /* Rose */
+    --accent-glow: 0 0 15px rgba(251, 113, 133, 0.4);
+    
+    /* Journey Graph */
+    --day-past-color: #381e25;
+    --day-future-color: #831843;
+    --day-today-color: #ffffff; /* Changed to White to separate from Pink accent */
+    --day-exam-color: #e11d48; /* Darker Red */
+    --day-part-test-color: #fbcfe8;
 }
 
+/* --- OCEAN (Deep & Clear) --- */
 [data-theme=ocean] {
-    --bg-color: #0d1b2a;
-    --card-bg-color: rgba(27, 38, 59, 0.4);
-    /* Reduced opacity */
-    --border-color: #415a77;
-    --text-primary: #e0e1dd;
-    --text-secondary: #778da9;
-    --accent-color: #61a5c2;
-    --accent-glow: 0 0 15px rgba(97, 165, 194, 0.4);
-    --day-past-color: #1b263b;
-    --day-future-color: #415a77;
-    --day-today-color: var(--accent-color);
-    --day-exam-color: #ff6b6b;
-    --day-part-test-color: #61a5c2
+    --bg-color: #020617;
+    --card-bg-color: rgba(15, 23, 42, 0.65);
+    --border-color: #1e40af;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --accent-color: #38bdf8; /* Sky Blue */
+    --accent-glow: 0 0 15px rgba(56, 189, 248, 0.3);
+    
+    /* Journey Graph */
+    --day-past-color: #172554;
+    --day-future-color: #1e3a8a;
+    --day-today-color: #ccfbf1; /* Changed to Minty White to stand out from Blue */
+    --day-exam-color: #ef4444;
+    --day-part-test-color: #60a5fa;
 }
 
+/* --- SUNSET (Vibrant & Gradient-like) --- */
 [data-theme=sunset] {
-    --bg-color: #2c0e37;
-    --card-bg-color: rgba(74, 29, 89, 0.4);
-    /* Reduced opacity */
-    --border-color: #83387a;
-    --text-primary: #f8f3f9;
-    --text-secondary: #e4a1d4;
-    --accent-color: #ff6d6d;
-    --accent-glow: 0 0 15px rgba(255, 109, 109, 0.4);
-    --day-past-color: #4a1d59;
-    --day-future-color: #83387a;
-    --day-today-color: var(--accent-color);
-    --day-exam-color: #e4a1d4;
-    --day-part-test-color: #ff6d6d
+    --bg-color: #2a0a2e;
+    --card-bg-color: rgba(50, 15, 55, 0.6);
+    --border-color: #c026d3;
+    --text-primary: #fae8ff;
+    --text-secondary: #e879f9;
+    --accent-color: #f59e0b; /* Orange */
+    --accent-glow: 0 0 15px rgba(245, 158, 11, 0.4);
+    
+    /* Journey Graph */
+    --day-past-color: #4a044e;
+    --day-future-color: #86198f;
+    --day-today-color: #ffffff; /* Changed to White */
+    --day-exam-color: #db2777; /* Deep Pink/Red */
+    --day-part-test-color: #fcd34d; /* Yellow */
 }
 
+/* --- DRACULA (Official Palette) --- */
 [data-theme=dracula] {
     --bg-color: #282a36;
-    --card-bg-color: rgba(68, 71, 90, 0.45);
-    /* Reduced opacity */
+    --card-bg-color: rgba(40, 42, 54, 0.75);
     --border-color: #6272a4;
     --text-primary: #f8f8f2;
-    --text-secondary: #bd93f9;
-    --accent-color: #ff79c6;
-    --accent-glow: 0 0 15px rgba(255, 121, 198, 0.4);
+    --text-secondary: #bfbfbf;
+    --accent-color: #ff79c6; /* Pink */
+    --accent-glow: 0 0 15px rgba(255, 121, 198, 0.3);
+    
+    /* Journey Graph */
     --day-past-color: #44475a;
     --day-future-color: #6272a4;
-    --day-today-color: var(--accent-color);
+    --day-today-color: #f1fa8c; /* Changed to Dracula Yellow */
     --day-exam-color: #ff5555;
-    --day-part-test-color: #bd93f9
+    --day-part-test-color: #8be9fd;
 }
 
+/* --- ALAKH PANDEY (Education Gold) --- */
 [data-theme=alakh-pandey] {
-    --bg-color: #1e1e1e;
-    --card-bg-color: rgba(40, 40, 40, 0.4);
-    /* Reduced opacity */
-    --border-color: #f5cb5c;
+    --bg-color: #111111;
+    --card-bg-color: rgba(30, 30, 30, 0.7);
+    --border-color: #ca8a04;
     --text-primary: #ffffff;
-    --text-secondary: #e0e0e0;
-    --accent-color: #f5cb5c;
-    --accent-glow: 0 0 15px rgba(245, 203, 92, 0.4);
-    --day-past-color: #333533;
-    --day-future-color: #4f4f4f;
-    --day-today-color: var(--accent-color);
-    --day-exam-color: #cf6679;
-    --day-part-test-color: #bb86fc
+    --text-secondary: #d4d4d4;
+    --accent-color: #eab308; /* Gold */
+    --accent-glow: 0 0 15px rgba(234, 179, 8, 0.3);
+    
+    /* Journey Graph */
+    --day-past-color: #262626;
+    --day-future-color: #404040;
+    --day-today-color: #ffffff; /* Changed to White to contrast with Gold */
+    --day-exam-color: #dc2626;
+    --day-part-test-color: #fef08a;
 }
 
+/* --- CHAITANYA NOOB (Hacker/Terminal) --- */
 [data-theme=chaitanya-noob] {
     --bg-color: #000000;
-    --card-bg-color: transparent;
-    --border-color: #39ff14;
-    --text-primary: #39ff14;
-    --text-secondary: #ff00ff;
-    --accent-color: #39ff14;
-    --accent-glow: 0 0 20px rgba(57, 255, 20, 0.5);
-    --card-shadow: 0 0 10px rgba(57, 255, 20, 0.3);
-    --day-past-color: transparent;
-    --day-future-color: transparent;
-    --day-today-color: transparent;
-    --day-exam-color: transparent;
-    --day-part-test-color: transparent
-}
-
-[data-theme=god-mode] {
-    --bg-color: #000000;
-    --card-bg-color: rgba(10, 20, 10, 0.7);
+    --card-bg-color: rgba(0, 20, 0, 0.85);
     --border-color: #00ff00;
     --text-primary: #00ff00;
-    --text-secondary: #008000;
+    --text-secondary: #008f11;
     --accent-color: #00ff00;
-    --font-family: 'Fira Code', monospace;
-    --day-past-color: #002000;
-    --day-future-color: #004000;
-    --day-today-color: #00ff00;
+    --accent-glow: 0 0 10px rgba(0, 255, 0, 0.4);
+    --card-shadow: 0 0 0px transparent;
+    
+    /* Journey Graph */
+    --day-past-color: transparent;
+    --day-future-color: #003300;
+    --day-today-color: #ffffff; /* Changed to White to pop on the green terminal */
     --day-exam-color: #ff0000;
-    --day-part-test-color: #00ffff
+    --day-part-test-color: #00ff00;
 }
 
+/* --- COFFEE BREAK (Warm, Cozy, Productive) --- */
+[data-theme=coffee] {
+    --bg-color: #1b1414; /* Dark Roasted Bean */
+    --card-bg-color: rgba(62, 39, 35, 0.6); /* Espresso glass */
+    --border-color: #8d6e63; /* Light wood */
+    --text-primary: #efebe9; /* Frothed milk */
+    --text-secondary: #d7ccc8; /* Latte */
+    --accent-color: #d7ccc8; /* Cream */
+    --accent-glow: 0 0 15px rgba(215, 204, 200, 0.3);
+    
+    /* Journey Graph */
+    --day-past-color: #3e2723;
+    --day-future-color: #5d4037;
+    --day-today-color: #ffffff; /* White pop */
+    --day-exam-color: #ffab91; /* Warm Peach */
+    --day-part-test-color: #a1887f;
+}
+
+/* --- NORDIC FROST (Clean, Cold, Minimalist) --- */
+[data-theme=nordic] {
+    --bg-color: #0f172a; /* Deep Slate */
+    --card-bg-color: rgba(30, 41, 59, 0.7); /* Slate glass */
+    --border-color: #475569; /* Steel */
+    --text-primary: #f1f5f9; /* Snow */
+    --text-secondary: #94a3b8; /* Ice grey */
+    --accent-color: #38bdf8; /* Glacial Blue */
+    --accent-glow: 0 0 15px rgba(56, 189, 248, 0.4);
+    
+    /* Journey Graph */
+    --day-past-color: #1e293b;
+    --day-future-color: #334155;
+    --day-today-color: #e0f2fe; /* Pale Ice */
+    --day-exam-color: #f43f5e; /* Berry Red */
+    --day-part-test-color: #7dd3fc;
+}
+
+/* --- LAVENDER HAZE (Calm, Lo-Fi, Dreamy) --- */
+[data-theme=lavender] {
+    --bg-color: #151019; /* Deep violet black */
+    --card-bg-color: rgba(40, 30, 50, 0.65);
+    --border-color: #7c3aed; /* Electric Violet border */
+    --text-primary: #f3e8ff; /* Pale Lavender */
+    --text-secondary: #c084fc; /* Bright Purple */
+    --accent-color: #d8b4fe; /* Soft Lilac */
+    --accent-glow: 0 0 20px rgba(192, 132, 252, 0.3);
+    
+    /* Journey Graph */
+    --day-past-color: #2e1065;
+    --day-future-color: #4c1d95;
+    --day-today-color: #ffffff;
+    --day-exam-color: #f472b6; /* Pink */
+    --day-part-test-color: #a78bfa;
+}
+
+/* --- CRIMSON ELITE (Intense, Sith-like Focus) --- */
+[data-theme=crimson] {
+    --bg-color: #050000; /* Void */
+    --card-bg-color: rgba(30, 5, 5, 0.7); /* Blood glass */
+    --border-color: #7f1d1d; /* Dark Red border */
+    --text-primary: #ffe4e6; /* Rose white */
+    --text-secondary: #fca5a5; /* Light Red */
+    --accent-color: #ef4444; /* True Red */
+    --accent-glow: 0 0 15px rgba(239, 68, 68, 0.5);
+    
+    /* Journey Graph */
+    --day-past-color: #450a0a;
+    --day-future-color: #7f1d1d;
+    --day-today-color: #ffffff; /* Stark White */
+    --day-exam-color: #991b1b; /* Dark Blood */
+    --day-part-test-color: #f87171;
+}
+
+/* --- GOD MODE (The Matrix) --- */
+[data-theme=god-mode] {
+    --bg-color: #000000;
+    --card-bg-color: rgba(0, 0, 0, 0.8);
+    --border-color: #22c55e;
+    --text-primary: #4ade80;
+    --text-secondary: #15803d;
+    --accent-color: #22c55e;
+    --font-family: 'Fira Code', monospace;
+    
+    /* Journey Graph */
+    --day-past-color: #052e16;
+    --day-future-color: #14532d;
+    --day-today-color: #ffffff; /* Changed to White */
+    --day-exam-color: #dc2626;
+    --day-part-test-color: #22d3ee;
+}
 [data-theme=chaitanya-noob] .card {
     backdrop-filter: none;
     -webkit-backdrop-filter: none
@@ -1340,4 +1416,28 @@ input[type="date"] {
 input[type="date"]::-webkit-date-and-time-value {
     text-align: left;
     min-height: 1.5em; /* Prevents text from being cut off */
+}
+
+select.form-input {
+    background-color: rgba(0, 0, 0, 0.3); /* Darker tint for better contrast */
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+
+/* 2. Style the dropdown list (Must be SOLID color to prevent glitches) */
+select.form-input option {
+    background-color: var(--bg-color); /* Uses the theme's solid background */
+    color: var(--text-primary);        /* Uses the theme's text color */
+}
+
+/* 3. Specific fix for Light Theme to ensure high contrast */
+[data-theme="light"] select.form-input {
+    background-color: #ffffff;
+    color: #333333;
+    border: 1px solid #cccccc;
+}
+
+[data-theme="light"] select.form-input option {
+    background-color: #ffffff;
+    color: #000000;
 }

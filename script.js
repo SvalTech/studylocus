@@ -160,6 +160,8 @@ document.addEventListener("DOMContentLoaded", () => {
             focusShieldEnabled: false,
             ricedModeEnabled: false,
             userSubjects: [],
+            customExamName: "", 
+            customExamDate: "",
             ...parsedSettings,
         },
         cardProps: JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEYS.cardProps)) || {
@@ -366,11 +368,15 @@ document.addEventListener("DOMContentLoaded", () => {
             jeeSession: document.getElementById("jee-session-select"), // NEW
             jeeShift: document.getElementById("jee-shift-input"), // NEW
             jeeContainer: document.getElementById("jee-details-container"),
+            customContainer: document.getElementById("custom-exam-container"),
+            customName: document.getElementById("custom-exam-name"),
+            customDate: document.getElementById("custom-exam-date"),
         },
         mobileAlert: document.getElementById("mobile-alert"),
         confirmTitle: document.getElementById("confirm-title"),
         confirmMessage: document.getElementById("confirm-message"),
         godModePanel: document.getElementById("god-mode-panel"),
+        
     };
     // --- App Loading State ---
     // Disable controls until Firebase auth state is resolved
@@ -746,13 +752,14 @@ function sanitizeDashboardState() {
 
      */
     const getTargetExamDate = () => {
-        const {
-            examType,
-            examYear,
-            jeeSession,
-            jeeShiftDate
-        } = appState.settings;
+        const { examType, examYear, jeeSession, jeeShiftDate, customExamDate } = appState.settings;
         // 1. If JEE and user entered a specific shift date, use it
+
+        if (examType === "Custom") {
+            if (customExamDate) return new Date(customExamDate + "T00:00:00");
+            return new Date(); // Fallback to today if no date set
+        }
+
         if (examType === "JEE" && jeeShiftDate) {
             return new Date(jeeShiftDate + "T00:00:00"); // Assume 9 AM start
         }
@@ -1037,7 +1044,7 @@ function sanitizeDashboardState() {
                             <div class="flex items-center">
                                 <span class="font-bold text-white mr-2">${entry.name}</span>
                                 <span class="${currentTotal >= (cardData.targetScore || 0) ? 'text-green-400' : 'text-yellow-400'} font-bold">${currentTotal}</span>
-                                <span class="text-gray-600 text-[10px]">/${entry.maxMarks}</span>
+                                <span class="text-[10px]">/${entry.maxMarks}</span>
                             </div>
                             
                             <div class="flex gap-2 text-[10px] font-mono mt-0.5 opacity-80">
@@ -1598,24 +1605,46 @@ function sanitizeDashboardState() {
         }
         const currentSession = appState.settings.jeeSession || "January";
         const currentYear = appState.settings.examYear || "2026";
+
+        if (domElements.inputs.jeeSession && domElements.inputs.jeeSession.options.length === 0) {
+            ["January", "April"].forEach(session => {
+                const opt = document.createElement("option");
+                opt.value = session;
+                opt.textContent = session;
+                domElements.inputs.jeeSession.appendChild(opt);
+            });
+        }
+
         domElements.inputs.jeeSession.value = currentSession;
         // Check if user has a custom date, otherwise grab the default from your EXAM_DEFAULTS object
         const defaultDateStr = EXAM_DEFAULTS.JEE[currentSession]?.[currentYear] || "";
         // Set the input value to the custom date OR the default date
+        domElements.inputs.customName.value = appState.settings.customExamName || "";
+        domElements.inputs.customDate.value = appState.settings.customExamDate || "";
         domElements.inputs.jeeShift.value = appState.settings.jeeShiftDate || defaultDateStr;
         // Toggle visibility of JEE options
         if (appState.settings.examType === "JEE") {
             domElements.inputs.jeeContainer.classList.remove("hidden");
+            domElements.inputs.customContainer.classList.add("hidden");
+        } else if (appState.settings.examType === "Custom") {
+            domElements.inputs.jeeContainer.classList.add("hidden");
+            domElements.inputs.customContainer.classList.remove("hidden");
         } else {
             domElements.inputs.jeeContainer.classList.add("hidden");
+            domElements.inputs.customContainer.classList.add("hidden");
         }
         // Update main title
-        const {
-            examType,
-            examYear
-        } = appState.settings;
-        domElements.mainTitle.textContent = `${examType} ${examYear}`;
-        domElements.mainTitleRiced.textContent = `${examType} ${examYear}`;
+        const { examType, examYear, customExamName } = appState.settings;
+
+        let titleText;
+        if (examType === "Custom") {
+            titleText = customExamName ? customExamName : "My Exam";
+        } else {
+            titleText = `${examType} ${examYear}`;
+        }
+
+        domElements.mainTitle.textContent = titleText;
+        domElements.mainTitleRiced.textContent = titleText;
         // Update customize modal inputs
         domElements.inputs.theme.value = appState.settings.theme;
         domElements.inputs.font.value = appState.settings.font;
@@ -2707,6 +2736,8 @@ function sanitizeDashboardState() {
     // Save Session (Jan/April)
     domElements.inputs.jeeSession.addEventListener("change", () => {
         appState.settings.jeeSession = domElements.inputs.jeeSession.value;
+        appState.settings.jeeShiftDate = "";
+        domElements.inputs.jeeShift.value = "";
         saveAndApplySettings();
         // Update Main Title dynamically
         const {
@@ -2873,6 +2904,31 @@ function sanitizeDashboardState() {
             }
         }
     }
+
+
+    // Custom Exam Name Change
+    domElements.inputs.customName.addEventListener("input", () => {
+        appState.settings.customExamName = domElements.inputs.customName.value;
+        saveAndApplySettings();
+    });
+
+    // Custom Exam Date Change
+    domElements.inputs.customDate.addEventListener("change", () => {
+        appState.settings.customExamDate = domElements.inputs.customDate.value;
+        saveAndApplySettings();
+    });
+
+    // Update the Exam Type Listener to handle the UI toggle immediately
+    domElements.inputs.examType.addEventListener("change", () => {
+        appState.settings.examType = domElements.inputs.examType.value;
+        
+        // Immediate UI Toggle
+        domElements.inputs.jeeContainer.classList.toggle("hidden", appState.settings.examType !== "JEE");
+        domElements.inputs.customContainer.classList.toggle("hidden", appState.settings.examType !== "Custom");
+        
+        saveAndApplySettings();
+    });
+
     // --- App Initialization ---
     domElements.mainTitle.addEventListener("click", (event) => {
         if (event.detail === 3) {
@@ -3281,4 +3337,92 @@ function sanitizeDashboardState() {
         const zenBtn = document.getElementById('zen-mode-btn');
         controlsContainer.insertBefore(focusBtn, zenBtn);
     }
+
+    // --- KEYBOARD SHORTCUTS LOGIC ---
+
+    const shortcutsModal = document.getElementById("shortcuts-modal");
+    const closeShortcutsBtn = document.getElementById("close-shortcuts-modal");
+
+    if (closeShortcutsBtn) {
+        closeShortcutsBtn.addEventListener("click", () => {
+            shortcutsModal.classList.add("hidden");
+        });
+    }
+
+    document.addEventListener("keydown", (e) => {
+        // 1. IGNORE if user is typing in an input, textarea, or select
+        const tagName = document.activeElement.tagName;
+        const isTyping = (tagName === "INPUT" || tagName === "TEXTAREA" || tagName === "SELECT" || document.activeElement.isContentEditable);
+
+        // Exception: Allow ESC to blur focus from an input
+        if (e.key === "Escape") {
+            if (isTyping) {
+                document.activeElement.blur();
+                return;
+            }
+            // Close all modals
+            Object.values(domElements.modals).forEach(modal => modal.classList.add("hidden"));
+            if (shortcutsModal) shortcutsModal.classList.add("hidden");
+            if (document.getElementById('mobile-alert')) document.getElementById('mobile-alert').classList.add("hidden");
+            return;
+        }
+
+        // If typing, stop here. Do not trigger other shortcuts.
+        if (isTyping) return;
+
+        // 2. SHORTCUT MAPPINGS
+        const key = e.key.toLowerCase();
+
+        switch (key) {
+            case " ": // Spacebar -> Toggle Active Timer
+                e.preventDefault(); // Prevent scrolling
+                // Priority: Active Timer -> First Pomodoro -> First Logger
+                let targetId = appState.activeTimer.cardId;
+                let targetType = appState.activeTimer.type;
+
+                if (!targetId) {
+                    const pomCard = appState.customCards.find(c => c.type === "pomodoro");
+                    if (pomCard) {
+                        targetId = pomCard.id;
+                        targetType = "pomodoro";
+                    }
+                }
+
+                if (targetId && targetType) {
+                    if (targetType === "pomodoro") pomodoroTimer.toggle(targetId);
+                    if (targetType === "time-logger") window.timeLogger.toggle(targetId);
+                }
+                break;
+
+            case "z": // Z -> Toggle Zen Mode
+                domElements.body.classList.toggle("zen-mode");
+                const isZen = domElements.body.classList.contains("zen-mode");
+                domElements.buttons.exitZenBtn.classList.toggle("hidden", !isZen);
+                break;
+
+            case "n": // N -> New Card Modal
+                e.preventDefault();
+                domElements.modals.addCard.classList.remove("hidden");
+                // Auto-focus the input
+                setTimeout(() => domElements.forms.newCard.querySelector("input").focus(), 100);
+                break;
+
+            case "c": // C -> Customize Menu
+                domElements.modals.customize.classList.toggle("hidden");
+                break;
+            
+            case "f": // F -> Super Focus Mode
+                // Check if the focus mode function exists (from your existing code)
+                if (typeof openFocusMode === 'function') {
+                    openFocusMode();
+                }
+                break;
+
+            case "?": // ? (Shift + /) -> Show Shortcuts Help
+            case "/":
+                if (shortcutsModal) shortcutsModal.classList.remove("hidden");
+                break;
+        }
+    });
+
 });
