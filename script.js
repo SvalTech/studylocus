@@ -438,72 +438,102 @@ document.addEventListener("DOMContentLoaded", () => {
         domElements.dashboardGrid.style.opacity = "1";
     };
     /**
-
-    * Updates the auth container UI based on the current user state.
-
-    */
+     * Updates the auth container UI based on the current user state.
+     */
     const updateAuthUI = () => {
         const containers = [domElements.authContainer, domElements.authContainerRiced];
-        if (currentUser) {
-            // User is signed in
-            const userMenuHTML = `
+        
+        // Icons
+        const logoutIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>`;
+        const googleIcon = `<svg class="w-4 h-4" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M47.532 24.552c0-1.566-.14-3.084-.404-4.548H24.5v8.58h12.944c-.566 2.76-2.213 5.108-4.72 6.708v5.524h7.112c4.162-3.832 6.596-9.42 6.596-16.264z" fill="#4285F4"/><path d="M24.5 48c6.48 0 11.944-2.14 15.928-5.788l-7.112-5.524c-2.14 1.44-4.884 2.292-7.816 2.292-6.004 0-11.084-4.04-12.9-9.492H4.42v5.7c3.48 6.912 10.32 11.532 18.08 11.532l2 .28z" fill="#34A853"/><path d="M11.6 28.98c-.34-.996-.54-2.052-.54-3.144s.2-2.148.54-3.144V16.992H4.42C2.852 20.04 2 23.436 2 27.024c0 3.588.852 6.984 2.42 10.032l7.18-5.7v-.376z" fill="#FBBC05"/><path d="M24.5 9.8c3.516 0 6.66 1.212 9.128 3.54l6.32-6.32C36.44.88 30.98 0 24.5 0 16.74 0 9.9 4.62 6.42 11.532l7.18 5.7c1.816-5.452 6.896-9.432 12.9-9.432z" fill="#EA4335"/></svg>`;
 
-                            <div class="relative" id="user-menu-container">
+        containers.forEach(container => {
+            if (!container) return;
 
-                                <button id="user-menu-button" title="User Menu" class="flex items-center justify-center w-10 h-10 rounded-full transition-colors hover:bg-white/20 ">
+            if (currentUser) {
+                // --- SIGNED IN (Subtle Avatar) ---
+                const userMenuHTML = `
+                    <div class="relative group" id="user-menu-container">
+                        <button id="user-menu-button" title="User Menu" class="flex items-center justify-center rounded-full transition-transform active:scale-95 focus:outline-none">
+                            <img src="${currentUser.photoURL}" alt="User" class="w-8 h-8 rounded-full object-cover border border-transparent group-hover:border-[var(--border-color)] opacity-90 group-hover:opacity-100 transition-all" />
+                        </button>
 
-                                    <img src="${currentUser.photoURL}" alt="${currentUser.displayName}" class="w-8 h-8 rounded-full pointer-events-none" />
-
-                                    <!-- <span class="text-sm font-semibold hidden sm:inline ml-2 pointer-events-none">${currentUser.displayName.split(" ")[0]}</span> -->
-
-                                </button>
-
-                                <div id="user-menu-dropdown" class="card absolute right-0 mt-2 w-48 p-2 hidden z-50">
-
-                                    <div class="px-2 py-1 mb-1 border-b" style="border-color: var(--border-color);">
-
-                                        <p class="text-sm font-semibold truncate" title="${currentUser.displayName}">${currentUser.displayName}</p>
-
-                                        <p class="text-xs text-secondary truncate" title="${currentUser.email}">${currentUser.email}</p>
-
-                                    </div>
-
-                                    <button id="sign-out-btn" class="w-full text-left flex items-center gap-2 p-2 rounded-md hover:bg-white/10 transition-colors">
-
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-
-                                        <span>Sign Out</span>
-
-                                    </button>
-
+                        <div id="user-menu-dropdown" class="absolute right-0 mt-2 w-56 origin-top-right transform transition-all duration-200 scale-95 opacity-0 invisible z-50">
+                            <div class="card p-0 overflow-hidden shadow-xl ring-1 ring-black/5 backdrop-blur-xl">
+                                
+                                <div class="px-4 py-3 border-b border-[var(--border-color)] bg-white/5">
+                                    <p class="text-sm font-semibold text-[var(--text-primary)] truncate">${currentUser.displayName}</p>
+                                    <p class="text-xs text-[var(--text-secondary)] truncate font-mono opacity-75">${currentUser.email}</p>
                                 </div>
 
+                                <div class="p-1">
+                                    <button id="sign-out-btn" class="w-full text-left flex items-center gap-2 px-3 py-2 text-xs font-medium text-[var(--text-secondary)] rounded hover:bg-white/10 hover:text-red-400 transition-colors">
+                                        ${logoutIcon}
+                                        <span>Sign Out</span>
+                                    </button>
+                                </div>
                             </div>
-
-                        `;
-            containers.forEach(container => {
-                if (!container) return;
+                        </div>
+                    </div>
+                `;
                 container.innerHTML = userMenuHTML;
-                // Add event listeners for the new dropdown
-                const userMenuButton = container.querySelector("#user-menu-button");
-                const userMenuDropdown = container.querySelector("#user-menu-dropdown");
+
+                // Listeners
+                const btn = container.querySelector("#user-menu-button");
+                const dropdown = container.querySelector("#user-menu-dropdown");
                 const signOutBtn = container.querySelector("#sign-out-btn");
-                userMenuButton.addEventListener("click", (event) => {
-                    event.stopPropagation();
-                    userMenuDropdown.classList.toggle("hidden");
-                });
+
+                const toggleMenu = (e) => {
+                    e.stopPropagation();
+                    const isHidden = dropdown.classList.contains("invisible");
+                    
+                    if (isHidden) {
+                        dropdown.classList.remove("invisible", "opacity-0", "scale-95");
+                        dropdown.classList.add("opacity-100", "scale-100");
+                        
+                        // --- SMART POSITIONING FIX ---
+                        const rect = dropdown.getBoundingClientRect();
+                        const screenWidth = window.innerWidth;
+                        
+                        // If the right edge of the menu is past the screen width
+                        if (rect.right > screenWidth) {
+                            // Shift it left by the difference + 10px padding
+                            const overflow = rect.right - screenWidth + 10;
+                            dropdown.style.right = `${overflow}px`;
+                        } else {
+                            dropdown.style.right = "0px"; // Reset if normal
+                        }
+                        // -----------------------------
+                        
+                    } else {
+                        dropdown.classList.add("invisible", "opacity-0", "scale-95");
+                        dropdown.classList.remove("opacity-100", "scale-100");
+                        dropdown.style.right = ""; // Reset style on close
+                    }
+                };
+
+                btn.addEventListener("click", toggleMenu);
                 signOutBtn.addEventListener("click", signOutUser);
-            });
-        } else {
-            // User is signed out
-            const signInHTML = '<button id="sign-in-btn" class="flex items-center justify-center w-10 h-10 rounded-full transition-colors hover:bg-white/20 sm:w-auto sm:px-3 sm:py-2"><svg class="w-5 h-5" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">\n                            <path d="M47.532 24.552c0-1.566-.14-3.084-.404-4.548H24.5v8.58h12.944c-.566 2.76-2.213 5.108-4.72 6.708v5.524h7.112c4.162-3.832 6.596-9.42 6.596-16.264z" fill="#4285F4"/><path d="M24.5 48c6.48 0 11.944-2.14 15.928-5.788l-7.112-5.524c-2.14 1.44-4.884 2.292-7.816 2.292-6.004 0-11.084-4.04-12.9-9.492H4.42v5.7c3.48 6.912 10.32 11.532 18.08 11.532l2 .28z" fill="#34A853"/><path d="M11.6 28.98c-.34-.996-.54-2.052-.54-3.144s.2-2.148.54-3.144V16.992H4.42C2.852 20.04 2 23.436 2 27.024c0 3.588.852 6.984 2.42 10.032l7.18-5.7v-.376z" fill="#FBBC05"/><path d="M24.5 9.8c3.516 0 6.66 1.212 9.128 3.54l6.32-6.32C36.44.88 30.98 0 24.5 0 16.74 0 9.9 4.62 6.42 11.532l7.18 5.7c1.816-5.452 6.896-9.432 12.9-9.432z" fill="#EA4335"/>\n                        </svg><span class="text-sm font-semibold hidden sm:inline ml-2">Sign In</span></button>';
-            containers.forEach(container => {
-                if (container) {
-                    container.innerHTML = signInHTML;
-                    container.querySelector("#sign-in-btn").addEventListener("click", signInWithGoogle);
-                }
-            });
-        }
+
+                document.addEventListener("click", (e) => {
+                    if (!container.contains(e.target)) {
+                        dropdown.classList.add("invisible", "opacity-0", "scale-95");
+                        dropdown.classList.remove("opacity-100", "scale-100");
+                    }
+                });
+
+            } else {
+                // --- SIGNED OUT (Subtle Glass Button) ---
+                const signInHTML = `
+                    <button id="sign-in-btn" class="flex items-center gap-2 px-3 py-1.5 rounded-md border border-[var(--border-color)] bg-transparent hover:bg-white/5 text-[var(--text-primary)] transition-all text-xs font-medium">
+                        ${googleIcon}
+                        <span class="opacity-90">Sign In</span>
+                    </button>
+                `;
+                container.innerHTML = signInHTML;
+                container.querySelector("#sign-in-btn").addEventListener("click", signInWithGoogle);
+            }
+        });
     };
     /**
 
@@ -666,7 +696,46 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
     // --- Modals & Utility Functions ---
-    let confirmCallback = null; // Stores the 'OK' action for the confirm modal
+    // --- Modals & Utility Functions (Updated) ---
+    let confirmCallback = null;
+    let cancelCallback = null; // New: Stores the 'Cancel' action
+
+    /**
+     * Displays a confirmation modal with customizable buttons and callbacks.
+     */
+    function showConfirmModal(message, onConfirm, title = "Are you sure?", onCancel = null, okText = "Confirm", cancelText = "Cancel") {
+        domElements.confirmTitle.textContent = title;
+        domElements.confirmMessage.textContent = message;
+        
+        // Update Button Text
+        domElements.buttons.confirmOk.textContent = okText;
+        domElements.buttons.confirmCancel.textContent = cancelText;
+
+        confirmCallback = onConfirm;
+        cancelCallback = onCancel;
+        domElements.modals.confirm.classList.remove("hidden");
+    }
+
+    // --- Updated Confirm Modal Listeners ---
+    // (Replace your old confirmCancel and confirmOk listeners with these)
+    
+    domElements.buttons.confirmCancel.addEventListener("click", () => {
+        if (typeof cancelCallback === "function") {
+            cancelCallback(); // Execute specific cancel logic (e.g., "Don't show again")
+        }
+        domElements.modals.confirm.classList.add("hidden");
+        confirmCallback = null;
+        cancelCallback = null;
+    });
+
+    domElements.buttons.confirmOk.addEventListener("click", () => {
+        if (typeof confirmCallback === "function") {
+            confirmCallback(); // Execute confirm logic
+        }
+        domElements.modals.confirm.classList.add("hidden");
+        confirmCallback = null;
+        cancelCallback = null;
+    });
     /**
 
     * Displays a confirmation modal.
@@ -1558,6 +1627,8 @@ function sanitizeDashboardState() {
             }
         });
     }
+
+    
     // --- Settings Application ---
     /**
 
@@ -2457,13 +2528,13 @@ function sanitizeDashboardState() {
         reader.readAsText(file);
     });
     // --- Mobile Alert ---
-    if (window.innerWidth < 768 && localStorage.getItem(LOCAL_STORAGE_KEYS.mobileAlertDismissed) !== "true") {
-        domElements.mobileAlert.classList.remove("hidden");
-    }
-    domElements.buttons.closeAlert.addEventListener("click", () => {
-        domElements.mobileAlert.classList.add("hidden");
-        localStorage.setItem(LOCAL_STORAGE_KEYS.mobileAlertDismissed, "true");
-    });
+    // if (window.innerWidth < 768 && localStorage.getItem(LOCAL_STORAGE_KEYS.mobileAlertDismissed) !== "true") {
+    //     domElements.mobileAlert.classList.remove("hidden");
+    // }
+    // domElements.buttons.closeAlert.addEventListener("click", () => {
+    //     domElements.mobileAlert.classList.add("hidden");
+    //     localStorage.setItem(LOCAL_STORAGE_KEYS.mobileAlertDismissed, "true");
+    // });
     // --- Info Modal ---
     domElements.buttons.info.forEach(btn => btn.addEventListener("click", () => domElements.modals.info.classList.remove("hidden")));
     domElements.buttons.closeInfo.addEventListener("click", () => domElements.modals.info.classList.add("hidden"));
@@ -3425,4 +3496,148 @@ function sanitizeDashboardState() {
         }
     });
 
+// --- Updated Tutorial Logic ---
+    const startTutorial = () => {
+        // Check if Driver.js is loaded
+        if (!window.driver?.js?.driver) {
+            console.warn("Driver.js not loaded");
+            return;
+        }
+
+        // --- STEP 1: UI CLEANUP ---
+        // Close the Info Modal immediately
+        const infoModal = document.getElementById("info-modal");
+        if (infoModal) infoModal.classList.add("hidden");
+        
+        // Close Customise Modal if open
+        const customizeModal = document.getElementById("customize-modal");
+        if (customizeModal) customizeModal.classList.add("hidden");
+
+        // --- STEP 2: START DRIVER AFTER DELAY ---
+        // We wait 300ms to let the modal vanish visually before the tutorial highlights elements
+        setTimeout(() => {
+            const driver = window.driver.js.driver;
+
+            // Determine active layout (for the button highlighting fix)
+            const isRicedMode = appState.settings.ricedModeEnabled; 
+            const headerScope = isRicedMode ? '.top-bar' : '.default-header';
+
+            const rawSteps = [
+                {
+                    element: isRicedMode ? '#main-title-riced' : '#main-title',
+                    popover: {
+                        title: 'Welcome to StudyLocus',
+                        description: 'Your personal JEE/NEET command center. Drag cards to reorder them.',
+                        side: 'bottom',
+                        align: 'start'
+                    }
+                },
+                {
+                    element: '#dashboard-grid',
+                    popover: {
+                        title: 'Your Workspace',
+                        description: 'This is where your study tools live.',
+                        side: 'top'
+                    }
+                },
+                {
+                    element: `${headerScope} .add-card-btn`,
+                    popover: {
+                        title: 'Add Widgets',
+                        description: 'Click here to add To-Do lists, Timers, Graphs, or YouTube videos.',
+                        side: 'bottom'
+                    }
+                },
+                {
+                    element: `${headerScope} .customize-btn`,
+                    popover: {
+                        title: 'Customise',
+                        description: 'Change themes, fonts, wallpapers, and set your Exam Goal here. (IMPORTANT)',
+                        side: 'bottom'
+                    }
+                },
+                {
+                    element: `${headerScope} .zen-mode-btn`,
+                    popover: {
+                        title: 'Zen Mode',
+                        description: 'Hide everything except your dashboard for deep focus.',
+                        side: 'bottom'
+                    }
+                },
+                {
+                    element: '.fab-container',
+                    popover: {
+                        title: 'Quick Tools',
+                        description: 'Fast access to Syllabus Tracker and Zenith.',
+                        side: 'left'
+                    }
+                },
+                {
+                    // Selects the correct container based on the current mode
+                    element: isRicedMode ? '#auth-container-riced' : '#auth-container',
+                    popover: {
+                        title: 'Cloud Sync & Backup',
+                        description: 'Sign in with Google to save your dashboard, tasks, and settings to the cloud. Never lose your progress and access your study space from any device! NOT COMPULSORY :)',
+                        side: 'left',
+                        align: 'center'
+                    }
+                },
+                {
+                    element: isRicedMode ? '#main-title-riced' : '#main-title',
+                    popover: {
+                        title: 'Well, good luck with your preparation!',
+                        description: "If you like the project, share it with others and follow me on github pls 🙂",
+                        side: 'bottom',
+                        align: 'center'
+                    }
+                },
+            ];
+
+            // Filter for visible elements only
+            const validSteps = rawSteps.filter(step => {
+                const el = document.querySelector(step.element);
+                return el && (el.offsetWidth > 0 || el.offsetHeight > 0);
+            });
+
+            const driverObj = driver({
+                showProgress: true,
+                animate: true,
+                allowClose: true,
+                overlayClickNext: false,
+                popoverClass: 'driverjs-theme',
+                steps: validSteps,
+                onDestroyStarted: () => {
+                    localStorage.setItem("tutorialSeen_v2", "true");
+                    driverObj.destroy();
+                }
+            });
+
+            driverObj.drive();
+        }, 300); // 300ms delay for smooth transition
+    };
+
+    const hasSeenTutorial = localStorage.getItem("tutorialSeen_v2");
+    window.startTutorial = startTutorial;
+
+    if (!hasSeenTutorial) {
+        console.log("User has not seen tutorial. Prompting...");
+        
+        setTimeout(() => {
+            showConfirmModal(
+                "Would you like a quick tour of the dashboard features?", // Message
+                () => {
+                    // User clicked "Start Tour"
+                    startTutorial(); 
+                },
+                "Welcome to StudyLocus!", // Title
+                () => {
+                    // User clicked "Skip"
+                    // Mark as seen so we don't ask again
+                    localStorage.setItem("tutorialSeen_v2", "true");
+                },
+                "Start Tour", // Confirm Button Text
+                "Skip"        // Cancel Button Text
+            );
+        }, 1500); 
+    }
 });

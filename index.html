@@ -52,7 +52,34 @@
             }
         }
     </script>
+    <style>
+        /* FORCE Tutorial on top of everything */
+        .driver-popover.driverjs-theme {
+            z-index: 999999 !important; 
+            background-color: #18181b;
+            color: white;
+            border: 1px solid #3f3f46;
+        }
 
+        /* Ensure the overlay is also on top of your navbar/modals */
+        #driver-page-overlay {
+            z-index: 999998 !important;
+        }
+
+        /* Make sure buttons are visible and clickable */
+        .driver-popover.driverjs-theme button {
+            background-color: #27272a;
+            color: white;
+            border: 1px solid #52525b;
+            text-shadow: none;
+            cursor: pointer;
+            z-index: 1000000; /* Super high to ensure clickability */
+        }
+
+        .driver-popover.driverjs-theme button:hover {
+            background-color: var(--accent-color, #6366f1);
+        }
+    </style>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
@@ -60,6 +87,8 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.js.iife.js"></script>
     <link rel="stylesheet" href="styles.css">
     <script type="application/ld+json">
     {
@@ -90,7 +119,7 @@
     gtag('config', 'G-TCK0S6VC58');
 </script>
 
-<body class="antialiased relative min-h-screen supports-[min-h-[100dvh]]:min-h-[100dvh]">
+<body class="antialiased">
 
     <div id="app-background" class="fixed inset-0 w-full h-full -z-50 pointer-events-none">
         </div>
@@ -1004,14 +1033,14 @@
         </div>
     </div>
 
-    <div id="mobile-alert"
+    <!-- <div id="mobile-alert"
         class="fixed bottom-4 left-4 right-4 bg-yellow-400 text-black p-3 text-center text-sm rounded-lg flex justify-between items-center hidden z-50">
         <span>Welcome to StudyLocus! This is your personalized JEE/NEET dashboard. Drag, drop, and click the '+' button
             to add different cards to your space. Use the customise button to customise the dashboard to your liking.
             For more details, check the Information tab.</span>
         <button id="close-alert-btn" class="font-bold text-lg ml-4" aria-label="Close mobile alert">&times;</button>
     </div>
-    
+     -->
     <div id="info-modal" class="modal-overlay hidden">
         <div class="card w-11/12 max-w-lg">
             <!-- Tab Navigation -->
@@ -1026,6 +1055,10 @@
             <div>
                 <!-- Quick Start Panel -->
                 <div id="tab-quick-start" class="tab-content space-y-3 text-sm">
+                    <button onclick="startTutorial()" class="w-full mb-4 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md font-bold transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+                        Take the Tour
+                    </button>
                     <p><strong>YOU CAN NOW CHANGE DATE ACCORDING TO UR SHIFT IN CUSTOMISE MENU !!!</strong></p>
                     <p>Open "What's new" to see more changes !!!!</p>
                     <p>If you liked this update, follow me on <a href="https://github.com/svalordev" style="color:aqua" target="_blank">github</a>!</p>
