@@ -941,9 +941,9 @@ function sanitizeDashboardState() {
                 cardElement.querySelector('[data-value="days"]').innerText = Math.floor(diff / (1000 * 60 * 60 * 24)).toString().padStart(2, "0");
                 cardElement.querySelector('[data-value="hours"]').innerText = Math.floor((diff / (1000 * 60 * 60)) % 24).toString().padStart(2, "0");
                 cardElement.querySelector('[data-value="minutes"]').innerText = Math.floor((diff / (1000 * 60)) % 60).toString().padStart(2, "0");
-                // cardElement.querySelector('[data-value="seconds"]').innerText = Math.floor((diff / 1000) % 60)
-                //     .toString()
-                //     .padStart(2, "0");
+                cardElement.querySelector('[data-value="seconds"]').innerText = Math.floor((diff / 1000) % 60)
+                    .toString()
+                    .padStart(2, "0");
             },
         },
         time: {
