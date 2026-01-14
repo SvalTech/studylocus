@@ -159,6 +159,7 @@ document.addEventListener("DOMContentLoaded", () => {
             youtubeBlurEnabled: false,
             focusShieldEnabled: false,
             ricedModeEnabled: false,
+            tickingSoundEnabled: false,
             userSubjects: [],
             customExamName: "", 
             customExamDate: "",
@@ -371,6 +372,7 @@ document.addEventListener("DOMContentLoaded", () => {
             customContainer: document.getElementById("custom-exam-container"),
             customName: document.getElementById("custom-exam-name"),
             customDate: document.getElementById("custom-exam-date"),
+            tickingSoundToggle: document.getElementById("ticking-sound-toggle"),
         },
         mobileAlert: document.getElementById("mobile-alert"),
         confirmTitle: document.getElementById("confirm-title"),
@@ -1717,6 +1719,7 @@ function sanitizeDashboardState() {
         domElements.mainTitle.textContent = titleText;
         domElements.mainTitleRiced.textContent = titleText;
         // Update customize modal inputs
+        domElements.inputs.tickingSoundToggle.checked = appState.settings.tickingSoundEnabled;
         domElements.inputs.theme.value = appState.settings.theme;
         domElements.inputs.font.value = appState.settings.font;
         domElements.inputs.bgUrl.value = appState.settings.bgUrl;
@@ -2422,6 +2425,12 @@ function sanitizeDashboardState() {
             if (type === "time-logger") window.timeLogger.pause(cardId);
         }
     });
+
+    domElements.inputs.tickingSoundToggle.addEventListener("change", () => {
+        appState.settings.tickingSoundEnabled = domElements.inputs.tickingSoundToggle.checked;
+        appState.saveSettings();
+    });
+
     // --- Riced Mode ---
     domElements.inputs.ricedModeToggle.addEventListener("change", () => {
         appState.settings.ricedModeEnabled = domElements.inputs.ricedModeToggle.checked;
@@ -3044,12 +3053,60 @@ function sanitizeDashboardState() {
             appState.save("layout");
         },
     });
-    // Start 1-second interval for updating time-sensitive cards
+    // 1. Setup the High-End Mechanical Sounds
+    const clockHigh = new Tone.NoiseSynth({
+        noise: { type: "white" },
+        envelope: { attack: 0.001, decay: 0.005, sustain: 0 }
+    }).toDestination();
+
+    const clockLow = new Tone.NoiseSynth({
+        noise: { type: "pink" },
+        envelope: { attack: 0.001, decay: 0.015, sustain: 0 }
+    }).toDestination();
+
+    // Filter to make it sound "inside a watch" rather than "static noise"
+    const watchFilter = new Tone.Filter(4000, "highpass").toDestination();
+    clockHigh.connect(watchFilter);
+    clockLow.connect(watchFilter);
+
+    let doomTickCounter = 0;
+    let isTock = false; // Toggle for tick-tock logic
+
     setInterval(() => {
+        // Standard countdown render
         const countdownCard = domElements.dashboardGrid.querySelector('[data-card-id="countdown"]');
         if (countdownCard && cardRenderers.countdown.render) {
             cardRenderers.countdown.render(countdownCard);
         }
+
+        if (appState.settings.tickingSoundEnabled) {
+            doomTickCounter++;
+            
+            // --- THE 60-SECOND CHECKPOINT ---
+            if (doomTickCounter >= 60) { 
+                if (isTock) {
+                    clockLow.triggerAttackRelease("32n", undefined, 0.1); // Subtle Tock
+                } else {
+                    clockHigh.triggerAttackRelease("32n", undefined, 0.15); // Crisp Tick
+                }
+                
+                // Visual "Pulse" on the Countdown Card
+                if (countdownCard) {
+                    countdownCard.style.transform = "scale(1.04)";
+                    countdownCard.style.transition = "transform 0.1s ease-out";
+                    setTimeout(() => {
+                        countdownCard.style.transform = "scale(1)";
+                    }, 100);
+                }
+
+                isTock = !isTock; // Switch for next minute
+                doomTickCounter = 0; 
+            }
+        } else {
+            doomTickCounter = 0; 
+        }
+
+        // Standard time render
         const timeCard = domElements.dashboardGrid.querySelector('[data-card-id="time"]');
         if (timeCard && cardRenderers.time.render) {
             cardRenderers.time.render(timeCard);
