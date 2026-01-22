@@ -3504,7 +3504,6 @@ function sanitizeDashboardState() {
             appState.save("layout");
         },
     });
-    // 1. Setup the High-End Mechanical Sounds
     const clockHigh = new Tone.NoiseSynth({
         noise: { type: "white" },
         envelope: { attack: 0.001, decay: 0.005, sustain: 0 }
@@ -3515,33 +3514,31 @@ function sanitizeDashboardState() {
         envelope: { attack: 0.001, decay: 0.015, sustain: 0 }
     }).toDestination();
 
-    // Filter to make it sound "inside a watch" rather than "static noise"
     const watchFilter = new Tone.Filter(4000, "highpass").toDestination();
     clockHigh.connect(watchFilter);
     clockLow.connect(watchFilter);
 
     let doomTickCounter = 0;
-    let isTock = false; // Toggle for tick-tock logic
+    let quoteOscillator = 0; // NEW: Counter for quotes
+    let isTock = false; 
 
     setInterval(() => {
-        // Standard countdown render
+        // 1. Render Countdown
         const countdownCard = domElements.dashboardGrid.querySelector('[data-card-id="countdown"]');
         if (countdownCard && cardRenderers.countdown.render) {
             cardRenderers.countdown.render(countdownCard);
         }
 
+        // 2. Doom Tick Logic
         if (appState.settings.tickingSoundEnabled) {
             doomTickCounter++;
-            
-            // --- THE 60-SECOND CHECKPOINT ---
             if (doomTickCounter >= 60) { 
                 if (isTock) {
-                    clockLow.triggerAttackRelease("32n", undefined, 0.1); // Subtle Tock
+                    clockLow.triggerAttackRelease("32n", undefined, 0.1);
                 } else {
-                    clockHigh.triggerAttackRelease("32n", undefined, 0.15); // Crisp Tick
+                    clockHigh.triggerAttackRelease("32n", undefined, 0.15);
                 }
                 
-                // Visual "Pulse" on the Countdown Card
                 if (countdownCard) {
                     countdownCard.style.transform = "scale(1.04)";
                     countdownCard.style.transition = "transform 0.1s ease-out";
@@ -3549,15 +3546,38 @@ function sanitizeDashboardState() {
                         countdownCard.style.transform = "scale(1)";
                     }, 100);
                 }
-
-                isTock = !isTock; // Switch for next minute
+                isTock = !isTock; 
                 doomTickCounter = 0; 
             }
         } else {
             doomTickCounter = 0; 
         }
 
-        // Standard time render
+        // 3. NEW: Quote Oscillation Logic
+        quoteOscillator++;
+        if (quoteOscillator >= 30) { // Change every 30 seconds
+            const quoteCard = domElements.dashboardGrid.querySelector('[data-card-id="quote"]');
+            
+            if (quoteCard && cardRenderers.quote.render) {
+                const content = quoteCard.querySelector("#quote-card-content");
+                
+                if (content) {
+                    // Smooth Fade Transition
+                    content.style.transition = "opacity 0.5s ease";
+                    content.style.opacity = "0"; // Fade out
+                    
+                    setTimeout(() => {
+                        cardRenderers.quote.render(quoteCard); // Update text
+                        content.style.opacity = "1"; // Fade in
+                    }, 500); // Wait 0.5s for fade out to finish
+                } else {
+                    cardRenderers.quote.render(quoteCard);
+                }
+            }
+            quoteOscillator = 0; // Reset counter
+        }
+
+        // 4. Render Time
         const timeCard = domElements.dashboardGrid.querySelector('[data-card-id="time"]');
         if (timeCard && cardRenderers.time.render) {
             cardRenderers.time.render(timeCard);
