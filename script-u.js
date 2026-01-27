@@ -163,6 +163,7 @@ document.addEventListener("DOMContentLoaded", () => {
             userSubjects: [],
             customExamName: "", 
             customExamDate: "",
+            streamlinedModeEnabled: false,
             ...parsedSettings,
         },
         cardProps: JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEYS.cardProps)) || {
@@ -374,6 +375,7 @@ document.addEventListener("DOMContentLoaded", () => {
             customName: document.getElementById("custom-exam-name"),
             customDate: document.getElementById("custom-exam-date"),
             tickingSoundToggle: document.getElementById("ticking-sound-toggle"),
+            streamlinedModeToggle: document.getElementById("streamlined-mode-toggle"),
         },
         mobileAlert: document.getElementById("mobile-alert"),
         confirmTitle: document.getElementById("confirm-title"),
@@ -967,11 +969,16 @@ function sanitizeDashboardState() {
                 if (!cardElement.querySelector('[data-value="days"]')) {
                      if (timerContainer) {
                         // Restore original layout
+                        // timerContainer.innerHTML = `
+                        //     <div><div data-value="days" class="font-bold">00</div><div class="text-xs sm:text-sm text-secondary">Days</div></div>
+                        //     <div><div data-value="hours" class="font-bold">00</div><div class="text-xs sm:text-sm text-secondary">Hours</div></div>
+                        //     <div><div data-value="minutes" class="font-bold">00</div><div class="text-xs sm:text-sm text-secondary">Minutes</div></div>
+                        //     <div><div data-value="seconds" class="font-bold">00</div><div class="text-xs sm:text-sm text-secondary">Seconds</div></div>
+                        // `;
                         timerContainer.innerHTML = `
                             <div><div data-value="days" class="font-bold">00</div><div class="text-xs sm:text-sm text-secondary">Days</div></div>
                             <div><div data-value="hours" class="font-bold">00</div><div class="text-xs sm:text-sm text-secondary">Hours</div></div>
                             <div><div data-value="minutes" class="font-bold">00</div><div class="text-xs sm:text-sm text-secondary">Minutes</div></div>
-                            <div><div data-value="seconds" class="font-bold">00</div><div class="text-xs sm:text-sm text-secondary">Seconds</div></div>
                         `;
                      }
                 }
@@ -980,7 +987,7 @@ function sanitizeDashboardState() {
                 cardElement.querySelector('[data-value="days"]').innerText = Math.floor(diff / (1000 * 60 * 60 * 24)).toString().padStart(2, "0");
                 cardElement.querySelector('[data-value="hours"]').innerText = Math.floor((diff / (1000 * 60 * 60)) % 24).toString().padStart(2, "0");
                 cardElement.querySelector('[data-value="minutes"]').innerText = Math.floor((diff / (1000 * 60)) % 60).toString().padStart(2, "0");
-                cardElement.querySelector('[data-value="seconds"]').innerText = Math.floor((diff / 1000) % 60).toString().padStart(2, "0");
+                // cardElement.querySelector('[data-value="seconds"]').innerText = Math.floor((diff / 1000) % 60).toString().padStart(2, "0");
             },
         },
         time: {
@@ -2076,6 +2083,13 @@ function sanitizeDashboardState() {
         domElements.inputs.focusShieldToggle.checked = appState.settings.focusShieldEnabled;
         domElements.inputs.ricedModeToggle.checked = appState.settings.ricedModeEnabled;
         updateYouTubeCardStyles();
+
+        document.documentElement.dataset.streamlinedMode = appState.settings.streamlinedModeEnabled ? "true" : "false";
+        
+        // Update Toggle UI
+        if (domElements.inputs.streamlinedModeToggle) {
+            domElements.inputs.streamlinedModeToggle.checked = appState.settings.streamlinedModeEnabled;
+        }
     }
     // --- Dashboard Grid Event Listeners (Delegation) ---
     // Click handler
@@ -2972,6 +2986,17 @@ function sanitizeDashboardState() {
         };
         reader.readAsText(file);
     });
+
+
+    if (domElements.inputs.streamlinedModeToggle) {
+        domElements.inputs.streamlinedModeToggle.addEventListener("change", () => {
+            appState.settings.streamlinedModeEnabled = domElements.inputs.streamlinedModeToggle.checked;
+            appState.saveSettings();
+            applySettings();
+            // Force a re-render to adjust grid classes if necessary
+            renderDashboard(); 
+        });
+    }
     // --- Mobile Alert ---
     // if (window.innerWidth < 768 && localStorage.getItem(LOCAL_STORAGE_KEYS.mobileAlertDismissed) !== "true") {
     //     domElements.mobileAlert.classList.remove("hidden");
