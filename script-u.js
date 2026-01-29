@@ -1721,6 +1721,130 @@ function sanitizeDashboardState() {
                 });
             }
         },
+        "daily-tasks": {
+            templateId: "daily-tasks-template",
+            render: (cardElement, cardData) => {
+                // Initialize content structure: { "YYYY-MM-DD": [tasks] }
+                if (!cardData.content || Array.isArray(cardData.content)) {
+                    cardData.content = {};
+                }
+
+                // 1. Get Selected Date (Default to Today)
+                const dateInput = cardElement.querySelector(".daily-date-selector");
+                if (!dateInput.value) {
+                    // Check dataset first (persisted state), then fallback to today
+                    dateInput.value = cardElement.dataset.selectedDate || new Date().toISOString().split('T')[0];
+                }
+                cardElement.dataset.selectedDate = dateInput.value; // Sync dataset
+                const selectedDate = dateInput.value;
+
+                // 2. Prepare Task Data
+                const tasksForDate = cardData.content[selectedDate] || [];
+                const listElement = cardElement.querySelector(".daily-task-list");
+                const progressBar = cardElement.querySelector(".progress-bar");
+                const progressText = cardElement.querySelector(".progress-text");
+                
+                listElement.innerHTML = "";
+
+                // 3. Render Progress Bar
+                let totalTasks = 0;
+                let completedTasks = 0;
+
+                if (tasksForDate.length === 0) {
+                    listElement.innerHTML = `<li class="text-secondary text-xs text-center py-8 opacity-50 flex flex-col items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                        <span>No plans for ${new Date(selectedDate).toLocaleDateString(undefined, {weekday:'short', month:'short', day:'numeric'})}</span>
+                    </li>`;
+                } else {
+                    tasksForDate.forEach((task, index) => {
+                        // Initialize missing properties
+                        if (!task.priority) task.priority = 'medium';
+                        if (!task.status) task.status = task.completed ? 'done' : 'todo';
+                        if (!task.subtasks) task.subtasks = [];
+
+                        totalTasks++;
+                        if (task.status === 'done') completedTasks++;
+
+                        // Styling Config (Copied from Todo Renderer)
+                        const priorityConfig = {
+                            high: { color: 'text-red-300', bg: 'bg-red-500/20', border: 'border-red-500/20', label: 'High' },
+                            medium: { color: 'text-amber-200', bg: 'bg-amber-500/20', border: 'border-amber-500/20', label: 'Medium' },
+                            low: { color: 'text-blue-200', bg: 'bg-blue-500/20', border: 'border-blue-500/20', label: 'Low' }
+                        };
+                        const pStyle = priorityConfig[task.priority];
+                        const statusIcons = {
+                            todo: `<div class="w-4 h-4 rounded-full border-[1.5px] border-gray-400 hover:border-white transition-colors"></div>`,
+                            'in-progress': `<div class="w-4 h-4 rounded-full border-[1.5px] border-amber-400 flex items-center justify-center"><div class="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse"></div></div>`,
+                            done: `<div class="w-4 h-4 rounded-full bg-[var(--accent-color)] border border-[var(--accent-color)] flex items-center justify-center text-white"><svg width="10" height="8" viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 5L4 8L11 1"/></svg></div>`
+                        };
+
+                        // Subtasks HTML
+                        const subtasksHtml = task.subtasks.map((sub, sIndex) => `
+                            <div class="flex items-center gap-3 py-1.5 pl-2 group/sub relative">
+                                <div class="absolute left-[-6px] top-1/2 w-2 h-px bg-gray-700"></div>
+                                <button class="toggle-subtask-btn w-3.5 h-3.5 flex-shrink-0 border border-gray-500 rounded flex items-center justify-center transition-colors ${sub.completed ? 'bg-gray-500 border-gray-500' : 'hover:border-gray-300'}" data-sub-index="${sIndex}">
+                                    ${sub.completed ? '<svg class="w-2.5 h-2.5 text-white" viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 5L4 8L11 1"/></svg>' : ''}
+                                </button>
+                                <span class="text-xs ${sub.completed ? 'line-through text-gray-500' : 'text-gray-300'} flex-grow break-all font-medium">${sub.text}</span>
+                                <button class="delete-subtask-btn text-gray-500 hover:text-red-400 opacity-0 group-hover/sub:opacity-100 px-1.5 transition-opacity text-lg leading-none" data-sub-index="${sIndex}">×</button>
+                            </div>
+                        `).join('');
+
+                        const li = document.createElement("li");
+                        li.className = `group mb-2 rounded-xl bg-white/5 hover:bg-white/10 transition-all overflow-hidden relative`;
+                        li.dataset.index = index;
+
+                        li.innerHTML = `
+                            <div class="flex items-start gap-3 p-3.5">
+                                <button class="status-btn mt-0.5 flex-shrink-0 transform active:scale-95 transition-transform">
+                                    ${statusIcons[task.status]}
+                                </button>
+                                
+                                <div class="flex-grow min-w-0 flex flex-col toggle-expand-btn cursor-pointer">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <span class="text-sm font-semibold leading-tight transition-colors ${task.status === 'done' ? 'line-through text-gray-500 decoration-gray-500' : 'text-gray-100 group-hover:text-white'}">
+                                            ${task.text}
+                                        </span>
+                                    </div>
+                                    
+                                    <div class="flex items-center gap-2 mt-2">
+                                        <button class="priority-btn text-[10px] font-bold tracking-wide px-2 py-0.5 rounded-full border ${pStyle.border} ${pStyle.color} ${pStyle.bg} hover:brightness-125 transition-all uppercase">
+                                            ${pStyle.label}
+                                        </button>
+                                        ${task.subtasks.length > 0 ? `
+                                            <span class="text-[10px] text-gray-400 font-medium flex items-center gap-1 bg-white/5 px-2 py-0.5 rounded-full">
+                                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+                                                ${task.subtasks.filter(s=>s.completed).length}/${task.subtasks.length}
+                                            </span>
+                                        ` : ''}
+                                    </div>
+                                </div>
+
+                                <button class="delete-daily-task text-gray-500 hover:text-red-400 p-1 opacity-0 group-hover:opacity-100 transition-opacity absolute top-3 right-3">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                                </button>
+                            </div>
+                            
+                            <div class="subtasks-section ${task.expanded ? 'block' : 'hidden'} pl-10 pr-4 pb-3 border-t border-white/5 bg-black/20">
+                                <div class="space-y-0.5 mt-2">
+                                    ${subtasksHtml}
+                                </div>
+                                <form class="add-subtask-form flex gap-2 mt-2 items-center opacity-70 hover:opacity-100 transition-opacity">
+                                    <span class="text-gray-500 text-lg leading-none">+</span>
+                                    <input type="text" placeholder="Add step..." class="bg-transparent border-none text-xs w-full focus:outline-none focus:placeholder-gray-400 placeholder-gray-600 text-gray-300 py-1 font-medium">
+                                </form>
+                            </div>
+                        `;
+                        listElement.appendChild(li);
+                    });
+                }
+
+                // Update Progress Bar
+                const percent = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+                progressBar.style.width = `${percent}%`;
+                progressText.textContent = `${percent}%`;
+            }
+        },
         ambient: {
             templateId: "ambient-card-template",
             render: (cardElement, cardData) => {
@@ -2250,6 +2374,135 @@ function sanitizeDashboardState() {
                 cardRenderers.todo.render(cardElement, cardData); // Re-render this card
             }
         }
+
+        if (event.target.closest(".toggle-daily-task")) {
+            const btn = event.target.closest(".toggle-daily-task");
+            const index = parseInt(btn.dataset.index);
+            const cardElement = event.target.closest(".card");
+            const cardId = cardElement.dataset.cardId;
+            const cardData = appState.customCards.find((c) => c.id === cardId);
+            const selectedDate = cardElement.querySelector(".daily-date-selector").value;
+
+            if (cardData && cardData.content[selectedDate]) {
+                cardData.content[selectedDate][index].completed = !cardData.content[selectedDate][index].completed;
+                appState.save("customCards");
+                cardRenderers["daily-tasks"].render(cardElement, cardData);
+            }
+        }
+
+        // Daily Tasks: Delete Task
+        if (event.target.closest(".delete-daily-task")) {
+            const btn = event.target.closest(".delete-daily-task");
+            const index = parseInt(btn.dataset.index);
+            const cardElement = event.target.closest(".card");
+            const cardId = cardElement.dataset.cardId;
+            const cardData = appState.customCards.find((c) => c.id === cardId);
+            const selectedDate = cardElement.querySelector(".daily-date-selector").value;
+
+            if (cardData && cardData.content[selectedDate]) {
+                cardData.content[selectedDate].splice(index, 1);
+                // Optional: clean up empty dates
+                if(cardData.content[selectedDate].length === 0) delete cardData.content[selectedDate];
+                
+                appState.save("customCards");
+                cardRenderers["daily-tasks"].render(cardElement, cardData);
+            }
+        }
+
+        if (event.target.closest(".prev-day-btn") || event.target.closest(".next-day-btn")) {
+            // NO 'const cardElement = ...' here because it exists at the top
+            const dateInput = cardElement.querySelector(".daily-date-selector");
+            
+            // Parse current date
+            const currentDate = new Date(dateInput.value || new Date());
+            
+            // Add or Subtract 1 Day
+            const offset = event.target.closest(".prev-day-btn") ? -1 : 1;
+            currentDate.setDate(currentDate.getDate() + offset);
+            
+            // Format back to YYYY-MM-DD (ISO)
+            const newDateStr = currentDate.toISOString().split('T')[0];
+            dateInput.value = newDateStr;
+            
+            // Update state and re-render
+            cardElement.dataset.selectedDate = newDateStr;
+            const cardData = appState.customCards.find((c) => c.id === cardId);
+            cardRenderers["daily-tasks"].render(cardElement, cardData);
+        }
+
+        // --- DAILY TASKS: INTERACTIONS (Status, Priority, Delete, etc.) ---
+        // We use the existing 'cardId' variable from the top of the function
+        const dailyTaskCardData = appState.customCards.find((c) => c.id === cardId);
+        
+        if (dailyTaskCardData && dailyTaskCardData.type === "daily-tasks") {
+            const selectedDate = cardElement.querySelector(".daily-date-selector").value;
+            // Ensure array exists
+            if (!dailyTaskCardData.content[selectedDate]) dailyTaskCardData.content[selectedDate] = [];
+            const taskArray = dailyTaskCardData.content[selectedDate];
+
+            const todoItem = event.target.closest("li");
+            if (todoItem) {
+                const index = parseInt(todoItem.dataset.index);
+                const task = taskArray[index];
+
+                if (task) {
+                    // A. CYCLE STATUS
+                    if (event.target.closest(".status-btn")) {
+                        const statuses = ['todo', 'in-progress', 'done'];
+                        const currentIdx = statuses.indexOf(task.status || 'todo');
+                        task.status = statuses[(currentIdx + 1) % 3];
+                        task.completed = (task.status === 'done');
+                        appState.save("customCards");
+                        cardRenderers["daily-tasks"].render(cardElement, dailyTaskCardData);
+                    }
+
+                    // B. CYCLE PRIORITY
+                    else if (event.target.closest(".priority-btn")) {
+                        const priorities = ['medium', 'high', 'low'];
+                        const currentIdx = priorities.indexOf(task.priority || 'medium');
+                        task.priority = priorities[(currentIdx + 1) % 3];
+                        appState.save("customCards");
+                        cardRenderers["daily-tasks"].render(cardElement, dailyTaskCardData);
+                    }
+
+                    // C. TOGGLE EXPAND
+                    else if (event.target.closest(".toggle-expand-btn")) {
+                        task.expanded = !task.expanded;
+                        appState.save("customCards");
+                        cardRenderers["daily-tasks"].render(cardElement, dailyTaskCardData);
+                    }
+
+                    // D. TOGGLE SUBTASK
+                    else if (event.target.closest(".toggle-subtask-btn")) {
+                        const subIndex = parseInt(event.target.closest(".toggle-subtask-btn").dataset.subIndex);
+                        if (task.subtasks[subIndex]) {
+                            task.subtasks[subIndex].completed = !task.subtasks[subIndex].completed;
+                            appState.save("customCards");
+                            cardRenderers["daily-tasks"].render(cardElement, dailyTaskCardData);
+                        }
+                    }
+
+                    // E. DELETE SUBTASK
+                    else if (event.target.closest(".delete-subtask-btn")) {
+                        const subIndex = parseInt(event.target.closest(".delete-subtask-btn").dataset.subIndex);
+                        task.subtasks.splice(subIndex, 1);
+                        appState.save("customCards");
+                        cardRenderers["daily-tasks"].render(cardElement, dailyTaskCardData);
+                    }
+
+                    // F. DELETE MAIN TASK
+                    else if (event.target.closest(".delete-daily-task")) {
+                        taskArray.splice(index, 1);
+                        if(taskArray.length === 0) delete dailyTaskCardData.content[selectedDate];
+                        appState.save("customCards");
+                        cardRenderers["daily-tasks"].render(cardElement, dailyTaskCardData);
+                    }
+                }
+            }
+        }
+
+        
+
         // Line-Graph card actions
         if (cardData && cardData.type === "line-graph" && event.target.closest(".delete-mark-item")) {
             const index = parseInt(event.target.closest(".delete-mark-item").dataset.index);
@@ -2308,6 +2561,18 @@ function sanitizeDashboardState() {
         if (event.target.classList.contains("subject-select")) {
             const cardId = event.target.closest(".card").dataset.cardId;
             window.timeLogger.changeSubject(cardId, event.target.value);
+        }
+
+        if (event.target.classList.contains("daily-date-selector")) {
+            const cardElement = event.target.closest(".card");
+            const cardId = cardElement.dataset.cardId;
+            const cardData = appState.customCards.find((c) => c.id === cardId);
+            
+            // Update the temporary DOM state
+            cardElement.dataset.selectedDate = event.target.value;
+            
+            // Re-render the card to show tasks for the new date
+            cardRenderers["daily-tasks"].render(cardElement, cardData);
         }
     });
     // Submit handler
@@ -2399,29 +2664,75 @@ function sanitizeDashboardState() {
                 console.log(`Added ${minutes} mins to ${subject}`);
             }
         }
+        else if (form.classList.contains("add-daily-task-form")) {
+            const cardData = appState.customCards.find((card) => card.id === cardId);
+            const inputEl = form.querySelector("input");
+            const taskText = inputEl.value.trim();
+            const dateInput = cardElement.querySelector(".daily-date-selector");
+            const selectedDate = dateInput.value;
+
+            if (cardData && taskText && selectedDate) {
+                // Ensure data structure exists
+                if (!cardData.content || Array.isArray(cardData.content)) cardData.content = {};
+                if (!cardData.content[selectedDate]) cardData.content[selectedDate] = [];
+
+                // Push new task
+                cardData.content[selectedDate].push({
+                    text: taskText,
+                    completed: false
+                });
+
+                appState.save("customCards");
+                cardRenderers["daily-tasks"].render(cardElement, cardData);
+                inputEl.value = "";
+            }
+        }
         else if (form.classList.contains("add-subtask-form")) {
+            // Note: We use 'cardElement' and 'cardId' from the top of this function scope
+            const cardData = appState.customCards.find((c) => c.id === cardId);
             const todoItem = form.closest("li");
             const index = parseInt(todoItem.dataset.index);
-            const cardData = appState.customCards.find((c) => c.id === cardId);
             const inputEl = form.querySelector("input");
             const text = inputEl.value.trim();
 
-            if (cardData && cardData.content[index] && text) {
-                if (!cardData.content[index].subtasks) cardData.content[index].subtasks = [];
-                
-                cardData.content[index].subtasks.push({
-                    text: text,
-                    completed: false
-                });
-                
-                appState.save("customCards");
-                cardRenderers.todo.render(cardElement, cardData);
-                
-                // Keep the input focused for rapid entry
-                const newItem = cardElement.querySelector(`li[data-index="${index}"]`);
-                if(newItem) {
-                    const newInput = newItem.querySelector(".add-subtask-form input");
-                    if(newInput) newInput.focus();
+            if (cardData && text) {
+                // 1. DAILY TASKS CARD LOGIC
+                if (cardData.type === "daily-tasks") {
+                    const selectedDate = cardElement.querySelector(".daily-date-selector").value;
+                    const task = cardData.content[selectedDate]?.[index];
+                    
+                    if (task) {
+                        if (!task.subtasks) task.subtasks = [];
+                        task.subtasks.push({ text: text, completed: false });
+                        appState.save("customCards");
+                        cardRenderers["daily-tasks"].render(cardElement, cardData);
+                        
+                        // Re-focus input to allow continuous typing
+                        const newItem = cardElement.querySelector(`li[data-index="${index}"]`);
+                        if(newItem) newItem.querySelector("input").focus();
+                    }
+                } 
+                // 2. NORMAL TODO CARD LOGIC
+                else {
+                    const task = cardData.content[index];
+                    if (task) {
+                        if (!task.subtasks) task.subtasks = [];
+                        
+                        task.subtasks.push({
+                            text: text,
+                            completed: false
+                        });
+                        
+                        appState.save("customCards");
+                        cardRenderers.todo.render(cardElement, cardData);
+                        
+                        // Re-focus input
+                        const newItem = cardElement.querySelector(`li[data-index="${index}"]`);
+                        if(newItem) {
+                            const newInput = newItem.querySelector(".add-subtask-form input");
+                            if(newInput) newInput.focus();
+                        }
+                    }
                 }
             }
         }
