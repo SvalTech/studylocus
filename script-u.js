@@ -68,6 +68,8 @@ document.addEventListener("DOMContentLoaded", () => {
             2028: new Date("2028-05-02T00:00:00")
         },
     };
+    // Inside script-u.js
+
     const EXAM_DEFAULTS = {
         JEE: {
             January: {
@@ -81,6 +83,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 2028: "2028-04-05"
             }
         },
+        // --- ADD THIS BLOCK ---
+        JEE_ADVANCED: {
+            2026: "2026-05-17", 
+            2027: "2027-05-23", 
+            2028: "2028-05-21" 
+        },
+        // ---------------------
         NEET: {
             2026: "2026-05-03",
             2027: "2027-05-02",
@@ -864,24 +873,33 @@ function sanitizeDashboardState() {
      */
     const getTargetExamDate = () => {
         const { examType, examYear, jeeSession, jeeShiftDate, customExamDate } = appState.settings;
-        // 1. If JEE and user entered a specific shift date, use it
 
+        // 1. Custom Exam
         if (examType === "Custom") {
             if (customExamDate) return new Date(customExamDate + "T00:00:00");
-            return new Date(); // Fallback to today if no date set
+            return new Date(); 
         }
 
+        // 2. JEE Main (Specific Shift)
         if (examType === "JEE" && jeeShiftDate) {
-            return new Date(jeeShiftDate + "T00:00:00"); // Assume 9 AM start
+            return new Date(jeeShiftDate + "T00:00:00");
         }
-        // 2. If JEE, use the default date for the selected Session & Year
+
+        // 3. JEE Main (Default Session)
         if (examType === "JEE") {
             const dateStr = EXAM_DEFAULTS.JEE[jeeSession]?.[examYear] || `${examYear}-01-01`;
             return new Date(dateStr + "T00:00:00");
         }
-        // 3. Fallback for NEET
+
+        // 4. JEE Advanced (NEW LOGIC)
+        if (examType === "JEE Advanced") {
+            const advDateStr = EXAM_DEFAULTS.JEE_ADVANCED?.[examYear] || `${examYear}-05-17`;
+            return new Date(advDateStr + "T00:00:00");
+        }
+
+        // 5. Fallback for NEET
         const neetDateStr = EXAM_DEFAULTS.NEET[examYear] || `${examYear}-05-01`;
-        return new Date(neetDateStr + "T00:00:00"); // NEET usually starts at 2 PM
+        return new Date(neetDateStr + "T00:00:00"); 
     };
     /**
 
