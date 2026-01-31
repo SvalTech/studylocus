@@ -1914,3 +1914,154 @@ body.zen-mode .manual-entry-container {
     border: none !important;
     padding: 0 !important;
 }
+
+/* Subject Manager Chips */
+.subject-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border-color);
+    font-size: 0.75rem;
+    color: var(--text-primary);
+    transition: all 0.2s;
+}
+
+.subject-chip:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: var(--accent-color);
+}
+
+.delete-subject-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.3);
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 10px;
+    line-height: 1;
+    transition: color 0.2s, background-color 0.2s;
+}
+
+.delete-subject-btn:hover {
+    background-color: #ef4444; /* Red */
+    color: white;
+}
+
+.settings-nav-btn {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 12px 20px;
+    text-align: left;
+    background: transparent;
+    border: none;
+    border-left: 3px solid transparent; /* Left border for active state */
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.settings-nav-btn:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+}
+
+.settings-nav-btn.active {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: var(--accent-color);
+    border-left-color: var(--accent-color);
+}
+
+/* Mobile: Horizontal Scroll adjustments */
+@media (max-width: 768px) {
+    .settings-nav-btn {
+        width: auto;
+        white-space: nowrap;
+        border-left: none;
+        border-bottom: 3px solid transparent;
+        padding: 12px 16px;
+    }
+    
+    .settings-nav-btn.active {
+        border-left: none;
+        border-bottom-color: var(--accent-color);
+    }
+}
+
+/* Panel Animation */
+.settings-panel {
+    animation: fadeInPanel 0.2s ease-out;
+}
+
+@keyframes fadeInPanel {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Clean Input Groups */
+.settings-group {
+    background-color: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.settings-panel select,
+.settings-panel input[type="text"],
+.settings-panel input[type="date"] {
+    border-radius: 8px !important;       /* Reduces the extreme curve */
+    padding: 10px 14px !important;       /* Increases internal spacing */
+    height: 42px !important;             /* Enforces a comfortable click height */
+    font-size: 0.95rem !important;       /* Increases text size for readability */
+    line-height: 1.5 !important;
+    background-color: rgba(0, 0, 0, 0.4) !important; /* Darker background for contrast */
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    color: var(--text-primary) !important;
+}
+
+.settings-panel select:focus,
+.settings-panel input:focus {
+    border-color: var(--accent-color) !important;
+    background-color: rgba(0, 0, 0, 0.6) !important;
+    outline: none;
+}
+
+/* Fix the 'Add' button next to the input */
+#add-subject-btn {
+    border-radius: 8px !important;
+    height: 42px !important;
+    padding: 0 20px !important;
+    font-size: 0.9rem !important;
+}
+
+/* Fix the color chips in 'Theme' to match */
+.settings-panel select option {
+    background-color: #1a1a1a; /* Fixes dark text on dark background in some browsers */
+    color: white;
+    padding: 8px;
+}
+
+.card-option.active {
+    background-color: rgba(var(--accent-color-rgb), 0.15) !important;
+    border-color: var(--accent-color) !important;
+    box-shadow: 0 0 10px rgba(var(--accent-color-rgb), 0.2);
+}
+
+/* Ensure SVG inside active card takes accent color */
+.card-option.active svg {
+    color: var(--accent-color);
+}
+
+.card-option.active {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    border-color: var(--accent-color) !important;
+}

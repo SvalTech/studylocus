@@ -847,231 +847,307 @@
     <div id="add-card-modal" class="modal-overlay hidden">
         <div class="card w-11/12 max-w-md">
             <h2 class="text-xl font-semibold mb-4">Add New Card</h2>
-            <form id="new-card-form">
-                <label for="new-card-type" class="sr-only">Card Type</label>
-                <select id="new-card-type" class="form-input rounded-md p-2 w-full mb-3">
-                    <option value="note">Note</option>
-                    <option value="todo">To-Do List</option>
-                    <option value="daily-tasks">Daily Tasks (Calendar)</option>
-                    <option value="time-logger">Study Logger (Timer)</option>
-                    <option value="analytics">Study Analytics</option>
-                    <option value="line-graph">Line Graph</option>
-                    <option value="pomodoro">Pomodoro Timer</option>
-                    <option value="youtube">YouTube Video</option>
-                    <option value="ambient">Ambient Soundscapes</option>
-                </select>
-                <label for="new-card-title" class="sr-only">Card Title</label>
-                <input type="text" id="new-card-title" placeholder="Card Title"
-                    class="form-input rounded-md p-2 w-full mb-3" required>
-                <label for="new-card-content" class="sr-only">Card Content</label>
-                <textarea id="new-card-content" placeholder="Card Content" rows="4"
-                    class="form-input rounded-md p-2 w-full mb-4"></textarea>
-                <div class="flex justify-end gap-3">
-                    <button type="button" id="cancel-add-card"
-                        class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md">Cancel</button>
-                    <button type="submit" class="btn-primary font-bold py-2 px-4 rounded-md">Add</button>
+            <form id="new-card-form" class="flex flex-col h-full">
+                <input type="hidden" id="new-card-type" value="note">
+
+                <div class="flex-1 overflow-y-auto pr-2 mb-4 custom-scrollbar" style="max-height: 400px;">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="card-type-grid">
+                        <div class="card-option active p-3 rounded-xl border border-gray-700 bg-white/5 hover:bg-white/10 cursor-pointer transition-all flex flex-col gap-2" data-value="note">
+                            <div class="flex items-center gap-2">
+                                <svg class="text-blue-400" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                <span class="font-bold text-sm">Note</span>
+                            </div>
+                            <p class="text-xs text-gray-400">Simple text area for scratchpad or reminders.</p>
+                        </div>
+
+                        <div class="card-option p-3 rounded-xl border border-gray-700 bg-white/5 hover:bg-white/10 cursor-pointer transition-all flex flex-col gap-2" data-value="todo">
+                            <div class="flex items-center gap-2">
+                                <svg class="text-green-400" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                                <span class="font-bold text-sm">To-Do List</span>
+                            </div>
+                            <p class="text-xs text-gray-400">Task management with subtasks and priority.</p>
+                        </div>
+
+                        <div class="card-option p-3 rounded-xl border border-gray-700 bg-white/5 hover:bg-white/10 cursor-pointer transition-all flex flex-col gap-2" data-value="daily-tasks">
+                            <div class="flex items-center gap-2">
+                                <svg class="text-purple-400" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                <span class="font-bold text-sm">Calendar Tasks</span>
+                            </div>
+                            <p class="text-xs text-gray-400">Date-specific tasks with progress tracking.</p>
+                        </div>
+
+                        <div class="card-option p-3 rounded-xl border border-gray-700 bg-white/5 hover:bg-white/10 cursor-pointer transition-all flex flex-col gap-2" data-value="pomodoro">
+                            <div class="flex items-center gap-2">
+                                <svg class="text-red-400" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                <span class="font-bold text-sm">Pomodoro</span>
+                            </div>
+                            <p class="text-xs text-gray-400">Focus timer with short and long breaks.</p>
+                        </div>
+
+                        <div class="card-option p-3 rounded-xl border border-gray-700 bg-white/5 hover:bg-white/10 cursor-pointer transition-all flex flex-col gap-2" data-value="time-logger">
+                            <div class="flex items-center gap-2">
+                                <svg class="text-yellow-400" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                <span class="font-bold text-sm">Study Logger</span>
+                            </div>
+                            <p class="text-xs text-gray-400">Track subject-wise study hours.</p>
+                        </div>
+
+                        <div class="card-option p-3 rounded-xl border border-gray-700 bg-white/5 hover:bg-white/10 cursor-pointer transition-all flex flex-col gap-2" data-value="line-graph">
+                            <div class="flex items-center gap-2">
+                                <svg class="text-indigo-400" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                                <span class="font-bold text-sm">Marks Graph</span>
+                            </div>
+                            <p class="text-xs text-gray-400">Visualize test scores and trends.</p>
+                        </div>
+                        <div class="card-option p-3 rounded-xl border border-gray-700 bg-white/5 hover:bg-white/10 cursor-pointer transition-all flex flex-col gap-2" data-value="analytics">
+                            <div class="flex items-center gap-2">
+                                <svg class="text-cyan-400" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+                                <span class="font-bold text-sm">Analytics</span>
+                            </div>
+                            <p class="text-xs text-gray-400">Bar chart of study hours over time.</p>
+                        </div>
+
+                        <div class="card-option p-3 rounded-xl border border-gray-700 bg-white/5 hover:bg-white/10 cursor-pointer transition-all flex flex-col gap-2" data-value="ambient">
+                            <div class="flex items-center gap-2">
+                                <svg class="text-gray-400" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19c0-1.7-1.3-3-3-3s-3 1.3-3 3c0-1.7-1.3-3-3-3s-3 1.3-3 3"/><path d="M3 19V5c0-1.1.9-2 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                                <span class="font-bold text-sm">Soundscapes</span>
+                            </div>
+                            <p class="text-xs text-gray-400">White, brown, and pink noise.</p>
+                        </div>
+
+                        <div class="card-option p-3 rounded-xl border border-gray-700 bg-white/5 hover:bg-white/10 cursor-pointer transition-all flex flex-col gap-2" data-value="youtube">
+                            <div class="flex items-center gap-2">
+                                <svg class="text-red-500" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/></svg>
+                                <span class="font-bold text-sm">YouTube</span>
+                            </div>
+                            <p class="text-xs text-gray-400">Embed lectures or lofi music.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border-t border-gray-700 pt-4 mt-2">
+                    <label for="new-card-title" class="sr-only">Card Title</label>
+                    <input type="text" id="new-card-title" placeholder="Card Title"
+                        class="form-input rounded-md p-2 w-full mb-3 text-sm bg-black/40 border-gray-600 focus:border-indigo-500" required>
+                    
+                    <label for="new-card-content" class="sr-only">Card Content</label>
+                    <textarea id="new-card-content" placeholder="Card Content" rows="3"
+                        class="form-input rounded-md p-2 w-full mb-4 text-sm bg-black/40 border-gray-600 focus:border-indigo-500 resize-none"></textarea>
+
+                    <div class="flex justify-end gap-3">
+                        <button type="button" id="cancel-add-card"
+                            class="bg-gray-700 hover:bg-gray-600 text-white text-sm font-bold py-2 px-4 rounded-md transition-colors">Cancel</button>
+                        <button type="submit" class="btn-primary text-sm font-bold py-2 px-4 rounded-md shadow-lg shadow-indigo-500/20">Add Card</button>
+                    </div>
                 </div>
             </form>
         </div>
     </div>
 
     <div id="customize-modal" class="modal-overlay hidden">
-        <div class="card w-11/12 max-w-md relative">
-            <button id="close-customize-icon-btn"
-                class="absolute top-3 right-3 text-secondary hover:text-primary transition-colors p-1 rounded-full"
-                aria-label="Close customize panel">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+        <div class="card w-11/12 max-w-4xl h-[80vh] flex flex-col p-0 overflow-hidden relative shadow-2xl">
+    
+        <div class="flex justify-between items-center px-6 py-4 border-b border-gray-700/50 bg-black/20">
+            <h2 class="text-xl font-bold tracking-tight flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                Settings
+            </h2>
+            <button id="close-customize" class="text-secondary hover:text-white transition-colors p-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
-            <h2 class="text-xl font-semibold mb-4">Customize Dashboard</h2>
-            <div class="space-y-4">
-                <div>
-                    <label for="exam-type-select" class="block text-sm font-medium text-secondary mb-1">Target Exam</label>
-                    <div class="grid grid-cols-2 gap-2">
-                        <select id="exam-type-select" class="form-input rounded-md p-2 w-full">
-                            <option value="JEE">JEE Main</option>
-                            <option value="NEET">NEET</option>
-                            <option value="Custom">Custom</option>
-                        </select>
-                        <select id="exam-year-select" class="form-input rounded-md p-2 w-full">
-                            <option value="2026">2026</option>
-                            <option value="2027">2027</option>
-                            <option value="2028">2028</option>
-                        </select>
-                    </div>
+            <button id="close-customize-icon-btn" class="hidden"></button> 
+        </div>
 
-                     <div id="jee-details-container" class="mt-3 p-3 rounded-lg border border-dashed border-gray-700 bg-black/20 hidden">
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="block text-xs text-secondary mb-1">Session</label>
-                            <select id="jee-session-select" class="form-input rounded-md p-2 w-full text-sm">
-                                <option value="January">January</option>
-                                <option value="April">April</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs text-secondary mb-1">Shift Date (Optional)</label>
-                            <input type="date" id="jee-shift-input" class="form-input rounded-md p-2 w-full text-sm">
-                        </div>
-                    </div>
-                    <p class="text-[10px] text-secondary mt-2 italic">Select specific exam date if announced, otherwise defaults will be used.</p>
-                </div>
-
-                    <div id="custom-exam-container" class="mt-3 p-3 rounded-lg border border-dashed border-gray-700 bg-black/20 hidden">
-                        <div class="space-y-2">
-                            <div>
-                                <label class="block text-xs text-secondary mb-1">Exam Name</label>
-                                <input type="text" id="custom-exam-name" placeholder="e.g. BITSAT / Boards" class="form-input rounded-md p-2 w-full text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs text-secondary mb-1">Exam Date</label>
-                                <input type="date" id="custom-exam-date" class="form-input rounded-md p-2 w-full text-sm">
-                            </div>
-                        </div>
-                    </div>
-               
-
-                <div id="jee-details-container" class="mt-3 p-3 rounded-lg border border-dashed border-gray-700 bg-black/20 hidden">
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="block text-xs text-secondary mb-1">Session</label>
-                            <select id="jee-session-select" class="form-input rounded-md p-2 w-full text-sm">
-                                <option value="January">January</option>
-                                <option value="April">April</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs text-secondary mb-1">Shift Date (Optional)</label>
-                            <input type="date" id="jee-shift-input" class="form-input rounded-md p-2 w-full text-sm">
-                        </div>
-                    </div>
-                    <p class="text-[10px] text-secondary mt-2 italic">Select specific exam date if announced, otherwise defaults will be used.</p>
-                </div>
-                </div>
-                <div>
-                    <label for="theme-select" class="block text-sm font-medium text-secondary mb-1">Theme</label>
-                    <select id="theme-select" class="form-input rounded-md p-2 w-full">
-                        <option value="default">Deep Space</option>
-                        <!-- <option value="light">Solarized Light</option> -->
-                        <option value="cyberpunk">Cyberpunk</option>
-                        <option value="forest">Forest</option>
-                        <option value="rose-gold">Rose Gold</option>
-                        <option value="ocean">Ocean</option>
-                        <option value="sunset">Sunset</option>
-                        <option value="dracula">Dracula</option>
-                        <option value="coffee">Coffee Break</option>
-                        <option value="nordic">Nordic Frost</option>
-                        <option value="lavender">Lavender Haze</option>
-                        <option value="crimson">Crimson Elite</option>
-                        <option value="alakh-pandey" class="hidden">Alakh Pandey</option>
-                    </select>
-                </div>
-                
-                <div>
-                    <label for="font-select" class="block text-sm font-medium text-secondary mb-1">Font</label>
-                    <select id="font-select" class="form-input rounded-md p-2 w-full">
-                        <option value="'Inter', sans-serif">Inter (Default)</option>
-                        <option value="'Poppins', sans-serif">Poppins (Modern)</option>
-                        <option value="'Space Grotesk', sans-serif">Space Grotesk (Sci-Fi)</option>
-                        <option value="'Oswald', sans-serif">Oswald (Condensed)</option>
-                        <option value="'Roboto Slab', serif">Roboto Slab (Serif)</option>
-                        <option value="'Fira Code', monospace">Fira Code (Code)</option>
-                        <option value="'JetBrains Mono', monospace">JetBrains Mono (Dev)</option>
-                        <option value="'Comic Neue', cursive">Comic Sans</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-secondary mb-2">Preset Wallpapers</label>
-                    
-                    <div class="grid grid-cols-4 gap-2 mb-4" id="preset-wallpaper-grid"></div>
-
-                    <label for="bg-image-url" class="block text-sm font-medium text-secondary mb-1">Or paste a custom URL</label>
-                    <div class="flex gap-2">
-                        <input type="text" id="bg-image-url"
-                            placeholder="Paste image URL (.jpg, .png, .gif)"
-                            class="form-input rounded-md p-2 w-full text-xs">
-                        <button id="remove-bg-btn"
-                            class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-md"
-                            aria-label="Remove background image">X</button>
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-secondary mb-1">YouTube Player</label>
-                    <div class="space-y-2 mt-2 p-3 rounded-md" style="background-color: rgba(0,0,0,0.2);">
-                        <label for="youtube-tint-toggle" class="flex items-center justify-between cursor-pointer">
-                            <span class="text-sm">Enable Video Tint</span>
-                            <input type="checkbox" id="youtube-tint-toggle" class="form-input-toggle">
-                        </label>
-                        <label for="youtube-blur-toggle" class="flex items-center justify-between cursor-pointer">
-                            <span class="text-sm">Blur Video Player</span>
-                            <input type="checkbox" id="youtube-blur-toggle" class="form-input-toggle">
-                        </label>
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-secondary mb-1">Focus Mode (running timelogger stops
-                        when you switch tabs) + (full screen on pc)</label>
-                    <div class="space-y-2 mt-2 p-3 rounded-md" style="background-color: rgba(0,0,0,0.2);">
-                        <label for="focus-shield-toggle" class="flex items-center justify-between cursor-pointer">
-                            <span class="text-sm">Enable Focus Shield</span>
-                            <input type="checkbox" id="focus-shield-toggle" class="form-input-toggle">
-                        </label>
-                        <label for="ticking-sound-toggle" class="flex items-center justify-between cursor-pointer">
-                        <span class="text-sm">Impending Doom Tick (Every 10s)</span>
-                        <input type="checkbox" id="ticking-sound-toggle" class="form-input-toggle">
-                    </div>
-                
-
-                    <div>
-
-                        <br>
-                    <label class="block text-sm font-medium text-secondary mb-1">UI Layout</label>
-                    <div class="space-y-2 mt-2 p-3 rounded-md" style="background-color: rgba(0,0,0,0.2);">
-                        <label for="riced-mode-toggle" class="flex items-center justify-between cursor-pointer">
-                            <span class="text-sm">Riced Linux Mode (BETA)</span>
-                            <input type="checkbox" id="riced-mode-toggle" class="form-input-toggle">
-                        </label>
-                    </div>
-                </div>
-                </div>
-                <div class="p-3 rounded-md border border-gray-700/50 bg-black/20 mt-2">
-                    <label for="streamlined-mode-toggle" class="flex items-center justify-between cursor-pointer">
-                        <div class="flex flex-col">
-                            <span class="text-sm font-medium text-white">Pro Dashboard Mode</span>
-                            <span class="text-[10px] text-gray-400">Full-width, dense grid, solid UI.</span>
-                        </div>
-                        <input type="checkbox" id="streamlined-mode-toggle" class="form-input-toggle">
-                    </label>
-                </div>
-            </div>
-            <div class="flex justify-between items-center mt-6">
-                <button type="button" id="reset-dashboard-btn"
-                    class="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M3 6h18"></path>
-                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-                    </svg>
-                    <span>Reset Dashboard</span>
+        <div class="flex flex-col md:flex-row flex-1 overflow-hidden">
+            
+            <div class="w-full md:w-56 bg-black/20 border-r border-gray-700/30 flex flex-row md:flex-col overflow-x-auto md:overflow-y-auto">
+                <button class="settings-nav-btn active" data-target="general">
+                    <span>General</span>
                 </button>
-                <button type="button" id="close-customize"
-                    class="btn-primary font-bold py-2 px-4 rounded-md">Close</button>
+                <button class="settings-nav-btn" data-target="appearance">
+                    <span>Appearance</span>
+                </button>
+                <button class="settings-nav-btn" data-target="features">
+                    <span>Features</span>
+                </button>
+                <button class="settings-nav-btn" data-target="data">
+                    <span>Data & Reset</span>
+                </button>
             </div>
-            <div class="mt-6 pt-4 border-t" style="border-color: var(--border-color);">
+
+            <div class="flex-1 overflow-y-auto p-6 bg-black/10 relative">
                 
-                <div class="flex flex-col sm:flex-row gap-3">
-                    <button type="button" id="export-data-btn"
-                        class="flex-1 bg-green-700 hover:bg-green-800 text-white font-bold py-2 px-4 rounded-md text-sm transition-colors">Export
-                        Data</button>
-                    <button type="button" id="import-data-btn"
-                        class="flex-1 bg-sky-600 hover:bg-sky-700 text-white font-bold py-2 px-4 rounded-md text-sm transition-colors">Import
-                        Data</button>
+                <div id="panel-general" class="settings-panel space-y-6">
+                    <div class="settings-group">
+                        <h3 class="text-sm font-bold text-white mb-3 uppercase tracking-wider opacity-80">Target Exam</h3>
+                        <div class="grid grid-cols-2 gap-3 mb-3">
+                            <div>
+                                <label class="text-xs text-secondary mb-1 block">Exam</label>
+                                <select id="exam-type-select" class="form-input text-sm w-full"><option value="JEE">JEE Main</option><option value="NEET">NEET</option><option value="Custom">Custom</option></select>
+                            </div>
+                            <div>
+                                <label class="text-xs text-secondary mb-1 block">Year</label>
+                                <select id="exam-year-select" class="form-input text-sm w-full"><option value="2026">2026</option><option value="2027">2027</option><option value="2028">2028</option></select>
+                            </div>
+                        </div>
+                        
+                        <div id="jee-details-container" class="p-3 rounded-lg border border-dashed border-gray-700 bg-black/20 hidden">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div><label class="text-xs text-secondary mb-1 block">Session</label><select id="jee-session-select" class="form-input text-sm w-full"><option value="January">January</option><option value="April">April</option></select></div>
+                                <div><label class="text-xs text-secondary mb-1 block">Shift Date</label><input type="date" id="jee-shift-input" class="form-input text-sm w-full"></div>
+                            </div>
+                        </div>
+
+                        <div id="custom-exam-container" class="p-3 rounded-lg border border-dashed border-gray-700 bg-black/20 hidden">
+                            <div class="space-y-3">
+                                <div><label class="text-xs text-secondary mb-1 block">Name</label><input type="text" id="custom-exam-name" placeholder="e.g. BITSAT" class="form-input text-sm w-full"></div>
+                                <div><label class="text-xs text-secondary mb-1 block">Date</label><input type="date" id="custom-exam-date" class="form-input text-sm w-full"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <h3 class="text-sm font-bold text-white mb-3 uppercase tracking-wider opacity-80">Add Custom Subjects</h3>
+                        <div id="subject-manager-list" class="flex flex-wrap gap-2 mb-3 min-h-[40px] p-2 rounded-lg border border-gray-700/50 bg-black/20">
+                            <span class="text-xs text-gray-500 italic p-1">Loading...</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <input type="text" id="new-subject-input" placeholder="Add new subject..." class="form-input text-sm w-full">
+                            <button id="add-subject-btn" class="btn-primary px-4 py-2 font-bold text-xs whitespace-nowrap">Add</button>
+                        </div>
+                    </div>
                 </div>
+
+                <div id="panel-appearance" class="settings-panel hidden space-y-6">
+                    <div class="settings-group">
+                        <h3 class="text-sm font-bold text-white mb-3 uppercase tracking-wider opacity-80">Interface</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-xs text-secondary mb-1 block">Color Theme</label>
+                                <select id="theme-select" class="form-input text-sm w-full">
+                                    <option value="default">Deep Space</option>
+                                    <option value="cyberpunk">Cyberpunk</option>
+                                    <option value="forest">Forest</option>
+                                    <option value="rose-gold">Rose Gold</option>
+                                    <option value="ocean">Ocean</option>
+                                    <option value="sunset">Sunset</option>
+                                    <option value="dracula">Dracula</option>
+                                    <option value="coffee">Coffee Break</option>
+                                    <option value="nordic">Nordic Frost</option>
+                                    <option value="lavender">Lavender Haze</option>
+                                    <option value="crimson">Crimson Elite</option>
+                                    <option value="alakh-pandey" class="hidden">Alakh Pandey</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-xs text-secondary mb-1 block">Typography</label>
+                                <select id="font-select" class="form-input text-sm w-full">
+                                    <option value="'Inter', sans-serif">Inter (Default)</option>
+                                    <option value="'Poppins', sans-serif">Poppins (Modern)</option>
+                                    <option value="'Space Grotesk', sans-serif">Space Grotesk (Sci-Fi)</option>
+                                    <option value="'Oswald', sans-serif">Oswald (Condensed)</option>
+                                    <option value="'Roboto Slab', serif">Roboto Slab (Serif)</option>
+                                    <option value="'Fira Code', monospace">Fira Code (Code)</option>
+                                    <option value="'JetBrains Mono', monospace">JetBrains Mono (Dev)</option>
+                                    <option value="'Comic Neue', cursive">Comic Sans</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <h3 class="text-sm font-bold text-white mb-3 uppercase tracking-wider opacity-80">Background</h3>
+                        <div class="grid grid-cols-4 gap-2 mb-4" id="preset-wallpaper-grid"></div>
+                        
+                        <div class="flex gap-2">
+                            <input type="text" id="bg-image-url" placeholder="Custom Image URL..." class="form-input text-xs w-full">
+                            <button id="remove-bg-btn" class="bg-red-600/80 hover:bg-red-600 text-white px-3 rounded-md transition-colors">✕</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="panel-features" class="settings-panel hidden space-y-6">
+                    
+                    <div class="settings-group">
+                        <h3 class="text-sm font-bold text-white mb-3 uppercase tracking-wider opacity-80">Focus & Layout</h3>
+                        <div class="space-y-3">
+                            <label class="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors cursor-pointer border border-transparent hover:border-gray-600">
+                                <div>
+                                    <span class="text-sm font-medium block">Pro Dashboard Mode</span>
+                                    <span class="text-[10px] text-secondary">Dense grid, no glassmorphism, fixed headers.</span>
+                                </div>
+                                <input type="checkbox" id="streamlined-mode-toggle" class="form-input-toggle">
+                            </label>
+
+                            <label class="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors cursor-pointer border border-transparent hover:border-gray-600">
+                                <div>
+                                    <span class="text-sm font-medium block">Riced Linux Mode (Beta)</span>
+                                    <span class="text-[10px] text-secondary">Top bar layout for the Unix enthusiasts.</span>
+                                </div>
+                                <input type="checkbox" id="riced-mode-toggle" class="form-input-toggle">
+                            </label>
+
+                            <label class="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors cursor-pointer border border-transparent hover:border-gray-600">
+                                <div>
+                                    <span class="text-sm font-medium block">Focus Shield</span>
+                                    <span class="text-[10px] text-secondary">Pauses timers if you switch tabs.</span>
+                                </div>
+                                <input type="checkbox" id="focus-shield-toggle" class="form-input-toggle">
+                            </label>
+                            <label class="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors cursor-pointer border border-transparent hover:border-gray-600">
+                                <div>
+                                    <span class="text-sm font-medium block">Doom Tick</span>
+                                    <span class="text-[10px] text-secondary">Plays a ticking sound every 60s.</span>
+                                </div>
+                                <input type="checkbox" id="ticking-sound-toggle" class="form-input-toggle">
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <h3 class="text-sm font-bold text-white mb-3 uppercase tracking-wider opacity-80">Media</h3>
+                        <div class="space-y-3">
+                            <label class="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors cursor-pointer border border-transparent hover:border-gray-600">
+                                <span class="text-sm">YouTube Tint</span>
+                                <input type="checkbox" id="youtube-tint-toggle" class="form-input-toggle">
+                            </label>
+                            <label class="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors cursor-pointer border border-transparent hover:border-gray-600">
+                                <span class="text-sm">Blur Player</span>
+                                <input type="checkbox" id="youtube-blur-toggle" class="form-input-toggle">
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="panel-data" class="settings-panel hidden flex flex-col h-full justify-center space-y-8">
+                    <div class="text-center space-y-2">
+                        <h3 class="text-lg font-bold text-white">Data Management</h3>
+                        <p class="text-xs text-secondary max-w-xs mx-auto">Backup your progress locally or wipe the slate clean.</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <button id="export-data-btn" class="flex flex-col items-center justify-center p-6 rounded-xl bg-green-900/20 border border-green-700/50 hover:bg-green-900/40 hover:border-green-500 transition-all group">
+                            <svg class="w-8 h-8 mb-3 text-green-500 group-hover:scale-110 transition-transform" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                            <span class="font-bold text-green-400">Export JSON</span>
+                        </button>
+                        
+                        <button id="import-data-btn" class="flex flex-col items-center justify-center p-6 rounded-xl bg-blue-900/20 border border-blue-700/50 hover:bg-blue-900/40 hover:border-blue-500 transition-all group">
+                            <svg class="w-8 h-8 mb-3 text-blue-500 group-hover:scale-110 transition-transform" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                            <span class="font-bold text-blue-400">Import JSON</span>
+                        </button>
+                    </div>
+
+                    <div class="border-t border-gray-700/50 pt-8">
+                        <button id="reset-dashboard-btn" class="w-full flex items-center justify-center gap-2 p-4 rounded-xl bg-red-900/10 border border-red-900/30 hover:bg-red-900/30 hover:border-red-500/50 text-red-400 hover:text-red-300 transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                            <span class="font-bold">Reset Dashboard Factory Settings</span>
+                        </button>
+                    </div>
+                </div>
+
             </div>
         </div>
+    </div>
     </div>
 
     <template id="line-graph-card-template">
@@ -1204,6 +1280,8 @@
                         <li>Tutorial added.</li>
                         <li>Impending doom tick.</li>
                         <li>Pro Dashboard View</li>
+                        <li>Improved Custom Subject Menus</li>
+                        <li>Improved Settings and Card menus.</li>
                     </ul>
                 </div>
 

@@ -741,6 +741,43 @@ document.addEventListener("DOMContentLoaded", () => {
         confirmCallback = null;
         cancelCallback = null;
     });
+
+
+    // --- Subject Manager Listeners ---
+
+    // 1. Add Button Click
+    const addSubBtn = document.getElementById("add-subject-btn");
+    if (addSubBtn) {
+        addSubBtn.addEventListener("click", handleAddSubject);
+    }
+
+    // 2. Add on Enter Key press
+    const subInput = document.getElementById("new-subject-input");
+    if (subInput) {
+        subInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") handleAddSubject();
+        });
+    }
+
+    // 3. Delete Button Click (Event Delegation)
+    const subList = document.getElementById("subject-manager-list");
+    if (subList) {
+        subList.addEventListener("click", (e) => {
+            if (e.target.classList.contains("delete-subject-btn")) {
+                const index = parseInt(e.target.dataset.index);
+                handleDeleteSubject(index);
+            }
+        });
+    }
+
+    // 4. Render the list when Customize Modal opens
+    domElements.buttons.customize.forEach(btn => 
+        btn.addEventListener("click", () => {
+            // ... existing logic ...
+            renderSubjectManager(); // <--- ADD THIS
+        })
+    );
+
     /**
 
     * Displays a confirmation modal.
@@ -861,6 +898,11 @@ function sanitizeDashboardState() {
         const seconds = Math.floor(totalSeconds % 60).toString().padStart(2, "0");
         return `${hours}:${minutes}:${seconds}`;
     };
+
+
+
+
+
     /**
 
     * Formats total seconds into a readable string (e.g., "1h 30m", "45m", "30s").
@@ -2778,6 +2820,75 @@ function sanitizeDashboardState() {
             }
         }
     });
+
+
+    /**
+ * Renders the subject chips in the Customize Modal.
+ */
+function renderSubjectManager() {
+    const container = document.getElementById("subject-manager-list");
+    const userSubjects = appState.settings.userSubjects || [];
+
+    container.innerHTML = "";
+
+    if (userSubjects.length === 0) {
+        container.innerHTML = '<span class="text-xs text-gray-500 italic p-1">No custom subjects added.</span>';
+        return;
+    }
+
+    userSubjects.forEach((subject, index) => {
+        const chip = document.createElement("div");
+        chip.className = "subject-chip";
+        chip.innerHTML = `
+            <span>${subject}</span>
+            <button class="delete-subject-btn" data-index="${index}" title="Remove ${subject}">✕</button>
+        `;
+        container.appendChild(chip);
+    });
+}
+
+    /**
+     * Handles adding a new subject.
+     */
+    function handleAddSubject() {
+        const input = document.getElementById("new-subject-input");
+        const newSubject = input.value.trim();
+
+        if (!newSubject) return;
+
+        // Initialize array if it doesn't exist
+        if (!appState.settings.userSubjects) {
+            appState.settings.userSubjects = [];
+        }
+
+        // Prevent duplicates
+        if (appState.settings.userSubjects.includes(newSubject)) {
+            alert("Subject already exists!");
+            return;
+        }
+
+        appState.settings.userSubjects.push(newSubject);
+        input.value = ""; // Clear input
+        
+        // Save and Refresh
+        appState.saveSettings();
+        renderSubjectManager(); // Refresh chips
+        renderDashboard(); // Refresh Study Logger dropdowns immediately
+    }
+
+    /**
+     * Handles deleting a subject.
+     */
+    function handleDeleteSubject(index) {
+        if (appState.settings.userSubjects && appState.settings.userSubjects[index]) {
+            appState.settings.userSubjects.splice(index, 1);
+            
+            // Save and Refresh
+            appState.saveSettings();
+            renderSubjectManager();
+            renderDashboard();
+        }
+    }
     // --- PiP Window Opener ---
     /**
 
@@ -3187,6 +3298,62 @@ function sanitizeDashboardState() {
         }
     });
 
+
+    // --- Card Adder Grid Logic ---
+    const cardOptions = document.querySelectorAll('.card-option');
+    const hiddenInput = document.getElementById('new-card-type');
+    const contentInput = document.getElementById('new-card-content');
+    const titleInput = document.getElementById('new-card-title');
+
+    // Default titles map for smart auto-filling
+    const defaultTitles = {
+        note: "Quick Note",
+        todo: "My Tasks",
+        "daily-tasks": "Agenda",
+        pomodoro: "Focus Timer",
+        "time-logger": "Study Log",
+        "line-graph": "Test Progress",
+        analytics: "Stats",
+        ambient: "Soundscapes",
+        youtube: "Video Player"
+    };
+
+    cardOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            // 1. Visual Selection
+            cardOptions.forEach(opt => opt.classList.remove('active'));
+            option.classList.add('active');
+
+            // 2. Update Hidden Input
+            const value = option.dataset.value;
+            hiddenInput.value = value;
+
+            // 3. Toggle Content Textarea (Existing Logic adapted)
+            const isNote = value === "note";
+            const isYouTube = value === "youtube";
+            
+            if (isNote || isYouTube) {
+                contentInput.style.display = "block";
+                contentInput.placeholder = isYouTube ? "Paste YouTube URL..." : "Write your note here...";
+                // Auto-focus content for these types
+                setTimeout(() => contentInput.focus(), 50);
+            } else {
+                contentInput.style.display = "none";
+                // Auto-focus title for others
+                titleInput.focus();
+            }
+
+            // 4. Smart Title Auto-fill (Quality of Life)
+            // Only change title if it's empty or matches a default of another type
+            const currentTitle = titleInput.value;
+            const isDefault = Object.values(defaultTitles).includes(currentTitle) || currentTitle === "";
+            
+            if (isDefault) {
+                titleInput.value = defaultTitles[value] || "";
+            }
+        });
+    });
+
     domElements.inputs.tickingSoundToggle.addEventListener("change", () => {
         appState.settings.tickingSoundEnabled = domElements.inputs.tickingSoundToggle.checked;
         appState.saveSettings();
@@ -3569,26 +3736,29 @@ function sanitizeDashboardState() {
         },
         changeSubject(cardId, newSubject) {
             const state = appState.timeLoggerState[cardId];
-            const cardElement = domElements.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
+            
+            // If user selects "Add New Subject...", guide them to settings
             if (newSubject === "add_new") {
-                const newSubjectName = prompt("Enter new subject name:");
-                if (newSubjectName && newSubjectName.trim()) {
-                    if (!appState.settings.userSubjects) appState.settings.userSubjects = [];
-                    appState.settings.userSubjects.push(newSubjectName.trim());
-                    appState.saveSettings();
-                    state.currentSubject = newSubjectName.trim();
-                    renderDashboard(); // Re-render to update all subject lists
-                } else {
-                    // Reset dropdown if cancelled
-                    if (cardElement) {
-                        cardElement.querySelector(".subject-select").value = state.currentSubject;
-                    }
+                // Option 1: Alert
+                alert("Please go to 'Customize Dashboard' to manage your subjects.");
+                
+                // Option 2: Auto-open Customize Modal (Smoother UX)
+                domElements.modals.customize.classList.remove("hidden");
+                renderSubjectManager();
+                
+                // Reset dropdown to previous value so it doesn't stay on "Add New..."
+                const cardElement = domElements.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
+                if (cardElement) {
+                    cardElement.querySelector(".subject-select").value = state.currentSubject;
                 }
-            } else if (state) {
+                return;
+            } 
+            
+            if (state) {
                 state.currentSubject = newSubject;
                 appState.save("timeLoggerState");
             }
-        },
+        }
     };
     domElements.inputs.examType.addEventListener("change", () => {
         appState.settings.examType = domElements.inputs.examType.value;
@@ -4504,4 +4674,23 @@ function sanitizeDashboardState() {
     //         );
     //     }, 1500); 
     // }
+    const settingsNavBtns = document.querySelectorAll('.settings-nav-btn');
+    const settingsPanels = document.querySelectorAll('.settings-panel');
+
+    settingsNavBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // 1. Remove active class from all buttons
+            settingsNavBtns.forEach(b => b.classList.remove('active'));
+            // 2. Add active class to clicked button
+            btn.classList.add('active');
+
+            // 3. Hide all panels
+            settingsPanels.forEach(p => p.classList.add('hidden'));
+
+            // 4. Show target panel
+            const targetId = `panel-${btn.dataset.target}`;
+            const targetPanel = document.getElementById(targetId);
+            if(targetPanel) targetPanel.classList.remove('hidden');
+        });
+    });
 });
