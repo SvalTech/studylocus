@@ -3538,6 +3538,35 @@ function renderSubjectManager() {
                 state.time--;
                 this.updateDisplay(cardId);
             } else {
+                // --- START OF NEW LOGIC ---
+                // Only log if the completed mode was "pomodoro" (ignore breaks)
+                if (state.mode === "pomodoro") {
+                    const todayStr = formatDateToISO(new Date());
+
+                    // Initialize today's log if it doesn't exist
+                    if (!appState.studyLogs[todayStr]) {
+                        appState.studyLogs[todayStr] = {};
+                    }
+
+                    // Define the subject name for analytics
+                    // Note: Since Pomodoro cards don't have a subject dropdown, 
+                    // we log it under a generic "Pomodoro" category.
+                    const subject = "Pomodoro";
+
+                    // Calculate seconds from the duration setting (minutes * 60)
+                    const secondsToAdd = state.durations.pomodoro * 60;
+
+                    // Update the logs
+                    appState.studyLogs[todayStr][subject] = (appState.studyLogs[todayStr][subject] || 0) + secondsToAdd;
+
+                    // Save to storage
+                    appState.save("studyLogs");
+
+                    // Force the dashboard (and Analytics card) to update immediately
+                    renderDashboard();
+                }
+                // --- END OF NEW LOGIC ---
+
                 this.stop(cardId);
                 new Tone.Synth().toDestination().triggerAttackRelease("C5", "0.5"); // Play sound
             }
