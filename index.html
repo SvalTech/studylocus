@@ -27,13 +27,15 @@
 
     <link rel="canonical" href="https://sval.tech/studylocus/" />
     <link rel="icon" type="image/x-icon" href="favicon.ico">
-    
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue&family=Fira+Code&family=Inter:wght@400;600;700&family=Roboto+Slab&family=Poppins:wght@300;400;500;600;700&family=Oswald:wght@400;500;700&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-    
+    <link
+        href="https://fonts.googleapis.com/css2?family=Comic+Neue&family=Fira+Code&family=Inter:wght@400;600;700&family=Roboto+Slab&family=Poppins:wght@300;400;500;600;700&family=Oswald:wght@400;500;700&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <script>
         tailwind.config = {
             theme: {
@@ -55,7 +57,7 @@
     <style>
         /* FORCE Tutorial on top of everything */
         .driver-popover.driverjs-theme {
-            z-index: 999999 !important; 
+            z-index: 999999 !important;
             background-color: #18181b;
             color: white;
             border: 1px solid #3f3f46;
@@ -73,7 +75,8 @@
             border: 1px solid #52525b;
             text-shadow: none;
             cursor: pointer;
-            z-index: 1000000; /* Super high to ensure clickability */
+            z-index: 1000000;
+            /* Super high to ensure clickability */
         }
 
         .driver-popover.driverjs-theme button:hover {
@@ -87,9 +90,9 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css" />
     <script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.js.iife.js"></script>
-    <link rel="stylesheet" href="styles-u.css">
+    <link rel="stylesheet" href="styles.css">
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -122,7 +125,7 @@
 <body class="antialiased">
 
     <div id="app-background" class="fixed inset-0 w-full h-full -z-50 pointer-events-none">
-        </div>
+    </div>
 
     <div id="bg-overlay" class="fixed inset-0 w-full h-full -z-40 pointer-events-none"></div>
     <!-- Riced Linux Header -->
@@ -178,55 +181,69 @@
     <div id="sync-status-toast"></div>
     <div class="container mx-auto px-2 sm:px-4 py-6">
         <!-- Default Header -->
-        <header class="default-header flex justify-between items-center mb-6">
-            <h1 id="main-title" class="text-3xl sm:text-4xl font-bold cursor-pointer">JEE 2026</h1>
-            <div class="flex items-center gap-2 sm:gap-4">
-                <div id="auth-container"></div>
-                <div class="flex items-center space-x-2">
-                    <button id="customize-btn"
-                        class="customize-btn bg-gray-700/50 hover:bg-gray-600/60 text-white font-bold rounded-full w-10 h-10 md:w-auto md:rounded-md flex items-center justify-center md:px-4 md:py-2 transition-all text-sm"
-                        title="Customize Dashboard" aria-label="Customize Dashboard">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="4" x2="4" y1="21" y2="14"></line>
-                            <line x1="4" x2="4" y1="10" y2="3"></line>
-                            <line x1="12" x2="12" y1="21" y2="12"></line>
-                            <line x1="12" x2="12" y1="8" y2="3"></line>
-                            <line x1="20" x2="20" y1="21" y2="16"></line>
-                            <line x1="20" x2="20" y1="12" y2="3"></line>
-                            <line x1="1" x2="7" y1="14" y2="14"></line>
-                            <line x1="9" x2="15" y1="8" y2="8"></line>
-                            <line x1="17" x2="23" y1="16" y2="16"></line>
-                        </svg>
-                    </button>
-                    <button id="add-card-btn"
-                        class="add-card-btn btn-primary font-bold rounded-full w-10 h-10 md:w-auto md:rounded-md flex items-center justify-center md:px-4 md:py-2 transition-all text-sm"
-                        title="Add New Card" aria-label="Add New Card">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+        <header class="default-header header-capsule flex justify-between items-center">
+        
+            <div class="flex items-center gap-3 pl-2">
+                <span class="brand-text hidden sm:block">sval.tech</span>
+            
+                <h1 id="main-title"
+                    class="text-lg sm:text-xl font-bold tracking-tight cursor-pointer hover:text-[var(--accent-color)] transition-colors">
+                    JEE 2026
+                </h1>
+            </div>
+        
+            <div class="flex items-center gap-2 pr-1">
+        
+                <div id="auth-container" class="scale-90 origin-right"></div>
+        
+                <div class="h-4 w-px bg-white/10 mx-1"></div>
+        
+                <div class="flex items-center gap-1.5">
+                    <button class="add-card-btn capsule-btn" title="Add New Card" aria-label="Add New Card">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="12" y1="5" x2="12" y2="19"></line>
                             <line x1="5" y1="12" x2="19" y2="12"></line>
                         </svg>
                     </button>
-                    <button id="info-btn"
-                        class="info-btn bg-gray-700/50 hover:bg-gray-600/60 text-white font-bold p-2 rounded-full transition-colors text-sm"
-                        title="About this project" aria-label="About this project">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+        
+                    <button class="customize-btn capsule-btn" title="Customize Dashboard" aria-label="Customize Dashboard">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <path d="M12 16v-4"></path>
-                            <path d="M12 8h.01"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path
+                                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                            </path>
                         </svg>
                     </button>
-                    <button id="zen-mode-btn"
-                        class="zen-mode-btn bg-gray-700/50 hover:bg-gray-600/60 text-white font-bold p-2 rounded-full transition-colors text-sm"
-                        title="Enter Zen Mode" aria-label="Enter Zen Mode">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+        
+                    <button id="static-focus-btn" class="capsule-btn" title="Super Focus Mode" aria-label="Enter Super Focus">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2Z"></path>
-                            <path d="m9.5 16.5 4-4"></path>
-                            <path d="m14.5 16.5-4-4"></path>
-                            <path d="M12 8V7"></path>
+                            <circle cx="12" cy="12" r="10" />
+                            <circle cx="12" cy="12" r="3" />
+                        </svg>
+                    </button>
+        
+                    <button class="zen-mode-btn capsule-btn" title="Enter Zen Mode" aria-label="Enter Zen Mode">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <circle cx="12" cy="12" r="4"></circle>
+                            <line x1="4.93" y1="4.93" x2="9.17" y2="9.17"></line>
+                            <line x1="14.83" y1="14.83" x2="19.07" y2="19.07"></line>
+                            <line x1="14.83" y1="9.17" x2="19.07" y2="4.93"></line>
+                            <line x1="14.83" y1="9.17" x2="18.36" y2="5.64"></line>
+                            <line x1="4.93" y1="19.07" x2="9.17" y2="14.83"></line>
+                        </svg>
+                    </button>
+        
+                    <button class="info-btn capsule-btn" title="Info" aria-label="Info">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
                         </svg>
                     </button>
                 </div>
@@ -246,25 +263,31 @@
         </svg></button>
 
     <footer class="mt-16 border-t border-zinc-800 pt-8 pb-6 text-center">
-            <div class="flex flex-wrap justify-center gap-4 mb-6">
-                <a href="https://sval.tech/studylocus/termsandconditions.html" style="color: var(--accent-color);" class="px-1.5 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-[10px] text-zinc-400 uppercase tracking-wide hover:border-indigo-500/50 hover:text-indigo-400 transition-colors">
-                    Terms and Conditions
-                </a>
-                <a href="https://sval.tech/studylocus/privacypolicy.html" style="color: var(--accent-color);" class="px-1.5 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-[10px] text-zinc-400 uppercase tracking-wide hover:border-indigo-500/50 hover:text-indigo-400 transition-colors">
-                    Privacy Policy
-                </a>
-                <a href="https://discord.gg/c8xHpTfM" style="color: var(--accent-color);" target="_blank" class="px-1.5 py-1.5 rounded-full bg-zinc-900 border border-[#5865F2]/20 text-[10px] text-[#5865F2] uppercase tracking-wide hover:text-white hover:border-indigo-500/50 transition-all flex items-center gap-2">
-                    <svg class="w-3 h-3 fill-current" viewBox="0 0 127.14 96.36">
-                        <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.11,77.11,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22c1.24-23.28-3.28-47.54-18.9-72.15ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z"/>
-                    </svg>
-                    Feedback / Discord
-                </a>
-            </div>
-            <p class="text-zinc-600 text-xs">
-                Built by <a href="https://github.com/svalordev" target="_blank" style="color: var(--accent-color);"" class="text-zinc-400 hover:text-white transition-colors underline decoration-dotted underline-offset-4">Shaurya Pratap Singh</a>
-            </p>
+        <div class="flex flex-wrap justify-center gap-4 mb-6">
+            <a href="https://sval.tech/studylocus/termsandconditions.html" style="color: var(--accent-color);"
+                class="px-1.5 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-[10px] text-zinc-400 uppercase tracking-wide hover:border-indigo-500/50 hover:text-indigo-400 transition-colors">
+                Terms and Conditions
+            </a>
+            <a href="https://sval.tech/studylocus/privacypolicy.html" style="color: var(--accent-color);"
+                class="px-1.5 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-[10px] text-zinc-400 uppercase tracking-wide hover:border-indigo-500/50 hover:text-indigo-400 transition-colors">
+                Privacy Policy
+            </a>
+            <a href="https://discord.gg/c8xHpTfM" style="color: var(--accent-color);" target="_blank"
+                class="px-1.5 py-1.5 rounded-full bg-zinc-900 border border-[#5865F2]/20 text-[10px] text-[#5865F2] uppercase tracking-wide hover:text-white hover:border-indigo-500/50 transition-all flex items-center gap-2">
+                <svg class="w-3 h-3 fill-current" viewBox="0 0 127.14 96.36">
+                    <path
+                        d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.11,77.11,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22c1.24-23.28-3.28-47.54-18.9-72.15ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z" />
+                </svg>
+                Feedback / Discord
+            </a>
+        </div>
+        <p class="text-zinc-600 text-xs">
+            Built by <a href="https://github.com/svalordev" target="_blank" style="color: var(--accent-color);"" class="
+                text-zinc-400 hover:text-white transition-colors underline decoration-dotted underline-offset-4">Shaurya
+                Pratap Singh</a>
+        </p>
 
-        </footer>
+    </footer>
 
     <template id="countdown-template">
         <div class="card" data-card-id="countdown">
@@ -496,28 +519,62 @@
             <div class="card-header mb-0 flex-shrink-0">
                 <h2 class="text-lg font-semibold card-title">Daily Agenda</h2>
                 <div class="card-header-controls">
-                    <button class="toggle-colspan-btn" title="Toggle size"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m6 6v-4m0 4h-4"/><path d="M3 3l6 6"/><path d="M3 3v4m0-4h4"/></svg></button>
-                    <button class="delete-card-btn" title="Delete card"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></button>
-                    <span class="drag-handle cursor-grab"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+                    <button class="toggle-colspan-btn" title="Toggle size"><svg xmlns="http://www.w3.org/2000/svg"
+                            width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 21l-6-6m6 6v-4m0 4h-4" />
+                            <path d="M3 3l6 6" />
+                            <path d="M3 3v4m0-4h4" />
+                        </svg></button>
+                    <button class="delete-card-btn" title="Delete card"><svg xmlns="http://www.w3.org/2000/svg"
+                            width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 6h18" />
+                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                        </svg></button>
+                    <span class="drag-handle cursor-grab"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="9" cy="12" r="1" />
+                            <circle cx="9" cy="5" r="1" />
+                            <circle cx="9" cy="19" r="1" />
+                            <circle cx="15" cy="12" r="1" />
+                            <circle cx="15" cy="5" r="1" />
+                            <circle cx="15" cy="19" r="1" />
+                        </svg></span>
                 </div>
             </div>
 
-            <div class="flex items-center justify-between gap-2 px-3 py-2 mb-3 mt-1 bg-black/20 rounded-lg border border-white/5">
-                <button class="prev-day-btn p-1 text-gray-400 hover:text-white hover:bg-white/10 rounded transition-colors" title="Previous Day">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            <div
+                class="flex items-center justify-between gap-2 px-3 py-2 mb-3 mt-1 bg-black/20 rounded-lg border border-white/5">
+                <button
+                    class="prev-day-btn p-1 text-gray-400 hover:text-white hover:bg-white/10 rounded transition-colors"
+                    title="Previous Day">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m15 18-6-6 6-6" />
+                    </svg>
                 </button>
-                
-                <input type="date" class="daily-date-selector bg-transparent border-none text-xs font-bold text-center text-white focus:ring-0 cursor-pointer font-mono tracking-wide">
-                
-                <button class="next-day-btn p-1 text-gray-400 hover:text-white hover:bg-white/10 rounded transition-colors" title="Next Day">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+
+                <input type="date"
+                    class="daily-date-selector bg-transparent border-none text-xs font-bold text-center text-white focus:ring-0 cursor-pointer font-mono tracking-wide">
+
+                <button
+                    class="next-day-btn p-1 text-gray-400 hover:text-white hover:bg-white/10 rounded transition-colors"
+                    title="Next Day">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m9 18 6-6-6-6" />
+                    </svg>
                 </button>
             </div>
 
             <div class="card-content flex flex-col flex-grow min-h-0">
                 <div class="flex items-center gap-2 mb-3 flex-shrink-0 px-1">
                     <div class="progress-container flex-grow bg-gray-700/30 rounded-full h-1.5">
-                        <div class="progress-bar bg-[var(--accent-color)] h-1.5 rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(var(--accent-color-rgb),0.4)]" style="width: 0%"></div>
+                        <div class="progress-bar bg-[var(--accent-color)] h-1.5 rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(var(--accent-color-rgb),0.4)]"
+                            style="width: 0%"></div>
                     </div>
                     <span class="progress-text text-[10px] text-gray-400 font-bold">0%</span>
                 </div>
@@ -525,10 +582,13 @@
                 <ul class="daily-task-list space-y-2 overflow-y-auto no-scrollbar flex-grow min-h-0 pr-1"></ul>
 
                 <form class="add-daily-task-form flex gap-2 mt-3 pt-2 border-t border-white/5 flex-shrink-0">
-                    <input type="text" placeholder="Add task for this day..." class="form-input rounded-md p-2 w-full text-xs bg-black/20 focus:bg-black/40 transition-colors border-none focus:ring-1 focus:ring-[var(--accent-color)]" required>
-                    <button type="submit" class="btn-primary py-1.5 px-3 rounded-md text-xs font-bold shadow-lg hover:shadow-[var(--accent-color)]/20 transition-all">+</button>
+                    <input type="text" placeholder="Add task for this day..."
+                        class="form-input rounded-md p-2 w-full text-xs bg-black/20 focus:bg-black/40 transition-colors border-none focus:ring-1 focus:ring-[var(--accent-color)]"
+                        required>
+                    <button type="submit"
+                        class="btn-primary py-1.5 px-3 rounded-md text-xs font-bold shadow-lg hover:shadow-[var(--accent-color)]/20 transition-all">+</button>
                 </form>
-                
+
                 <div class="text-[9px] text-gray-600 text-center mt-1 font-mono opacity-40 flex-shrink-0">
                     Click circle to toggle • Click badge to prioritize
                 </div>
@@ -541,16 +601,38 @@
             <div class="card-header mb-2 flex-shrink-0">
                 <h2 class="text-lg font-semibold card-title">Tasks</h2>
                 <div class="card-header-controls">
-                    <button class="toggle-colspan-btn" title="Toggle size"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m6 6v-4m0 4h-4"/><path d="M3 3l6 6"/><path d="M3 3v4m0-4h4"/></svg></button>
-                    <button class="delete-card-btn" title="Delete card"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></button>
-                    <span class="drag-handle cursor-grab"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+                    <button class="toggle-colspan-btn" title="Toggle size"><svg xmlns="http://www.w3.org/2000/svg"
+                            width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 21l-6-6m6 6v-4m0 4h-4" />
+                            <path d="M3 3l6 6" />
+                            <path d="M3 3v4m0-4h4" />
+                        </svg></button>
+                    <button class="delete-card-btn" title="Delete card"><svg xmlns="http://www.w3.org/2000/svg"
+                            width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 6h18" />
+                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                        </svg></button>
+                    <span class="drag-handle cursor-grab"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="9" cy="12" r="1" />
+                            <circle cx="9" cy="5" r="1" />
+                            <circle cx="9" cy="19" r="1" />
+                            <circle cx="15" cy="12" r="1" />
+                            <circle cx="15" cy="5" r="1" />
+                            <circle cx="15" cy="19" r="1" />
+                        </svg></span>
                 </div>
             </div>
 
             <div class="card-content flex flex-col flex-grow min-h-0">
                 <div class="flex items-center gap-2 mb-3 flex-shrink-0">
                     <div class="progress-container flex-grow bg-gray-700/30 rounded-full h-1.5">
-                        <div class="progress-bar bg-[var(--accent-color)] h-1.5 rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(var(--accent-color-rgb),0.4)]" style="width: 0%"></div>
+                        <div class="progress-bar bg-[var(--accent-color)] h-1.5 rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(var(--accent-color-rgb),0.4)]"
+                            style="width: 0%"></div>
                     </div>
                     <span class="progress-text text-[10px] text-gray-400 font-bold">0%</span>
                 </div>
@@ -558,10 +640,13 @@
                 <ul class="todo-list space-y-2 overflow-y-auto no-scrollbar flex-grow min-h-0 pr-1"></ul>
 
                 <form class="add-todo-form flex gap-2 mt-3 pt-2 border-t border-white/5 flex-shrink-0">
-                    <input type="text" placeholder="Add new task..." class="form-input rounded-md p-2 w-full text-xs bg-black/20 focus:bg-black/40 transition-colors border-none focus:ring-1 focus:ring-[var(--accent-color)]" required>
-                    <button type="submit" class="btn-primary py-1.5 px-3 rounded-md text-xs font-bold shadow-lg hover:shadow-[var(--accent-color)]/20 transition-all">+</button>
+                    <input type="text" placeholder="Add new task..."
+                        class="form-input rounded-md p-2 w-full text-xs bg-black/20 focus:bg-black/40 transition-colors border-none focus:ring-1 focus:ring-[var(--accent-color)]"
+                        required>
+                    <button type="submit"
+                        class="btn-primary py-1.5 px-3 rounded-md text-xs font-bold shadow-lg hover:shadow-[var(--accent-color)]/20 transition-all">+</button>
                 </form>
-                
+
                 <div class="text-[9px] text-gray-600 text-center mt-1 font-mono opacity-40 flex-shrink-0">
                     Click circle to toggle • Click badge to prioritize
                 </div>
@@ -692,23 +777,48 @@
                 <h2 class="text-lg font-semibold card-title">Study Logger</h2>
                 <div class="card-header-controls">
                     <button class="pip-btn" title="Show in floating window">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.75 4.75h-8.5a2 2 0 0 0-2 2v8.5a2 2 0 0 0 2 2h8.5a2 2 0 0 0 2-2v-8.5a2 2 0 0 0-2-2Z" /><path d="M19.25 8.75h-8.5a2 2 0 0 1-2-2v-2.5" /><path d="M17.5 15.5V14" /><path d="m15 12 5 5" /></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M12.75 4.75h-8.5a2 2 0 0 0-2 2v8.5a2 2 0 0 0 2 2h8.5a2 2 0 0 0 2-2v-8.5a2 2 0 0 0-2-2Z" />
+                            <path d="M19.25 8.75h-8.5a2 2 0 0 1-2-2v-2.5" />
+                            <path d="M17.5 15.5V14" />
+                            <path d="m15 12 5 5" />
+                        </svg>
                     </button>
                     <button class="toggle-colspan-btn" title="Toggle size">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m6 6v-4m0 4h-4" /><path d="M3 3l6 6" /><path d="M3 3v4m0-4h4" /></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 21l-6-6m6 6v-4m0 4h-4" />
+                            <path d="M3 3l6 6" />
+                            <path d="M3 3v4m0-4h4" />
+                        </svg>
                     </button>
                     <button class="delete-card-btn" title="Delete card">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 6h18" />
+                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                        </svg>
                     </button>
                     <span class="drag-handle">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="9" cy="12" r="1" />
+                            <circle cx="9" cy="5" r="1" />
+                            <circle cx="9" cy="19" r="1" />
+                            <circle cx="15" cy="12" r="1" />
+                            <circle cx="15" cy="5" r="1" />
+                            <circle cx="15" cy="19" r="1" />
+                        </svg>
                     </span>
                 </div>
             </div>
             <div class="card-content text-center">
                 <div class="timer-display text-5xl font-bold my-4 tabular-nums">00:00:00</div>
                 <div class="focus-status text-xs text-yellow-400 mb-2 h-4"></div>
-                
+
                 <div class="flex flex-col sm:flex-row gap-2 mb-4 items-center justify-center">
                     <label class="text-sm text-secondary sr-only sm:not-sr-only">Subject:</label>
                     <select class="subject-select form-input rounded-md p-2 text-sm flex-grow"></select>
@@ -719,30 +829,33 @@
                     <button class="log-btn btn-primary font-bold py-2 px-8 text-lg rounded-md">LOG</button>
                     <button class="reset-btn text-secondary hover:text-primary">Reset</button>
                 </div>
-                
+
                 <p class="log-message text-red-500 text-xs mt-2 h-4"></p>
                 <div class="w-full border-t border-[var(--border-color)] my-3"></div>
-                
+
                 <div class="flex justify-between items-center mb-2">
                     <h3 class="text-md font-semibold text-left">Today's Log</h3>
                     <span class="total-study-time text-sm font-bold text-secondary"></span>
                 </div>
-                
+
                 <ul class="study-log-list space-y-2 max-h-32 overflow-y-auto no-scrollbar text-left text-sm"></ul>
 
                 <div class="manual-entry-container mt-4 pt-2 border-t border-gray-700/50">
-                    <button class="toggle-manual-form text-xs text-secondary hover:text-white flex items-center gap-1 mx-auto transition-colors">
+                    <button
+                        class="toggle-manual-form text-xs text-secondary hover:text-white flex items-center gap-1 mx-auto transition-colors">
                         <span>+ Add Manual Entry</span>
                     </button>
                     <form class="manual-log-form hidden flex flex-col gap-2 mt-2">
                         <div class="flex gap-2">
-                            <select class="manual-subject-select form-input rounded p-1.5 text-xs bg-gray-800 flex-grow" required></select>
-                            <input type="number" name="minutes" placeholder="Mins" class="form-input rounded p-1.5 text-xs w-16 bg-gray-800 text-center" min="1" required>
+                            <select class="manual-subject-select form-input rounded p-1.5 text-xs bg-gray-800 flex-grow"
+                                required></select>
+                            <input type="number" name="minutes" placeholder="Mins"
+                                class="form-input rounded p-1.5 text-xs w-16 bg-gray-800 text-center" min="1" required>
                             <button type="submit" class="btn-primary text-xs px-3 py-1 rounded font-bold">Add</button>
                         </div>
                     </form>
                 </div>
-                </div>
+            </div>
         </div>
     </template>
 
@@ -802,19 +915,47 @@
             <div class="card-header">
                 <h2 class="text-lg font-semibold card-title">Soundscapes</h2>
                 <div class="card-header-controls flex items-center gap-1">
-                    <button class="ambient-toggle-btn mr-1 text-gray-400 hover:text-white transition-colors" title="Play/Pause All">
-                        <svg class="play-icon w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                        <svg class="pause-icon w-4 h-4 hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+                    <button class="ambient-toggle-btn mr-1 text-gray-400 hover:text-white transition-colors"
+                        title="Play/Pause All">
+                        <svg class="play-icon w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round">
+                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>
+                        <svg class="pause-icon w-4 h-4 hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round">
+                            <rect x="6" y="4" width="4" height="16"></rect>
+                            <rect x="14" y="4" width="4" height="16"></rect>
+                        </svg>
                     </button>
 
                     <button class="toggle-colspan-btn" title="Toggle size">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m6 6v-4m0 4h-4"/><path d="M3 3l6 6"/><path d="M3 3v4m0-4h4"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 21l-6-6m6 6v-4m0 4h-4" />
+                            <path d="M3 3l6 6" />
+                            <path d="M3 3v4m0-4h4" />
+                        </svg>
                     </button>
                     <button class="delete-card-btn" title="Delete card">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 6h18" />
+                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                        </svg>
                     </button>
                     <span class="drag-handle cursor-grab">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="9" cy="12" r="1" />
+                            <circle cx="9" cy="5" r="1" />
+                            <circle cx="9" cy="19" r="1" />
+                            <circle cx="15" cy="12" r="1" />
+                            <circle cx="15" cy="5" r="1" />
+                            <circle cx="15" cy="19" r="1" />
+                        </svg>
                     </span>
                 </div>
             </div>
@@ -824,105 +965,162 @@
                         <span class="group-hover:text-white transition-colors">🌧️ Rain</span>
                         <span class="opacity-0 group-hover:opacity-100 transition-opacity">Pink</span>
                     </div>
-                    <input type="range" data-type="pink" min="-60" max="-10" value="-60" class="ambient-slider w-full h-1.5 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                    <input type="range" data-type="pink" min="-60" max="-10" value="-60"
+                        class="ambient-slider w-full h-1.5 bg-gray-700 rounded-lg appearance-none cursor-pointer">
                 </div>
                 <div class="sound-control group">
                     <div class="flex justify-between text-xs text-secondary mb-1">
                         <span class="group-hover:text-white transition-colors">⚡ Thunder</span>
                         <span class="opacity-0 group-hover:opacity-100 transition-opacity">Brown</span>
                     </div>
-                    <input type="range" data-type="brown" min="-60" max="-10" value="-60" class="ambient-slider w-full h-1.5 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                    <input type="range" data-type="brown" min="-60" max="-10" value="-60"
+                        class="ambient-slider w-full h-1.5 bg-gray-700 rounded-lg appearance-none cursor-pointer">
                 </div>
                 <div class="sound-control group">
                     <div class="flex justify-between text-xs text-secondary mb-1">
                         <span class="group-hover:text-white transition-colors">🌊 Stream</span>
                         <span class="opacity-0 group-hover:opacity-100 transition-opacity">White</span>
                     </div>
-                    <input type="range" data-type="white" min="-60" max="-20" value="-60" class="ambient-slider w-full h-1.5 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                    <input type="range" data-type="white" min="-60" max="-20" value="-60"
+                        class="ambient-slider w-full h-1.5 bg-gray-700 rounded-lg appearance-none cursor-pointer">
                 </div>
             </div>
         </div>
     </template>
 
     <div id="add-card-modal" class="modal-overlay hidden">
-        <div class="card w-11/12 max-w-lg max-h-[85vh] flex flex-col p-0 overflow-hidden">
-            
-            <div class="px-6 py-4 border-b border-gray-700/50 bg-black/20 flex-shrink-0">
-                <h2 class="text-xl font-semibold">Add New Card</h2>
-            </div>
-
-            <form id="new-card-form" class="flex flex-col flex-grow overflow-hidden">
+        <div class="card w-11/12 max-w-md">
+            <h2 class="text-xl font-semibold mb-4">Add New Card</h2>
+            <form id="new-card-form" class="flex flex-col h-full">
                 <input type="hidden" id="new-card-type" value="note">
 
-                <div class="flex-1 overflow-y-auto p-6 min-h-0 custom-scrollbar">
+                <div class="flex-1 overflow-y-auto pr-2 mb-4 custom-scrollbar" style="max-height: 400px;">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="card-type-grid">
-                        
-                        <div class="card-option active p-3 rounded-xl border border-gray-700 bg-white/5 hover:bg-white/10 cursor-pointer transition-all flex flex-col gap-2" data-value="note">
+                        <div class="card-option active p-3 rounded-xl border border-gray-700 bg-white/5 hover:bg-white/10 cursor-pointer transition-all flex flex-col gap-2"
+                            data-value="note">
                             <div class="flex items-center gap-2">
-                                <svg class="text-blue-400" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                <svg class="text-blue-400" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                </svg>
                                 <span class="font-bold text-sm">Note</span>
                             </div>
                             <p class="text-xs text-gray-400">Simple text area for scratchpad or reminders.</p>
                         </div>
 
-                        <div class="card-option p-3 rounded-xl border border-gray-700 bg-white/5 hover:bg-white/10 cursor-pointer transition-all flex flex-col gap-2" data-value="todo">
+                        <div class="card-option p-3 rounded-xl border border-gray-700 bg-white/5 hover:bg-white/10 cursor-pointer transition-all flex flex-col gap-2"
+                            data-value="todo">
                             <div class="flex items-center gap-2">
-                                <svg class="text-green-400" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                                <svg class="text-green-400" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path
+                                        d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
+                                    <path d="m9 12 2 2 4-4" />
+                                </svg>
                                 <span class="font-bold text-sm">To-Do List</span>
                             </div>
                             <p class="text-xs text-gray-400">Task management with subtasks and priority.</p>
                         </div>
 
-                        <div class="card-option p-3 rounded-xl border border-gray-700 bg-white/5 hover:bg-white/10 cursor-pointer transition-all flex flex-col gap-2" data-value="daily-tasks">
+                        <div class="card-option p-3 rounded-xl border border-gray-700 bg-white/5 hover:bg-white/10 cursor-pointer transition-all flex flex-col gap-2"
+                            data-value="daily-tasks">
                             <div class="flex items-center gap-2">
-                                <svg class="text-purple-400" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                <svg class="text-purple-400" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                                </svg>
                                 <span class="font-bold text-sm">Calendar Tasks</span>
                             </div>
                             <p class="text-xs text-gray-400">Date-specific tasks with progress tracking.</p>
                         </div>
 
-                        <div class="card-option p-3 rounded-xl border border-gray-700 bg-white/5 hover:bg-white/10 cursor-pointer transition-all flex flex-col gap-2" data-value="pomodoro">
+                        <div class="card-option p-3 rounded-xl border border-gray-700 bg-white/5 hover:bg-white/10 cursor-pointer transition-all flex flex-col gap-2"
+                            data-value="pomodoro">
                             <div class="flex items-center gap-2">
-                                <svg class="text-red-400" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                <svg class="text-red-400" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
                                 <span class="font-bold text-sm">Pomodoro</span>
                             </div>
                             <p class="text-xs text-gray-400">Focus timer with short and long breaks.</p>
                         </div>
 
-                        <div class="card-option p-3 rounded-xl border border-gray-700 bg-white/5 hover:bg-white/10 cursor-pointer transition-all flex flex-col gap-2" data-value="time-logger">
+                        <div class="card-option p-3 rounded-xl border border-gray-700 bg-white/5 hover:bg-white/10 cursor-pointer transition-all flex flex-col gap-2"
+                            data-value="time-logger">
                             <div class="flex items-center gap-2">
-                                <svg class="text-yellow-400" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                <svg class="text-yellow-400" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
                                 <span class="font-bold text-sm">Study Logger</span>
                             </div>
                             <p class="text-xs text-gray-400">Track subject-wise study hours.</p>
                         </div>
 
-                        <div class="card-option p-3 rounded-xl border border-gray-700 bg-white/5 hover:bg-white/10 cursor-pointer transition-all flex flex-col gap-2" data-value="line-graph">
+                        <div class="card-option p-3 rounded-xl border border-gray-700 bg-white/5 hover:bg-white/10 cursor-pointer transition-all flex flex-col gap-2"
+                            data-value="line-graph">
                             <div class="flex items-center gap-2">
-                                <svg class="text-indigo-400" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                                <svg class="text-indigo-400" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                                </svg>
                                 <span class="font-bold text-sm">Marks Graph</span>
                             </div>
                             <p class="text-xs text-gray-400">Visualize test scores and trends.</p>
                         </div>
-                        <div class="card-option p-3 rounded-xl border border-gray-700 bg-white/5 hover:bg-white/10 cursor-pointer transition-all flex flex-col gap-2" data-value="analytics">
+                        <div class="card-option p-3 rounded-xl border border-gray-700 bg-white/5 hover:bg-white/10 cursor-pointer transition-all flex flex-col gap-2"
+                            data-value="analytics">
                             <div class="flex items-center gap-2">
-                                <svg class="text-cyan-400" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+                                <svg class="text-cyan-400" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 20V10" />
+                                    <path d="M18 20V4" />
+                                    <path d="M6 20v-4" />
+                                </svg>
                                 <span class="font-bold text-sm">Analytics</span>
                             </div>
                             <p class="text-xs text-gray-400">Bar chart of study hours over time.</p>
                         </div>
 
-                        <div class="card-option p-3 rounded-xl border border-gray-700 bg-white/5 hover:bg-white/10 cursor-pointer transition-all flex flex-col gap-2" data-value="ambient">
+                        <div class="card-option p-3 rounded-xl border border-gray-700 bg-white/5 hover:bg-white/10 cursor-pointer transition-all flex flex-col gap-2"
+                            data-value="ambient">
                             <div class="flex items-center gap-2">
-                                <svg class="text-gray-400" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19c0-1.7-1.3-3-3-3s-3 1.3-3 3c0-1.7-1.3-3-3-3s-3 1.3-3 3"/><path d="M3 19V5c0-1.1.9-2 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                                <svg class="text-gray-400" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M17.5 19c0-1.7-1.3-3-3-3s-3 1.3-3 3c0-1.7-1.3-3-3-3s-3 1.3-3 3" />
+                                    <path
+                                        d="M3 19V5c0-1.1.9-2 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                                </svg>
                                 <span class="font-bold text-sm">Soundscapes</span>
                             </div>
-                            <p class="text-xs text-gray-400">Pink, white, and brown noise.</p>
+                            <p class="text-xs text-gray-400">White, brown, and pink noise.</p>
                         </div>
 
-                        <div class="card-option p-3 rounded-xl border border-gray-700 bg-white/5 hover:bg-white/10 cursor-pointer transition-all flex flex-col gap-2" data-value="youtube">
+                        <div class="card-option p-3 rounded-xl border border-gray-700 bg-white/5 hover:bg-white/10 cursor-pointer transition-all flex flex-col gap-2"
+                            data-value="youtube">
                             <div class="flex items-center gap-2">
-                                <svg class="text-red-500" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/></svg>
+                                <svg class="text-red-500" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path
+                                        d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z" />
+                                    <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" />
+                                </svg>
                                 <span class="font-bold text-sm">YouTube</span>
                             </div>
                             <p class="text-xs text-gray-400">Embed lectures or lofi music.</p>
@@ -930,19 +1128,22 @@
                     </div>
                 </div>
 
-                <div class="border-t border-gray-700/50 p-6 bg-black/20 flex-shrink-0">
+                <div class="border-t border-gray-700 pt-4 mt-2">
                     <label for="new-card-title" class="sr-only">Card Title</label>
                     <input type="text" id="new-card-title" placeholder="Card Title"
-                        class="form-input rounded-md p-3 w-full mb-3 text-sm bg-black/40 border-gray-600 focus:border-indigo-500" required>
-                    
+                        class="form-input rounded-md p-2 w-full mb-3 text-sm bg-black/40 border-gray-600 focus:border-indigo-500"
+                        required>
+
                     <label for="new-card-content" class="sr-only">Card Content</label>
                     <textarea id="new-card-content" placeholder="Card Content" rows="3"
-                        class="form-input rounded-md p-3 w-full mb-4 text-sm bg-black/40 border-gray-600 focus:border-indigo-500 resize-none"></textarea>
+                        class="form-input rounded-md p-2 w-full mb-4 text-sm bg-black/40 border-gray-600 focus:border-indigo-500 resize-none"></textarea>
 
                     <div class="flex justify-end gap-3">
                         <button type="button" id="cancel-add-card"
                             class="bg-gray-700 hover:bg-gray-600 text-white text-sm font-bold py-2 px-4 rounded-md transition-colors">Cancel</button>
-                        <button type="submit" class="btn-primary text-sm font-bold py-2 px-4 rounded-md shadow-lg shadow-indigo-500/20">Add Card</button>
+                        <button type="submit"
+                            class="btn-primary text-sm font-bold py-2 px-4 rounded-md shadow-lg shadow-indigo-500/20">Add
+                            Card</button>
                     </div>
                 </div>
             </form>
@@ -951,226 +1152,315 @@
 
     <div id="customize-modal" class="modal-overlay hidden">
         <div class="card w-11/12 max-w-4xl h-[80vh] flex flex-col p-0 overflow-hidden relative shadow-2xl">
-    
-        <div class="flex justify-between items-center px-6 py-4 border-b border-gray-700/50 bg-black/20">
-            <h2 class="text-xl font-bold tracking-tight flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                Settings
-            </h2>
-            <button id="close-customize" class="text-secondary hover:text-white transition-colors p-1">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-            </button>
-            <button id="close-customize-icon-btn" class="hidden"></button> 
-        </div>
 
-        <div class="flex flex-col md:flex-row flex-1 overflow-hidden custom-scrollbar">
-            
-            <div class="w-full md:w-56 bg-black/20 border-r border-gray-700/30 flex flex-row md:flex-col overflow-x-auto md:overflow-y-auto">
-                <button class="settings-nav-btn active" data-target="general">
-                    <span>General</span>
+            <div class="flex justify-between items-center px-6 py-4 border-b border-gray-700/50 bg-black/20">
+                <h2 class="text-xl font-bold tracking-tight flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path
+                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                        </path>
+                    </svg>
+                    Settings
+                </h2>
+                <button id="close-customize" class="text-secondary hover:text-white transition-colors p-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
                 </button>
-                <button class="settings-nav-btn" data-target="appearance">
-                    <span>Appearance</span>
-                </button>
-                <button class="settings-nav-btn" data-target="features">
-                    <span>Features</span>
-                </button>
-                <button class="settings-nav-btn" data-target="data">
-                    <span>Data & Reset</span>
-                </button>
+                <button id="close-customize-icon-btn" class="hidden"></button>
             </div>
 
-            <div class="flex-1 overflow-y-auto p-6 bg-black/10 relative">
-                
-                <div id="panel-general" class="settings-panel space-y-6">
-                    <div class="settings-group">
-                        <h3 class="text-sm font-bold text-white mb-3 uppercase tracking-wider opacity-80">Target Exam</h3>
-                        <div class="grid grid-cols-2 gap-3 mb-3">
-                            <div>
-                                <label class="text-xs text-secondary mb-1 block">Exam</label>
-                                <select id="exam-type-select" class="form-input text-sm w-full">
-                                    <option value="JEE">JEE Main</option>
-                                    <option value="JEE Advanced">JEE Advanced</option> 
-                                    <option value="NEET">NEET</option>
-                                    <option value="Custom">Custom</option>
-                                </select>
+            <div class="flex flex-col md:flex-row flex-1 overflow-hidden">
+
+                <div
+                    class="w-full md:w-56 bg-black/20 border-r border-gray-700/30 flex flex-row md:flex-col overflow-x-auto md:overflow-y-auto">
+                    <button class="settings-nav-btn active" data-target="general">
+                        <span>General</span>
+                    </button>
+                    <button class="settings-nav-btn" data-target="appearance">
+                        <span>Appearance</span>
+                    </button>
+                    <button class="settings-nav-btn" data-target="features">
+                        <span>Features</span>
+                    </button>
+                    <button class="settings-nav-btn" data-target="data">
+                        <span>Data & Reset</span>
+                    </button>
+                </div>
+
+                <div class="flex-1 overflow-y-auto p-6 bg-black/10 relative">
+
+                    <div id="panel-general" class="settings-panel space-y-6">
+                        <div class="settings-group">
+                            <h3 class="text-sm font-bold text-white mb-3 uppercase tracking-wider opacity-80">Target
+                                Exam</h3>
+                            <div class="grid grid-cols-2 gap-3 mb-3">
+                                <div>
+                                    <label class="text-xs text-secondary mb-1 block">Exam</label>
+                                    <select id="exam-type-select" class="form-input text-sm w-full">
+                                        <option value="JEE">JEE Main</option>
+                                        <option value="NEET">NEET</option>
+                                        <option value="Custom">Custom</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-xs text-secondary mb-1 block">Year</label>
+                                    <select id="exam-year-select" class="form-input text-sm w-full">
+                                        <option value="2026">2026</option>
+                                        <option value="2027">2027</option>
+                                        <option value="2028">2028</option>
+                                    </select>
+                                </div>
                             </div>
-                            <div>
-                                <label class="text-xs text-secondary mb-1 block">Year</label>
-                                <select id="exam-year-select" class="form-input text-sm w-full"><option value="2026">2026</option><option value="2027">2027</option><option value="2028">2028</option></select>
+
+                            <div id="jee-details-container"
+                                class="p-3 rounded-lg border border-dashed border-gray-700 bg-black/20 hidden">
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div><label class="text-xs text-secondary mb-1 block">Session</label><select
+                                            id="jee-session-select" class="form-input text-sm w-full">
+                                            <option value="January">January</option>
+                                            <option value="April">April</option>
+                                        </select></div>
+                                    <div><label class="text-xs text-secondary mb-1 block">Shift Date</label><input
+                                            type="date" id="jee-shift-input" class="form-input text-sm w-full"></div>
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div id="jee-details-container" class="p-3 rounded-lg border border-dashed border-gray-700 bg-black/20 hidden">
-                            <div class="grid grid-cols-2 gap-3">
-                                <div><label class="text-xs text-secondary mb-1 block">Session</label><select id="jee-session-select" class="form-input text-sm w-full"><option value="January">January</option><option value="April">April</option></select></div>
-                                <div><label class="text-xs text-secondary mb-1 block">Shift Date</label><input type="date" id="jee-shift-input" class="form-input text-sm w-full"></div>
+
+                            <div id="custom-exam-container"
+                                class="p-3 rounded-lg border border-dashed border-gray-700 bg-black/20 hidden">
+                                <div class="space-y-3">
+                                    <div><label class="text-xs text-secondary mb-1 block">Name</label><input type="text"
+                                            id="custom-exam-name" placeholder="e.g. BITSAT"
+                                            class="form-input text-sm w-full"></div>
+                                    <div><label class="text-xs text-secondary mb-1 block">Date</label><input type="date"
+                                            id="custom-exam-date" class="form-input text-sm w-full"></div>
+                                </div>
                             </div>
                         </div>
 
-                        <div id="custom-exam-container" class="p-3 rounded-lg border border-dashed border-gray-700 bg-black/20 hidden">
+                        <div class="settings-group">
+                            <h3 class="text-sm font-bold text-white mb-3 uppercase tracking-wider opacity-80">Add Custom
+                                Subjects</h3>
+                            <div id="subject-manager-list"
+                                class="flex flex-wrap gap-2 mb-3 min-h-[40px] p-2 rounded-lg border border-gray-700/50 bg-black/20">
+                                <span class="text-xs text-gray-500 italic p-1">Loading...</span>
+                            </div>
+                            <div class="flex gap-2">
+                                <input type="text" id="new-subject-input" placeholder="Add new subject..."
+                                    class="form-input text-sm w-full">
+                                <button id="add-subject-btn"
+                                    class="btn-primary px-4 py-2 font-bold text-xs whitespace-nowrap">Add</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="panel-appearance" class="settings-panel hidden space-y-6">
+                        <div class="settings-group">
+                            <h3 class="text-sm font-bold text-white mb-3 uppercase tracking-wider opacity-80">Interface
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="text-xs text-secondary mb-1 block">Color Theme</label>
+                                    <select id="theme-select" class="form-input text-sm w-full">
+                                        <option value="default">Deep Space</option>
+                                        <option value="cyberpunk">Cyberpunk</option>
+                                        <option value="forest">Forest</option>
+                                        <option value="rose-gold">Rose Gold</option>
+                                        <option value="ocean">Ocean</option>
+                                        <option value="sunset">Sunset</option>
+                                        <option value="dracula">Dracula</option>
+                                        <option value="coffee">Coffee Break</option>
+                                        <option value="nordic">Nordic Frost</option>
+                                        <option value="lavender">Lavender Haze</option>
+                                        <option value="crimson">Crimson Elite</option>
+                                        <option value="alakh-pandey" class="hidden">Alakh Pandey</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-xs text-secondary mb-1 block">Typography</label>
+                                    <select id="font-select" class="form-input text-sm w-full">
+                                        <option value="'Inter', sans-serif">Inter (Default)</option>
+                                        <option value="'Poppins', sans-serif">Poppins (Modern)</option>
+                                        <option value="'Space Grotesk', sans-serif">Space Grotesk (Sci-Fi)</option>
+                                        <option value="'Oswald', sans-serif">Oswald (Condensed)</option>
+                                        <option value="'Roboto Slab', serif">Roboto Slab (Serif)</option>
+                                        <option value="'Fira Code', monospace">Fira Code (Code)</option>
+                                        <option value="'JetBrains Mono', monospace">JetBrains Mono (Dev)</option>
+                                        <option value="'Comic Neue', cursive">Comic Sans</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="settings-group">
+                            <h3 class="text-sm font-bold text-white mb-3 uppercase tracking-wider opacity-80">Background
+                            </h3>
+                            <div class="grid grid-cols-4 gap-2 mb-4" id="preset-wallpaper-grid"></div>
+
+                            <div class="flex gap-2">
+                                <input type="text" id="bg-image-url" placeholder="Custom Image URL..."
+                                    class="form-input text-xs w-full">
+                                <button id="remove-bg-btn"
+                                    class="bg-red-600/80 hover:bg-red-600 text-white px-3 rounded-md transition-colors">✕</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="panel-features" class="settings-panel hidden space-y-6">
+
+                        <div class="settings-group">
+                            <h3 class="text-sm font-bold text-white mb-3 uppercase tracking-wider opacity-80">Focus &
+                                Layout</h3>
                             <div class="space-y-3">
-                                <div><label class="text-xs text-secondary mb-1 block">Name</label><input type="text" id="custom-exam-name" placeholder="e.g. BITSAT" class="form-input text-sm w-full"></div>
-                                <div><label class="text-xs text-secondary mb-1 block">Date</label><input type="date" id="custom-exam-date" class="form-input text-sm w-full"></div>
+                                <label
+                                    class="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors cursor-pointer border border-transparent hover:border-gray-600">
+                                    <div>
+                                        <span class="text-sm font-medium block">Pro Dashboard Mode</span>
+                                        <span class="text-[10px] text-secondary">Dense grid, no glassmorphism, fixed
+                                            headers.</span>
+                                    </div>
+                                    <input type="checkbox" id="streamlined-mode-toggle" class="form-input-toggle">
+                                </label>
+
+                                <label
+                                    class="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors cursor-pointer border border-transparent hover:border-gray-600">
+                                    <div>
+                                        <span class="text-sm font-medium block">Riced Linux Mode (Beta)</span>
+                                        <span class="text-[10px] text-secondary">Top bar layout for the Unix
+                                            enthusiasts.</span>
+                                    </div>
+                                    <input type="checkbox" id="riced-mode-toggle" class="form-input-toggle">
+                                </label>
+
+                                <label
+                                    class="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors cursor-pointer border border-transparent hover:border-gray-600">
+                                    <div>
+                                        <span class="text-sm font-medium block">Focus Shield</span>
+                                        <span class="text-[10px] text-secondary">Pauses timers if you switch
+                                            tabs.</span>
+                                    </div>
+                                    <input type="checkbox" id="focus-shield-toggle" class="form-input-toggle">
+                                </label>
+                                <label
+                                    class="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors cursor-pointer border border-transparent hover:border-gray-600">
+                                    <div>
+                                        <span class="text-sm font-medium block">Doom Tick</span>
+                                        <span class="text-[10px] text-secondary">Plays a ticking sound every 60s.</span>
+                                    </div>
+                                    <input type="checkbox" id="ticking-sound-toggle" class="form-input-toggle">
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="settings-group">
+                            <h3 class="text-sm font-bold text-white mb-3 uppercase tracking-wider opacity-80">Media</h3>
+                            <div class="space-y-3">
+                                <label
+                                    class="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors cursor-pointer border border-transparent hover:border-gray-600">
+                                    <span class="text-sm">YouTube Tint</span>
+                                    <input type="checkbox" id="youtube-tint-toggle" class="form-input-toggle">
+                                </label>
+                                <label
+                                    class="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors cursor-pointer border border-transparent hover:border-gray-600">
+                                    <span class="text-sm">Blur Player</span>
+                                    <input type="checkbox" id="youtube-blur-toggle" class="form-input-toggle">
+                                </label>
                             </div>
                         </div>
                     </div>
 
-                    <div class="settings-group">
-                        <h3 class="text-sm font-bold text-white mb-3 uppercase tracking-wider opacity-80">Add Custom Subjects</h3>
-                        <div id="subject-manager-list" class="flex flex-wrap gap-2 mb-3 min-h-[40px] p-2 rounded-lg border border-gray-700/50 bg-black/20">
-                            <span class="text-xs text-gray-500 italic p-1">Loading...</span>
+                    <div id="panel-data" class="settings-panel hidden flex flex-col h-full justify-center space-y-8">
+                        <div class="text-center space-y-2">
+                            <h3 class="text-lg font-bold text-white">Data Management</h3>
+                            <p class="text-xs text-secondary max-w-xs mx-auto">Backup your progress locally or wipe the
+                                slate clean.</p>
                         </div>
-                        <div class="flex gap-2">
-                            <input type="text" id="new-subject-input" placeholder="Add new subject..." class="form-input text-sm w-full">
-                            <button id="add-subject-btn" class="btn-primary px-4 py-2 font-bold text-xs whitespace-nowrap">Add</button>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <button id="export-data-btn"
+                                class="flex flex-col items-center justify-center p-6 rounded-xl bg-green-900/20 border border-green-700/50 hover:bg-green-900/40 hover:border-green-500 transition-all group">
+                                <svg class="w-8 h-8 mb-3 text-green-500 group-hover:scale-110 transition-transform"
+                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                </svg>
+                                <span class="font-bold text-green-400">Export JSON</span>
+                            </button>
+
+                            <button id="import-data-btn"
+                                class="flex flex-col items-center justify-center p-6 rounded-xl bg-blue-900/20 border border-blue-700/50 hover:bg-blue-900/40 hover:border-blue-500 transition-all group">
+                                <svg class="w-8 h-8 mb-3 text-blue-500 group-hover:scale-110 transition-transform"
+                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                </svg>
+                                <span class="font-bold text-blue-400">Import JSON</span>
+                            </button>
+                        </div>
+
+                        <div class="border-t border-gray-700/50 pt-8">
+                            <button id="reset-dashboard-btn"
+                                class="w-full flex items-center justify-center gap-2 p-4 rounded-xl bg-red-900/10 border border-red-900/30 hover:bg-red-900/30 hover:border-red-500/50 text-red-400 hover:text-red-300 transition-all">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path d="M3 6h18" />
+                                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                </svg>
+                                <span class="font-bold">Reset Dashboard Factory Settings</span>
+                            </button>
                         </div>
                     </div>
+
                 </div>
-
-                <div id="panel-appearance" class="settings-panel hidden space-y-6">
-                    <div class="settings-group">
-                        <h3 class="text-sm font-bold text-white mb-3 uppercase tracking-wider opacity-80">Interface</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="text-xs text-secondary mb-1 block">Color Theme</label>
-                                <select id="theme-select" class="form-input text-sm w-full">
-                                    <option value="default">Deep Space</option>
-                                    <option value="cyberpunk">Cyberpunk</option>
-                                    <option value="forest">Forest</option>
-                                    <option value="rose-gold">Rose Gold</option>
-                                    <option value="ocean">Ocean</option>
-                                    <option value="sunset">Sunset</option>
-                                    <option value="dracula">Dracula</option>
-                                    <option value="coffee">Coffee Break</option>
-                                    <option value="nordic">Nordic Frost</option>
-                                    <option value="lavender">Lavender Haze</option>
-                                    <option value="crimson">Crimson Elite</option>
-                                    <option value="alakh-pandey" class="hidden">Alakh Pandey</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="text-xs text-secondary mb-1 block">Typography</label>
-                                <select id="font-select" class="form-input text-sm w-full">
-                                    <option value="'Inter', sans-serif">Inter (Default)</option>
-                                    <option value="'Poppins', sans-serif">Poppins (Modern)</option>
-                                    <option value="'Space Grotesk', sans-serif">Space Grotesk (Sci-Fi)</option>
-                                    <option value="'Oswald', sans-serif">Oswald (Condensed)</option>
-                                    <option value="'Roboto Slab', serif">Roboto Slab (Serif)</option>
-                                    <option value="'Fira Code', monospace">Fira Code (Code)</option>
-                                    <option value="'JetBrains Mono', monospace">JetBrains Mono (Dev)</option>
-                                    <option value="'Comic Neue', cursive">Comic Sans</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="settings-group">
-                        <h3 class="text-sm font-bold text-white mb-3 uppercase tracking-wider opacity-80">Background</h3>
-                        <div class="grid grid-cols-4 gap-2 mb-4" id="preset-wallpaper-grid"></div>
-                        
-                        <div class="flex gap-2">
-                            <input type="text" id="bg-image-url" placeholder="Custom Image URL..." class="form-input text-xs w-full">
-                            <button id="remove-bg-btn" class="bg-red-600/80 hover:bg-red-600 text-white px-3 rounded-md transition-colors">✕</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="panel-features" class="settings-panel hidden space-y-6">
-                    
-                    <div class="settings-group">
-                        <h3 class="text-sm font-bold text-white mb-3 uppercase tracking-wider opacity-80">Focus & Layout</h3>
-                        <div class="space-y-3">
-                            <label class="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors cursor-pointer border border-transparent hover:border-gray-600">
-                                <div>
-                                    <span class="text-sm font-medium block">Pro Dashboard Mode</span>
-                                    <span class="text-[10px] text-secondary">Dense grid, no glassmorphism, fixed headers.</span>
-                                </div>
-                                <input type="checkbox" id="streamlined-mode-toggle" class="form-input-toggle">
-                            </label>
-
-                            <label class="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors cursor-pointer border border-transparent hover:border-gray-600">
-                                <div>
-                                    <span class="text-sm font-medium block">Riced Linux Mode (Beta)</span>
-                                    <span class="text-[10px] text-secondary">Top bar layout for the Unix enthusiasts.</span>
-                                </div>
-                                <input type="checkbox" id="riced-mode-toggle" class="form-input-toggle">
-                            </label>
-
-                            <label class="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors cursor-pointer border border-transparent hover:border-gray-600">
-                                <div>
-                                    <span class="text-sm font-medium block">Focus Shield</span>
-                                    <span class="text-[10px] text-secondary">Pauses timers if you switch tabs.</span>
-                                </div>
-                                <input type="checkbox" id="focus-shield-toggle" class="form-input-toggle">
-                            </label>
-                            <label class="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors cursor-pointer border border-transparent hover:border-gray-600">
-                                <div>
-                                    <span class="text-sm font-medium block">Doom Tick</span>
-                                    <span class="text-[10px] text-secondary">Plays a ticking sound every 60s.</span>
-                                </div>
-                                <input type="checkbox" id="ticking-sound-toggle" class="form-input-toggle">
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="settings-group">
-                        <h3 class="text-sm font-bold text-white mb-3 uppercase tracking-wider opacity-80">Media</h3>
-                        <div class="space-y-3">
-                            <label class="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors cursor-pointer border border-transparent hover:border-gray-600">
-                                <span class="text-sm">YouTube Tint</span>
-                                <input type="checkbox" id="youtube-tint-toggle" class="form-input-toggle">
-                            </label>
-                            <label class="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors cursor-pointer border border-transparent hover:border-gray-600">
-                                <span class="text-sm">Blur Player</span>
-                                <input type="checkbox" id="youtube-blur-toggle" class="form-input-toggle">
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="panel-data" class="settings-panel hidden flex flex-col h-full justify-center space-y-8">
-                    <div class="text-center space-y-2">
-                        <h3 class="text-lg font-bold text-white">Data Management</h3>
-                        <p class="text-xs text-secondary max-w-xs mx-auto">Backup your progress locally or wipe the slate clean.</p>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <button id="export-data-btn" class="flex flex-col items-center justify-center p-6 rounded-xl bg-green-900/20 border border-green-700/50 hover:bg-green-900/40 hover:border-green-500 transition-all group">
-                            <svg class="w-8 h-8 mb-3 text-green-500 group-hover:scale-110 transition-transform" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                            <span class="font-bold text-green-400">Export JSON</span>
-                        </button>
-                        
-                        <button id="import-data-btn" class="flex flex-col items-center justify-center p-6 rounded-xl bg-blue-900/20 border border-blue-700/50 hover:bg-blue-900/40 hover:border-blue-500 transition-all group">
-                            <svg class="w-8 h-8 mb-3 text-blue-500 group-hover:scale-110 transition-transform" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
-                            <span class="font-bold text-blue-400">Import JSON</span>
-                        </button>
-                    </div>
-
-                    <div class="border-t border-gray-700/50 pt-8">
-                        <button id="reset-dashboard-btn" class="w-full flex items-center justify-center gap-2 p-4 rounded-xl bg-red-900/10 border border-red-900/30 hover:bg-red-900/30 hover:border-red-500/50 text-red-400 hover:text-red-300 transition-all">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
-                            <span class="font-bold">Reset Dashboard Factory Settings</span>
-                        </button>
-                    </div>
-                </div>
-
             </div>
         </div>
-    </div>
     </div>
 
     <template id="line-graph-card-template">
         <div class="card custom-card" data-card-type="line-graph">
             <div class="card-header pb-2 border-b border-gray-700/30">
                 <h2 class="text-lg font-semibold card-title flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent-color);"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        style="color: var(--accent-color);">
+                        <path d="M3 3v18h18" />
+                        <path d="m19 9-5 5-4-4-3 3" />
+                    </svg>
                     Progress Tracker
                 </h2>
                 <div class="card-header-controls">
-                    <button class="toggle-colspan-btn" title="Toggle size"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m6 6v-4m0 4h-4"/><path d="M3 3l6 6"/><path d="M3 3v4m0-4h4"/></svg></button>
-                    <button class="delete-card-btn" title="Delete card"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></button>
-                    <span class="drag-handle"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+                    <button class="toggle-colspan-btn" title="Toggle size"><svg xmlns="http://www.w3.org/2000/svg"
+                            width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 21l-6-6m6 6v-4m0 4h-4" />
+                            <path d="M3 3l6 6" />
+                            <path d="M3 3v4m0-4h4" />
+                        </svg></button>
+                    <button class="delete-card-btn" title="Delete card"><svg xmlns="http://www.w3.org/2000/svg"
+                            width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 6h18" />
+                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                        </svg></button>
+                    <span class="drag-handle"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="9" cy="12" r="1" />
+                            <circle cx="9" cy="5" r="1" />
+                            <circle cx="9" cy="19" r="1" />
+                            <circle cx="15" cy="12" r="1" />
+                            <circle cx="15" cy="5" r="1" />
+                            <circle cx="15" cy="19" r="1" />
+                        </svg></span>
                 </div>
             </div>
             <div class="card-content">
@@ -1194,23 +1484,35 @@
                 </div>
 
                 <div class="chart-toggles flex justify-center flex-wrap gap-2 mb-4">
-                    <button data-subject="total" class="text-[10px] px-3 py-1 rounded-full border transition-all font-semibold shadow-sm" style="background-color: var(--accent-color); border-color: var(--accent-color); color: white;">Total</button>
-                    <button data-subject="physics" class="text-[10px] px-3 py-1 rounded-full border border-gray-600 bg-gray-800/50 text-secondary hover:text-white hover:border-blue-500 transition-all">Physics</button>
-                    <button data-subject="chemistry" class="text-[10px] px-3 py-1 rounded-full border border-gray-600 bg-gray-800/50 text-secondary hover:text-white hover:border-green-500 transition-all">Chemistry</button>
-                    <button data-subject="maths" class="text-[10px] px-3 py-1 rounded-full border border-gray-600 bg-gray-800/50 text-secondary hover:text-white hover:border-red-500 transition-all">Math/Bio</button>
+                    <button data-subject="total"
+                        class="text-[10px] px-3 py-1 rounded-full border transition-all font-semibold shadow-sm"
+                        style="background-color: var(--accent-color); border-color: var(--accent-color); color: white;">Total</button>
+                    <button data-subject="physics"
+                        class="text-[10px] px-3 py-1 rounded-full border border-gray-600 bg-gray-800/50 text-secondary hover:text-white hover:border-blue-500 transition-all">Physics</button>
+                    <button data-subject="chemistry"
+                        class="text-[10px] px-3 py-1 rounded-full border border-gray-600 bg-gray-800/50 text-secondary hover:text-white hover:border-green-500 transition-all">Chemistry</button>
+                    <button data-subject="maths"
+                        class="text-[10px] px-3 py-1 rounded-full border border-gray-600 bg-gray-800/50 text-secondary hover:text-white hover:border-red-500 transition-all">Math/Bio</button>
                 </div>
 
                 <div class="mb-3">
-                    <button class="toggle-add-marks-form w-full text-xs text-secondary hover:text-white flex items-center justify-center gap-1 py-1 transition-colors">
+                    <button
+                        class="toggle-add-marks-form w-full text-xs text-secondary hover:text-white flex items-center justify-center gap-1 py-1 transition-colors">
                         + Add Test Score
                     </button>
                     <form class="add-marks-form grid grid-cols-4 gap-2 mt-2 hidden">
-                        <input type="text" name="name" placeholder="Test Name" class="form-input rounded p-2 text-xs col-span-4 bg-black/20" required>
-                        <input type="number" name="phy" placeholder="Phy" class="form-input rounded p-2 text-xs w-full text-center bg-black/20" required>
-                        <input type="number" name="chem" placeholder="Chem" class="form-input rounded p-2 text-xs w-full text-center bg-black/20" required>
-                        <input type="number" name="math" placeholder="M/B" class="form-input rounded p-2 text-xs w-full text-center bg-black/20" required>
-                        <input type="number" name="maxMarks" placeholder="Total" class="form-input rounded p-2 text-xs w-full text-center bg-black/20" required>
-                        <button type="submit" class="btn-primary font-bold py-1.5 rounded text-xs col-span-4 shadow-lg">Save</button>
+                        <input type="text" name="name" placeholder="Test Name"
+                            class="form-input rounded p-2 text-xs col-span-4 bg-black/20" required>
+                        <input type="number" name="phy" placeholder="Phy"
+                            class="form-input rounded p-2 text-xs w-full text-center bg-black/20" required>
+                        <input type="number" name="chem" placeholder="Chem"
+                            class="form-input rounded p-2 text-xs w-full text-center bg-black/20" required>
+                        <input type="number" name="math" placeholder="M/B"
+                            class="form-input rounded p-2 text-xs w-full text-center bg-black/20" required>
+                        <input type="number" name="maxMarks" placeholder="Total"
+                            class="form-input rounded p-2 text-xs w-full text-center bg-black/20" required>
+                        <button type="submit"
+                            class="btn-primary font-bold py-1.5 rounded text-xs col-span-4 shadow-lg">Save</button>
                     </form>
                 </div>
 
@@ -1219,7 +1521,9 @@
                         <h3 class="text-[10px] font-bold text-secondary uppercase tracking-widest">History</h3>
                         <div class="flex items-center gap-2 text-xs">
                             <label class="text-secondary text-[10px]">Target:</label>
-                            <input type="number" class="target-score-input bg-gray-800/50 border border-gray-700 rounded px-1 py-0.5 w-12 text-right text-white text-[10px]" placeholder="0">
+                            <input type="number"
+                                class="target-score-input bg-gray-800/50 border border-gray-700 rounded px-1 py-0.5 w-12 text-right text-white text-[10px]"
+                                placeholder="0">
                         </div>
                     </div>
                     <ul class="marks-list space-y-2 max-h-32 overflow-y-auto pr-1 custom-scrollbar"></ul>
@@ -1263,16 +1567,22 @@
             <div>
                 <!-- Quick Start Panel -->
                 <div id="tab-quick-start" class="tab-content space-y-3 text-sm">
-                    <button onclick="startTutorial()" class="w-full mb-4 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md font-bold transition-all">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+                    <button onclick="startTutorial()"
+                        class="w-full mb-4 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md font-bold transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10" />
+                            <polygon points="10 8 16 12 10 16 10 8" />
+                        </svg>
                         Take the Tour
                     </button>
                     <p><strong>YOU CAN NOW CHANGE DATE ACCORDING TO UR SHIFT IN CUSTOMISE MENU !!!</strong></p>
                     <p>Open "What's new" to see more changes !!!!</p>
-                    <p>If you liked this update, follow me on <a href="https://github.com/svalordev" style="color:aqua" target="_blank">github</a>!</p>
+                    <p>If you liked this update, follow me on <a href="https://github.com/svalordev" style="color:aqua"
+                            target="_blank">github</a>!</p>
                     <p><strong>GOOD LUCK FOR YOUR PREPARATION ! 🫡</strong></p>
                     <p><strong>YOU CAN CHANGE JEE/NEET AND YEAR IN CUSTOMISE MENU</strong></p>
-                   
+
                 </div>
 
                 <!-- What's New Panel -->
@@ -1298,7 +1608,8 @@
                 <!-- Feedback Panel -->
                 <div id="tab-feedback" class="tab-content hidden space-y-4 text-sm text-center">
                     <p>Have an idea or found a bug? Join the community!</p>
-                    <a href="https://discord.gg/c8xHpTfM" target="_blank" class="btn-primary inline-block" style="padding: 10px;">Join the Discord
+                    <a href="https://discord.gg/c8xHpTfM" target="_blank" class="btn-primary inline-block"
+                        style="padding: 10px;">Join the Discord
                         Group</a>
                     <p class="text-xs text-secondary">You can also submit feedback or report issues on the project's
                         GitHub page.</p>
@@ -1311,10 +1622,11 @@
                     <p><strong>Project Repository:</strong> <a href="https://github.com/SvalTech/studylocus/"
                             target="_blank">View on GitHub</a></p><br>
                     <div class="border-t border-gray-700 my-4"></div>
-                    <p>Enjoying StudyLocus? Star the project repository on Github (link above), will greatly appreciate it, Thanks!</p>
+                    <p>Enjoying StudyLocus? Star the project repository on Github (link above), will greatly appreciate
+                        it, Thanks!</p>
                     <p>+ This project will try to stay free to use + ads free perpetually :)</p>
                 </div>
-                
+
             </div>
 
             <div class="flex justify-end mt-6">
@@ -1358,7 +1670,8 @@
                 </div>
             </div>
             <div class="flex justify-end mt-6">
-                <button type="button" id="close-shortcuts-modal" class="btn-primary font-bold py-2 px-4 rounded-md">Got it</button>
+                <button type="button" id="close-shortcuts-modal" class="btn-primary font-bold py-2 px-4 rounded-md">Got
+                    it</button>
             </div>
         </div>
     </div>
@@ -1595,7 +1908,7 @@
         </div>
     </div>
 
-    <script src="script-u.js"></script>
+    <script src="script.js"></script>
 </body>
 
 </html>
