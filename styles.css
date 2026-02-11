@@ -2082,7 +2082,8 @@ body.zen-mode .manual-entry-container {
     padding: 0.5rem 1rem !important; 
     min-height: 50px;      /* Consistent thin height */
     
-    border-radius: 9999px !important; /* Full capsule roundness */
+    border-radius: 16px; /* Full capsule roundness */
+    border-color: var(--border-color);
 
     /* Glassmorphism */
     background-color: var(--card-bg-color);
@@ -2150,30 +2151,21 @@ body.zen-mode .manual-entry-container {
 
 [data-theme="cyberpunk"] .header-capsule {
     /* 1. Use the Neon Cyan Border */
-    border-color: var(--border-color) !important;
+    border-color:#628DF6;
     
     /* 2. Apply the specific Cyberpunk Card Shadow/Glow */
-    box-shadow: 0 0 20px rgba(0, 243, 255, 0.3), 
-                inset 0 0 10px rgba(0, 243, 255, 0.1) !important;
+    /* box-shadow: 0 0 20px rgba(0, 243, 255, 0.3), 
+                inset 0 0 10px rgba(0, 243, 255, 0.1) !important; */
     
     /* 3. Darker background to make the neon pop */
     background-color: rgba(2, 2, 10, 0.85) !important;
 }
 
-[data-theme="cyberpunk"] .header-capsule:hover {
-    /* Intense Glow on Hover */
-    box-shadow: 0 0 30px rgba(0, 243, 255, 0.5), 
-                inset 0 0 20px rgba(0, 243, 255, 0.2),
-                0 0 60px rgba(255, 0, 255, 0.2) !important; /* Slight Magenta mix */
-    
-    border-color: var(--accent-color) !important; /* Switch to Magenta border on hover */
-    transform: translateY(-1px);
-}
 
 /* Make the buttons inside glow harder too */
 [data-theme="cyberpunk"] .capsule-btn {
-    border-color: var(--border-color);
-    box-shadow: 0 0 5px rgba(0, 243, 255, 0.2);
+    border-color:#628DF6;
+    box-shadow: 0 0 5px #628DF6;
 }
 
 [data-theme="cyberpunk"] .capsule-btn:hover {
@@ -2199,7 +2191,7 @@ body.zen-mode .manual-entry-container {
 
 /* Adjust for Cyberpunk Mode to make it glow */
 [data-theme="cyberpunk"] .brand-text {
-    border-color: var(--border-color);
+    border-color: #628DF6;
     box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
     color: var(--text-primary);
 }
