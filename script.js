@@ -1,4 +1,472 @@
-function debounce(e,t){let s;return function(...o){clearTimeout(s),s=setTimeout(()=>e.apply(this,o),t)}}console.log("Kyu nahi ho rahi padhai?");const firebaseConfig={apiKey:"AIzaSyAO9ya8gHtVbMfxcnAAJrz6FdYWvIRqgBY",authDomain:"studydashboard-2a3eb.firebaseapp.com",projectId:"studydashboard-2a3eb",storageBucket:"studydashboard-2a3eb.firebasestorage.app",messagingSenderId:"79210973277",appId:"1:79210973277:web:cc0a5fa86729fd6d3f65b4",measurementId:"G-TE7Z0SR8L1"};firebase.initializeApp(firebaseConfig);const auth=firebase.auth(),db=firebase.firestore();let currentUser=null,syncTimeout=null,unsubscribeFirestore=null;document.addEventListener("DOMContentLoaded",()=>{let e={tests:"jeePartTests_v2",layout:"jeeDashboardLayout_v3",customCards:"jeeCustomCards_v3",settings:"jeeDashboardSettings_v3",mobileAlertDismissed:"jeeMobileAlertDismissed_v1",cardProps:"jeeCardProps_v2",pomodoroState:"jeePomodoroState_v1",timeLoggerState:"jeeTimeLoggerState_v1",studyLogs:"jeeStudyLogs_v1"},t={JEE:{January:{2026:"2026-01-21",2027:"2027-01-21",2028:"2028-01-21"},April:{2026:"2026-04-05",2027:"2027-04-05",2028:"2028-04-05"}},JEE_ADVANCED:{2026:"2026-05-17",2027:"2027-05-23",2028:"2028-05-21"},NEET:{2026:"2026-05-03",2027:"2027-05-02",2028:"2028-05-07"}},s=JSON.parse(localStorage.getItem(e.settings)),o={tests:JSON.parse(localStorage.getItem(e.tests))||{},customCards:JSON.parse(localStorage.getItem(e.customCards))||[{id:"default-todo",type:"todo",title:"My Tasks",content:[]},{id:"default-line-graph",type:"line-graph",title:"Mock Test Progress",content:[{name:"Test 1",marks:120,subjects:{chemistry:40,physics:60,maths:20},maxMarks:300},{name:"Test 2",marks:145,subjects:{chemistry:50,physics:70,maths:25},maxMarks:300},{name:"Test 3",marks:160,subjects:{chemistry:50,physics:80,maths:30},maxMarks:300},]},{id:"default-note",type:"note",title:"Welcome!",content:"Welcome to your new dashboard! You can drag, resize, and delete these cards. Add your own from the top right customise button. Best of luck in your journey! You can delete this card now."},{id:"default-study-logger",type:"time-logger",title:"Study Log",content:[]},],layout:JSON.parse(localStorage.getItem(e.layout))||["countdown","graph","default-todo","default-study-logger","default-note","default-line-graph","tests","quote","time",],settings:{theme:"default",font:"'Inter', sans-serif",bgUrl:"",examType:"JEE",examYear:"2026",jeeSession:"April",jeeShiftDate:"",youtubeTintEnabled:!0,youtubeBlurEnabled:!1,focusShieldEnabled:!1,ricedModeEnabled:!1,tickingSoundEnabled:!1,userSubjects:[],customExamName:"",customExamDate:"",streamlinedModeEnabled:!1,...s},cardProps:JSON.parse(localStorage.getItem(e.cardProps))||{graph:{colspan:2},"default-line-graph":{colspan:1},"default-study-logger":{colspan:1}},pomodoroState:JSON.parse(localStorage.getItem(e.pomodoroState))||{},timeLoggerState:JSON.parse(localStorage.getItem(e.timeLoggerState))||{},studyLogs:JSON.parse(localStorage.getItem(e.studyLogs))||{},chartInstances:{},activeTimer:{cardId:null,type:null,unfocusedTime:0,unfocusedStart:0},save(t){localStorage.setItem(e[t],JSON.stringify(this[t])),currentUser&&(b("Saving..."),h())},saveSettings(){localStorage.setItem(e.settings,JSON.stringify(this.settings)),currentUser&&(b("Saving..."),h())}},a=[{text:"The secret of getting ahead is getting started.",author:"Mark Twain"},{text:"It’s not whether you get knocked down, it’s whether you get up.",author:"Vince Lombardi"},{text:"Success is the sum of small efforts, repeated day in and day out.",author:"Robert Collier"},{text:"The expert in anything was once a beginner.",author:"Helen Hayes"},{text:"Believe you can and you're halfway there.",author:"Theodore Roosevelt"},{text:"The difference between ordinary and extraordinary is that little extra.",author:"Jimmy Johnson"},{text:"A person who never made a mistake never tried anything new.",author:"Albert Einstein"},{text:"The harder I work, the luckier I get.",author:"Samuel Goldwyn"},{text:"Success is not final, failure is not fatal: it is the courage to continue that counts.",author:"Winston Churchill"},{text:"Strive for progress, not perfection.",author:"Unknown"},{text:"Genius is one percent inspiration and ninety-nine percent perspiration.",author:"Thomas A. Edison"},{text:"It does not matter how slowly you go as long as you do not stop.",author:"Confucius"},{text:"Doubt kills more dreams than failure ever will.",author:"Suzy Kassem"},{text:"Push yourself, because no one else is going to do it for you.",author:"Unknown"},{text:"If you want to shine like a sun, first burn like a sun.",author:"A. P. J. Abdul Kalam"},{text:"The important thing is not to stop questioning. Curiosity has its own reason for existing.",author:"Albert Einstein"},{text:"We are what we repeatedly do. Excellence, then, is not an act, but a habit.",author:"Aristotle"},{text:"The chapters you study today will decide the chapters of your life tomorrow.",author:"Unknown"},{text:"Your toughest competition is the person you were yesterday.",author:"Unknown"},{text:"Rank is just a number. Knowledge and skill are the real assets.",author:"Unknown"},{text:"Dream is not that which you see while sleeping it is something that does not let you sleep.",author:"A. P. J. Abdul Kalam"},{text:"Focus on the process, not the outcome. The right process will lead to the right outcome.",author:"Unknown"},],r=[{text:"Kyu nahi ho rahi padhai?",author:"Alakh Pandey"},{text:"System phaad denge!",author:"A wise man"},{text:"Physics is not a subject, it's an emotion.",author:"Alakh Pandey"},{text:"Aag laga denge!",author:"Revolutionaries"},{text:"Mehnat karta hu bhai",author:"Basava Reddy"},],n=[{text:"Chaitanya is a noob \uD83E\uDD13",author:"Everyone"},{text:"I love Organic Chemistry \uD83E\uDD13",author:"Chaitanya (probably)"},{text:"Isomerism is my favorite topic \uD83E\uDD13",author:"Definitely Chaitanya"},{text:"Just like us guys \uD83E\uDD13",author:"Chaitanya the moron"},],i={body:document.body,mainTitle:document.getElementById("main-title"),mainTitleRiced:document.getElementById("main-title-riced"),dashboardGrid:document.getElementById("dashboard-grid"),authContainer:document.getElementById("auth-container"),authContainerRiced:document.getElementById("auth-container-riced"),syncStatusToast:document.getElementById("sync-status-toast"),modals:{addCard:document.getElementById("add-card-modal"),customize:document.getElementById("customize-modal"),info:document.getElementById("info-modal"),confirm:document.getElementById("confirm-modal")},buttons:{addCard:document.querySelectorAll(".add-card-btn"),cancelAddCard:document.getElementById("cancel-add-card"),customize:document.querySelectorAll(".customize-btn"),closeCustomize:document.getElementById("close-customize"),closeCustomizeIcon:document.getElementById("close-customize-icon-btn"),removeBg:document.getElementById("remove-bg-btn"),closeAlert:document.getElementById("close-alert-btn"),resetDashboard:document.getElementById("reset-dashboard-btn"),info:document.querySelectorAll(".info-btn"),closeInfo:document.getElementById("close-info-modal"),exportData:document.getElementById("export-data-btn"),importData:document.getElementById("import-data-btn"),confirmOk:document.getElementById("confirm-ok-btn"),confirmCancel:document.getElementById("confirm-cancel-btn"),zenModeBtn:document.querySelectorAll(".zen-mode-btn"),exitZenBtn:document.getElementById("exit-zen-btn"),godModeClose:document.getElementById("god-mode-close-btn"),addminutesformOpen:document.getElementById("toggle-manual-form")},forms:{newCard:document.getElementById("new-card-form")},inputs:{cardType:document.getElementById("new-card-type"),cardContent:document.getElementById("new-card-content"),theme:document.getElementById("theme-select"),font:document.getElementById("font-select"),bgUrl:document.getElementById("bg-image-url"),examType:document.getElementById("exam-type-select"),examYear:document.getElementById("exam-year-select"),importFile:document.getElementById("import-file-input"),youtubeTintToggle:document.getElementById("youtube-tint-toggle"),youtubeBlurToggle:document.getElementById("youtube-blur-toggle"),focusShieldToggle:document.getElementById("focus-shield-toggle"),ricedModeToggle:document.getElementById("riced-mode-toggle"),jeeSession:document.getElementById("jee-session-select"),jeeShift:document.getElementById("jee-shift-input"),jeeContainer:document.getElementById("jee-details-container"),customContainer:document.getElementById("custom-exam-container"),customName:document.getElementById("custom-exam-name"),customDate:document.getElementById("custom-exam-date"),tickingSoundToggle:document.getElementById("ticking-sound-toggle"),streamlinedModeToggle:document.getElementById("streamlined-mode-toggle")},mobileAlert:document.getElementById("mobile-alert"),confirmTitle:document.getElementById("confirm-title"),confirmMessage:document.getElementById("confirm-message"),godModePanel:document.getElementById("god-mode-panel")};i.buttons.addCard.forEach(e=>e.disabled=!0),i.dashboardGrid.style.pointerEvents="none",i.dashboardGrid.style.opacity="0.5";let l=null,d=null,c=null;auth.onAuthStateChanged(e=>{e?(currentUser=e,$(e),g()):(currentUser=null,p(),g())});let u=()=>{let e=new firebase.auth.GoogleAuthProvider;auth.signInWithPopup(e).catch(e=>{console.error("Authentication Error:",e)})},m=()=>{unsubscribeFirestore&&(unsubscribeFirestore(),unsubscribeFirestore=null),i.dashboardGrid.innerHTML="",sessionStorage.removeItem("cloud_data_loaded"),auth.signOut()},g=()=>{i.buttons.addCard.forEach(e=>e.disabled=!1),i.dashboardGrid.style.pointerEvents="auto",i.dashboardGrid.style.opacity="1"},p=()=>{let e=[i.authContainer,i.authContainerRiced];e.forEach(e=>{if(e){if(currentUser){let t=`
+console.log("Kyu nahi ho rahi padhai?")
+/**
+
+ * Creates a debounced version of a function that delays invoking the function
+
+ * until after 'delay' milliseconds have passed since the last time it was invoked.
+
+ */
+function debounce(func, delay) {
+    let timeout;
+    return function (...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), delay);
+    };
+}
+
+// --- Firebase Configuration ---
+// (Note: Your provided config is here)
+const firebaseConfig = {
+    apiKey: "AIzaSyAO9ya8gHtVbMfxcnAAJrz6FdYWvIRqgBY",
+    authDomain: "studydashboard-2a3eb.firebaseapp.com",
+    projectId: "studydashboard-2a3eb",
+    storageBucket: "studydashboard-2a3eb.firebasestorage.app",
+    messagingSenderId: "79210973277",
+    appId: "1:79210973277:web:cc0a5fa86729fd6d3f65b4",
+    measurementId: "G-TE7Z0SR8L1",
+};
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+// --- Global State ---
+let currentUser = null;
+let syncTimeout = null;
+let unsubscribeFirestore = null;
+// --- DOM Ready Event Listener ---
+document.addEventListener("DOMContentLoaded", () => {
+    /**
+
+    * Maps internal state keys to their corresponding localStorage keys.
+
+    */
+    const LOCAL_STORAGE_KEYS = {
+        tests: "jeePartTests_v2",
+        layout: "jeeDashboardLayout_v3",
+        customCards: "jeeCustomCards_v3",
+        settings: "jeeDashboardSettings_v3",
+        mobileAlertDismissed: "jeeMobileAlertDismissed_v1",
+        cardProps: "jeeCardProps_v2",
+        pomodoroState: "jeePomodoroState_v1",
+        timeLoggerState: "jeeTimeLoggerState_v1",
+        studyLogs: "jeeStudyLogs_v1",
+    };
+    /**
+
+    * Default target exam dates.
+
+    */
+    const EXAM_DATES = {
+        JEE: {
+            2026: new Date("2026-01-21T00:00:00"),
+            2027: new Date("2027-01-21T00:00:00"),
+            2028: new Date("2028-01-21T00:00:00")
+        },
+        NEET: {
+            2026: new Date("2026-05-03T00:00:00"),
+            2027: new Date("2027-05-02T00:00:00"),
+            2028: new Date("2028-05-02T00:00:00")
+        },
+    };
+    // Inside script-u.js
+
+    const EXAM_DEFAULTS = {
+        JEE: {
+            January: {
+                2026: "2026-01-21",
+                2027: "2027-01-21",
+                2028: "2028-01-21"
+            },
+            April: {
+                2026: "2026-04-05",
+                2027: "2027-04-05",
+                2028: "2028-04-05"
+            }
+        },
+        // --- ADD THIS BLOCK ---
+        JEE_ADVANCED: {
+            2026: "2026-05-17",
+            2027: "2027-05-23",
+            2028: "2028-05-21"
+        },
+        // ---------------------
+        NEET: {
+            2026: "2026-05-03",
+            2027: "2027-05-02",
+            2028: "2028-05-07"
+        }
+    };
+    // Load initial state from localStorage
+    const parsedSettings = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEYS.settings));
+    /**
+
+    * Main application state object.
+
+    * Manages all dashboard data and provides methods to save it.
+
+    */
+    const appState = {
+        tests: JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEYS.tests)) || {},
+        customCards: JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEYS.customCards)) || [{
+            id: "default-todo",
+            type: "todo",
+            title: "My Tasks",
+            content: [],
+        }, {
+            id: "default-line-graph",
+            type: "line-graph",
+            title: "Mock Test Progress",
+            content: [{
+                name: "Test 1",
+                marks: 120,
+                subjects: {
+                    chemistry: 40,
+                    physics: 60,
+                    maths: 20
+                },
+                maxMarks: 300
+            }, {
+                name: "Test 2",
+                marks: 145,
+                subjects: {
+                    chemistry: 50,
+                    physics: 70,
+                    maths: 25
+                },
+                maxMarks: 300
+            }, {
+                name: "Test 3",
+                marks: 160,
+                subjects: {
+                    chemistry: 50,
+                    physics: 80,
+                    maths: 30
+                },
+                maxMarks: 300
+            },],
+        }, {
+            id: "default-note",
+            type: "note",
+            title: "Welcome!",
+            content: "Welcome to your new dashboard! You can drag, resize, and delete these cards. Add your own from the top right customise button. Best of luck in your journey! You can delete this card now.",
+        }, {
+            id: "default-study-logger",
+            type: "time-logger",
+            title: "Study Log",
+            content: []
+        },],
+        layout: JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEYS.layout)) || ["countdown", "graph", "default-todo", "default-study-logger", "default-note", "default-line-graph", "tests", "quote", "time",],
+        settings: {
+            theme: "default",
+            font: "'Inter', sans-serif",
+            bgUrl: "",
+            examType: "JEE",
+            examYear: "2026",
+            jeeSession: "April",
+            jeeShiftDate: "",
+            youtubeTintEnabled: true,
+            youtubeBlurEnabled: false,
+            focusShieldEnabled: false,
+            ricedModeEnabled: false,
+            tickingSoundEnabled: false,
+            userSubjects: [],
+            customExamName: "",
+            customExamDate: "",
+            streamlinedModeEnabled: false,
+            ...parsedSettings,
+        },
+        cardProps: JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEYS.cardProps)) || {
+            graph: {
+                colspan: 2
+            },
+            "default-line-graph": {
+                colspan: 1
+            },
+            "default-study-logger": {
+                colspan: 1
+            },
+        },
+        pomodoroState: JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEYS.pomodoroState)) || {},
+        timeLoggerState: JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEYS.timeLoggerState)) || {},
+        studyLogs: JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEYS.studyLogs)) || {},
+        chartInstances: {}, // Holds active Chart.js instances
+        activeTimer: {
+            cardId: null,
+            type: null,
+            unfocusedTime: 0,
+            unfocusedStart: 0
+        },
+        /**
+
+        * Saves a specific part of the state to localStorage and triggers a cloud sync.
+
+        * @param {string} key The key of the appState property to save (e.g., 'tests', 'layout').
+
+        */
+        save(key) {
+            localStorage.setItem(LOCAL_STORAGE_KEYS[key], JSON.stringify(this[key]));
+            if (currentUser) {
+                showSyncStatus("Saving..."); // Show "Saving..." immediately
+                debouncedSaveAllToFirestore();
+            }
+        },
+        /**
+
+        * Saves the 'settings' object specifically.
+
+        */
+        saveSettings() {
+            localStorage.setItem(LOCAL_STORAGE_KEYS.settings, JSON.stringify(this.settings));
+            if (currentUser) {
+                showSyncStatus("Saving...");
+                debouncedSaveAllToFirestore();
+            }
+        },
+    };
+    // --- Quotes Data ---
+    const generalQuotes = [{
+        text: "The secret of getting ahead is getting started.",
+        author: "Mark Twain"
+    }, {
+        text: "It’s not whether you get knocked down, it’s whether you get up.",
+        author: "Vince Lombardi"
+    }, {
+        text: "Success is the sum of small efforts, repeated day in and day out.",
+        author: "Robert Collier"
+    }, {
+        text: "The expert in anything was once a beginner.",
+        author: "Helen Hayes"
+    }, {
+        text: "Believe you can and you're halfway there.",
+        author: "Theodore Roosevelt"
+    }, {
+        text: "The difference between ordinary and extraordinary is that little extra.",
+        author: "Jimmy Johnson",
+    }, {
+        text: "A person who never made a mistake never tried anything new.",
+        author: "Albert Einstein"
+    }, {
+        text: "The harder I work, the luckier I get.",
+        author: "Samuel Goldwyn"
+    }, {
+        text: "Success is not final, failure is not fatal: it is the courage to continue that counts.",
+        author: "Winston Churchill",
+    }, {
+        text: "Strive for progress, not perfection.",
+        author: "Unknown"
+    }, {
+        text: "Genius is one percent inspiration and ninety-nine percent perspiration.",
+        author: "Thomas A. Edison",
+    }, {
+        text: "It does not matter how slowly you go as long as you do not stop.",
+        author: "Confucius"
+    }, {
+        text: "Doubt kills more dreams than failure ever will.",
+        author: "Suzy Kassem"
+    }, {
+        text: "Push yourself, because no one else is going to do it for you.",
+        author: "Unknown"
+    }, {
+        text: "If you want to shine like a sun, first burn like a sun.",
+        author: "A. P. J. Abdul Kalam"
+    }, {
+        text: "The important thing is not to stop questioning. Curiosity has its own reason for existing.",
+        author: "Albert Einstein",
+    }, {
+        text: "We are what we repeatedly do. Excellence, then, is not an act, but a habit.",
+        author: "Aristotle",
+    }, {
+        text: "The chapters you study today will decide the chapters of your life tomorrow.",
+        author: "Unknown"
+    }, {
+        text: "Your toughest competition is the person you were yesterday.",
+        author: "Unknown"
+    }, {
+        text: "Rank is just a number. Knowledge and skill are the real assets.",
+        author: "Unknown"
+    }, {
+        text: "Dream is not that which you see while sleeping it is something that does not let you sleep.",
+        author: "A. P. J. Abdul Kalam",
+    }, {
+        text: "Focus on the process, not the outcome. The right process will lead to the right outcome.",
+        author: "Unknown",
+    },];
+    const alakhPandeyQuotes = [{
+        text: "Kyu nahi ho rahi padhai?",
+        author: "Alakh Pandey"
+    }, {
+        text: "System phaad denge!",
+        author: "A wise man"
+    }, {
+        text: "Physics is not a subject, it's an emotion.",
+        author: "Alakh Pandey"
+    }, {
+        text: "Aag laga denge!",
+        author: "Revolutionaries"
+    }, {
+        text: "Mehnat karta hu bhai",
+        author: "Basava Reddy"
+    },];
+    const chaitanyaQuotes = [ // Easter egg quotes
+        {
+            text: "Chaitanya is a noob 🤓",
+            author: "Everyone"
+        }, {
+            text: "I love Organic Chemistry 🤓",
+            author: "Chaitanya (probably)"
+        }, {
+            text: "Isomerism is my favorite topic 🤓",
+            author: "Definitely Chaitanya"
+        }, {
+            text: "Just like us guys 🤓",
+            author: "Chaitanya the moron"
+        },
+    ];
+    /**
+
+    * Object containing references to all key DOM elements.
+
+    */
+    const domElements = {
+        body: document.body,
+        mainTitle: document.getElementById("main-title"),
+        mainTitleRiced: document.getElementById("main-title-riced"),
+        dashboardGrid: document.getElementById("dashboard-grid"),
+        authContainer: document.getElementById("auth-container"),
+        authContainerRiced: document.getElementById("auth-container-riced"),
+        syncStatusToast: document.getElementById("sync-status-toast"),
+        modals: {
+            addCard: document.getElementById("add-card-modal"),
+            customize: document.getElementById("customize-modal"),
+            info: document.getElementById("info-modal"),
+            confirm: document.getElementById("confirm-modal"),
+        },
+        buttons: {
+            addCard: document.querySelectorAll(".add-card-btn"),
+            cancelAddCard: document.getElementById("cancel-add-card"),
+            customize: document.querySelectorAll(".customize-btn"),
+            closeCustomize: document.getElementById("close-customize"),
+            closeCustomizeIcon: document.getElementById("close-customize-icon-btn"),
+            removeBg: document.getElementById("remove-bg-btn"),
+            closeAlert: document.getElementById("close-alert-btn"),
+            resetDashboard: document.getElementById("reset-dashboard-btn"),
+            info: document.querySelectorAll(".info-btn"),
+            closeInfo: document.getElementById("close-info-modal"),
+            exportData: document.getElementById("export-data-btn"),
+            importData: document.getElementById("import-data-btn"),
+            confirmOk: document.getElementById("confirm-ok-btn"),
+            confirmCancel: document.getElementById("confirm-cancel-btn"),
+            zenModeBtn: document.querySelectorAll(".zen-mode-btn"),
+            exitZenBtn: document.getElementById("exit-zen-btn"),
+            godModeClose: document.getElementById("god-mode-close-btn"),
+            addminutesformOpen: document.getElementById("toggle-manual-form"),
+        },
+        forms: {
+            newCard: document.getElementById("new-card-form"),
+        },
+        inputs: {
+            cardType: document.getElementById("new-card-type"),
+            cardContent: document.getElementById("new-card-content"),
+            theme: document.getElementById("theme-select"),
+            font: document.getElementById("font-select"),
+            bgUrl: document.getElementById("bg-image-url"),
+            examType: document.getElementById("exam-type-select"),
+            examYear: document.getElementById("exam-year-select"),
+            importFile: document.getElementById("import-file-input"),
+            youtubeTintToggle: document.getElementById("youtube-tint-toggle"),
+            youtubeBlurToggle: document.getElementById("youtube-blur-toggle"),
+            focusShieldToggle: document.getElementById("focus-shield-toggle"),
+            ricedModeToggle: document.getElementById("riced-mode-toggle"),
+            jeeSession: document.getElementById("jee-session-select"), // NEW
+            jeeShift: document.getElementById("jee-shift-input"), // NEW
+            jeeContainer: document.getElementById("jee-details-container"),
+            customContainer: document.getElementById("custom-exam-container"),
+            customName: document.getElementById("custom-exam-name"),
+            customDate: document.getElementById("custom-exam-date"),
+            tickingSoundToggle: document.getElementById("ticking-sound-toggle"),
+            streamlinedModeToggle: document.getElementById("streamlined-mode-toggle"),
+        },
+        mobileAlert: document.getElementById("mobile-alert"),
+        confirmTitle: document.getElementById("confirm-title"),
+        confirmMessage: document.getElementById("confirm-message"),
+        godModePanel: document.getElementById("god-mode-panel"),
+
+    };
+    // --- App Loading State ---
+    // Disable controls until Firebase auth state is resolved
+    domElements.buttons.addCard.forEach(btn => btn.disabled = true);
+    domElements.dashboardGrid.style.pointerEvents = "none";
+    domElements.dashboardGrid.style.opacity = "0.5";
+    // --- Picture-in-Picture (PiP) State ---
+    let pipWindow = null;
+    let pipCardId = null;
+    let pipCardType = null;
+    // --- Authentication ---
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            currentUser = user;
+            loadUserData(user);
+            enableAppControls();
+        } else {
+            currentUser = null;
+            updateAuthUI();
+            enableAppControls();
+        }
+    });
+    /**
+
+    * Initiates Google Sign-In popup.
+
+    */
+    const signInWithGoogle = () => {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        auth.signInWithPopup(provider).catch((error) => {
+            console.error("Authentication Error:", error);
+        });
+    };
+    /**
+
+    * Signs out the current user.
+
+    */
+    const signOutUser = () => {
+        if (unsubscribeFirestore) {
+            unsubscribeFirestore(); // Stop listening to the database
+            unsubscribeFirestore = null;
+        }
+
+        // Clear local app state to prevent the next user from seeing old data briefly
+        // (Optional but recommended)
+        domElements.dashboardGrid.innerHTML = "";
+        sessionStorage.removeItem("cloud_data_loaded"); // Force cloud reload on next login
+        auth.signOut();
+    };
+    /**
+
+    * Enables dashboard controls after auth state is determined.
+
+    */
+    const enableAppControls = () => {
+        domElements.buttons.addCard.forEach(btn => btn.disabled = false);
+        domElements.dashboardGrid.style.pointerEvents = "auto";
+        domElements.dashboardGrid.style.opacity = "1";
+    };
+    /**
+     * Updates the auth container UI based on the current user state.
+     */
+    const updateAuthUI = () => {
+        const containers = [domElements.authContainer, domElements.authContainerRiced];
+
+        // Icons
+        const logoutIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>`;
+        const googleIcon = `<svg class="w-4 h-4" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M47.532 24.552c0-1.566-.14-3.084-.404-4.548H24.5v8.58h12.944c-.566 2.76-2.213 5.108-4.72 6.708v5.524h7.112c4.162-3.832 6.596-9.42 6.596-16.264z" fill="#4285F4"/><path d="M24.5 48c6.48 0 11.944-2.14 15.928-5.788l-7.112-5.524c-2.14 1.44-4.884 2.292-7.816 2.292-6.004 0-11.084-4.04-12.9-9.492H4.42v5.7c3.48 6.912 10.32 11.532 18.08 11.532l2 .28z" fill="#34A853"/><path d="M11.6 28.98c-.34-.996-.54-2.052-.54-3.144s.2-2.148.54-3.144V16.992H4.42C2.852 20.04 2 23.436 2 27.024c0 3.588.852 6.984 2.42 10.032l7.18-5.7v-.376z" fill="#FBBC05"/><path d="M24.5 9.8c3.516 0 6.66 1.212 9.128 3.54l6.32-6.32C36.44.88 30.98 0 24.5 0 16.74 0 9.9 4.62 6.42 11.532l7.18 5.7c1.816-5.452 6.896-9.432 12.9-9.432z" fill="#EA4335"/></svg>`;
+
+        containers.forEach(container => {
+            if (!container) return;
+
+            if (currentUser) {
+                // --- SIGNED IN (Subtle Avatar) ---
+                const userMenuHTML = `
                     <div class="relative group" id="user-menu-container">
                         <button id="user-menu-button" title="User Menu" class="flex items-center justify-center rounded-full transition-transform active:scale-95 focus:outline-none">
                             <img src="${currentUser.photoURL}" alt="User" class="w-8 h-8 rounded-full object-cover border border-transparent group-hover:border-[var(--border-color)] opacity-90 group-hover:opacity-100 transition-all" />
@@ -14,19 +482,531 @@ function debounce(e,t){let s;return function(...o){clearTimeout(s),s=setTimeout(
 
                                 <div class="p-1">
                                     <button id="sign-out-btn" class="w-full text-left flex items-center gap-2 px-3 py-2 text-xs font-medium text-[var(--text-secondary)] rounded hover:bg-white/10 hover:text-red-400 transition-colors">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                                        ${logoutIcon}
                                         <span>Sign Out</span>
                                     </button>
                                 </div>
                             </div>
                         </div>
                     </div>
-                `;e.innerHTML=t;let s=e.querySelector("#user-menu-button"),o=e.querySelector("#user-menu-dropdown"),a=e.querySelector("#sign-out-btn"),r=e=>{e.stopPropagation();let t=o.classList.contains("invisible");if(t){o.classList.remove("invisible","opacity-0","scale-95"),o.classList.add("opacity-100","scale-100");let s=o.getBoundingClientRect(),a=window.innerWidth;if(s.right>a){let r=s.right-a+10;o.style.right=`${r}px`}else o.style.right="0px"}else o.classList.add("invisible","opacity-0","scale-95"),o.classList.remove("opacity-100","scale-100"),o.style.right=""};s.addEventListener("click",r),a.addEventListener("click",m),document.addEventListener("click",t=>{e.contains(t.target)||(o.classList.add("invisible","opacity-0","scale-95"),o.classList.remove("opacity-100","scale-100"))})}else{let n=`
+                `;
+                container.innerHTML = userMenuHTML;
+
+                // Listeners
+                const btn = container.querySelector("#user-menu-button");
+                const dropdown = container.querySelector("#user-menu-dropdown");
+                const signOutBtn = container.querySelector("#sign-out-btn");
+
+                const toggleMenu = (e) => {
+                    e.stopPropagation();
+                    const isHidden = dropdown.classList.contains("invisible");
+
+                    if (isHidden) {
+                        dropdown.classList.remove("invisible", "opacity-0", "scale-95");
+                        dropdown.classList.add("opacity-100", "scale-100");
+
+                        // --- SMART POSITIONING FIX ---
+                        const rect = dropdown.getBoundingClientRect();
+                        const screenWidth = window.innerWidth;
+
+                        // If the right edge of the menu is past the screen width
+                        if (rect.right > screenWidth) {
+                            // Shift it left by the difference + 10px padding
+                            const overflow = rect.right - screenWidth + 10;
+                            dropdown.style.right = `${overflow}px`;
+                        } else {
+                            dropdown.style.right = "0px"; // Reset if normal
+                        }
+                        // -----------------------------
+
+                    } else {
+                        dropdown.classList.add("invisible", "opacity-0", "scale-95");
+                        dropdown.classList.remove("opacity-100", "scale-100");
+                        dropdown.style.right = ""; // Reset style on close
+                    }
+                };
+
+                btn.addEventListener("click", toggleMenu);
+                signOutBtn.addEventListener("click", signOutUser);
+
+                document.addEventListener("click", (e) => {
+                    if (!container.contains(e.target)) {
+                        dropdown.classList.add("invisible", "opacity-0", "scale-95");
+                        dropdown.classList.remove("opacity-100", "scale-100");
+                    }
+                });
+
+            } else {
+                // --- SIGNED OUT (Subtle Glass Button) ---
+                const signInHTML = `
                     <button id="sign-in-btn" class="flex items-center gap-2 px-3 py-1.5 rounded-md border border-[var(--border-color)] bg-transparent hover:bg-white/5 text-[var(--text-primary)] transition-all text-xs font-medium">
-                        <svg class="w-4 h-4" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M47.532 24.552c0-1.566-.14-3.084-.404-4.548H24.5v8.58h12.944c-.566 2.76-2.213 5.108-4.72 6.708v5.524h7.112c4.162-3.832 6.596-9.42 6.596-16.264z" fill="#4285F4"/><path d="M24.5 48c6.48 0 11.944-2.14 15.928-5.788l-7.112-5.524c-2.14 1.44-4.884 2.292-7.816 2.292-6.004 0-11.084-4.04-12.9-9.492H4.42v5.7c3.48 6.912 10.32 11.532 18.08 11.532l2 .28z" fill="#34A853"/><path d="M11.6 28.98c-.34-.996-.54-2.052-.54-3.144s.2-2.148.54-3.144V16.992H4.42C2.852 20.04 2 23.436 2 27.024c0 3.588.852 6.984 2.42 10.032l7.18-5.7v-.376z" fill="#FBBC05"/><path d="M24.5 9.8c3.516 0 6.66 1.212 9.128 3.54l6.32-6.32C36.44.88 30.98 0 24.5 0 16.74 0 9.9 4.62 6.42 11.532l7.18 5.7c1.816-5.452 6.896-9.432 12.9-9.432z" fill="#EA4335"/></svg>
+                        ${googleIcon}
                         <span class="opacity-90">Sign In</span>
                     </button>
-                `;e.innerHTML=n,e.querySelector("#sign-in-btn").addEventListener("click",u)}}})},h=debounce(()=>{if(!currentUser)return;console.log("Debounced save triggered. Saving all data to cloud...");let t=db.collection("users").doc(currentUser.uid),s={};for(let o in e){let a=localStorage.getItem(e[o]);a&&(s[o]=JSON.parse(a))}t.set(s).then(()=>{console.log("Debounced save successful.")}).catch(e=>{b("Sync Error"),console.error("Firestore save error:",e)})},2e3),y=async t=>{let s={};for(let o in e){let a=e[o],r=localStorage.getItem(a);if(r)try{s[o]=JSON.parse(r)}catch(n){console.warn(`Failed to parse ${o} during migration.`)}}try{await t.set(s),console.log("Local data successfully migrated to cloud."),b("Data Migrated")}catch(i){console.error("Error migrating data to cloud:",i),b("Migration Failed")}},$=async t=>{p();let s=db.collection("users").doc(t.uid),a=await s.get();a.exists||(console.log("New user detected. Migrating local data to cloud..."),await y(s)),unsubscribeFirestore&&unsubscribeFirestore(),unsubscribeFirestore=s.onSnapshot(t=>{console.log("Received cloud data snapshot...");let s=t.data();if(s){let a=!1;for(let r in e)if(s[r]){let n=JSON.stringify(o[r]),i=JSON.stringify(s[r]);n!==i&&(o[r]=s[r],localStorage.setItem(e[r],i),a=!0)}a&&(console.log("Cloud data merged. Re-rendering dashboard..."),D(),j())}let l=t.metadata.hasPendingWrites?"Syncing...":"All changes saved";b(l)},e=>{console.error("Firestore snapshot error: ",e),b("Sync Error")})},b=e=>{let t=i.syncStatusToast;t.textContent=e,t.classList.add("show"),"Saving..."!==e&&"Syncing..."!==e&&(clearTimeout(syncTimeout),syncTimeout=setTimeout(()=>{t.classList.remove("show")},2e3))},f=null,v=null;function x(e,t,s="Are you sure?",o=null,a="Confirm",r="Cancel"){i.confirmTitle.textContent=s,i.confirmMessage.textContent=e,i.buttons.confirmOk.textContent=a,i.buttons.confirmCancel.textContent=r,f=t,v=o,i.modals.confirm.classList.remove("hidden")}i.buttons.confirmCancel.addEventListener("click",()=>{"function"==typeof v&&v(),i.modals.confirm.classList.add("hidden"),f=null,v=null}),i.buttons.confirmOk.addEventListener("click",()=>{"function"==typeof f&&f(),i.modals.confirm.classList.add("hidden"),f=null,v=null});let _=document.getElementById("add-subject-btn");_&&_.addEventListener("click",R);let k=document.getElementById("new-subject-input");k&&k.addEventListener("keypress",e=>{"Enter"===e.key&&R()});let S=document.getElementById("subject-manager-list");function x(e,t,s="Are you sure?"){i.confirmTitle.textContent=s,i.confirmMessage.textContent=e,f=t,i.modals.confirm.classList.remove("hidden")}S&&S.addEventListener("click",e=>{if(e.target.classList.contains("delete-subject-btn")){let t=parseInt(e.target.dataset.index);H(t)}}),i.buttons.customize.forEach(e=>e.addEventListener("click",()=>{P()}));let E=e=>{let t=e.getFullYear(),s=(e.getMonth()+1).toString().padStart(2,"0"),o=e.getDate().toString().padStart(2,"0");return`${t}-${s}-${o}`};function w(){if(o.layout&&(o.layout=[...new Set(o.layout)]),o.customCards){let e=[],t=new Set;o.customCards.forEach(s=>{t.has(s.id)||(t.add(s.id),e.push(s))}),o.customCards=e}let s=new Set(o.customCards.map(e=>e.id)),a=["countdown","time","graph","tests","quote"];o.layout=o.layout.filter(e=>s.has(e)||a.includes(e)),o.save("layout"),o.save("customCards")}let L=()=>{let{examType:e,examYear:s,jeeSession:a,jeeShiftDate:r,customExamDate:n}=o.settings;if("Custom"===e)return n?new Date(n+"T00:00:00"):new Date;if("JEE"===e&&r)return new Date(r+"T00:00:00");if("JEE"===e){let i=t.JEE[a]?.[s]||`${s}-01-01`;return new Date(i+"T00:00:00")}if("JEE Advanced"===e){let l=t.JEE_ADVANCED?.[s]||`${s}-05-17`;return new Date(l+"T00:00:00")}let d=t.NEET[s]||`${s}-05-01`;return new Date(d+"T00:00:00")},C=e=>{let t=Math.floor(e/3600).toString().padStart(2,"0"),s=Math.floor(e%3600/60).toString().padStart(2,"0"),o=Math.floor(e%60).toString().padStart(2,"0");return`${t}:${s}:${o}`},T=e=>{let t=Math.floor(e/3600),s=Math.floor(e%3600/60),o="";return t>0&&(o+=`${t}h `),(s>0||t>0)&&(o+=`${s}m`),""===o&&(o=e%60+"s"),o.trim()};function I(){"visible"===document.visibilityState&&l&&l.close()}function B(){if(!l||!d)return;let e=document.querySelector(`[data-card-id="${d}"] .timer-display`),t=l.document.getElementById("pip-timer");e&&t&&(t.textContent=e.textContent)}function q(){if(!l||!d)return;let e=o.timeLoggerState[d];if(!e)return;let t=l.document.getElementById("pip-start-pause-btn"),s=l.document.getElementById("pip-log-btn");t&&(t.textContent=e.isRunning?"Pause":"Start"),s&&(s.disabled=e.accumulatedTime<60)}let M={countdown:{templateId:"countdown-template",isDefault:!0,render(e){let t=L()-new Date,s=e.querySelector("#countdown-timer");if(t<=0){s&&(s.innerHTML=`
+                `;
+                container.innerHTML = signInHTML;
+                container.querySelector("#sign-in-btn").addEventListener("click", signInWithGoogle);
+            }
+        });
+    };
+    /**
+
+     * Debounced function to save the ENTIRE local app state to Firestore.
+
+     * This bundles all changes (layout, cards, tests) into one write.
+
+     */
+    const debouncedSaveAllToFirestore = debounce(() => {
+        if (!currentUser) return;
+        console.log("Debounced save triggered. Saving all data to cloud...");
+        const userDocRef = db.collection("users").doc(currentUser.uid);
+        // 1. Get all data from localStorage (which is our up-to-date cache)
+        const localData = {};
+        for (const key in LOCAL_STORAGE_KEYS) {
+            const dataString = localStorage.getItem(LOCAL_STORAGE_KEYS[key]);
+            if (dataString) {
+                localData[key] = JSON.parse(dataString);
+            }
+        }
+        // 2. Send it all to Firestore in ONE 'set' operation
+        userDocRef.set(localData).then(() => {
+            // We don't need showSyncStatus("All changes saved") here
+            // The onSnapshot listener (Step 1) will handle this automatically!
+            console.log("Debounced save successful.");
+        }).catch((error) => {
+            showSyncStatus("Sync Error");
+            console.error("Firestore save error:", error);
+        });
+    }, 2000); // 2-second debounce is plenty. 5 is too long.
+
+
+    /**
+         * Helper function to migrate data from LocalStorage to Firestore
+         * for a first-time cloud user.
+         */
+    const migrateLocalDataToCloud = async (userDocRef) => {
+        const migrationData = {};
+
+        // Loop through all defined keys and grab data from LocalStorage
+        for (const key in LOCAL_STORAGE_KEYS) {
+            const storageKey = LOCAL_STORAGE_KEYS[key];
+            const item = localStorage.getItem(storageKey);
+            if (item) {
+                try {
+                    migrationData[key] = JSON.parse(item);
+                } catch (e) {
+                    console.warn(`Failed to parse ${key} during migration.`);
+                }
+            }
+        }
+
+        // Write the gathered data to the new user's Firestore document
+        try {
+            await userDocRef.set(migrationData);
+            console.log("Local data successfully migrated to cloud.");
+            showSyncStatus("Data Migrated");
+        } catch (error) {
+            console.error("Error migrating data to cloud:", error);
+            showSyncStatus("Migration Failed");
+        }
+    };
+
+    // --- Firestore Data Sync ---
+    /**
+
+
+        
+
+* Loads user data from Firestore or migrates local data if new user.
+
+* @param {firebase.User} user The authenticated user object.
+
+*/
+    const loadUserData = async (user) => {
+        updateAuthUI();
+        const userDocRef = db.collection("users").doc(user.uid);
+        // 1. Check if the document exists
+        const userDoc = await userDocRef.get();
+        if (!userDoc.exists) {
+            // 2. NEW USER: This part is fine. Migrate local data to the cloud ONCE.
+            console.log("New user detected. Migrating local data to cloud...");
+            await migrateLocalDataToCloud(userDocRef); // Your existing function is good for this
+        }
+
+
+        if (unsubscribeFirestore) {
+            unsubscribeFirestore();
+        }
+        // 3. (THE BIG CHANGE)
+        // Attach a REAL-TIME LISTENER to the user's document.
+        // This will replace your 'mergeCloudDataWithLocal' and the awful page reload.
+        unsubscribeFirestore = userDocRef.onSnapshot(
+            (doc) => {
+                console.log("Received cloud data snapshot...");
+                const cloudData = doc.data();
+                if (cloudData) {
+                    let isStateUpdated = false;
+                    // 4. Merge cloud data into your local appState
+                    // (This is the "merge" without the page reload)
+                    for (const key in LOCAL_STORAGE_KEYS) {
+                        if (cloudData[key]) {
+                            // Check if data is actually different to avoid needless re-renders
+                            const localString = JSON.stringify(appState[key]);
+                            const cloudString = JSON.stringify(cloudData[key]);
+                            if (localString !== cloudString) {
+                                appState[key] = cloudData[key];
+                                // Also update the localStorage cache for the next offline load
+                                localStorage.setItem(LOCAL_STORAGE_KEYS[key], cloudString);
+                                isStateUpdated = true;
+                            }
+                        }
+                    }
+                    // 5. If anything changed, just re-render the dashboard. NO RELOAD.
+                    if (isStateUpdated) {
+                        console.log("Cloud data merged. Re-rendering dashboard...");
+                        applySettings(); // Apply new settings
+                        renderDashboard(); // Re-render cards
+                    }
+                }
+                // 6. (BONUS) Use this to show a 100% accurate sync status!
+                // This replaces your manual showSyncStatus("All changes saved")
+                const status = doc.metadata.hasPendingWrites ? "Syncing..." : "All changes saved";
+                showSyncStatus(status);
+            },
+            (error) => {
+                console.error("Firestore snapshot error: ", error);
+                showSyncStatus("Sync Error");
+            });
+    };
+    /**
+
+    * Displays a sync status message (e.g., "Saving...", "All changes saved").
+
+    * @param {string} message The message to display.
+
+    */
+    const showSyncStatus = (message) => {
+        const toast = domElements.syncStatusToast;
+        toast.textContent = message;
+        toast.classList.add("show");
+        if (message !== "Saving..." && message !== "Syncing...") {
+            clearTimeout(syncTimeout);
+            syncTimeout = setTimeout(() => {
+                toast.classList.remove("show");
+            }, 2000);
+        }
+    };
+    /**
+
+    * Triggers a debounced Firestore sync for a given state key.
+
+    * @param {string} key The key of the appState to sync.
+
+    */
+    const triggerSync = (key) => {
+        if (currentUser) {
+            showSyncStatus("Saving...");
+            debouncedSaveAllToFirestore();
+        }
+    };
+    // --- Modals & Utility Functions ---
+    // --- Modals & Utility Functions (Updated) ---
+    let confirmCallback = null;
+    let cancelCallback = null; // New: Stores the 'Cancel' action
+
+    /**
+     * Displays a confirmation modal with customizable buttons and callbacks.
+     */
+    function showConfirmModal(message, onConfirm, title = "Are you sure?", onCancel = null, okText = "Confirm", cancelText = "Cancel") {
+        domElements.confirmTitle.textContent = title;
+        domElements.confirmMessage.textContent = message;
+
+        // Update Button Text
+        domElements.buttons.confirmOk.textContent = okText;
+        domElements.buttons.confirmCancel.textContent = cancelText;
+
+        confirmCallback = onConfirm;
+        cancelCallback = onCancel;
+        domElements.modals.confirm.classList.remove("hidden");
+    }
+
+    // --- Updated Confirm Modal Listeners ---
+    // (Replace your old confirmCancel and confirmOk listeners with these)
+
+    domElements.buttons.confirmCancel.addEventListener("click", () => {
+        if (typeof cancelCallback === "function") {
+            cancelCallback(); // Execute specific cancel logic (e.g., "Don't show again")
+        }
+        domElements.modals.confirm.classList.add("hidden");
+        confirmCallback = null;
+        cancelCallback = null;
+    });
+
+    domElements.buttons.confirmOk.addEventListener("click", () => {
+        if (typeof confirmCallback === "function") {
+            confirmCallback(); // Execute confirm logic
+        }
+        domElements.modals.confirm.classList.add("hidden");
+        confirmCallback = null;
+        cancelCallback = null;
+    });
+
+
+    // --- Subject Manager Listeners ---
+
+    // 1. Add Button Click
+    const addSubBtn = document.getElementById("add-subject-btn");
+    if (addSubBtn) {
+        addSubBtn.addEventListener("click", handleAddSubject);
+    }
+
+    // 2. Add on Enter Key press
+    const subInput = document.getElementById("new-subject-input");
+    if (subInput) {
+        subInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") handleAddSubject();
+        });
+    }
+
+    // 3. Delete Button Click (Event Delegation)
+    const subList = document.getElementById("subject-manager-list");
+    if (subList) {
+        subList.addEventListener("click", (e) => {
+            if (e.target.classList.contains("delete-subject-btn")) {
+                const index = parseInt(e.target.dataset.index);
+                handleDeleteSubject(index);
+            }
+        });
+    }
+
+    // 4. Render the list when Customize Modal opens
+    domElements.buttons.customize.forEach(btn =>
+        btn.addEventListener("click", () => {
+            // ... existing logic ...
+            renderSubjectManager(); // <--- ADD THIS
+        })
+    );
+
+    /**
+
+    * Displays a confirmation modal.
+
+    * @param {string} message The confirmation message.
+
+    * @param {Function} callback The function to execute if the user clicks "OK".
+
+    * @param {string} [title="Are you sure?"] The title for the modal.
+
+    */
+    function showConfirmModal(message, callback, title = "Are you sure?") {
+        domElements.confirmTitle.textContent = title;
+        domElements.confirmMessage.textContent = message;
+        confirmCallback = callback;
+        domElements.modals.confirm.classList.remove("hidden");
+    }
+    /**
+
+    * Formats a Date object to an ISO string (YYYY-MM-DD).
+
+    * @param {Date} date The date to format.
+
+    * @returns {string} The formatted date string.
+
+    */
+    const formatDateToISO = (date) => {
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, "0");
+        const day = date.getDate().toString().padStart(2, "0");
+        return `${year}-${month}-${day}`;
+    };
+
+
+    /**
+ * Removes duplicate IDs from layout and ensures data integrity.
+ */
+    function sanitizeDashboardState() {
+        // 1. Remove duplicate IDs from the layout array
+        if (appState.layout) {
+            appState.layout = [...new Set(appState.layout)];
+        }
+
+        // 2. Remove duplicate cards (by ID) from customCards
+        if (appState.customCards) {
+            const uniqueCards = [];
+            const seenIds = new Set();
+
+            appState.customCards.forEach(card => {
+                if (!seenIds.has(card.id)) {
+                    seenIds.add(card.id);
+                    uniqueCards.push(card);
+                }
+            });
+            appState.customCards = uniqueCards;
+        }
+
+        // 3. Ensure layout only contains IDs that actually exist (or are built-in)
+        const validCardIds = new Set(appState.customCards.map(c => c.id));
+        const builtInCards = ["countdown", "time", "graph", "tests", "quote"];
+
+        appState.layout = appState.layout.filter(id =>
+            validCardIds.has(id) || builtInCards.includes(id)
+        );
+
+        // Save the cleaned state back to storage
+        appState.save("layout");
+        appState.save("customCards");
+    }
+
+    /**
+
+    * Gets the target exam date based on user settings.
+
+    * @returns {Date} The target exam date.
+
+    */
+    /**
+
+     * Gets the target exam date based on user settings.
+
+     * Priority: User's Shift Date > Default Session Date > Default NEET Date
+
+     */
+    const getTargetExamDate = () => {
+        const { examType, examYear, jeeSession, jeeShiftDate, customExamDate } = appState.settings;
+
+        // 1. Custom Exam
+        if (examType === "Custom") {
+            if (customExamDate) return new Date(customExamDate + "T00:00:00");
+            return new Date();
+        }
+
+        // 2. JEE Main (Specific Shift)
+        if (examType === "JEE" && jeeShiftDate) {
+            return new Date(jeeShiftDate + "T00:00:00");
+        }
+
+        // 3. JEE Main (Default Session)
+        if (examType === "JEE") {
+            const dateStr = EXAM_DEFAULTS.JEE[jeeSession]?.[examYear] || `${examYear}-01-01`;
+            return new Date(dateStr + "T00:00:00");
+        }
+
+        // 4. JEE Advanced (NEW LOGIC)
+        if (examType === "JEE Advanced") {
+            const advDateStr = EXAM_DEFAULTS.JEE_ADVANCED?.[examYear] || `${examYear}-05-17`;
+            return new Date(advDateStr + "T00:00:00");
+        }
+
+        // 5. Fallback for NEET
+        const neetDateStr = EXAM_DEFAULTS.NEET[examYear] || `${examYear}-05-01`;
+        return new Date(neetDateStr + "T00:00:00");
+    };
+    /**
+
+    * Formats total seconds into a HH:MM:SS string.
+
+    * @param {number} totalSeconds The number of seconds.
+
+    * @returns {string} The formatted time string.
+
+    */
+    const formatTimeHHMMSS = (totalSeconds) => {
+        const hours = Math.floor(totalSeconds / 3600).toString().padStart(2, "0");
+        const minutes = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, "0");
+        const seconds = Math.floor(totalSeconds % 60).toString().padStart(2, "0");
+        return `${hours}:${minutes}:${seconds}`;
+    };
+
+
+
+
+
+    /**
+
+    * Formats total seconds into a readable string (e.g., "1h 30m", "45m", "30s").
+
+    * @param {number} totalSeconds The number of seconds.
+
+    * @returns {string} The readable time string.
+
+    */
+    const formatTimeReadable = (totalSeconds) => {
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        let resultString = "";
+        if (hours > 0) {
+            resultString += `${hours}h `;
+        }
+        if (minutes > 0 || hours > 0) {
+            resultString += `${minutes}m`;
+        }
+        if (resultString === "") {
+            resultString = (totalSeconds % 60) + "s";
+        }
+        return resultString.trim();
+    };
+    // --- Picture-in-Picture (PiP) Functions ---
+    /**
+
+    * Closes the PiP window if the main document becomes visible.
+
+    */
+    function handleVisibilityChangePiP() {
+        if (document.visibilityState === "visible" && pipWindow) {
+            pipWindow.close();
+        }
+    }
+    /**
+
+    * Updates the timer display inside the PiP window.
+
+    */
+    function updatePiPTimerDisplay() {
+        if (!pipWindow || !pipCardId) return;
+        const mainTimerDisplay = document.querySelector(`[data-card-id="${pipCardId}"] .timer-display`);
+        const pipTimerDisplay = pipWindow.document.getElementById("pip-timer");
+        if (mainTimerDisplay && pipTimerDisplay) {
+            pipTimerDisplay.textContent = mainTimerDisplay.textContent;
+        }
+    }
+    /**
+
+    * Updates the PiP window's control buttons (Start/Pause, Log) state.
+
+    */
+    function updatePiPControls() {
+        if (!pipWindow || !pipCardId) return;
+        const loggerState = appState.timeLoggerState[pipCardId];
+        if (!loggerState) return;
+        const pipStartPauseBtn = pipWindow.document.getElementById("pip-start-pause-btn");
+        const pipLogBtn = pipWindow.document.getElementById("pip-log-btn");
+        if (pipStartPauseBtn) {
+            pipStartPauseBtn.textContent = loggerState.isRunning ? "Pause" : "Start";
+        }
+        if (pipLogBtn) {
+            pipLogBtn.disabled = loggerState.accumulatedTime < 60; // Disable log if less than 1 min
+        }
+    }
+    // --- Card Rendering ---
+    /**
+
+    * An object mapping card types to their rendering logic.
+
+    * Each renderer defines a templateId and a render function.
+
+    */
+    const cardRenderers = {
+        countdown: {
+            templateId: "countdown-template",
+            isDefault: true,
+            render: (cardElement) => {
+                const diff = getTargetExamDate() - new Date();
+                const timerContainer = cardElement.querySelector("#countdown-timer");
+
+                // --- 1. THE "BETTER" MESSAGE ---
+                if (diff <= 0) {
+                    if (timerContainer) {
+                        timerContainer.innerHTML = `
                             <div class="flex flex-col items-center justify-center h-full py-4">
                                 <span class="text-4xl md:text-6xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white to-[var(--accent-color)] drop-shadow-2xl animate-pulse select-none">
                                     IT'S TIME
@@ -40,45 +1020,258 @@ function debounce(e,t){let s;return function(...o){clearTimeout(s),s=setTimeout(
                                     <div class="h-[1px] w-8 bg-[var(--border-color)]"></div>
                                 </div>
                             </div>
-                        `);return}!e.querySelector('[data-value="days"]')&&s&&(s.innerHTML=`
+                        `;
+                    }
+                    return;
+                }
+
+                // --- 2. RESTORE TIMER IF DATE CHANGED BACK ---
+                if (!cardElement.querySelector('[data-value="days"]')) {
+                    if (timerContainer) {
+                        // Restore original layout
+                        // timerContainer.innerHTML = `
+                        //     <div><div data-value="days" class="font-bold">00</div><div class="text-xs sm:text-sm text-secondary">Days</div></div>
+                        //     <div><div data-value="hours" class="font-bold">00</div><div class="text-xs sm:text-sm text-secondary">Hours</div></div>
+                        //     <div><div data-value="minutes" class="font-bold">00</div><div class="text-xs sm:text-sm text-secondary">Minutes</div></div>
+                        //     <div><div data-value="seconds" class="font-bold">00</div><div class="text-xs sm:text-sm text-secondary">Seconds</div></div>
+                        // `;
+                        timerContainer.innerHTML = `
                             <div><div data-value="days" class="font-bold">00</div><div class="text-xs sm:text-sm text-secondary">Days</div></div>
                             <div><div data-value="hours" class="font-bold">00</div><div class="text-xs sm:text-sm text-secondary">Hours</div></div>
                             <div><div data-value="minutes" class="font-bold">00</div><div class="text-xs sm:text-sm text-secondary">Minutes</div></div>
-                        `),e.querySelector('[data-value="days"]').innerText=Math.floor(t/864e5).toString().padStart(2,"0"),e.querySelector('[data-value="hours"]').innerText=Math.floor(t/36e5%24).toString().padStart(2,"0"),e.querySelector('[data-value="minutes"]').innerText=Math.floor(t/6e4%60).toString().padStart(2,"0")}},time:{templateId:"time-template",isDefault:!0,render(e){let t=new Date;e.querySelector('[data-value="time"]').textContent=t.toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:!0}),e.querySelector('[data-value="date"]').textContent=t.toLocaleDateString("en-US",{weekday:"long",year:"numeric",month:"long",day:"numeric"})}},graph:{templateId:"graph-template",isDefault:!0,render(e){let t=e.querySelector("#contribution-graph");t.innerHTML="";let s=document.createDocumentFragment(),a=new Date;a.setHours(0,0,0,0);let r=new Date().getFullYear(),n=new Date(`${r}-01-01T00:00:00`),i=L();for(i.setHours(0,0,0,0);n<=i;){let l=document.createElement("div"),d=document.createElement("span"),c=E(n);l.className="day",l.dataset.date=c,d.className="tooltip";let u="day-future",m=`<strong class="text-accent">${n.toDateString()}</strong>`;n<a&&(u="day-past");let g=n.getTime();if(g===a.getTime()&&(u="day-today",m+="<br/><span class='text-xs text-gray-400'>(Today)</span>"),o.tests[c]){u="day-part-test";let p=o.tests[c].split("|").map(e=>`• ${e.trim()}`).join("<br/>"),h=Math.ceil((new Date(c)-a)/864e5),y=h>0?`${h} days left`:h<0?"Completed":"Today";m+=`<div class="mt-1 pt-1 border-t border-gray-700">${p}</div>`,m+=`<div class="text-[10px] text-gray-500 mt-1 italic">${y}</div>`}g===i.getTime()&&(u="day-exam",m+="<br/>\uD83D\uDEA8 <strong>EXAM DAY</strong> \uD83D\uDEA8"),l.classList.add(u),d.innerHTML=m,l.appendChild(d),s.appendChild(l),n.setDate(n.getDate()+1)}t.appendChild(s)}},tests:{templateId:"tests-template",isDefault:!0,render(e){let t=e.querySelector("#test-list");t.innerHTML="";let s=Object.keys(o.tests).sort();0!==s.length?s.forEach(e=>{let s=document.createElement("li");s.className="flex justify-between items-center bg-gray-800 p-2 rounded-md",s.innerHTML=`<div class="flex flex-col"><span class="font-semibold text-sm">${o.tests[e]}</span><span class="text-xs text-secondary">${new Date(e+"T00:00:00").toDateString()}</span></div><button data-date="${e}" class="delete-test-btn text-red-500 hover:text-red-400 font-semibold text-xs">Delete</button>`,t.appendChild(s)}):t.innerHTML='<li class="text-secondary px-2 text-sm">No tests scheduled.</li>'}},quote:{templateId:"quote-template",isDefault:!0,render(e){let t=a;"alakh-pandey"===o.settings.theme&&(t=r),"chaitanya-noob"===o.settings.theme&&(t=n);let{text:s,author:i}=t[Math.floor(Math.random()*t.length)];e.querySelector("#quote").textContent=`"${s}"`,e.querySelector("#author").textContent=`- ${i}`}},note:{templateId:"note-card-template",render(e,t){e.querySelector(".card-content").textContent=t.content}},todo:{templateId:"todo-card-template",render(e,t){let s=e.querySelector(".todo-list"),o=e.querySelector(".progress-bar"),a=e.querySelector(".progress-text");if(s.innerHTML="",Array.isArray(t.content)){let r=0,n=0;0===t.content.length?s.innerHTML='<li class="text-secondary text-xs text-center py-6 opacity-60">No active tasks. Time to focus.</li>':t.content.forEach((e,t)=>{e.priority||(e.priority="medium"),e.status||(e.status=e.completed?"done":"todo"),e.subtasks||(e.subtasks=[]),r++,"done"===e.status&&n++;let o={high:{color:"text-red-300",bg:"bg-red-500/20",border:"border-red-500/20",label:"High"},medium:{color:"text-amber-200",bg:"bg-amber-500/20",border:"border-amber-500/20",label:"Medium"},low:{color:"text-blue-200",bg:"bg-blue-500/20",border:"border-blue-500/20",label:"Low"}}[e.priority],a=document.createElement("li");a.className="group mb-2 rounded-xl bg-white/5 hover:bg-white/10 transition-all overflow-hidden relative",a.dataset.index=t;let i=e.subtasks.map((e,t)=>`
+                        `;
+                    }
+                }
+
+                // --- 3. UPDATE NUMBERS ---
+                cardElement.querySelector('[data-value="days"]').innerText = Math.floor(diff / (1000 * 60 * 60 * 24)).toString().padStart(2, "0");
+                cardElement.querySelector('[data-value="hours"]').innerText = Math.floor((diff / (1000 * 60 * 60)) % 24).toString().padStart(2, "0");
+                cardElement.querySelector('[data-value="minutes"]').innerText = Math.floor((diff / (1000 * 60)) % 60).toString().padStart(2, "0");
+                // cardElement.querySelector('[data-value="seconds"]').innerText = Math.floor((diff / 1000) % 60).toString().padStart(2, "0");
+            },
+        },
+        time: {
+            templateId: "time-template",
+            isDefault: true,
+            render: (cardElement) => {
+                const now = new Date();
+                cardElement.querySelector('[data-value="time"]').textContent = now.toLocaleTimeString("en-US", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                    hour12: true,
+                });
+                cardElement.querySelector('[data-value="date"]').textContent = now.toLocaleDateString("en-US", {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                });
+            },
+        },
+        graph: {
+            templateId: "graph-template",
+            isDefault: true,
+            render: (cardElement) => {
+                const graphContainer = cardElement.querySelector("#contribution-graph");
+
+                // 1. Clear existing content
+                graphContainer.innerHTML = "";
+
+                // 2. OPTIMIZATION: Create a fragment to batch all DOM changes
+                const fragment = document.createDocumentFragment();
+
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const todayTime = today.getTime(); // Use timestamp for faster comparison
+
+                const currentYear = new Date().getFullYear();
+                let currentDate = new Date(`${currentYear}-01-01T00:00:00`);
+
+                const examDate = getTargetExamDate();
+                examDate.setHours(0, 0, 0, 0);
+                const examTime = examDate.getTime();
+
+                // 3. Single loop to generate all days
+                while (currentDate <= examDate) {
+                    const dayCell = document.createElement("div");
+                    const tooltip = document.createElement("span");
+                    const dateString = formatDateToISO(currentDate);
+                    const currentTime = currentDate.getTime();
+
+                    dayCell.className = "day";
+                    dayCell.dataset.date = dateString;
+                    tooltip.className = "tooltip";
+
+                    // Default State
+                    let dayClass = "day-future";
+                    let tooltipHTML = `<strong class="text-accent">${currentDate.toDateString()}</strong>`;
+
+                    // Time States
+                    if (currentTime < todayTime) {
+                        dayClass = "day-past";
+                    } else if (currentTime === todayTime) {
+                        dayClass = "day-today";
+                        tooltipHTML += "<br/><span class='text-xs text-gray-400'>(Today)</span>";
+                    }
+
+                    // Logic: Check for Tests (Reduces lookups)
+                    if (appState.tests[dateString]) {
+                        dayClass = "day-part-test";
+                        const testList = appState.tests[dateString].split('|').map(t => `• ${t.trim()}`).join('<br/>');
+                        const daysFromNow = Math.ceil((currentTime - todayTime) / (1000 * 60 * 60 * 24));
+                        const daysLabel = daysFromNow > 0 ? `${daysFromNow} days left` : (daysFromNow < 0 ? "Completed" : "Today");
+
+                        tooltipHTML += `<div class="mt-1 pt-1 border-t border-gray-700">${testList}</div>`;
+                        tooltipHTML += `<div class="text-[10px] text-gray-500 mt-1 italic">${daysLabel}</div>`;
+                    }
+
+                    // Logic: Check for Exam Day
+                    if (currentTime === examTime) {
+                        dayClass = "day-exam";
+                        tooltipHTML += "<br/>🚨 <strong>EXAM DAY</strong> 🚨";
+                    }
+
+                    // Assemble the cell
+                    dayCell.classList.add(dayClass);
+                    tooltip.innerHTML = tooltipHTML;
+                    dayCell.appendChild(tooltip);
+
+                    // Add to fragment (memory only, no lag)
+                    fragment.appendChild(dayCell);
+
+                    // Move to next day
+                    currentDate.setDate(currentDate.getDate() + 1);
+                }
+
+                // 4. FINAL PAINT: Inject everything into the DOM at once
+                graphContainer.appendChild(fragment);
+            },
+        },
+        tests: {
+            templateId: "tests-template",
+            isDefault: true,
+            render: (cardElement) => {
+                const listElement = cardElement.querySelector("#test-list");
+                listElement.innerHTML = "";
+                const sortedDates = Object.keys(appState.tests).sort();
+                if (sortedDates.length !== 0) {
+                    sortedDates.forEach((date) => {
+                        const listItem = document.createElement("li");
+                        listItem.className = "flex justify-between items-center bg-gray-800 p-2 rounded-md";
+                        listItem.innerHTML = `<div class="flex flex-col"><span class="font-semibold text-sm">${appState.tests[date]}</span><span class="text-xs text-secondary">${new Date(date + "T00:00:00").toDateString()}</span></div><button data-date="${date}" class="delete-test-btn text-red-500 hover:text-red-400 font-semibold text-xs">Delete</button>`;
+                        listElement.appendChild(listItem);
+                    });
+                } else {
+                    listElement.innerHTML = '<li class="text-secondary px-2 text-sm">No tests scheduled.</li>';
+                }
+            },
+        },
+        quote: {
+            templateId: "quote-template",
+            isDefault: true,
+            render: (cardElement) => {
+                let quotesArray = generalQuotes;
+                if (appState.settings.theme === "alakh-pandey") quotesArray = alakhPandeyQuotes;
+                if (appState.settings.theme === "chaitanya-noob") quotesArray = chaitanyaQuotes;
+                const {
+                    text,
+                    author
+                } = quotesArray[Math.floor(Math.random() * quotesArray.length)];
+                cardElement.querySelector("#quote").textContent = `"${text}"`;
+                cardElement.querySelector("#author").textContent = `- ${author}`;
+            },
+        },
+        note: {
+            templateId: "note-card-template",
+            render: (cardElement, cardData) => {
+                cardElement.querySelector(".card-content").textContent = cardData.content;
+            },
+        },
+        todo: {
+            templateId: "todo-card-template",
+            render: (cardElement, cardData) => {
+                const listElement = cardElement.querySelector(".todo-list");
+                const progressBar = cardElement.querySelector(".progress-bar");
+                const progressText = cardElement.querySelector(".progress-text");
+                listElement.innerHTML = "";
+
+                if (Array.isArray(cardData.content)) {
+                    let totalTasks = 0;
+                    let completedTasks = 0;
+
+                    if (cardData.content.length === 0) {
+                        listElement.innerHTML = '<li class="text-secondary text-xs text-center py-6 opacity-60">No active tasks. Time to focus.</li>';
+                    } else {
+                        cardData.content.forEach((task, index) => {
+                            // --- DATA CHECKS ---
+                            if (!task.priority) task.priority = 'medium';
+                            if (!task.status) task.status = task.completed ? 'done' : 'todo';
+                            if (!task.subtasks) task.subtasks = [];
+
+                            totalTasks++;
+                            if (task.status === 'done') completedTasks++;
+
+                            // --- MODERN STYLING (No Monospace) ---
+                            // Using softer backgrounds and text colors
+                            const priorityConfig = {
+                                high: { color: 'text-red-300', bg: 'bg-red-500/20', border: 'border-red-500/20', label: 'High' },
+                                medium: { color: 'text-amber-200', bg: 'bg-amber-500/20', border: 'border-amber-500/20', label: 'Medium' },
+                                low: { color: 'text-blue-200', bg: 'bg-blue-500/20', border: 'border-blue-500/20', label: 'Low' }
+                            };
+
+                            const pStyle = priorityConfig[task.priority];
+
+                            // Clean, friendly status icons
+                            const statusIcons = {
+                                todo: `<div class="w-4 h-4 rounded-full border-[1.5px] border-gray-400 hover:border-white transition-colors"></div>`,
+                                'in-progress': `<div class="w-4 h-4 rounded-full border-[1.5px] border-amber-400 flex items-center justify-center"><div class="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse"></div></div>`,
+                                done: `<div class="w-4 h-4 rounded-full bg-[var(--accent-color)] border border-[var(--accent-color)] flex items-center justify-center text-white"><svg width="10" height="8" viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 5L4 8L11 1"/></svg></div>`
+                            };
+
+                            const listItem = document.createElement("li");
+                            // Removed glass borders, made it cleaner
+                            listItem.className = `group mb-2 rounded-xl bg-white/5 hover:bg-white/10 transition-all overflow-hidden relative`;
+                            listItem.dataset.index = index;
+
+                            // Subtasks (Clean Sans-Serif)
+                            const subtasksHtml = task.subtasks.map((sub, sIndex) => `
                                 <div class="flex items-center gap-3 py-1.5 pl-2 group/sub relative">
                                     <div class="absolute left-[-6px] top-1/2 w-2 h-px bg-gray-700"></div>
-                                    <button class="toggle-subtask-btn w-3.5 h-3.5 flex-shrink-0 border border-gray-500 rounded flex items-center justify-center transition-colors ${e.completed?"bg-gray-500 border-gray-500":"hover:border-gray-300"}" data-sub-index="${t}">
-                                        ${e.completed?'<svg class="w-2.5 h-2.5 text-white" viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 5L4 8L11 1"/></svg>':""}
+                                    <button class="toggle-subtask-btn w-3.5 h-3.5 flex-shrink-0 border border-gray-500 rounded flex items-center justify-center transition-colors ${sub.completed ? 'bg-gray-500 border-gray-500' : 'hover:border-gray-300'}" data-sub-index="${sIndex}">
+                                        ${sub.completed ? '<svg class="w-2.5 h-2.5 text-white" viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 5L4 8L11 1"/></svg>' : ''}
                                     </button>
-                                    <span class="text-xs ${e.completed?"line-through text-gray-500":"text-gray-300"} flex-grow break-all font-medium">${e.text}</span>
-                                    <button class="delete-subtask-btn text-gray-500 hover:text-red-400 opacity-0 group-hover/sub:opacity-100 px-1.5 transition-opacity text-lg leading-none" data-sub-index="${t}">\xd7</button>
+                                    <span class="text-xs ${sub.completed ? 'line-through text-gray-500' : 'text-gray-300'} flex-grow break-all font-medium">${sub.text}</span>
+                                    <button class="delete-subtask-btn text-gray-500 hover:text-red-400 opacity-0 group-hover/sub:opacity-100 px-1.5 transition-opacity text-lg leading-none" data-sub-index="${sIndex}">×</button>
                                 </div>
-                            `).join("");a.innerHTML=`
+                            `).join('');
+
+                            listItem.innerHTML = `
                                 <div class="flex items-start gap-3 p-3.5">
                                     <button class="status-btn mt-0.5 flex-shrink-0 transform active:scale-95 transition-transform" 
-                                            data-tooltip="${"todo"===e.status?"Start Task":"in-progress"===e.status?"Complete":"Reset"}">
-                                        ${({todo:'<div class="w-4 h-4 rounded-full border-[1.5px] border-gray-400 hover:border-white transition-colors"></div>',"in-progress":'<div class="w-4 h-4 rounded-full border-[1.5px] border-amber-400 flex items-center justify-center"><div class="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse"></div></div>',done:'<div class="w-4 h-4 rounded-full bg-[var(--accent-color)] border border-[var(--accent-color)] flex items-center justify-center text-white"><svg width="10" height="8" viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 5L4 8L11 1"/></svg></div>'})[e.status]}
+                                            data-tooltip="${task.status === 'todo' ? 'Start Task' : (task.status === 'in-progress' ? 'Complete' : 'Reset')}">
+                                        ${statusIcons[task.status]}
                                     </button>
                                     
                                     <div class="flex-grow min-w-0 flex flex-col toggle-expand-btn cursor-pointer">
                                         <div class="flex items-center justify-between gap-2">
-                                            <span class="text-sm font-semibold leading-tight transition-colors ${"done"===e.status?"line-through text-gray-500 decoration-gray-500":"text-gray-100 group-hover:text-white"}">
-                                                ${e.text}
+                                            <span class="text-sm font-semibold leading-tight transition-colors ${task.status === 'done' ? 'line-through text-gray-500 decoration-gray-500' : 'text-gray-100 group-hover:text-white'}">
+                                                ${task.text}
                                             </span>
                                         </div>
                                         
                                         <div class="flex items-center gap-2 mt-2">
-                                            <button class="priority-btn text-[10px] font-bold tracking-wide px-2 py-0.5 rounded-full border ${o.border} ${o.color} ${o.bg} hover:brightness-125 transition-all uppercase"
-                                                    data-tooltip="Priority: ${o.label}">
-                                                ${o.label}
+                                            <button class="priority-btn text-[10px] font-bold tracking-wide px-2 py-0.5 rounded-full border ${pStyle.border} ${pStyle.color} ${pStyle.bg} hover:brightness-125 transition-all uppercase"
+                                                    data-tooltip="Priority: ${pStyle.label}">
+                                                ${pStyle.label}
                                             </button>
                                             
-                                            ${e.subtasks.length>0?`
+                                            ${task.subtasks.length > 0 ? `
                                                 <span class="text-[10px] text-gray-400 font-medium flex items-center gap-1 bg-white/5 px-2 py-0.5 rounded-full">
                                                     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
-                                                    ${e.subtasks.filter(e=>e.completed).length}/${e.subtasks.length}
+                                                    ${task.subtasks.filter(s => s.completed).length}/${task.subtasks.length}
                                                 </span>
-                                            `:""}
+                                            ` : ''}
                                         </div>
                                     </div>
 
@@ -87,76 +1280,635 @@ function debounce(e,t){let s;return function(...o){clearTimeout(s),s=setTimeout(
                                     </button>
                                 </div>
                                 
-                                <div class="subtasks-section ${e.expanded?"block":"hidden"} pl-10 pr-4 pb-3 border-t border-white/5 bg-black/20">
+                                <div class="subtasks-section ${task.expanded ? 'block' : 'hidden'} pl-10 pr-4 pb-3 border-t border-white/5 bg-black/20">
                                     <div class="space-y-0.5 mt-2">
-                                        ${i}
+                                        ${subtasksHtml}
                                     </div>
                                     <form class="add-subtask-form flex gap-2 mt-2 items-center opacity-70 hover:opacity-100 transition-opacity">
                                         <span class="text-gray-500 text-lg leading-none">+</span>
                                         <input type="text" placeholder="Add step..." class="bg-transparent border-none text-xs w-full focus:outline-none focus:placeholder-gray-400 placeholder-gray-600 text-gray-300 py-1 font-medium">
                                     </form>
                                 </div>
-                            `,s.appendChild(a)});let i=r>0?Math.round(n/r*100):0;o.style.width=`${i}%`,a.className="progress-text text-[10px] text-gray-400 font-bold",a.textContent=`${i}%`}}},"line-graph":{templateId:"line-graph-card-template",render(e,t){let s=e.querySelector(".marks-list");s.innerHTML="";let a=0,r=0,n=0,i=0,l=[...t.content].reverse();l.forEach((e,o)=>{let l=t.content.length-1-o,d=e.total??e.marks;a+=d,r++,d>n&&(n=d),0===o&&(i=d);let c=e.subjects||{},u=c.physics||0,m=c.chemistry||0,g=c.maths||0,p=t.targetScore||0,h=!(p>0)||d>=p,y=document.createElement("li");y.className="group flex flex-col bg-white/5 hover:bg-white/10 border border-transparent hover:border-gray-600 rounded-lg p-2 transition-all",y.innerHTML=`
+                            `;
+                            listElement.appendChild(listItem);
+                        });
+                    }
+
+                    // Clean Progress Bar
+                    const percent = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+                    progressBar.style.width = `${percent}%`;
+                    progressText.className = "progress-text text-[10px] text-gray-400 font-bold"; // Removed font-mono
+                    progressText.textContent = `${percent}%`;
+                }
+            },
+        },
+        "line-graph": {
+            templateId: "line-graph-card-template",
+            render: (cardElement, cardData) => {
+                // --- 1. SETUP & CALCULATIONS ---
+                const marksListEl = cardElement.querySelector(".marks-list");
+                marksListEl.innerHTML = "";
+
+                let totalScoreSum = 0;
+                let count = 0;
+                let maxScore = 0;
+                let lastScore = 0;
+
+                // Sort content by date if available, or just index (assuming chronological order)
+                // We iterate backwards to show newest at top of list
+                const reversedContent = [...cardData.content].reverse();
+
+                reversedContent.forEach((entry, reverseIndex) => {
+                    // Original index calculation
+                    const index = cardData.content.length - 1 - reverseIndex;
+
+                    const currentTotal = entry.total ?? entry.marks;
+                    totalScoreSum += currentTotal;
+                    count++;
+                    if (currentTotal > maxScore) maxScore = currentTotal;
+                    if (reverseIndex === 0) lastScore = currentTotal; // Newest score
+
+                    // Subject Marks Safe Access
+                    const s = entry.subjects || {};
+                    const phy = s.physics || 0;
+                    const chem = s.chemistry || 0;
+                    const math = s.maths || 0;
+                    const target = cardData.targetScore || 0;
+                    const isPassing = target > 0 ? currentTotal >= target : true;
+
+                    // --- 2. RENDER LIST ITEMS (Enhanced UI) ---
+                    const listItem = document.createElement("li");
+                    listItem.className = "group flex flex-col bg-white/5 hover:bg-white/10 border border-transparent hover:border-gray-600 rounded-lg p-2 transition-all";
+
+                    listItem.innerHTML = `
                         <div class="flex justify-between items-center mb-1">
                             <div class="flex items-center gap-2">
-                                <span class="font-bold text-sm text-white">${e.name}</span>
-                                ${h&&p>0?'<span class="text-[9px] bg-green-500/20 text-green-400 px-1.5 rounded">Hit</span>':""}
+                                <span class="font-bold text-sm text-white">${entry.name}</span>
+                                ${isPassing && target > 0 ? '<span class="text-[9px] bg-green-500/20 text-green-400 px-1.5 rounded">Hit</span>' : ''}
                             </div>
                             <div class="flex items-center gap-2">
-                                <span class="text-sm font-bold ${h?"text-white":"text-yellow-500"}">${d}</span>
-                                <span class="text-[10px] text-secondary">/${e.maxMarks}</span>
-                                <button data-index="${l}" class="delete-mark-item opacity-0 group-hover:opacity-100 text-gray-500 hover:text-red-500 transition-opacity p-1 ml-1" aria-label="Delete">
+                                <span class="text-sm font-bold ${isPassing ? 'text-white' : 'text-yellow-500'}">${currentTotal}</span>
+                                <span class="text-[10px] text-secondary">/${entry.maxMarks}</span>
+                                <button data-index="${index}" class="delete-mark-item opacity-0 group-hover:opacity-100 text-gray-500 hover:text-red-500 transition-opacity p-1 ml-1" aria-label="Delete">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
                                 </button>
                             </div>
                         </div>
                         
                         <div class="flex gap-1.5 mt-1">
-                            <span class="subject-pill phy" title="Physics">P: ${u}</span>
-                            <span class="subject-pill chem" title="Chemistry">C: ${m}</span>
-                            <span class="subject-pill math" title="Maths">M: ${g}</span>
+                            <span class="subject-pill phy" title="Physics">P: ${phy}</span>
+                            <span class="subject-pill chem" title="Chemistry">C: ${chem}</span>
+                            <span class="subject-pill math" title="Maths">M: ${math}</span>
                         </div>
-                    `,s.appendChild(y)});let d=r>0?(a/r).toFixed(0):0;e.querySelector(".mean-score-display").textContent=d,e.querySelector(".max-score-display").textContent=n;let c=e.querySelector(".trend-display");if(r>0){let u=i-d;u>0?c.innerHTML=`<span class="text-green-400 flex items-center justify-center gap-1">▲ ${Math.abs(u).toFixed(0)}</span>`:u<0?c.innerHTML=`<span class="text-red-400 flex items-center justify-center gap-1">▼ ${Math.abs(u).toFixed(0)}</span>`:c.innerHTML='<span class="text-gray-400">~</span>'}else c.innerHTML="-";let m=e.querySelector(".toggle-add-marks-form"),g=e.querySelector(".add-marks-form"),p=m.cloneNode(!0);m.parentNode.replaceChild(p,m),p.addEventListener("click",()=>{g.classList.toggle("hidden");let e=g.classList.contains("hidden");p.innerHTML=e?'<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> Add Test Score':'<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg> Cancel'});let h=e.querySelector(".target-score-input");h.value=t.targetScore||"";let y=h.cloneNode(!0);h.parentNode.replaceChild(y,h),y.addEventListener("change",s=>{let a=parseFloat(s.target.value);t.targetScore=isNaN(a)?0:a,o.save("customCards"),M["line-graph"].render(e,t)});let $=e.querySelector(".marks-chart").getContext("2d");o.chartInstances[t.id]&&o.chartInstances[t.id].destroy();let b=getComputedStyle(document.documentElement),f=b.getPropertyValue("--accent-color").trim()||"#3b82f6",v=(e=>{let t=/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(e);return t?`${parseInt(t[1],16)}, ${parseInt(t[2],16)}, ${parseInt(t[3],16)}`:"56, 189, 248"})(f),x=(e,t)=>{let s=e.createLinearGradient(0,0,0,300);return s.addColorStop(0,`rgba(${t}, 0.4)`),s.addColorStop(1,`rgba(${t}, 0)`),s},_={total:{color:f,rgb:v},physics:{color:"#60a5fa",rgb:"96, 165, 250"},chemistry:{color:"#34d399",rgb:"52, 211, 153"},maths:{color:"#fb923c",rgb:"251, 146, 60"}},k=["total","physics","chemistry","maths"].map(e=>{let s=_[e];return{label:e.charAt(0).toUpperCase()+e.slice(1),data:t.content.map(t=>"total"===e?t.total??t.marks:t.subjects?t.subjects[e]:0),borderColor:s.color,backgroundColor:x($,s.rgb),fill:"total"===e,tension:.4,pointRadius:4,pointBackgroundColor:"#18181b",pointBorderColor:s.color,pointBorderWidth:2,pointHoverRadius:6,pointHoverBackgroundColor:s.color,pointHoverBorderColor:"#fff",borderWidth:2,hidden:"total"!==e}});t.targetScore&&t.targetScore>0&&k.push({label:"Target",data:Array(t.content.length).fill(t.targetScore),borderColor:"#ef4444",borderDash:[5,5],pointRadius:0,borderWidth:1,fill:!1});let S=t.content.length>0?Math.max(...t.content.map(e=>e.maxMarks||300)):300,E=new Chart($,{type:"line",data:{labels:t.content.map(e=>e.name),datasets:k},options:{responsive:!0,maintainAspectRatio:!1,interaction:{mode:"index",intersect:!1},plugins:{legend:{display:!1},tooltip:{backgroundColor:"rgba(24, 24, 27, 0.95)",titleColor:"#fff",bodyColor:"#9ca3af",borderColor:"rgba(255,255,255,0.1)",borderWidth:1,padding:10,displayColors:!0,callbacks:{label:function(e){return` ${e.dataset.label}: ${e.raw}`}}}},scales:{y:{beginAtZero:!0,max:S,grid:{color:"rgba(255, 255, 255, 0.05)",drawBorder:!1},ticks:{color:"#6b7280",font:{size:10}}},x:{grid:{display:!1},ticks:{color:"#6b7280",font:{size:10}}}}}});o.chartInstances[t.id]=E;let w=e.querySelector(".chart-toggles"),L=w.cloneNode(!0);w.parentNode.replaceChild(L,w),L.addEventListener("click",e=>{if("BUTTON"===e.target.tagName){let t=e.target.dataset.subject,s=E.data.datasets.findIndex(e=>e.label.toLowerCase().includes("maths"===t?"math":t));if(s>-1){let o=E.getDatasetMeta(s);o.hidden=null===o.hidden?!E.data.datasets[s].hidden:null,E.update();let a=e.target,r=E.isDatasetVisible(s);r?"total"===t?(a.style.backgroundColor="var(--accent-color)",a.style.color="white",a.style.borderColor="var(--accent-color)"):"physics"===t?(a.style.backgroundColor="rgba(59, 130, 246, 0.2)",a.style.color="#60a5fa",a.style.borderColor="#60a5fa"):"chemistry"===t?(a.style.backgroundColor="rgba(16, 185, 129, 0.2)",a.style.color="#34d399",a.style.borderColor="#34d399"):"maths"===t&&(a.style.backgroundColor="rgba(249, 115, 22, 0.2)",a.style.color="#fb923c",a.style.borderColor="#fb923c"):(a.style.backgroundColor="rgba(31, 41, 55, 0.5)",a.style.color="var(--text-secondary)",a.style.borderColor="#4b5563")}}})}},pomodoro:{templateId:"pomodoro-card-template",render(e,t){let s=o.pomodoroState[t.id]||{mode:"pomodoro",time:1500,isRunning:!1,intervalId:null,durations:{pomodoro:25,shortBreak:5,longBreak:15}};o.pomodoroState[t.id]=s;let a=Math.floor(s.time/60).toString().padStart(2,"0"),r=(s.time%60).toString().padStart(2,"0");e.querySelector(".timer-display").textContent=`${a}:${r}`,e.querySelectorAll(".pomodoro-btn").forEach(e=>{e.classList.toggle("active",e.dataset.mode===s.mode)}),e.querySelector(".start-pause-btn").textContent=s.isRunning?"PAUSE":"START",e.querySelector('[data-mode="pomodoro"].pomodoro-duration-input').value=s.durations.pomodoro,e.querySelector('[data-mode="shortBreak"].pomodoro-duration-input').value=s.durations.shortBreak,e.querySelector('[data-mode="longBreak"].pomodoro-duration-input').value=s.durations.longBreak}},youtube:{templateId:"youtube-card-template",render(e,t){let s=e.querySelector(".youtube-iframe"),a=t.content,r="";if(a)try{let n=new URL(a);r=n.hostname.includes("youtu.be")?n.pathname.slice(1):n.searchParams.get("v")}catch(i){console.error("Invalid YouTube URL")}s.src=r?`https://www.youtube.com/embed/${r}`:"";let l=e.querySelector(".youtube-container");l.classList.toggle("tint-disabled",!o.settings.youtubeTintEnabled),l.classList.toggle("blurred",o.settings.youtubeBlurEnabled)}},analytics:{templateId:"analytics-card-template",render(e,t){let s=e=>{let t=[],s=[],a=0;for(let r=e-1;r>=0;r--){let n=new Date;n.setDate(n.getDate()-r);let i=n.getFullYear(),l=(n.getMonth()+1).toString().padStart(2,"0"),d=n.getDate().toString().padStart(2,"0"),c=`${i}-${l}-${d}`,u=7===e?n.toLocaleDateString("en-US",{weekday:"short"}):n.toLocaleDateString("en-US",{day:"numeric",month:"short"});t.push(u);let m=0;o.studyLogs[c]&&Object.values(o.studyLogs[c]).forEach(e=>m+=e),s.push(m/3600),a+=m}return{labels:t,dataPoints:s,totalSecondsRange:a}},a=e.querySelector(".analytics-chart").getContext("2d"),r=e.querySelectorAll(".range-btn"),n=getComputedStyle(document.documentElement),i=n.getPropertyValue("--accent-color").trim()||"#3b82f6",l=n.getPropertyValue("--text-secondary").trim()||"#8b949e",d=n.getPropertyValue("--border-color").trim()||"#30363d",c=n=>{let{labels:c,dataPoints:u,totalSecondsRange:m}=s(n),g=Math.floor(m/3600),p=Math.floor(m%3600/60),h=g>0?`${g}h ${p}m`:`${p}m`,y=(m/3600/n).toFixed(2),$=e.querySelector(".statistics-summary");$&&($.innerHTML=`
+                    `;
+                    marksListEl.appendChild(listItem);
+                });
 
-                                    <span class="mr-4">Total: <strong style="color:${i}">${h}</strong></span>
+                // --- 3. STATS HEADER UPDATES ---
+                const meanScore = count > 0 ? (totalScoreSum / count).toFixed(0) : 0;
 
-                                    <span>Average: <strong>${y}h/day</strong></span>
+                // Update Stats
+                cardElement.querySelector(".mean-score-display").textContent = meanScore;
+                cardElement.querySelector(".max-score-display").textContent = maxScore;
 
-                                `),o.chartInstances[t.id]&&o.chartInstances[t.id].destroy(),o.chartInstances[t.id]=new Chart(a,{type:"bar",data:{labels:c,datasets:[{label:"Hours",data:u,backgroundColor:i,hoverBackgroundColor:i,borderRadius:4,barPercentage:.6}]},options:{responsive:!0,maintainAspectRatio:!1,animation:{duration:0},plugins:{legend:{display:!1},tooltip:{callbacks:{label(e){let t=e.raw;return t>0&&t<1?` ${Math.round(60*t)} mins`:` ${t.toFixed(2)} hrs`}}}},scales:{y:{beginAtZero:!0,grid:{color:d,drawBorder:!1},border:{display:!1},ticks:{color:l,callback:e=>(e%1==0?e:e.toFixed(1))+"h"}},x:{grid:{display:!1,drawBorder:!1},ticks:{color:l}}}}}),r.forEach(e=>{parseInt(e.dataset.range)===n?(e.style.backgroundColor=i,e.style.borderColor=i,e.style.color="#fff"):(e.style.backgroundColor="transparent",e.style.borderColor=d,e.style.color=l)})};c(7),r.forEach(e=>{e.addEventListener("click",e=>{let t=parseInt(e.target.dataset.range);c(t)})})}},"daily-tasks":{templateId:"daily-tasks-template",render(e,t){(!t.content||Array.isArray(t.content))&&(t.content={});let s=e.querySelector(".daily-date-selector");s.value||(s.value=e.dataset.selectedDate||new Date().toISOString().split("T")[0]),e.dataset.selectedDate=s.value;let o=s.value,a=t.content[o]||[],r=e.querySelector(".daily-task-list"),n=e.querySelector(".progress-bar"),i=e.querySelector(".progress-text");r.innerHTML="";let l=0,d=0;0===a.length?r.innerHTML=`<li class="text-secondary text-xs text-center py-8 opacity-50 flex flex-col items-center gap-2">
+                // Trend Calculation
+                const trendEl = cardElement.querySelector(".trend-display");
+                if (count > 0) {
+                    const diff = lastScore - meanScore;
+                    if (diff > 0) {
+                        trendEl.innerHTML = `<span class="text-green-400 flex items-center justify-center gap-1">▲ ${Math.abs(diff).toFixed(0)}</span>`;
+                    } else if (diff < 0) {
+                        trendEl.innerHTML = `<span class="text-red-400 flex items-center justify-center gap-1">▼ ${Math.abs(diff).toFixed(0)}</span>`;
+                    } else {
+                        trendEl.innerHTML = `<span class="text-gray-400">~</span>`;
+                    }
+                } else {
+                    trendEl.innerHTML = "-";
+                }
+
+                // --- 4. INPUT TOGGLE LOGIC ---
+                const toggleBtn = cardElement.querySelector(".toggle-add-marks-form");
+                const formEl = cardElement.querySelector(".add-marks-form");
+
+                // Clean up old listeners to prevent stacking
+                const newToggleBtn = toggleBtn.cloneNode(true);
+                toggleBtn.parentNode.replaceChild(newToggleBtn, toggleBtn);
+
+                newToggleBtn.addEventListener("click", () => {
+                    formEl.classList.toggle("hidden");
+                    const isHidden = formEl.classList.contains("hidden");
+                    newToggleBtn.innerHTML = isHidden
+                        ? `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> Add Test Score`
+                        : `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg> Cancel`;
+                });
+
+
+                // --- 5. TARGET SCORE INPUT ---
+                const targetInput = cardElement.querySelector(".target-score-input");
+                targetInput.value = cardData.targetScore || "";
+                const newTargetInput = targetInput.cloneNode(true);
+                targetInput.parentNode.replaceChild(newTargetInput, targetInput);
+
+                newTargetInput.addEventListener("change", (e) => {
+                    const val = parseFloat(e.target.value);
+                    cardData.targetScore = isNaN(val) ? 0 : val;
+                    appState.save("customCards");
+                    cardRenderers["line-graph"].render(cardElement, cardData);
+                });
+
+                // --- 6. CHART.JS CONFIGURATION (THE BEAUTIFUL PART) ---
+                const ctx = cardElement.querySelector(".marks-chart").getContext("2d");
+
+                if (appState.chartInstances[cardData.id]) {
+                    appState.chartInstances[cardData.id].destroy();
+                }
+
+                const styles = getComputedStyle(document.documentElement);
+                // Helper to convert hex to rgba for gradients
+                const hexToRgb = (hex) => {
+                    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                    return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '56, 189, 248'; // Default blue
+                };
+
+                const accentHex = styles.getPropertyValue("--accent-color").trim() || '#3b82f6';
+                const accentRgb = hexToRgb(accentHex);
+
+                // Create Gradients
+                const createGradient = (ctx, colorRgb) => {
+                    const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+                    gradient.addColorStop(0, `rgba(${colorRgb}, 0.4)`);
+                    gradient.addColorStop(1, `rgba(${colorRgb}, 0)`);
+                    return gradient;
+                };
+
+                const subjectConfigs = {
+                    total: { color: accentHex, rgb: accentRgb },
+                    physics: { color: "#60a5fa", rgb: "96, 165, 250" }, // Blue
+                    chemistry: { color: "#34d399", rgb: "52, 211, 153" }, // Green
+                    maths: { color: "#fb923c", rgb: "251, 146, 60" } // Orange
+                };
+
+                const datasets = ["total", "physics", "chemistry", "maths"].map((subject) => {
+                    const config = subjectConfigs[subject];
+                    const isHidden = subject !== "total"; // Hide subject lines by default to keep it clean
+
+                    return {
+                        label: subject.charAt(0).toUpperCase() + subject.slice(1),
+                        data: cardData.content.map((entry) => subject === "total" ? (entry.total ?? entry.marks) : (entry.subjects ? entry.subjects[subject] : 0)),
+                        borderColor: config.color,
+                        backgroundColor: createGradient(ctx, config.rgb),
+                        fill: subject === 'total', // Only fill the total graph
+                        tension: 0.4, // Bezier Curve
+                        pointRadius: 4,
+                        pointBackgroundColor: '#18181b', // Dark bg
+                        pointBorderColor: config.color,
+                        pointBorderWidth: 2,
+                        pointHoverRadius: 6,
+                        pointHoverBackgroundColor: config.color,
+                        pointHoverBorderColor: '#fff',
+                        borderWidth: 2,
+                        hidden: isHidden,
+                    };
+                });
+
+                // Add Target Line
+                if (cardData.targetScore && cardData.targetScore > 0) {
+                    datasets.push({
+                        label: "Target",
+                        data: new Array(cardData.content.length).fill(cardData.targetScore),
+                        borderColor: "#ef4444",
+                        borderDash: [5, 5],
+                        pointRadius: 0,
+                        borderWidth: 1,
+                        fill: false
+                    });
+                }
+
+                const maxY = cardData.content.length > 0 ? Math.max(...cardData.content.map((entry) => entry.maxMarks || 300)) : 300;
+
+                const chartInstance = new Chart(ctx, {
+                    type: "line",
+                    data: {
+                        labels: cardData.content.map((entry) => entry.name),
+                        datasets: datasets,
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false,
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: 'rgba(24, 24, 27, 0.95)',
+                                titleColor: '#fff',
+                                bodyColor: '#9ca3af',
+                                borderColor: 'rgba(255,255,255,0.1)',
+                                borderWidth: 1,
+                                padding: 10,
+                                displayColors: true,
+                                callbacks: {
+                                    label: function (context) {
+                                        return ` ${context.dataset.label}: ${context.raw}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: maxY, // Dynamic max
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.05)',
+                                    drawBorder: false,
+                                },
+                                ticks: { color: '#6b7280', font: { size: 10 } }
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: '#6b7280', font: { size: 10 } }
+                            },
+                        },
+                    },
+                });
+
+                appState.chartInstances[cardData.id] = chartInstance;
+
+                // --- 7. HANDLE TOGGLE CLICKS ---
+                const togglesContainer = cardElement.querySelector(".chart-toggles");
+                const newTogglesContainer = togglesContainer.cloneNode(true);
+                togglesContainer.parentNode.replaceChild(newTogglesContainer, togglesContainer);
+
+                newTogglesContainer.addEventListener("click", (event) => {
+                    if (event.target.tagName === "BUTTON") {
+                        const subject = event.target.dataset.subject;
+                        const datasetIndex = chartInstance.data.datasets.findIndex((d) => d.label.toLowerCase().includes(subject === 'maths' ? 'math' : subject));
+
+                        if (datasetIndex > -1) {
+                            const meta = chartInstance.getDatasetMeta(datasetIndex);
+
+                            // Toggle visibility logic (This part was fine)
+                            meta.hidden = meta.hidden === null ? !chartInstance.data.datasets[datasetIndex].hidden : null;
+                            chartInstance.update();
+
+                            // Update Button UI
+                            const btn = event.target;
+
+                            // --- FIX START: Use isDatasetVisible for accurate state ---
+                            const isActive = chartInstance.isDatasetVisible(datasetIndex);
+                            // --- FIX END ---
+
+                            if (isActive) {
+                                if (subject === 'total') {
+                                    btn.style.backgroundColor = "var(--accent-color)";
+                                    btn.style.color = "white";
+                                    btn.style.borderColor = "var(--accent-color)";
+                                } else if (subject === 'physics') {
+                                    btn.style.backgroundColor = "rgba(59, 130, 246, 0.2)";
+                                    btn.style.color = "#60a5fa";
+                                    btn.style.borderColor = "#60a5fa";
+                                } else if (subject === 'chemistry') {
+                                    btn.style.backgroundColor = "rgba(16, 185, 129, 0.2)";
+                                    btn.style.color = "#34d399";
+                                    btn.style.borderColor = "#34d399";
+                                } else if (subject === 'maths') {
+                                    btn.style.backgroundColor = "rgba(249, 115, 22, 0.2)";
+                                    btn.style.color = "#fb923c";
+                                    btn.style.borderColor = "#fb923c";
+                                }
+                            } else {
+                                btn.style.backgroundColor = "rgba(31, 41, 55, 0.5)";
+                                btn.style.color = "var(--text-secondary)";
+                                btn.style.borderColor = "#4b5563";
+                            }
+                        }
+                    }
+                });
+            },
+        },
+        pomodoro: {
+            templateId: "pomodoro-card-template",
+            render: (cardElement, cardData) => {
+                const state = appState.pomodoroState[cardData.id] || {
+                    mode: "pomodoro",
+                    time: 25 * 60, // 25 minutes
+                    isRunning: false,
+                    intervalId: null,
+                    durations: {
+                        pomodoro: 25,
+                        shortBreak: 5,
+                        longBreak: 15
+                    },
+                };
+                appState.pomodoroState[cardData.id] = state;
+                const minutes = Math.floor(state.time / 60).toString().padStart(2, "0");
+                const seconds = (state.time % 60).toString().padStart(2, "0");
+                cardElement.querySelector(".timer-display").textContent = `${minutes}:${seconds}`;
+                cardElement.querySelectorAll(".pomodoro-btn").forEach((btn) => {
+                    btn.classList.toggle("active", btn.dataset.mode === state.mode);
+                });
+                cardElement.querySelector(".start-pause-btn").textContent = state.isRunning ? "PAUSE" : "START";
+                // Set duration input values
+                cardElement.querySelector('[data-mode="pomodoro"].pomodoro-duration-input').value = state.durations.pomodoro;
+                cardElement.querySelector('[data-mode="shortBreak"].pomodoro-duration-input').value = state.durations.shortBreak;
+                cardElement.querySelector('[data-mode="longBreak"].pomodoro-duration-input').value = state.durations.longBreak;
+            },
+        },
+        youtube: {
+            templateId: "youtube-card-template",
+            render: (cardElement, cardData) => {
+                const container = cardElement.querySelector(".youtube-container");
+                const url = cardData.content;
+                let videoId = "";
+
+                // Extract Video ID
+                if (url) {
+                    try {
+                        const parsedUrl = new URL(url);
+                        if (parsedUrl.hostname.includes("youtu.be")) {
+                            videoId = parsedUrl.pathname.slice(1);
+                        } else {
+                            videoId = parsedUrl.searchParams.get("v");
+                        }
+                    } catch (e) { console.error("Invalid YouTube URL"); }
+                }
+
+                if (!videoId) {
+                    container.innerHTML = `<div class="flex items-center justify-center h-full text-xs text-gray-500">Invalid URL</div>`;
+                    return;
+                }
+
+                // OPTIMIZATION: Check if iframe is already loaded to avoid re-rendering
+                if (container.querySelector("iframe")) return;
+
+                // Render Facade (Thumbnail + Play Button)
+                container.innerHTML = `
+            <div class="relative w-full h-full cursor-pointer group bg-black" onclick="this.innerHTML='<iframe class=\\'w-full h-full\\' src=\\'https://www.youtube.com/embed/${videoId}?autoplay=1\\' frameborder=\\'0\\' allow=\\'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\\' allowfullscreen></iframe>'">
+                <img src="https://img.youtube.com/vi/${videoId}/hqdefault.jpg" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" alt="Video thumbnail">
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white" stroke="none"><path d="M8 5v14l11-7z"/></svg>
+                    </div>
+                </div>
+            </div>
+        `;
+
+                // Apply tint/blur settings
+                container.classList.toggle("tint-disabled", !appState.settings.youtubeTintEnabled);
+                container.classList.toggle("blurred", appState.settings.youtubeBlurEnabled);
+            },
+        },
+        analytics: {
+            templateId: "analytics-card-template",
+            render: (cardElement, cardData) => {
+                // 1. Helper: Get Data
+                const getChartData = (days) => {
+                    const labels = [];
+                    const dataPoints = [];
+                    let totalSecondsRange = 0;
+                    for (let i = days - 1; i >= 0; i--) {
+                        const d = new Date();
+                        d.setDate(d.getDate() - i);
+                        const year = d.getFullYear();
+                        const month = (d.getMonth() + 1).toString().padStart(2, "0");
+                        const day = d.getDate().toString().padStart(2, "0");
+                        const isoDate = `${year}-${month}-${day}`;
+                        const label = days === 7 ? d.toLocaleDateString('en-US', {
+                            weekday: 'short'
+                        }) : d.toLocaleDateString('en-US', {
+                            day: 'numeric',
+                            month: 'short'
+                        });
+                        labels.push(label);
+                        let dailySeconds = 0;
+                        if (appState.studyLogs[isoDate]) {
+                            Object.values(appState.studyLogs[isoDate]).forEach(sec => dailySeconds += sec);
+                        }
+                        dataPoints.push(dailySeconds / 3600);
+                        totalSecondsRange += dailySeconds;
+                    }
+                    return {
+                        labels,
+                        dataPoints,
+                        totalSecondsRange
+                    };
+                };
+                // 2. Setup
+                const ctx = cardElement.querySelector(".analytics-chart").getContext("2d");
+                const rangeBtns = cardElement.querySelectorAll(".range-btn");
+                // Styles
+                const styles = getComputedStyle(document.documentElement);
+                const accentColor = styles.getPropertyValue("--accent-color").trim() || '#3b82f6';
+                const textColor = styles.getPropertyValue("--text-secondary").trim() || '#8b949e';
+                const gridColor = styles.getPropertyValue("--border-color").trim() || '#30363d';
+                // 3. Render Function
+                const renderChart = (range) => {
+                    const {
+                        labels,
+                        dataPoints,
+                        totalSecondsRange
+                    } = getChartData(range);
+                    // Summary Text
+                    const totalH = Math.floor(totalSecondsRange / 3600);
+                    const totalM = Math.floor((totalSecondsRange % 3600) / 60);
+                    const displayTotal = totalH > 0 ? `${totalH}h ${totalM}m` : `${totalM}m`;
+                    const avgHours = (totalSecondsRange / 3600 / range).toFixed(2);
+                    const summaryEl = cardElement.querySelector(".statistics-summary");
+                    if (summaryEl) {
+                        summaryEl.innerHTML = `
+
+                                    <span class="mr-4">Total: <strong style="color:${accentColor}">${displayTotal}</strong></span>
+
+                                    <span>Average: <strong>${avgHours}h/day</strong></span>
+
+                                `;
+                    }
+                    // Chart
+                    if (appState.chartInstances[cardData.id]) {
+                        appState.chartInstances[cardData.id].destroy();
+                    }
+                    appState.chartInstances[cardData.id] = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Hours',
+                                data: dataPoints,
+                                backgroundColor: accentColor,
+                                hoverBackgroundColor: accentColor,
+                                borderRadius: 4,
+                                barPercentage: 0.6
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            animation: {
+                                duration: 0
+                            },
+                            plugins: {
+                                legend: {
+                                    display: false
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: (context) => {
+                                            const val = context.raw;
+                                            if (val > 0 && val < 1) return ` ${Math.round(val * 60)} mins`;
+                                            return ` ${val.toFixed(2)} hrs`;
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    grid: {
+                                        color: gridColor,
+                                        drawBorder: false
+                                    },
+                                    border: {
+                                        display: false
+                                    },
+                                    ticks: {
+                                        color: textColor,
+                                        callback: (val) => (val % 1 === 0 ? val : val.toFixed(1)) + 'h'
+                                    }
+                                },
+                                x: {
+                                    grid: {
+                                        display: false,
+                                        drawBorder: false
+                                    },
+                                    ticks: {
+                                        color: textColor
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    // Update Button Styles - THIS NOW WORKS CORRECTLY
+                    rangeBtns.forEach(btn => {
+                        if (parseInt(btn.dataset.range) === range) {
+                            btn.style.backgroundColor = accentColor;
+                            btn.style.borderColor = accentColor;
+                            btn.style.color = "#fff";
+                        } else {
+                            btn.style.backgroundColor = "transparent";
+                            btn.style.borderColor = gridColor;
+                            btn.style.color = textColor;
+                        }
+                    });
+                };
+                // 4. Initialize
+                renderChart(7);
+                // 5. Simplified Event Listeners (Fixed)
+                rangeBtns.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const range = parseInt(e.target.dataset.range);
+                        renderChart(range);
+                    });
+                });
+            }
+        },
+        "daily-tasks": {
+            templateId: "daily-tasks-template",
+            render: (cardElement, cardData) => {
+                // Initialize content structure: { "YYYY-MM-DD": [tasks] }
+                if (!cardData.content || Array.isArray(cardData.content)) {
+                    cardData.content = {};
+                }
+
+                // 1. Get Selected Date (Default to Today)
+                const dateInput = cardElement.querySelector(".daily-date-selector");
+                if (!dateInput.value) {
+                    // Check dataset first (persisted state), then fallback to today
+                    dateInput.value = cardElement.dataset.selectedDate || new Date().toISOString().split('T')[0];
+                }
+                cardElement.dataset.selectedDate = dateInput.value; // Sync dataset
+                const selectedDate = dateInput.value;
+
+                // 2. Prepare Task Data
+                const tasksForDate = cardData.content[selectedDate] || [];
+                const listElement = cardElement.querySelector(".daily-task-list");
+                const progressBar = cardElement.querySelector(".progress-bar");
+                const progressText = cardElement.querySelector(".progress-text");
+
+                listElement.innerHTML = "";
+
+                // 3. Render Progress Bar
+                let totalTasks = 0;
+                let completedTasks = 0;
+
+                if (tasksForDate.length === 0) {
+                    listElement.innerHTML = `<li class="text-secondary text-xs text-center py-8 opacity-50 flex flex-col items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                        <span>No plans for ${new Date(o).toLocaleDateString(void 0,{weekday:"short",month:"short",day:"numeric"})}</span>
-                    </li>`:a.forEach((e,t)=>{e.priority||(e.priority="medium"),e.status||(e.status=e.completed?"done":"todo"),e.subtasks||(e.subtasks=[]),l++,"done"===e.status&&d++;let s={high:{color:"text-red-300",bg:"bg-red-500/20",border:"border-red-500/20",label:"High"},medium:{color:"text-amber-200",bg:"bg-amber-500/20",border:"border-amber-500/20",label:"Medium"},low:{color:"text-blue-200",bg:"bg-blue-500/20",border:"border-blue-500/20",label:"Low"}}[e.priority],o=e.subtasks.map((e,t)=>`
+                        <span>No plans for ${new Date(selectedDate).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+                    </li>`;
+                } else {
+                    tasksForDate.forEach((task, index) => {
+                        // Initialize missing properties
+                        if (!task.priority) task.priority = 'medium';
+                        if (!task.status) task.status = task.completed ? 'done' : 'todo';
+                        if (!task.subtasks) task.subtasks = [];
+
+                        totalTasks++;
+                        if (task.status === 'done') completedTasks++;
+
+                        // Styling Config (Copied from Todo Renderer)
+                        const priorityConfig = {
+                            high: { color: 'text-red-300', bg: 'bg-red-500/20', border: 'border-red-500/20', label: 'High' },
+                            medium: { color: 'text-amber-200', bg: 'bg-amber-500/20', border: 'border-amber-500/20', label: 'Medium' },
+                            low: { color: 'text-blue-200', bg: 'bg-blue-500/20', border: 'border-blue-500/20', label: 'Low' }
+                        };
+                        const pStyle = priorityConfig[task.priority];
+                        const statusIcons = {
+                            todo: `<div class="w-4 h-4 rounded-full border-[1.5px] border-gray-400 hover:border-white transition-colors"></div>`,
+                            'in-progress': `<div class="w-4 h-4 rounded-full border-[1.5px] border-amber-400 flex items-center justify-center"><div class="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse"></div></div>`,
+                            done: `<div class="w-4 h-4 rounded-full bg-[var(--accent-color)] border border-[var(--accent-color)] flex items-center justify-center text-white"><svg width="10" height="8" viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 5L4 8L11 1"/></svg></div>`
+                        };
+
+                        // Subtasks HTML
+                        const subtasksHtml = task.subtasks.map((sub, sIndex) => `
                             <div class="flex items-center gap-3 py-1.5 pl-2 group/sub relative">
                                 <div class="absolute left-[-6px] top-1/2 w-2 h-px bg-gray-700"></div>
-                                <button class="toggle-subtask-btn w-3.5 h-3.5 flex-shrink-0 border border-gray-500 rounded flex items-center justify-center transition-colors ${e.completed?"bg-gray-500 border-gray-500":"hover:border-gray-300"}" data-sub-index="${t}">
-                                    ${e.completed?'<svg class="w-2.5 h-2.5 text-white" viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 5L4 8L11 1"/></svg>':""}
+                                <button class="toggle-subtask-btn w-3.5 h-3.5 flex-shrink-0 border border-gray-500 rounded flex items-center justify-center transition-colors ${sub.completed ? 'bg-gray-500 border-gray-500' : 'hover:border-gray-300'}" data-sub-index="${sIndex}">
+                                    ${sub.completed ? '<svg class="w-2.5 h-2.5 text-white" viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 5L4 8L11 1"/></svg>' : ''}
                                 </button>
-                                <span class="text-xs ${e.completed?"line-through text-gray-500":"text-gray-300"} flex-grow break-all font-medium">${e.text}</span>
-                                <button class="delete-subtask-btn text-gray-500 hover:text-red-400 opacity-0 group-hover/sub:opacity-100 px-1.5 transition-opacity text-lg leading-none" data-sub-index="${t}">\xd7</button>
+                                <span class="text-xs ${sub.completed ? 'line-through text-gray-500' : 'text-gray-300'} flex-grow break-all font-medium">${sub.text}</span>
+                                <button class="delete-subtask-btn text-gray-500 hover:text-red-400 opacity-0 group-hover/sub:opacity-100 px-1.5 transition-opacity text-lg leading-none" data-sub-index="${sIndex}">×</button>
                             </div>
-                        `).join(""),a=document.createElement("li");a.className="group mb-2 rounded-xl bg-white/5 hover:bg-white/10 transition-all overflow-hidden relative",a.dataset.index=t,a.innerHTML=`
+                        `).join('');
+
+                        const li = document.createElement("li");
+                        li.className = `group mb-2 rounded-xl bg-white/5 hover:bg-white/10 transition-all overflow-hidden relative`;
+                        li.dataset.index = index;
+
+                        li.innerHTML = `
                             <div class="flex items-start gap-3 p-3.5">
                                 <button class="status-btn mt-0.5 flex-shrink-0 transform active:scale-95 transition-transform">
-                                    ${({todo:'<div class="w-4 h-4 rounded-full border-[1.5px] border-gray-400 hover:border-white transition-colors"></div>',"in-progress":'<div class="w-4 h-4 rounded-full border-[1.5px] border-amber-400 flex items-center justify-center"><div class="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse"></div></div>',done:'<div class="w-4 h-4 rounded-full bg-[var(--accent-color)] border border-[var(--accent-color)] flex items-center justify-center text-white"><svg width="10" height="8" viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 5L4 8L11 1"/></svg></div>'})[e.status]}
+                                    ${statusIcons[task.status]}
                                 </button>
                                 
                                 <div class="flex-grow min-w-0 flex flex-col toggle-expand-btn cursor-pointer">
                                     <div class="flex items-center justify-between gap-2">
-                                        <span class="text-sm font-semibold leading-tight transition-colors ${"done"===e.status?"line-through text-gray-500 decoration-gray-500":"text-gray-100 group-hover:text-white"}">
-                                            ${e.text}
+                                        <span class="text-sm font-semibold leading-tight transition-colors ${task.status === 'done' ? 'line-through text-gray-500 decoration-gray-500' : 'text-gray-100 group-hover:text-white'}">
+                                            ${task.text}
                                         </span>
                                     </div>
                                     
                                     <div class="flex items-center gap-2 mt-2">
-                                        <button class="priority-btn text-[10px] font-bold tracking-wide px-2 py-0.5 rounded-full border ${s.border} ${s.color} ${s.bg} hover:brightness-125 transition-all uppercase">
-                                            ${s.label}
+                                        <button class="priority-btn text-[10px] font-bold tracking-wide px-2 py-0.5 rounded-full border ${pStyle.border} ${pStyle.color} ${pStyle.bg} hover:brightness-125 transition-all uppercase">
+                                            ${pStyle.label}
                                         </button>
-                                        ${e.subtasks.length>0?`
+                                        ${task.subtasks.length > 0 ? `
                                             <span class="text-[10px] text-gray-400 font-medium flex items-center gap-1 bg-white/5 px-2 py-0.5 rounded-full">
                                                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
-                                                ${e.subtasks.filter(e=>e.completed).length}/${e.subtasks.length}
+                                                ${task.subtasks.filter(s => s.completed).length}/${task.subtasks.length}
                                             </span>
-                                        `:""}
+                                        ` : ''}
                                     </div>
                                 </div>
 
@@ -165,19 +1917,1070 @@ function debounce(e,t){let s;return function(...o){clearTimeout(s),s=setTimeout(
                                 </button>
                             </div>
                             
-                            <div class="subtasks-section ${e.expanded?"block":"hidden"} pl-10 pr-4 pb-3 border-t border-white/5 bg-black/20">
+                            <div class="subtasks-section ${task.expanded ? 'block' : 'hidden'} pl-10 pr-4 pb-3 border-t border-white/5 bg-black/20">
                                 <div class="space-y-0.5 mt-2">
-                                    ${o}
+                                    ${subtasksHtml}
                                 </div>
                                 <form class="add-subtask-form flex gap-2 mt-2 items-center opacity-70 hover:opacity-100 transition-opacity">
                                     <span class="text-gray-500 text-lg leading-none">+</span>
                                     <input type="text" placeholder="Add step..." class="bg-transparent border-none text-xs w-full focus:outline-none focus:placeholder-gray-400 placeholder-gray-600 text-gray-300 py-1 font-medium">
                                 </form>
                             </div>
-                        `,r.appendChild(a)});let c=l>0?Math.round(d/l*100):0;n.style.width=`${c}%`,i.textContent=`${c}%`}},ambient:{templateId:"ambient-card-template",render(e,t){if(!window.ambientSounds){window.ambientSounds={pink:new Tone.Noise("pink").toDestination(),brown:new Tone.Noise("brown").toDestination(),white:new Tone.Noise("white").toDestination()};let s=new Tone.Filter(1500,"lowpass").toDestination();window.ambientSounds.white.disconnect().connect(s),Object.values(window.ambientSounds).forEach(e=>{e.volume.value=-1/0,e.start()})}(!t.content||"object"!=typeof t.content||Array.isArray(t.content))&&(t.content={pink:-60,brown:-60,white:-60,isGlobalPaused:!0});let a=e.querySelector(".ambient-toggle-btn"),r=a.querySelector(".play-icon"),n=a.querySelector(".pause-icon"),i=e=>{e?(r.classList.remove("hidden"),n.classList.add("hidden"),a.title="Play All"):(r.classList.add("hidden"),n.classList.remove("hidden"),a.title="Pause All")};i(t.content.isGlobalPaused),a.onclick=()=>{let s=!t.content.isGlobalPaused;t.content.isGlobalPaused=s,s?Object.values(window.ambientSounds).forEach(e=>e.volume.rampTo(-1/0,.5)):("running"!==Tone.context.state&&Tone.start(),e.querySelectorAll(".ambient-slider").forEach(e=>{let t=e.dataset.type,s=parseInt(e.value);s>-59&&window.ambientSounds[t].volume.rampTo(s,.5)})),i(s),o.save("customCards")},e.querySelectorAll(".ambient-slider").forEach(e=>{let s=e.dataset.type;e.setAttribute("draggable","false"),e.addEventListener("dragstart",e=>{e.preventDefault(),e.stopPropagation()}),e.addEventListener("mousedown",e=>{e.stopPropagation()});let a=t.content[s]||-60;if(e.value=a,!t.content.isGlobalPaused){let r=window.ambientSounds[s].volume.value,n=-59>=parseInt(a)?-1/0:parseInt(a);r<n&&n>-60&&window.ambientSounds[s].volume.rampTo(n,.1)}e.oninput=e=>{let o=parseInt(e.target.value);t.content[s]=o,t.content.isGlobalPaused&&o>-59&&(t.content.isGlobalPaused=!1,i(!1)),"running"!==Tone.context.state&&Tone.start(),t.content.isGlobalPaused||(o<=-59?window.ambientSounds[s].volume.rampTo(-1/0,.1):window.ambientSounds[s].volume.rampTo(o,.1))},e.onchange=e=>{o.save("customCards")}})}},"time-logger":{templateId:"time-logger-card-template",render(e,t){let s=o.timeLoggerState[t.id]||{isRunning:!1,accumulatedTime:0,currentSubject:"Physics",intervalId:null};o.timeLoggerState[t.id]=s,e.querySelector(".timer-display").textContent=C(s.accumulatedTime),e.querySelector(".start-pause-btn").textContent=s.isRunning?"PAUSE":"START";let a=`subject-select-${t.id}`,r=e.querySelector(".subject-select"),n=r.previousElementSibling;n&&"LABEL"===n.tagName&&n.setAttribute("for",a),r.id=a;let i=[...new Set(["Physics","Chemistry","Maths","Biology","Zoology","Botany",...o.settings.userSubjects||[],]),];r.innerHTML=i.map(e=>`<option>${e}</option>`).join("")+'<option value="add_new">Add New Subject...</option>',r.value=s.currentSubject;let l=e.querySelector(".manual-subject-select");l&&(l.innerHTML=i.map(e=>`<option>${e}</option>`).join(""),l.value=s.currentSubject);let d=e.querySelector(".study-log-list"),c=e.querySelector(".total-study-time");d.innerHTML="";let u=E(new Date),m=o.studyLogs[u]||{},g=Object.values(m).reduce((e,t)=>e+t,0);c&&(c.textContent=`Total: ${T(g)}`),0===Object.keys(m).length?d.innerHTML='<li class="text-secondary px-2 text-sm">No sessions logged today.</li>':Object.entries(m).forEach(([e,t])=>{let s=document.createElement("li");s.className="flex justify-between items-center",s.innerHTML=`<span>${e}</span><div class="flex items-center gap-2"><span class="font-semibold">${T(t)}</span><button data-subject="${e}" class="delete-log-item text-red-500 hover:text-red-400 font-semibold px-2 py-1 text-xs leading-none rounded-sm" aria-label="Delete ${e} log">\xd7</button></div>`,d.appendChild(s)})}}};function j(){Object.values(o.chartInstances).forEach(e=>e.destroy()),o.chartInstances={},i.dashboardGrid.innerHTML="";let e=!1,t=o.customCards.map(e=>e.id);Array.isArray(o.layout)||(o.layout=["countdown","graph","default-todo","default-study-logger","default-note","default-line-graph","tests","quote","time",],e=!0);let s=o.layout.length;o.layout=o.layout.filter(e=>M[e]?.isDefault||t.includes(e)),o.layout.length!==s&&(e=!0),o.customCards.forEach(e=>{o.layout.includes(e.id)||o.layout.push(e.id)}),document.getElementById("dashboard-grid").onmousemove=e=>{for(let t of document.getElementsByClassName("card")){let s=t.getBoundingClientRect(),o=e.clientX-s.left,a=e.clientY-s.top;t.style.setProperty("--mouse-x",`${o}px`),t.style.setProperty("--mouse-y",`${a}px`)}},w(),o.save("layout"),o.layout.forEach(e=>{let t=o.customCards.find(t=>t.id===e),s=t?t.type:e,a=M[s];if(a){let r=document.getElementById(a.templateId).content.cloneNode(!0),n=r.querySelector(".card");n.dataset.cardId=e;let l=o.cardProps[e]||{colspan:"graph"===s||"line-graph"===s||"youtube"===s||"time-logger"===s?2:1};if(o.cardProps[e]=l,2===l.colspan&&n.classList.add("md:col-span-2"),t)n.querySelector(".card-title").textContent=t.title;else if("chaitanya-noob"===o.settings.theme){let d=n.querySelector("h2");d&&(d.textContent+=" \uD83E\uDD13")}i.dashboardGrid.appendChild(r)}}),i.dashboardGrid.querySelectorAll(".card").forEach((e,t)=>{let s=e.dataset.cardId,a=o.customCards.find(e=>e.id===s),r=a?a.type:s,n=M[r];n&&n.render&&n.render(e,a)})}function A(){let e=o.settings.youtubeTintEnabled,t=o.settings.youtubeBlurEnabled;i.inputs.youtubeTintToggle&&(i.inputs.youtubeTintToggle.checked=e),i.inputs.youtubeBlurToggle&&(i.inputs.youtubeBlurToggle.checked=t),document.querySelectorAll('[data-card-type="youtube"] .youtube-container').forEach(s=>{s.classList.toggle("tint-disabled",!e),s.classList.toggle("blurred",t)})}function D(){document.documentElement.dataset.theme=o.settings.theme;let e=["cyberpunk","god-mode"].includes(o.settings.theme)?o.settings.theme:"";document.documentElement.dataset.subTheme=e,document.documentElement.dataset.ricedMode=o.settings.ricedModeEnabled?"true":"false",i.body.style.fontFamily=o.settings.font,"alakh-pandey"===o.settings.theme?i.body.style.backgroundImage="url(https://i.imgflip.com/8otyfs.jpg)":"chaitanya-noob"===o.settings.theme?i.body.style.backgroundImage="url(https://i.ibb.co/pv4BYhMs/Whats-App-Image-2025-08-06-at-16-12-41-4f47e159.jpg)":"god-mode"===o.settings.theme?i.body.style.backgroundImage="url('https://i.pinimg.com/originals/c5/9a/d2/c59ad2bd4ad2fbacd04017debc679ddb.gif')":i.body.style.backgroundImage=o.settings.bgUrl?`url(${o.settings.bgUrl})`:"none";let s=o.settings.jeeSession||"April",a=o.settings.examYear||"2026";i.inputs.jeeSession&&0===i.inputs.jeeSession.options.length&&["January","April"].forEach(e=>{let t=document.createElement("option");t.value=e,t.textContent=e,i.inputs.jeeSession.appendChild(t)}),i.inputs.jeeSession.value=s;let r=t.JEE[s]?.[a]||"";i.inputs.customName.value=o.settings.customExamName||"",i.inputs.customDate.value=o.settings.customExamDate||"",i.inputs.jeeShift.value=o.settings.jeeShiftDate||r,"JEE"===o.settings.examType?(i.inputs.jeeContainer.classList.remove("hidden"),i.inputs.customContainer.classList.add("hidden")):"Custom"===o.settings.examType?(i.inputs.jeeContainer.classList.add("hidden"),i.inputs.customContainer.classList.remove("hidden")):(i.inputs.jeeContainer.classList.add("hidden"),i.inputs.customContainer.classList.add("hidden"));let{examType:n,examYear:l,customExamName:d}=o.settings,c;c="Custom"===n?d||"My Exam":`${n} ${l}`,i.mainTitle.textContent=c,i.mainTitleRiced.textContent=c,i.inputs.tickingSoundToggle.checked=o.settings.tickingSoundEnabled,i.inputs.theme.value=o.settings.theme,i.inputs.font.value=o.settings.font,i.inputs.bgUrl.value=o.settings.bgUrl,i.inputs.examType.value=o.settings.examType,i.inputs.examYear.value=o.settings.examYear,i.inputs.focusShieldToggle.checked=o.settings.focusShieldEnabled,i.inputs.ricedModeToggle.checked=o.settings.ricedModeEnabled,A(),document.documentElement.dataset.streamlinedMode=o.settings.streamlinedModeEnabled?"true":"false",i.inputs.streamlinedModeToggle&&(i.inputs.streamlinedModeToggle.checked=o.settings.streamlinedModeEnabled)}function P(){let e=document.getElementById("subject-manager-list"),t=o.settings.userSubjects||[];if(e.innerHTML="",0===t.length){e.innerHTML='<span class="text-xs text-gray-500 italic p-1">No custom subjects added.</span>';return}t.forEach((t,s)=>{let o=document.createElement("div");o.className="subject-chip",o.innerHTML=`
-            <span>${t}</span>
-            <button class="delete-subject-btn" data-index="${s}" title="Remove ${t}">✕</button>
-        `,e.appendChild(o)})}function R(){let e=document.getElementById("new-subject-input"),t=e.value.trim();if(t){if(o.settings.userSubjects||(o.settings.userSubjects=[]),o.settings.userSubjects.includes(t)){alert("Subject already exists!");return}o.settings.userSubjects.push(t),e.value="",o.saveSettings(),P(),j()}}function H(e){o.settings.userSubjects&&o.settings.userSubjects[e]&&(o.settings.userSubjects.splice(e,1),o.saveSettings(),P(),j())}async function N(e,t){if("documentPictureInPicture"in window){l&&l.close();try{let s=await documentPictureInPicture.requestWindow({width:320,height:155});l=s,d=e,c=t,[...document.styleSheets].forEach(e=>{if(e.href){let t=document.createElement("link");t.rel="stylesheet",t.href=e.href,l.document.head.appendChild(t)}else if(e.ownerNode){let s=e.ownerNode.cloneNode(!0);l.document.head.appendChild(s)}});let o=document.createElement("style");o.textContent=`
+                        `;
+                        listElement.appendChild(li);
+                    });
+                }
+
+                // Update Progress Bar
+                const percent = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+                progressBar.style.width = `${percent}%`;
+                progressText.textContent = `${percent}%`;
+            }
+        },
+        ambient: {
+            templateId: "ambient-card-template",
+            render: (cardElement, cardData) => {
+                // 1. Initialize Tone.js noises (Singleton)
+                if (!window.ambientSounds) {
+                    window.ambientSounds = {
+                        pink: new Tone.Noise("pink").toDestination(),
+                        brown: new Tone.Noise("brown").toDestination(),
+                        white: new Tone.Noise("white").toDestination(),
+                    };
+                    const filter = new Tone.Filter(1500, "lowpass").toDestination();
+                    window.ambientSounds.white.disconnect().connect(filter);
+                    Object.values(window.ambientSounds).forEach(n => {
+                        n.volume.value = -Infinity;
+                        n.start();
+                    });
+                }
+
+                // 2. Data Init
+                if (!cardData.content || typeof cardData.content !== 'object' || Array.isArray(cardData.content)) {
+                    cardData.content = { pink: -60, brown: -60, white: -60, isGlobalPaused: true };
+                }
+
+                // --- NEW: Toggle Button Logic ---
+                const toggleBtn = cardElement.querySelector('.ambient-toggle-btn');
+                const playIcon = toggleBtn.querySelector('.play-icon');
+                const pauseIcon = toggleBtn.querySelector('.pause-icon');
+
+                const updateToggleIcon = (isPaused) => {
+                    if (isPaused) {
+                        playIcon.classList.remove('hidden');
+                        pauseIcon.classList.add('hidden');
+                        toggleBtn.title = "Play All";
+                    } else {
+                        playIcon.classList.add('hidden');
+                        pauseIcon.classList.remove('hidden');
+                        toggleBtn.title = "Pause All";
+                    }
+                };
+
+                // Initialize Icon State
+                updateToggleIcon(cardData.content.isGlobalPaused);
+
+                toggleBtn.onclick = () => {
+                    const isNowPaused = !cardData.content.isGlobalPaused;
+                    cardData.content.isGlobalPaused = isNowPaused;
+
+                    if (isNowPaused) {
+                        // PAUSE: Ramp everything to silence
+                        Object.values(window.ambientSounds).forEach(n => n.volume.rampTo(-Infinity, 0.5));
+                    } else {
+                        // PLAY: Restore volume from sliders
+                        if (Tone.context.state !== 'running') Tone.start();
+
+                        cardElement.querySelectorAll('.ambient-slider').forEach(slider => {
+                            const type = slider.dataset.type;
+                            const val = parseInt(slider.value);
+                            // Only restore if the slider isn't at the bottom (-60)
+                            if (val > -59) {
+                                window.ambientSounds[type].volume.rampTo(val, 0.5);
+                            }
+                        });
+                    }
+                    updateToggleIcon(isNowPaused);
+                    appState.save("customCards");
+                };
+
+                // 3. Setup Sliders
+                cardElement.querySelectorAll('.ambient-slider').forEach(slider => {
+                    const type = slider.dataset.type;
+
+                    // Prevent drag conflict
+                    slider.setAttribute('draggable', 'false');
+                    slider.addEventListener('dragstart', (e) => { e.preventDefault(); e.stopPropagation(); });
+                    slider.addEventListener('mousedown', (e) => { e.stopPropagation(); });
+
+                    const savedVal = cardData.content[type] || -60;
+                    slider.value = savedVal;
+
+                    // Sync Audio on Load (only if not globally paused)
+                    if (!cardData.content.isGlobalPaused) {
+                        const currentVol = window.ambientSounds[type].volume.value;
+                        const targetVol = parseInt(savedVal) <= -59 ? -Infinity : parseInt(savedVal);
+                        if (currentVol < targetVol && targetVol > -60) {
+                            window.ambientSounds[type].volume.rampTo(targetVol, 0.1);
+                        }
+                    }
+
+                    slider.oninput = (e) => {
+                        const val = parseInt(e.target.value);
+                        cardData.content[type] = val;
+
+                        // If user moves slider, auto-unpause (optional, makes UI feel responsive)
+                        if (cardData.content.isGlobalPaused && val > -59) {
+                            cardData.content.isGlobalPaused = false;
+                            updateToggleIcon(false);
+                        }
+
+                        if (Tone.context.state !== 'running') Tone.start();
+
+                        // If not paused, update sound immediately
+                        if (!cardData.content.isGlobalPaused) {
+                            if (val <= -59) {
+                                window.ambientSounds[type].volume.rampTo(-Infinity, 0.1);
+                            } else {
+                                window.ambientSounds[type].volume.rampTo(val, 0.1);
+                            }
+                        }
+                    };
+
+                    slider.onchange = (e) => {
+                        appState.save("customCards");
+                    };
+                });
+            }
+        },
+        "time-logger": {
+            templateId: "time-logger-card-template",
+            render: (cardElement, cardData) => {
+                const state = appState.timeLoggerState[cardData.id] || {
+                    isRunning: false,
+                    accumulatedTime: 0,
+                    currentSubject: "Physics",
+                    intervalId: null,
+                };
+                appState.timeLoggerState[cardData.id] = state;
+                cardElement.querySelector(".timer-display").textContent = formatTimeHHMMSS(state.accumulatedTime);
+                cardElement.querySelector(".start-pause-btn").textContent = state.isRunning ? "PAUSE" : "START";
+                // Update subject dropdown
+                const labelFor = `subject-select-${cardData.id}`;
+                const selectEl = cardElement.querySelector(".subject-select");
+                const labelEl = selectEl.previousElementSibling; // Find the label relative to the select box
+                // Check if we found the label and it is a LABEL tag
+                if (labelEl && labelEl.tagName === 'LABEL') {
+                    labelEl.setAttribute("for", labelFor);
+                }
+                selectEl.id = labelFor;
+                const allSubjects = [...new Set(["Physics", "Chemistry", "Maths", "Biology", "Zoology", "Botany", ...(appState.settings.userSubjects || []),]),];
+                selectEl.innerHTML = allSubjects.map((subject) => `<option>${subject}</option>`).join("") + '<option value="add_new">Add New Subject...</option>';
+                selectEl.value = state.currentSubject;
+                const manualSelect = cardElement.querySelector(".manual-subject-select");
+                if (manualSelect) {
+                    manualSelect.innerHTML = allSubjects.map((subject) => `<option>${subject}</option>`).join("");
+                    // Set default to current timer subject just for convenience
+                    manualSelect.value = state.currentSubject;
+                }
+                // Render today's study log
+                const logListEl = cardElement.querySelector(".study-log-list");
+                const totalTimeEl = cardElement.querySelector(".total-study-time");
+                logListEl.innerHTML = "";
+                const todayStr = formatDateToISO(new Date());
+                const todayLogs = appState.studyLogs[todayStr] || {};
+                const totalToday = Object.values(todayLogs).reduce((sum, time) => sum + time, 0);
+                if (totalTimeEl) {
+                    totalTimeEl.textContent = `Total: ${formatTimeReadable(totalToday)}`;
+                }
+                if (Object.keys(todayLogs).length === 0) {
+                    logListEl.innerHTML = '<li class="text-secondary px-2 text-sm">No sessions logged today.</li>';
+                } else {
+                    Object.entries(todayLogs).forEach(([subject, time]) => {
+                        const listItem = document.createElement("li");
+                        listItem.className = "flex justify-between items-center";
+                        listItem.innerHTML = `<span>${subject}</span><div class="flex items-center gap-2"><span class="font-semibold">${formatTimeReadable(time)}</span><button data-subject="${subject}" class="delete-log-item text-red-500 hover:text-red-400 font-semibold px-2 py-1 text-xs leading-none rounded-sm" aria-label="Delete ${subject} log">×</button></div>`;
+                        logListEl.appendChild(listItem);
+                    });
+                }
+            },
+        },
+    };
+    /**
+
+    * Re-renders the entire dashboard grid based on the current `appState`.
+
+    */
+    function renderDashboard() {
+
+        // Destroy all existing chart instances to prevent memory leaks
+        Object.values(appState.chartInstances).forEach((chart) => chart.destroy());
+        appState.chartInstances = {};
+        domElements.dashboardGrid.innerHTML = ""; // Clear the grid
+        // Filter layout to remove IDs of deleted custom cards
+        let layoutChanged = false;
+        const customCardIds = appState.customCards.map((card) => card.id);
+        if (!Array.isArray(appState.layout)) {
+            // Fallback for corrupted layout
+            appState.layout = ["countdown", "graph", "default-todo", "default-study-logger", "default-note", "default-line-graph", "tests", "quote", "time",];
+            layoutChanged = true;
+        }
+        // 1. Filter layout to remove IDs of deleted custom cards
+        const originalLength = appState.layout.length;
+        appState.layout = appState.layout.filter(
+            (cardId) => cardRenderers[cardId]?.isDefault || customCardIds.includes(cardId));
+        if (appState.layout.length !== originalLength) {
+            layoutChanged = true;
+        }
+        // // 2. Add any new custom cards to the layout if they're not already there
+        // appState.customCards.forEach((card) => {
+        //     if (!appState.layout.includes(card.id)) {
+        //         appState.layout.push(card.id);
+        //         layoutChanged = true;
+        //     }
+        // });
+        // // 3. Only save if the layout actually changed
+        // if (layoutChanged) {
+        //     appState.save("layout");
+        // }
+        // Add any new custom cards to the layout if they're not already there
+        appState.customCards.forEach((card) => {
+            if (!appState.layout.includes(card.id)) {
+                appState.layout.push(card.id);
+            }
+        });
+        document.getElementById("dashboard-grid").onmousemove = e => {
+            for (const card of document.getElementsByClassName("card")) {
+                const rect = card.getBoundingClientRect(),
+                    x = e.clientX - rect.left,
+                    y = e.clientY - rect.top;
+
+                card.style.setProperty("--mouse-x", `${x}px`);
+                card.style.setProperty("--mouse-y", `${y}px`);
+            }
+        };
+        sanitizeDashboardState();
+        appState.save("layout");
+        // Create and append card elements
+        appState.layout.forEach((cardId) => {
+            const cardData = appState.customCards.find((card) => card.id === cardId);
+            const cardType = cardData ? cardData.type : cardId;
+            const renderer = cardRenderers[cardType];
+            if (renderer) {
+                const templateClone = document.getElementById(renderer.templateId).content.cloneNode(true);
+                const cardElement = templateClone.querySelector(".card");
+                cardElement.dataset.cardId = cardId;
+                // Apply card properties (e.g., colspan)
+                const cardProps = appState.cardProps[cardId] || {
+                    colspan: cardType === "graph" || cardType === "line-graph" || cardType === "youtube" || cardType === "time-logger" ? 2 : 1,
+                };
+                appState.cardProps[cardId] = cardProps;
+                if (cardProps.colspan === 2) {
+                    cardElement.classList.add("md:col-span-2");
+                }
+                // Set title for custom cards
+                if (cardData) {
+                    cardElement.querySelector(".card-title").textContent = cardData.title;
+                } else if (appState.settings.theme === 'chaitanya-noob') {
+                    // Easter egg
+                    const titleEl = cardElement.querySelector('h2');
+                    if (titleEl) titleEl.textContent += " 🤓";
+                }
+                domElements.dashboardGrid.appendChild(templateClone);
+            }
+        });
+        // Call the render function for each card
+        domElements.dashboardGrid.querySelectorAll(".card").forEach((cardElement, index) => {
+            const cardId = cardElement.dataset.cardId;
+            const cardData = appState.customCards.find((card) => card.id === cardId);
+            const cardType = cardData ? cardData.type : cardId;
+            const renderer = cardRenderers[cardType];
+            if (renderer && renderer.render) {
+                renderer.render(cardElement, cardData);
+            }
+        });
+    }
+
+
+    // --- Settings Application ---
+    /**
+
+    * Updates styles for all YouTube cards based on settings.
+
+    */
+    function updateYouTubeCardStyles() {
+        const tintEnabled = appState.settings.youtubeTintEnabled;
+        const blurEnabled = appState.settings.youtubeBlurEnabled;
+        if (domElements.inputs.youtubeTintToggle) {
+            domElements.inputs.youtubeTintToggle.checked = tintEnabled;
+        }
+        if (domElements.inputs.youtubeBlurToggle) {
+            domElements.inputs.youtubeBlurToggle.checked = blurEnabled;
+        }
+        document.querySelectorAll('[data-card-type="youtube"] .youtube-container').forEach((container) => {
+            container.classList.toggle("tint-disabled", !tintEnabled);
+            container.classList.toggle("blurred", blurEnabled);
+        });
+    }
+    /**
+
+    * Applies all settings from `appState.settings` to the DOM.
+
+    */
+    function applySettings() {
+        // Apply theme
+        document.documentElement.dataset.theme = appState.settings.theme;
+        // Apply sub-theme for riced-linux variants
+        const subTheme = ["cyberpunk", "god-mode"].includes(appState.settings.theme) ? appState.settings.theme : "";
+        document.documentElement.dataset.subTheme = subTheme;
+        // Apply riced mode
+        document.documentElement.dataset.ricedMode = appState.settings.ricedModeEnabled ? "true" : "false";
+        // Apply font
+        domElements.body.style.fontFamily = appState.settings.font;
+        // Apply background
+        if (appState.settings.theme === "alakh-pandey") {
+            domElements.body.style.backgroundImage = "url(https://i.imgflip.com/8otyfs.jpg)";
+        } else if (appState.settings.theme === "chaitanya-noob") {
+            domElements.body.style.backgroundImage = "url(https://i.ibb.co/pv4BYhMs/Whats-App-Image-2025-08-06-at-16-12-41-4f47e159.jpg)";
+        } else if (appState.settings.theme === "god-mode") {
+            domElements.body.style.backgroundImage = "url('https://i.pinimg.com/originals/c5/9a/d2/c59ad2bd4ad2fbacd04017debc679ddb.gif')";
+        } else {
+            domElements.body.style.backgroundImage = appState.settings.bgUrl ? `url(${appState.settings.bgUrl})` : "none";
+        }
+        const currentSession = appState.settings.jeeSession || "April";
+        const currentYear = appState.settings.examYear || "2026";
+
+        if (domElements.inputs.jeeSession && domElements.inputs.jeeSession.options.length === 0) {
+            ["January", "April"].forEach(session => {
+                const opt = document.createElement("option");
+                opt.value = session;
+                opt.textContent = session;
+                domElements.inputs.jeeSession.appendChild(opt);
+            });
+        }
+
+        domElements.inputs.jeeSession.value = currentSession;
+        // Check if user has a custom date, otherwise grab the default from your EXAM_DEFAULTS object
+        const defaultDateStr = EXAM_DEFAULTS.JEE[currentSession]?.[currentYear] || "";
+        // Set the input value to the custom date OR the default date
+        domElements.inputs.customName.value = appState.settings.customExamName || "";
+        domElements.inputs.customDate.value = appState.settings.customExamDate || "";
+        domElements.inputs.jeeShift.value = appState.settings.jeeShiftDate || defaultDateStr;
+        // Toggle visibility of JEE options
+        if (appState.settings.examType === "JEE") {
+            domElements.inputs.jeeContainer.classList.remove("hidden");
+            domElements.inputs.customContainer.classList.add("hidden");
+        } else if (appState.settings.examType === "Custom") {
+            domElements.inputs.jeeContainer.classList.add("hidden");
+            domElements.inputs.customContainer.classList.remove("hidden");
+        } else {
+            domElements.inputs.jeeContainer.classList.add("hidden");
+            domElements.inputs.customContainer.classList.add("hidden");
+        }
+        // Update main title
+        const { examType, examYear, customExamName } = appState.settings;
+
+        let titleText;
+        if (examType === "Custom") {
+            titleText = customExamName ? customExamName : "My Exam";
+        } else {
+            titleText = `${examType} ${examYear}`;
+        }
+
+        domElements.mainTitle.textContent = titleText;
+        domElements.mainTitleRiced.textContent = titleText;
+        // Update customize modal inputs
+        domElements.inputs.tickingSoundToggle.checked = appState.settings.tickingSoundEnabled;
+        domElements.inputs.theme.value = appState.settings.theme;
+        domElements.inputs.font.value = appState.settings.font;
+        domElements.inputs.bgUrl.value = appState.settings.bgUrl;
+        domElements.inputs.examType.value = appState.settings.examType;
+        domElements.inputs.examYear.value = appState.settings.examYear;
+        domElements.inputs.focusShieldToggle.checked = appState.settings.focusShieldEnabled;
+        domElements.inputs.ricedModeToggle.checked = appState.settings.ricedModeEnabled;
+        updateYouTubeCardStyles();
+
+        document.documentElement.dataset.streamlinedMode = appState.settings.streamlinedModeEnabled ? "true" : "false";
+
+        // Update Toggle UI
+        if (domElements.inputs.streamlinedModeToggle) {
+            domElements.inputs.streamlinedModeToggle.checked = appState.settings.streamlinedModeEnabled;
+        }
+    }
+    // --- Dashboard Grid Event Listeners (Delegation) ---
+    // Click handler
+    domElements.dashboardGrid.addEventListener("click", (event) => {
+        const cardElement = event.target.closest(".card");
+        if (!cardElement) return;
+        const cardId = cardElement.dataset.cardId;
+        // --- Card-Specific Actions ---
+        // Refresh quote
+        if (cardId === "quote" && cardRenderers.quote.render) {
+            cardRenderers.quote.render(cardElement);
+        }
+        // Delete test
+        if (event.target.closest(".delete-test-btn")) {
+            const date = event.target.closest(".delete-test-btn").dataset.date;
+            delete appState.tests[date];
+            appState.save("tests");
+            renderDashboard(); // Re-render to update graph and test list
+        }
+        // Add/Remove test from graph
+        if (event.target.classList.contains("day")) {
+            const dateString = event.target.dataset.date;
+            if (appState.tests[dateString]) {
+                // Delete existing test
+                delete appState.tests[dateString];
+                appState.save("tests");
+                renderDashboard();
+            } else {
+                // Focus add test form
+                const addTestForm = domElements.dashboardGrid.querySelector("#add-test-form");
+                if (addTestForm) {
+                    addTestForm.date.value = dateString;
+                    addTestForm.name.focus();
+                }
+            }
+        }
+
+
+        const cardData = appState.customCards.find((card) => card.id === cardId);
+        // Toggle colspan
+        if (event.target.closest(".toggle-colspan-btn")) {
+            const cardProps = appState.cardProps[cardId] || {
+                colspan: 1
+            };
+            cardProps.colspan = cardProps.colspan === 2 ? 1 : 2;
+            appState.cardProps[cardId] = cardProps;
+            appState.save("cardProps");
+            renderDashboard();
+        }
+        // Delete custom card
+        if (event.target.closest(".delete-card-btn") && cardData) {
+            appState.customCards = appState.customCards.filter((card) => card.id !== cardId);
+            delete appState.cardProps[cardId];
+            delete appState.pomodoroState[cardId];
+            delete appState.timeLoggerState[cardId];
+            appState.save("customCards");
+            appState.save("cardProps");
+            appState.save("pomodoroState");
+            appState.save("timeLoggerState");
+            renderDashboard();
+        }
+        // Delete study log item
+        if (event.target.classList.contains("delete-log-item")) {
+            const cardElement = event.target.closest(".card");
+            const cardId = cardElement.dataset.cardId;
+            const subject = event.target.dataset.subject;
+            const todayStr = formatDateToISO(new Date());
+            if (appState.studyLogs[todayStr] && appState.studyLogs[todayStr][subject] !== undefined) {
+                delete appState.studyLogs[todayStr][subject];
+                // Clean up empty date objects
+                if (Object.keys(appState.studyLogs[todayStr]).length === 0) {
+                    delete appState.studyLogs[todayStr];
+                }
+                appState.save("studyLogs");
+                // Re-render this card
+                const cardData = appState.customCards.find((c) => c.id === cardId);
+                cardRenderers["time-logger"].render(cardElement, cardData);
+            }
+        }
+        // --- NEW TODO LOGIC ---
+        if (cardData && cardData.type === "todo") {
+            const todoItem = event.target.closest("li");
+            if (todoItem) {
+                const index = parseInt(todoItem.dataset.index);
+                const task = cardData.content[index];
+
+                // 1. CYCLE STATUS (Todo -> In Progress -> Done)
+                if (event.target.closest(".status-btn")) {
+                    const statuses = ['todo', 'in-progress', 'done'];
+                    const currentIdx = statuses.indexOf(task.status || 'todo');
+                    task.status = statuses[(currentIdx + 1) % 3];
+                    // Sync 'completed' for legacy compatibility
+                    task.completed = (task.status === 'done');
+                    appState.save("customCards");
+                    cardRenderers.todo.render(cardElement, cardData);
+                }
+
+                // 2. CYCLE PRIORITY (Medium -> High -> Low)
+                else if (event.target.closest(".priority-btn")) {
+                    const priorities = ['medium', 'high', 'low'];
+                    const currentIdx = priorities.indexOf(task.priority || 'medium');
+                    task.priority = priorities[(currentIdx + 1) % 3];
+                    appState.save("customCards");
+                    cardRenderers.todo.render(cardElement, cardData);
+                }
+
+                // 3. TOGGLE EXPAND (Subtasks visibility)
+                else if (event.target.closest(".toggle-expand-btn")) {
+                    task.expanded = !task.expanded;
+                    appState.save("customCards"); // Save expanded state so it persists
+                    cardRenderers.todo.render(cardElement, cardData);
+                }
+
+                // 4. TOGGLE SUBTASK COMPLETE
+                else if (event.target.closest(".toggle-subtask-btn")) {
+                    const subIndex = parseInt(event.target.closest(".toggle-subtask-btn").dataset.subIndex);
+                    if (task.subtasks[subIndex]) {
+                        task.subtasks[subIndex].completed = !task.subtasks[subIndex].completed;
+                        appState.save("customCards");
+                        cardRenderers.todo.render(cardElement, cardData);
+                    }
+                }
+
+                // 5. DELETE SUBTASK
+                else if (event.target.closest(".delete-subtask-btn")) {
+                    const subIndex = parseInt(event.target.closest(".delete-subtask-btn").dataset.subIndex);
+                    task.subtasks.splice(subIndex, 1);
+                    appState.save("customCards");
+                    cardRenderers.todo.render(cardElement, cardData);
+                }
+
+                // 6. DELETE MAIN TASK
+                else if (event.target.closest(".delete-todo-item")) {
+                    cardData.content.splice(index, 1);
+                    appState.save("customCards");
+                    cardRenderers.todo.render(cardElement, cardData);
+                }
+            }
+        }
+        // Open PiP window
+        if (event.target.closest(".pip-btn")) {
+            const cardData = appState.customCards.find((c) => c.id === cardId);
+            if (cardData && cardData.type === 'time-logger') {
+                openPiP(cardId, cardData.type);
+            }
+        }
+        // To-Do card actions
+        if (cardData && cardData.type === "todo") {
+            const todoItem = event.target.closest(".todo-item");
+            if (todoItem) {
+                const index = parseInt(todoItem.dataset.index);
+                if (event.target.closest(".delete-todo-item")) {
+                    cardData.content.splice(index, 1);
+                } else if (event.target.classList.contains("todo-checkbox")) {
+                    cardData.content[index].completed = !cardData.content[index].completed;
+                }
+                appState.save("customCards");
+                cardRenderers.todo.render(cardElement, cardData); // Re-render this card
+            }
+        }
+
+        if (event.target.closest(".toggle-daily-task")) {
+            const btn = event.target.closest(".toggle-daily-task");
+            const index = parseInt(btn.dataset.index);
+            const cardElement = event.target.closest(".card");
+            const cardId = cardElement.dataset.cardId;
+            const cardData = appState.customCards.find((c) => c.id === cardId);
+            const selectedDate = cardElement.querySelector(".daily-date-selector").value;
+
+            if (cardData && cardData.content[selectedDate]) {
+                cardData.content[selectedDate][index].completed = !cardData.content[selectedDate][index].completed;
+                appState.save("customCards");
+                cardRenderers["daily-tasks"].render(cardElement, cardData);
+            }
+        }
+
+        // Daily Tasks: Delete Task
+        if (event.target.closest(".delete-daily-task")) {
+            const btn = event.target.closest(".delete-daily-task");
+            const index = parseInt(btn.dataset.index);
+            const cardElement = event.target.closest(".card");
+            const cardId = cardElement.dataset.cardId;
+            const cardData = appState.customCards.find((c) => c.id === cardId);
+            const selectedDate = cardElement.querySelector(".daily-date-selector").value;
+
+            if (cardData && cardData.content[selectedDate]) {
+                cardData.content[selectedDate].splice(index, 1);
+                // Optional: clean up empty dates
+                if (cardData.content[selectedDate].length === 0) delete cardData.content[selectedDate];
+
+                appState.save("customCards");
+                cardRenderers["daily-tasks"].render(cardElement, cardData);
+            }
+        }
+
+        if (event.target.closest(".prev-day-btn") || event.target.closest(".next-day-btn")) {
+            // NO 'const cardElement = ...' here because it exists at the top
+            const dateInput = cardElement.querySelector(".daily-date-selector");
+
+            // Parse current date
+            const currentDate = new Date(dateInput.value || new Date());
+
+            // Add or Subtract 1 Day
+            const offset = event.target.closest(".prev-day-btn") ? -1 : 1;
+            currentDate.setDate(currentDate.getDate() + offset);
+
+            // Format back to YYYY-MM-DD (ISO)
+            const newDateStr = currentDate.toISOString().split('T')[0];
+            dateInput.value = newDateStr;
+
+            // Update state and re-render
+            cardElement.dataset.selectedDate = newDateStr;
+            const cardData = appState.customCards.find((c) => c.id === cardId);
+            cardRenderers["daily-tasks"].render(cardElement, cardData);
+        }
+
+        // --- DAILY TASKS: INTERACTIONS (Status, Priority, Delete, etc.) ---
+        // We use the existing 'cardId' variable from the top of the function
+        const dailyTaskCardData = appState.customCards.find((c) => c.id === cardId);
+
+        if (dailyTaskCardData && dailyTaskCardData.type === "daily-tasks") {
+            const selectedDate = cardElement.querySelector(".daily-date-selector").value;
+            // Ensure array exists
+            if (!dailyTaskCardData.content[selectedDate]) dailyTaskCardData.content[selectedDate] = [];
+            const taskArray = dailyTaskCardData.content[selectedDate];
+
+            const todoItem = event.target.closest("li");
+            if (todoItem) {
+                const index = parseInt(todoItem.dataset.index);
+                const task = taskArray[index];
+
+                if (task) {
+                    // A. CYCLE STATUS
+                    if (event.target.closest(".status-btn")) {
+                        const statuses = ['todo', 'in-progress', 'done'];
+                        const currentIdx = statuses.indexOf(task.status || 'todo');
+                        task.status = statuses[(currentIdx + 1) % 3];
+                        task.completed = (task.status === 'done');
+                        appState.save("customCards");
+                        cardRenderers["daily-tasks"].render(cardElement, dailyTaskCardData);
+                    }
+
+                    // B. CYCLE PRIORITY
+                    else if (event.target.closest(".priority-btn")) {
+                        const priorities = ['medium', 'high', 'low'];
+                        const currentIdx = priorities.indexOf(task.priority || 'medium');
+                        task.priority = priorities[(currentIdx + 1) % 3];
+                        appState.save("customCards");
+                        cardRenderers["daily-tasks"].render(cardElement, dailyTaskCardData);
+                    }
+
+                    // C. TOGGLE EXPAND
+                    else if (event.target.closest(".toggle-expand-btn")) {
+                        task.expanded = !task.expanded;
+                        appState.save("customCards");
+                        cardRenderers["daily-tasks"].render(cardElement, dailyTaskCardData);
+                    }
+
+                    // D. TOGGLE SUBTASK
+                    else if (event.target.closest(".toggle-subtask-btn")) {
+                        const subIndex = parseInt(event.target.closest(".toggle-subtask-btn").dataset.subIndex);
+                        if (task.subtasks[subIndex]) {
+                            task.subtasks[subIndex].completed = !task.subtasks[subIndex].completed;
+                            appState.save("customCards");
+                            cardRenderers["daily-tasks"].render(cardElement, dailyTaskCardData);
+                        }
+                    }
+
+                    // E. DELETE SUBTASK
+                    else if (event.target.closest(".delete-subtask-btn")) {
+                        const subIndex = parseInt(event.target.closest(".delete-subtask-btn").dataset.subIndex);
+                        task.subtasks.splice(subIndex, 1);
+                        appState.save("customCards");
+                        cardRenderers["daily-tasks"].render(cardElement, dailyTaskCardData);
+                    }
+
+                    // F. DELETE MAIN TASK
+                    else if (event.target.closest(".delete-daily-task")) {
+                        taskArray.splice(index, 1);
+                        if (taskArray.length === 0) delete dailyTaskCardData.content[selectedDate];
+                        appState.save("customCards");
+                        cardRenderers["daily-tasks"].render(cardElement, dailyTaskCardData);
+                    }
+                }
+            }
+        }
+
+
+
+        // Line-Graph card actions
+        if (cardData && cardData.type === "line-graph" && event.target.closest(".delete-mark-item")) {
+            const index = parseInt(event.target.closest(".delete-mark-item").dataset.index);
+            cardData.content.splice(index, 1);
+            appState.save("customCards");
+            cardRenderers["line-graph"].render(cardElement, cardData); // Re-render this card
+        }
+        if (event.target.closest(".toggle-manual-form")) {
+            const form = event.target.closest(".card").querySelector(".manual-log-form");
+            form.classList.toggle("hidden");
+            const btnSpan = event.target.closest(".toggle-manual-form").querySelector("span");
+            // Update button text based on visibility
+            if (form.classList.contains("hidden")) {
+                btnSpan.textContent = "+ Add Manual Entry";
+            } else {
+                btnSpan.textContent = "- Close";
+            }
+        }
+        // Pomodoro card actions
+        if (cardData && cardData.type === "pomodoro") {
+            if (event.target.classList.contains("pomodoro-btn")) {
+                pomodoroTimer.setMode(cardId, event.target.dataset.mode);
+            } else if (event.target.classList.contains("start-pause-btn")) {
+                pomodoroTimer.toggle(cardId);
+            } else if (event.target.classList.contains("reset-btn")) {
+                pomodoroTimer.reset(cardId);
+            }
+        }
+        // Time-Logger card actions
+        if (cardData && cardData.type === "time-logger") {
+            if (event.target.classList.contains("start-pause-btn")) {
+                window.timeLogger.toggle(cardId);
+            } else if (event.target.classList.contains("log-btn")) {
+                window.timeLogger.log(cardId);
+            } else if (event.target.classList.contains("reset-btn")) {
+                window.timeLogger.reset(cardId);
+            }
+        }
+    });
+    // Change handler
+    domElements.dashboardGrid.addEventListener("change", (event) => {
+        // Pomodoro duration change
+        if (event.target.classList.contains("pomodoro-duration-input")) {
+            const cardId = event.target.closest(".card").dataset.cardId;
+            const mode = event.target.dataset.mode;
+            let duration = parseInt(event.target.value);
+            if (duration < 1) {
+                duration = 1;
+                event.target.value = 1;
+            }
+            if (cardId && mode && !isNaN(duration)) {
+                pomodoroTimer.setDuration(cardId, mode, duration);
+            }
+        }
+        // Time-Logger subject change
+        if (event.target.classList.contains("subject-select")) {
+            const cardId = event.target.closest(".card").dataset.cardId;
+            window.timeLogger.changeSubject(cardId, event.target.value);
+        }
+
+        if (event.target.classList.contains("daily-date-selector")) {
+            const cardElement = event.target.closest(".card");
+            const cardId = cardElement.dataset.cardId;
+            const cardData = appState.customCards.find((c) => c.id === cardId);
+
+            // Update the temporary DOM state
+            cardElement.dataset.selectedDate = event.target.value;
+
+            // Re-render the card to show tasks for the new date
+            cardRenderers["daily-tasks"].render(cardElement, cardData);
+        }
+    });
+    // Submit handler
+    domElements.dashboardGrid.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const form = event.target;
+        const cardElement = form.closest(".card");
+        const cardId = cardElement.dataset.cardId;
+        // Add Test form
+        if (form.id === "add-test-form") {
+            const {
+                date: dateInput,
+                name: nameInput
+            } = form.elements;
+            if (dateInput.value && nameInput.value.trim()) {
+                const dateKey = dateInput.value;
+                const newTestName = nameInput.value.trim();
+                // CHECK: Does a test already exist for this date?
+                if (appState.tests[dateKey]) {
+                    // Append the new test with a special separator ( | )
+                    appState.tests[dateKey] = appState.tests[dateKey] + " | " + newTestName;
+                } else {
+                    // Create new entry
+                    appState.tests[dateKey] = newTestName;
+                }
+                appState.save("tests");
+                renderDashboard();
+                form.reset();
+            }
+        }
+        // Add To-Do form
+        else if (form.classList.contains("add-todo-form")) {
+            const cardData = appState.customCards.find((card) => card.id === cardId);
+            const inputEl = form.querySelector("input");
+            const taskText = inputEl.value.trim();
+            // Easter egg check
+            if (taskText.toLowerCase() === "coco") {
+                if (!godModeBackup) { // Store backup only once
+                    godModeBackup = {
+                        theme: appState.settings.theme,
+                        customCards: JSON.parse(JSON.stringify(appState.customCards)),
+                        tests: JSON.parse(JSON.stringify(appState.tests)),
+                        layout: [...appState.layout]
+                    };
+                }
+                domElements.godModePanel.classList.remove("hidden");
+                new Tone.Synth().toDestination().triggerAttackRelease("C4", "0.5");
+                inputEl.value = "";
+                return;
+            }
+            if (taskText.toLowerCase() === "doingocmakesmeexcited") {
+                appState.settings.theme = "chaitanya-noob";
+                appState.saveSettings();
+                applySettings();
+                renderDashboard();
+                inputEl.value = "";
+                return;
+            }
+            if (cardData && taskText) {
+                if (!Array.isArray(cardData.content)) cardData.content = [];
+                cardData.content.push({
+                    text: taskText,
+                    completed: false
+                });
+                appState.save("customCards");
+                cardRenderers.todo.render(cardElement, cardData);
+                inputEl.value = "";
+            }
+        } else if (form.classList.contains("manual-log-form")) {
+            const subject = form.querySelector(".manual-subject-select").value;
+            const minutesInput = form.querySelector('input[name="minutes"]');
+            const minutes = parseInt(minutesInput.value);
+            if (subject && minutes > 0) {
+                const todayStr = formatDateToISO(new Date());
+                // Initialize today's log if not exists
+                if (!appState.studyLogs[todayStr]) {
+                    appState.studyLogs[todayStr] = {};
+                }
+                // Calculate seconds
+                const secondsToAdd = minutes * 60;
+                // Add to logs
+                appState.studyLogs[todayStr][subject] = (appState.studyLogs[todayStr][subject] || 0) + secondsToAdd;
+                // Save and Render
+                appState.save("studyLogs");
+                renderDashboard();
+                // Clear input but keep form open for rapid entry
+                minutesInput.value = "";
+                // Optional: Show a quick toast or console log
+                console.log(`Added ${minutes} mins to ${subject}`);
+            }
+        }
+        else if (form.classList.contains("add-daily-task-form")) {
+            const cardData = appState.customCards.find((card) => card.id === cardId);
+            const inputEl = form.querySelector("input");
+            const taskText = inputEl.value.trim();
+            const dateInput = cardElement.querySelector(".daily-date-selector");
+            const selectedDate = dateInput.value;
+
+            if (cardData && taskText && selectedDate) {
+                // Ensure data structure exists
+                if (!cardData.content || Array.isArray(cardData.content)) cardData.content = {};
+                if (!cardData.content[selectedDate]) cardData.content[selectedDate] = [];
+
+                // Push new task
+                cardData.content[selectedDate].push({
+                    text: taskText,
+                    completed: false
+                });
+
+                appState.save("customCards");
+                cardRenderers["daily-tasks"].render(cardElement, cardData);
+                inputEl.value = "";
+            }
+        }
+        else if (form.classList.contains("add-subtask-form")) {
+            // Note: We use 'cardElement' and 'cardId' from the top of this function scope
+            const cardData = appState.customCards.find((c) => c.id === cardId);
+            const todoItem = form.closest("li");
+            const index = parseInt(todoItem.dataset.index);
+            const inputEl = form.querySelector("input");
+            const text = inputEl.value.trim();
+
+            if (cardData && text) {
+                // 1. DAILY TASKS CARD LOGIC
+                if (cardData.type === "daily-tasks") {
+                    const selectedDate = cardElement.querySelector(".daily-date-selector").value;
+                    const task = cardData.content[selectedDate]?.[index];
+
+                    if (task) {
+                        if (!task.subtasks) task.subtasks = [];
+                        task.subtasks.push({ text: text, completed: false });
+                        appState.save("customCards");
+                        cardRenderers["daily-tasks"].render(cardElement, cardData);
+
+                        // Re-focus input to allow continuous typing
+                        const newItem = cardElement.querySelector(`li[data-index="${index}"]`);
+                        if (newItem) newItem.querySelector("input").focus();
+                    }
+                }
+                // 2. NORMAL TODO CARD LOGIC
+                else {
+                    const task = cardData.content[index];
+                    if (task) {
+                        if (!task.subtasks) task.subtasks = [];
+
+                        task.subtasks.push({
+                            text: text,
+                            completed: false
+                        });
+
+                        appState.save("customCards");
+                        cardRenderers.todo.render(cardElement, cardData);
+
+                        // Re-focus input
+                        const newItem = cardElement.querySelector(`li[data-index="${index}"]`);
+                        if (newItem) {
+                            const newInput = newItem.querySelector(".add-subtask-form input");
+                            if (newInput) newInput.focus();
+                        }
+                    }
+                }
+            }
+        }
+        // Add Marks form
+        else if (form.classList.contains("add-marks-form")) {
+            const cardData = appState.customCards.find((card) => card.id === cardId);
+            const {
+                name: nameInput,
+                phy: phyInput,
+                chem: chemInput,
+                math: mathInput,
+                maxMarks: maxMarksInput
+            } = form.elements;
+            if (cardData && nameInput.value.trim() && phyInput.value && chemInput.value && mathInput.value && maxMarksInput.value) {
+                if (!Array.isArray(cardData.content)) cardData.content = [];
+                const phyMarks = parseFloat(phyInput.value);
+                const chemMarks = parseFloat(chemInput.value);
+                const mathMarks = parseFloat(mathInput.value);
+                const totalMarks = phyMarks + chemMarks + mathMarks;
+                cardData.content.push({
+                    name: nameInput.value.trim(),
+                    maxMarks: parseFloat(maxMarksInput.value),
+                    total: totalMarks,
+                    subjects: {
+                        physics: phyMarks,
+                        chemistry: chemMarks,
+                        maths: mathMarks
+                    },
+                });
+                appState.save("customCards");
+                cardRenderers["line-graph"].render(cardElement, cardData);
+                form.reset();
+            }
+        }
+        // Update YouTube URL form
+        else if (form.classList.contains("update-youtube-form")) {
+            const cardData = appState.customCards.find((card) => card.id === cardId);
+            const inputEl = form.querySelector("input");
+            if (cardData && inputEl.value.trim()) {
+                cardData.content = inputEl.value.trim();
+                appState.save("customCards");
+                cardRenderers.youtube.render(cardElement, cardData);
+            }
+        }
+    });
+
+
+    /**
+ * Renders the subject chips in the Customize Modal.
+ */
+    function renderSubjectManager() {
+        const container = document.getElementById("subject-manager-list");
+        const userSubjects = appState.settings.userSubjects || [];
+
+        container.innerHTML = "";
+
+        if (userSubjects.length === 0) {
+            container.innerHTML = '<span class="text-xs text-gray-500 italic p-1">No custom subjects added.</span>';
+            return;
+        }
+
+        userSubjects.forEach((subject, index) => {
+            const chip = document.createElement("div");
+            chip.className = "subject-chip";
+            chip.innerHTML = `
+            <span>${subject}</span>
+            <button class="delete-subject-btn" data-index="${index}" title="Remove ${subject}">✕</button>
+        `;
+            container.appendChild(chip);
+        });
+    }
+
+    /**
+     * Handles adding a new subject.
+     */
+    function handleAddSubject() {
+        const input = document.getElementById("new-subject-input");
+        const newSubject = input.value.trim();
+
+        if (!newSubject) return;
+
+        // Initialize array if it doesn't exist
+        if (!appState.settings.userSubjects) {
+            appState.settings.userSubjects = [];
+        }
+
+        // Prevent duplicates
+        if (appState.settings.userSubjects.includes(newSubject)) {
+            alert("Subject already exists!");
+            return;
+        }
+
+        appState.settings.userSubjects.push(newSubject);
+        input.value = ""; // Clear input
+
+        // Save and Refresh
+        appState.saveSettings();
+        renderSubjectManager(); // Refresh chips
+        renderDashboard(); // Refresh Study Logger dropdowns immediately
+    }
+
+    /**
+     * Handles deleting a subject.
+     */
+    function handleDeleteSubject(index) {
+        if (appState.settings.userSubjects && appState.settings.userSubjects[index]) {
+            appState.settings.userSubjects.splice(index, 1);
+
+            // Save and Refresh
+            appState.saveSettings();
+            renderSubjectManager();
+            renderDashboard();
+        }
+    }
+    // --- PiP Window Opener ---
+    /**
+
+    * Opens the Document Picture-in-Picture window.
+
+    * @param {string} cardId The ID of the card to show in PiP.
+
+    * @param {string} cardType The type of the card.
+
+    */
+    async function openPiP(cardId, cardType) {
+        if ("documentPictureInPicture" in window) {
+            // Close any existing PiP window
+            if (pipWindow) {
+                pipWindow.close();
+            }
+            try {
+                const options = {
+                    width: 320,
+                    height: 155
+                };
+                const newPipWindow = await documentPictureInPicture.requestWindow(options);
+                pipWindow = newPipWindow;
+                pipCardId = cardId;
+                pipCardType = cardType;
+                // 1. Copy all stylesheets
+                [...document.styleSheets].forEach((styleSheet) => {
+                    if (styleSheet.href) {
+                        // It's a linked stylesheet (e.g., Google Fonts, Tailwind CDN)
+                        const link = document.createElement("link");
+                        link.rel = "stylesheet";
+                        link.href = styleSheet.href;
+                        pipWindow.document.head.appendChild(link);
+                    } else if (styleSheet.ownerNode) {
+                        // It's an inline <style> tag, clone it
+                        const style = styleSheet.ownerNode.cloneNode(true);
+                        pipWindow.document.head.appendChild(style);
+                    }
+                });
+                // 2. Add PiP-specific styles
+                const pipStyle = document.createElement("style");
+                pipStyle.textContent = `
 
                             body {
 
@@ -317,18 +3120,1660 @@ function debounce(e,t){let s;return function(...o){clearTimeout(s),s=setTimeout(
 
                             }
 
-                        `,l.document.head.appendChild(o);let a=document.documentElement.dataset.theme;a&&"default"!==a&&(l.document.documentElement.dataset.theme=a);let r=document.createElement("h2");r.textContent=document.querySelector(`[data-card-id="${e}"] .card-title`).textContent;let n=document.createElement("div");n.id="pip-timer";let i=document.createElement("div");i.id="pip-controls";let u=document.createElement("button");u.id="pip-start-pause-btn",u.addEventListener("click",()=>window.timeLogger.toggle(d));let m=document.createElement("button");m.id="pip-log-btn",m.textContent="Log",m.addEventListener("click",()=>window.timeLogger.log(d));let g=document.createElement("button");g.id="pip-reset-btn",g.textContent="Reset",g.addEventListener("click",()=>window.timeLogger.reset(d)),i.append(u,m,g),l.document.body.append(r,n,i),document.addEventListener("visibilitychange",I),l.addEventListener("pagehide",()=>{l=null,d=null,c=null,document.removeEventListener("visibilitychange",I)}),B(),q()}catch(p){console.error("PiP Error:",p),l=null}}else alert("Your browser does not support the Document Picture-in-Picture API required for this feature. Please try a recent version of Chrome or Edge on a desktop computer.")}i.dashboardGrid.addEventListener("click",e=>{let t=e.target.closest(".card");if(!t)return;let s=t.dataset.cardId;if("quote"===s&&M.quote.render&&M.quote.render(t),e.target.closest(".delete-test-btn")){let a=e.target.closest(".delete-test-btn").dataset.date;delete o.tests[a],o.save("tests"),j()}if(e.target.classList.contains("day")){let r=e.target.dataset.date;if(o.tests[r])delete o.tests[r],o.save("tests"),j();else{let n=i.dashboardGrid.querySelector("#add-test-form");n&&(n.date.value=r,n.name.focus())}}let l=o.customCards.find(e=>e.id===s);if(e.target.closest(".toggle-colspan-btn")){let d=o.cardProps[s]||{colspan:1};d.colspan=2===d.colspan?1:2,o.cardProps[s]=d,o.save("cardProps"),j()}if(e.target.closest(".delete-card-btn")&&l&&(o.customCards=o.customCards.filter(e=>e.id!==s),delete o.cardProps[s],delete o.pomodoroState[s],delete o.timeLoggerState[s],o.save("customCards"),o.save("cardProps"),o.save("pomodoroState"),o.save("timeLoggerState"),j()),e.target.classList.contains("delete-log-item")){let c=e.target.closest(".card"),u=c.dataset.cardId,m=e.target.dataset.subject,g=E(new Date);if(o.studyLogs[g]&&void 0!==o.studyLogs[g][m]){delete o.studyLogs[g][m],0===Object.keys(o.studyLogs[g]).length&&delete o.studyLogs[g],o.save("studyLogs");let p=o.customCards.find(e=>e.id===u);M["time-logger"].render(c,p)}}if(l&&"todo"===l.type){let h=e.target.closest("li");if(h){let y=parseInt(h.dataset.index),$=l.content[y];if(e.target.closest(".status-btn")){let b=["todo","in-progress","done"],f=b.indexOf($.status||"todo");$.status=b[(f+1)%3],$.completed="done"===$.status,o.save("customCards"),M.todo.render(t,l)}else if(e.target.closest(".priority-btn")){let v=["medium","high","low"],x=v.indexOf($.priority||"medium");$.priority=v[(x+1)%3],o.save("customCards"),M.todo.render(t,l)}else if(e.target.closest(".toggle-expand-btn"))$.expanded=!$.expanded,o.save("customCards"),M.todo.render(t,l);else if(e.target.closest(".toggle-subtask-btn")){let _=parseInt(e.target.closest(".toggle-subtask-btn").dataset.subIndex);$.subtasks[_]&&($.subtasks[_].completed=!$.subtasks[_].completed,o.save("customCards"),M.todo.render(t,l))}else if(e.target.closest(".delete-subtask-btn")){let k=parseInt(e.target.closest(".delete-subtask-btn").dataset.subIndex);$.subtasks.splice(k,1),o.save("customCards"),M.todo.render(t,l)}else e.target.closest(".delete-todo-item")&&(l.content.splice(y,1),o.save("customCards"),M.todo.render(t,l))}}if(e.target.closest(".pip-btn")){let S=o.customCards.find(e=>e.id===s);S&&"time-logger"===S.type&&N(s,S.type)}if(l&&"todo"===l.type){let w=e.target.closest(".todo-item");if(w){let L=parseInt(w.dataset.index);e.target.closest(".delete-todo-item")?l.content.splice(L,1):e.target.classList.contains("todo-checkbox")&&(l.content[L].completed=!l.content[L].completed),o.save("customCards"),M.todo.render(t,l)}}if(e.target.closest(".toggle-daily-task")){let C=e.target.closest(".toggle-daily-task"),T=parseInt(C.dataset.index),I=e.target.closest(".card"),B=I.dataset.cardId,q=o.customCards.find(e=>e.id===B),A=I.querySelector(".daily-date-selector").value;q&&q.content[A]&&(q.content[A][T].completed=!q.content[A][T].completed,o.save("customCards"),M["daily-tasks"].render(I,q))}if(e.target.closest(".delete-daily-task")){let D=e.target.closest(".delete-daily-task"),P=parseInt(D.dataset.index),R=e.target.closest(".card"),H=R.dataset.cardId,U=o.customCards.find(e=>e.id===H),F=R.querySelector(".daily-date-selector").value;U&&U.content[F]&&(U.content[F].splice(P,1),0===U.content[F].length&&delete U.content[F],o.save("customCards"),M["daily-tasks"].render(R,U))}if(e.target.closest(".prev-day-btn")||e.target.closest(".next-day-btn")){let z=t.querySelector(".daily-date-selector"),G=new Date(z.value||new Date),O=e.target.closest(".prev-day-btn")?-1:1;G.setDate(G.getDate()+O);let Y=G.toISOString().split("T")[0];z.value=Y,t.dataset.selectedDate=Y;let J=o.customCards.find(e=>e.id===s);M["daily-tasks"].render(t,J)}let W=o.customCards.find(e=>e.id===s);if(W&&"daily-tasks"===W.type){let V=t.querySelector(".daily-date-selector").value;W.content[V]||(W.content[V]=[]);let K=W.content[V],X=e.target.closest("li");if(X){let Q=parseInt(X.dataset.index),ee=K[Q];if(ee){if(e.target.closest(".status-btn")){let et=["todo","in-progress","done"],es=et.indexOf(ee.status||"todo");ee.status=et[(es+1)%3],ee.completed="done"===ee.status,o.save("customCards"),M["daily-tasks"].render(t,W)}else if(e.target.closest(".priority-btn")){let eo=["medium","high","low"],ea=eo.indexOf(ee.priority||"medium");ee.priority=eo[(ea+1)%3],o.save("customCards"),M["daily-tasks"].render(t,W)}else if(e.target.closest(".toggle-expand-btn"))ee.expanded=!ee.expanded,o.save("customCards"),M["daily-tasks"].render(t,W);else if(e.target.closest(".toggle-subtask-btn")){let er=parseInt(e.target.closest(".toggle-subtask-btn").dataset.subIndex);ee.subtasks[er]&&(ee.subtasks[er].completed=!ee.subtasks[er].completed,o.save("customCards"),M["daily-tasks"].render(t,W))}else if(e.target.closest(".delete-subtask-btn")){let en=parseInt(e.target.closest(".delete-subtask-btn").dataset.subIndex);ee.subtasks.splice(en,1),o.save("customCards"),M["daily-tasks"].render(t,W)}else e.target.closest(".delete-daily-task")&&(K.splice(Q,1),0===K.length&&delete W.content[V],o.save("customCards"),M["daily-tasks"].render(t,W))}}}if(l&&"line-graph"===l.type&&e.target.closest(".delete-mark-item")){let ei=parseInt(e.target.closest(".delete-mark-item").dataset.index);l.content.splice(ei,1),o.save("customCards"),M["line-graph"].render(t,l)}if(e.target.closest(".toggle-manual-form")){let el=e.target.closest(".card").querySelector(".manual-log-form");el.classList.toggle("hidden");let ed=e.target.closest(".toggle-manual-form").querySelector("span");el.classList.contains("hidden")?ed.textContent="+ Add Manual Entry":ed.textContent="- Close"}l&&"pomodoro"===l.type&&(e.target.classList.contains("pomodoro-btn")?Z.setMode(s,e.target.dataset.mode):e.target.classList.contains("start-pause-btn")?Z.toggle(s):e.target.classList.contains("reset-btn")&&Z.reset(s)),l&&"time-logger"===l.type&&(e.target.classList.contains("start-pause-btn")?window.timeLogger.toggle(s):e.target.classList.contains("log-btn")?window.timeLogger.log(s):e.target.classList.contains("reset-btn")&&window.timeLogger.reset(s))}),i.dashboardGrid.addEventListener("change",e=>{if(e.target.classList.contains("pomodoro-duration-input")){let t=e.target.closest(".card").dataset.cardId,s=e.target.dataset.mode,a=parseInt(e.target.value);a<1&&(a=1,e.target.value=1),t&&s&&!isNaN(a)&&Z.setDuration(t,s,a)}if(e.target.classList.contains("subject-select")){let r=e.target.closest(".card").dataset.cardId;window.timeLogger.changeSubject(r,e.target.value)}if(e.target.classList.contains("daily-date-selector")){let n=e.target.closest(".card"),i=n.dataset.cardId,l=o.customCards.find(e=>e.id===i);n.dataset.selectedDate=e.target.value,M["daily-tasks"].render(n,l)}}),i.dashboardGrid.addEventListener("submit",e=>{e.preventDefault();let t=e.target,s=t.closest(".card"),a=s.dataset.cardId;if("add-test-form"===t.id){let{date:r,name:n}=t.elements;if(r.value&&n.value.trim()){let l=r.value,d=n.value.trim();o.tests[l]?o.tests[l]=o.tests[l]+" | "+d:o.tests[l]=d,o.save("tests"),j(),t.reset()}}else if(t.classList.contains("add-todo-form")){let c=o.customCards.find(e=>e.id===a),u=t.querySelector("input"),m=u.value.trim();if("coco"===m.toLowerCase()){K||(K={theme:o.settings.theme,customCards:JSON.parse(JSON.stringify(o.customCards)),tests:JSON.parse(JSON.stringify(o.tests)),layout:[...o.layout]}),i.godModePanel.classList.remove("hidden"),new Tone.Synth().toDestination().triggerAttackRelease("C4","0.5"),u.value="";return}if("doingocmakesmeexcited"===m.toLowerCase()){o.settings.theme="chaitanya-noob",o.saveSettings(),D(),j(),u.value="";return}c&&m&&(Array.isArray(c.content)||(c.content=[]),c.content.push({text:m,completed:!1}),o.save("customCards"),M.todo.render(s,c),u.value="")}else if(t.classList.contains("manual-log-form")){let g=t.querySelector(".manual-subject-select").value,p=t.querySelector('input[name="minutes"]'),h=parseInt(p.value);if(g&&h>0){let y=E(new Date);o.studyLogs[y]||(o.studyLogs[y]={});let $=60*h;o.studyLogs[y][g]=(o.studyLogs[y][g]||0)+$,o.save("studyLogs"),j(),p.value="",console.log(`Added ${h} mins to ${g}`)}}else if(t.classList.contains("add-daily-task-form")){let b=o.customCards.find(e=>e.id===a),f=t.querySelector("input"),v=f.value.trim(),x=s.querySelector(".daily-date-selector"),_=x.value;b&&v&&_&&((!b.content||Array.isArray(b.content))&&(b.content={}),b.content[_]||(b.content[_]=[]),b.content[_].push({text:v,completed:!1}),o.save("customCards"),M["daily-tasks"].render(s,b),f.value="")}else if(t.classList.contains("add-subtask-form")){let k=o.customCards.find(e=>e.id===a),S=t.closest("li"),w=parseInt(S.dataset.index),L=t.querySelector("input"),C=L.value.trim();if(k&&C){if("daily-tasks"===k.type){let T=s.querySelector(".daily-date-selector").value,I=k.content[T]?.[w];if(I){I.subtasks||(I.subtasks=[]),I.subtasks.push({text:C,completed:!1}),o.save("customCards"),M["daily-tasks"].render(s,k);let B=s.querySelector(`li[data-index="${w}"]`);B&&B.querySelector("input").focus()}}else{let q=k.content[w];if(q){q.subtasks||(q.subtasks=[]),q.subtasks.push({text:C,completed:!1}),o.save("customCards"),M.todo.render(s,k);let A=s.querySelector(`li[data-index="${w}"]`);if(A){let P=A.querySelector(".add-subtask-form input");P&&P.focus()}}}}}else if(t.classList.contains("add-marks-form")){let R=o.customCards.find(e=>e.id===a),{name:H,phy:N,chem:U,math:F,maxMarks:z}=t.elements;if(R&&H.value.trim()&&N.value&&U.value&&F.value&&z.value){Array.isArray(R.content)||(R.content=[]);let G=parseFloat(N.value),O=parseFloat(U.value),Y=parseFloat(F.value),J=G+O+Y;R.content.push({name:H.value.trim(),maxMarks:parseFloat(z.value),total:J,subjects:{physics:G,chemistry:O,maths:Y}}),o.save("customCards"),M["line-graph"].render(s,R),t.reset()}}else if(t.classList.contains("update-youtube-form")){let W=o.customCards.find(e=>e.id===a),V=t.querySelector("input");W&&V.value.trim()&&(W.content=V.value.trim(),o.save("customCards"),M.youtube.render(s,W))}}),i.buttons.addCard.forEach(e=>e.addEventListener("click",()=>i.modals.addCard.classList.remove("hidden"))),i.buttons.cancelAddCard.addEventListener("click",()=>i.modals.addCard.classList.add("hidden")),i.inputs.cardType.addEventListener("change",e=>{let t="note"===e.target.value,s="youtube"===e.target.value;i.inputs.cardContent.style.display=t||s?"block":"none",i.inputs.cardContent.placeholder=s?"Paste YouTube video URL...":"Card Content (for notes)"}),i.forms.newCard.addEventListener("submit",e=>{e.preventDefault();let t=i.inputs.cardType.value,s=i.forms.newCard.querySelector('input[type="text"]').value.trim();if(!s)return;let a={id:`custom-${Date.now()}`,type:t,title:s,content:"note"===t||"youtube"===t?i.inputs.cardContent.value.trim():[]};o.customCards.push(a);let r={colspan:"line-graph"===t||"youtube"===t||"time-logger"===t||"analytics"===t?2:1};"line-graph"===t&&(r.maxMarks=300),o.cardProps[a.id]=r,o.save("customCards"),o.save("cardProps"),j(),i.modals.addCard.classList.add("hidden"),i.forms.newCard.reset(),i.inputs.cardContent.style.display="block"});let U=()=>i.modals.customize.classList.add("hidden");i.buttons.customize.forEach(e=>e.addEventListener("click",()=>i.modals.customize.classList.remove("hidden"))),i.buttons.closeCustomize.addEventListener("click",U),i.buttons.closeCustomizeIcon.addEventListener("click",U),i.modals.customize.addEventListener("click",e=>{e.target===i.modals.customize&&U()});let F=document.getElementById("preset-wallpaper-grid"),z=[{name:"Deep Space",type:"img",thumb:"https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=200&q=60",url:"https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=1920&q=80"},{name:"Midnight City",type:"img",thumb:"https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=200&q=60",url:"https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=1920&q=80"},{name:"Dark Library",type:"img",thumb:"https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=200&q=60",url:"https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=1920&q=80"},{name:"Zen Forest",type:"img",thumb:"https://images.pexels.com/photos/167699/pexels-photo-167699.jpeg?auto=compress&cs=tinysrgb&w=200",url:"https://images.pexels.com/photos/167699/pexels-photo-167699.jpeg?auto=compress&cs=tinysrgb&w=1920"},{name:"Study Desk",type:"img",thumb:"https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=200&q=60",url:"https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1920&q=80"},{name:"Stormy Sea",type:"img",thumb:"https://images.unsplash.com/photo-1505118380757-91f5f5632de0?auto=format&fit=crop&w=200&q=60",url:"https://images.unsplash.com/photo-1505118380757-91f5f5632de0?auto=format&fit=crop&w=1920&q=80"},{name:"Minimal Dark",type:"img",thumb:"https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?auto=format&fit=crop&w=200&q=60",url:"https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?auto=format&fit=crop&w=1920&q=80"},{name:"Cozy Rain",type:"img",thumb:"https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?auto=format&fit=crop&w=200&q=60",url:"https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?auto=format&fit=crop&w=1920&q=80"}];F&&z.forEach(e=>{let t=document.createElement("button");t.className="relative group w-full h-16 rounded-md overflow-hidden border border-gray-700 hover:border-white transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500",t.type="button",t.innerHTML=`
+                        `;
+                pipWindow.document.head.appendChild(pipStyle);
+                // 3. Set theme
+                const currentTheme = document.documentElement.dataset.theme;
+                if (currentTheme && currentTheme !== "default") {
+                    pipWindow.document.documentElement.dataset.theme = currentTheme;
+                }
+                // 4. Create PiP body content
+                const titleEl = document.createElement("h2");
+                titleEl.textContent = document.querySelector(`[data-card-id="${cardId}"] .card-title`).textContent;
+                const timerEl = document.createElement("div");
+                timerEl.id = "pip-timer";
+                const controlsEl = document.createElement("div");
+                controlsEl.id = "pip-controls";
+                const startPauseBtn = document.createElement("button");
+                startPauseBtn.id = "pip-start-pause-btn";
+                startPauseBtn.addEventListener("click", () => window.timeLogger.toggle(pipCardId));
+                const logBtn = document.createElement("button");
+                logBtn.id = "pip-log-btn";
+                logBtn.textContent = "Log";
+                logBtn.addEventListener("click", () => window.timeLogger.log(pipCardId));
+                const resetBtn = document.createElement("button");
+                resetBtn.id = "pip-reset-btn";
+                resetBtn.textContent = "Reset";
+                resetBtn.addEventListener("click", () => window.timeLogger.reset(pipCardId));
+                controlsEl.append(startPauseBtn, logBtn, resetBtn);
+                pipWindow.document.body.append(titleEl, timerEl, controlsEl);
+                // 5. Add event listeners
+                document.addEventListener("visibilitychange", handleVisibilityChangePiP);
+                pipWindow.addEventListener("pagehide", () => {
+                    pipWindow = null;
+                    pipCardId = null;
+                    pipCardType = null;
+                    document.removeEventListener("visibilitychange", handleVisibilityChangePiP);
+                });
+                // 6. Initial update
+                updatePiPTimerDisplay();
+                updatePiPControls();
+            } catch (error) {
+                console.error("PiP Error:", error);
+                pipWindow = null;
+            }
+        } else {
+            alert("Your browser does not support the Document Picture-in-Picture API required for this feature. Please try a recent version of Chrome or Edge on a desktop computer.");
+        }
+    }
+    // --- Add Card Modal ---
+    domElements.buttons.addCard.forEach(btn => btn.addEventListener("click", () => domElements.modals.addCard.classList.remove("hidden")));
+    domElements.buttons.cancelAddCard.addEventListener("click", () => domElements.modals.addCard.classList.add("hidden"));
+    domElements.inputs.cardType.addEventListener("change", (event) => {
+        const isNote = event.target.value === "note";
+        const isYouTube = event.target.value === "youtube";
+        domElements.inputs.cardContent.style.display = isNote || isYouTube ? "block" : "none";
+        domElements.inputs.cardContent.placeholder = isYouTube ? "Paste YouTube video URL..." : "Card Content (for notes)";
+    });
+    domElements.forms.newCard.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const cardType = domElements.inputs.cardType.value;
+        const cardTitle = domElements.forms.newCard.querySelector('input[type="text"]').value.trim();
+        if (!cardTitle) return;
+        const newCard = {
+            id: `custom-${Date.now()}`,
+            type: cardType,
+            title: cardTitle,
+            content: cardType === "note" || cardType === "youtube" ? domElements.inputs.cardContent.value.trim() : [],
+        };
+        appState.customCards.push(newCard);
+        const newCardProps = {
+            // Add 'analytics' to this check
+            colspan: cardType === "line-graph" || cardType === "youtube" || cardType === "time-logger" || cardType === "analytics" ? 2 : 1,
+        };
+        if (cardType === "line-graph") {
+            newCardProps.maxMarks = 300; // Default max marks
+        }
+        appState.cardProps[newCard.id] = newCardProps;
+        appState.save("customCards");
+        appState.save("cardProps");
+        renderDashboard();
+        domElements.modals.addCard.classList.add("hidden");
+        domElements.forms.newCard.reset();
+        domElements.inputs.cardContent.style.display = "block"; // Reset to default
+    });
+    // --- Customize Modal ---
+    const closeCustomizeModal = () => domElements.modals.customize.classList.add("hidden");
+    domElements.buttons.customize.forEach(btn => btn.addEventListener("click", () => domElements.modals.customize.classList.remove("hidden")));
+    domElements.buttons.closeCustomize.addEventListener("click", closeCustomizeModal);
+    domElements.buttons.closeCustomizeIcon.addEventListener("click", closeCustomizeModal);
+    domElements.modals.customize.addEventListener("click", (event) => {
+        if (event.target === domElements.modals.customize) {
+            closeCustomizeModal();
+        }
+    });
+    // --- WALLPAPER PRESETS LOGIC ---
+    const presetGrid = document.getElementById('preset-wallpaper-grid');
+    const wallpapers = [{
+        name: "Deep Space",
+        type: "img",
+        thumb: "https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=200&q=60",
+        url: "https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=1920&q=80"
+    }, {
+        name: "Midnight City",
+        type: "img",
+        thumb: "https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=200&q=60",
+        url: "https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=1920&q=80"
+    }, {
+        name: "Dark Library",
+        type: "img",
+        thumb: "https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=200&q=60",
+        url: "https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=1920&q=80"
+    }, {
+        name: "Zen Forest",
+        type: "img",
+        thumb: "https://images.pexels.com/photos/167699/pexels-photo-167699.jpeg?auto=compress&cs=tinysrgb&w=200",
+        url: "https://images.pexels.com/photos/167699/pexels-photo-167699.jpeg?auto=compress&cs=tinysrgb&w=1920"
+    }, {
+        name: "Study Desk",
+        type: "img",
+        thumb: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=200&q=60",
+        url: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1920&q=80"
+    }, {
+        name: "Stormy Sea",
+        type: "img",
+        thumb: "https://images.unsplash.com/photo-1505118380757-91f5f5632de0?auto=format&fit=crop&w=200&q=60",
+        url: "https://images.unsplash.com/photo-1505118380757-91f5f5632de0?auto=format&fit=crop&w=1920&q=80"
+    }, {
+        name: "Minimal Dark",
+        type: "img",
+        thumb: "https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?auto=format&fit=crop&w=200&q=60",
+        url: "https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?auto=format&fit=crop&w=1920&q=80"
+    }, {
+        name: "Cozy Rain",
+        type: "img",
+        thumb: "https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?auto=format&fit=crop&w=200&q=60",
+        url: "https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?auto=format&fit=crop&w=1920&q=80"
+    }];
+    if (presetGrid) {
+        wallpapers.forEach(wp => {
+            const btn = document.createElement('button');
+            // Styling the button
+            btn.className = "relative group w-full h-16 rounded-md overflow-hidden border border-gray-700 hover:border-white transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500";
+            btn.type = "button"; // Prevent form submission
+            // Button Inner HTML
+            btn.innerHTML = `
 
-                <img src="${e.thumb}" alt="${e.name}" class="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity">
+                <img src="${wp.thumb}" alt="${wp.name}" class="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity">
 
-                <span class="absolute bottom-0 left-0 right-0 bg-black/60 text-[9px] text-white text-center py-0.5 truncate">${e.name}</span>
+                <span class="absolute bottom-0 left-0 right-0 bg-black/60 text-[9px] text-white text-center py-0.5 truncate">${wp.name}</span>
 
-                ${"gif"===e.type?'<span class="absolute top-1 right-1 bg-indigo-600/80 text-[8px] text-white px-1 rounded">GIF</span>':""}
+                ${wp.type === 'gif' ? '<span class="absolute top-1 right-1 bg-indigo-600/80 text-[8px] text-white px-1 rounded">GIF</span>' : ''}
 
-            `,t.addEventListener("click",()=>{i.inputs.bgUrl.value=e.url,o.settings.bgUrl=e.url,G()}),F.appendChild(t)});let G=()=>{o.saveSettings(),D(),j()};i.inputs.examType.addEventListener("change",()=>{o.settings.examType=i.inputs.examType.value,G()}),i.inputs.examYear.addEventListener("change",()=>{o.settings.examYear=i.inputs.examYear.value,o.settings.jeeShiftDate="",i.inputs.jeeShift.value="",G()}),i.inputs.theme.addEventListener("change",()=>{o.settings.theme=i.inputs.theme.value,o.saveSettings(),D(),j()}),i.inputs.font.addEventListener("change",()=>{o.settings.font=i.inputs.font.value,o.saveSettings(),D()}),i.inputs.bgUrl.addEventListener("input",()=>{o.settings.bgUrl=i.inputs.bgUrl.value,o.saveSettings(),D()}),i.buttons.removeBg.addEventListener("click",()=>{o.settings.bgUrl="",o.saveSettings(),D()}),i.inputs.youtubeTintToggle.addEventListener("change",()=>{o.settings.youtubeTintEnabled=i.inputs.youtubeTintToggle.checked,o.saveSettings(),A()}),i.inputs.youtubeBlurToggle.addEventListener("change",()=>{o.settings.youtubeBlurEnabled=i.inputs.youtubeBlurToggle.checked,o.saveSettings(),A()}),i.inputs.focusShieldToggle.addEventListener("change",()=>{let e=i.inputs.focusShieldToggle.checked;if(o.settings.focusShieldEnabled=e,o.saveSettings(),!e&&o.activeTimer.cardId){let{cardId:t,type:s}=o.activeTimer;"pomodoro"===s&&Z.stop(t),"time-logger"===s&&window.timeLogger.pause(t)}});let O=document.querySelectorAll(".card-option"),Y=document.getElementById("new-card-type"),J=document.getElementById("new-card-content"),W=document.getElementById("new-card-title"),V={note:"Quick Note",todo:"My Tasks","daily-tasks":"Agenda",pomodoro:"Focus Timer","time-logger":"Study Log","line-graph":"Test Progress",analytics:"Stats",ambient:"Soundscapes",youtube:"Video Player"};O.forEach(e=>{e.addEventListener("click",()=>{O.forEach(e=>e.classList.remove("active")),e.classList.add("active");let t=e.dataset.value;Y.value=t;let s="note"===t,o="youtube"===t;s||o?(J.style.display="block",J.placeholder=o?"Paste YouTube URL...":"Write your note here...",setTimeout(()=>J.focus(),50)):(J.style.display="none",W.focus());let a=W.value,r=Object.values(V).includes(a)||""===a;r&&(W.value=V[t]||"")})}),i.inputs.tickingSoundToggle.addEventListener("change",()=>{o.settings.tickingSoundEnabled=i.inputs.tickingSoundToggle.checked,o.saveSettings()}),i.inputs.ricedModeToggle.addEventListener("change",()=>{o.settings.ricedModeEnabled=i.inputs.ricedModeToggle.checked,o.saveSettings(),D()}),i.buttons.resetDashboard.addEventListener("click",()=>{x("This will delete all custom cards and reset the layout to the default.",async()=>{if(Object.keys(e).forEach(t=>{"settings"!==t&&"mobileAlertDismissed"!==t&&localStorage.removeItem(e[t])}),currentUser){b("Resetting Cloud Data...");try{await db.collection("users").doc(currentUser.uid).delete(),console.log("Cloud data deleted.")}catch(t){console.error("Error resetting cloud data:",t),alert("Failed to reset cloud data. Check console.");return}}location.reload()},"Reset Dashboard?")}),i.buttons.exportData.addEventListener("click",()=>{let t={};for(let s in e){let o=localStorage.getItem(e[s]);null!==o&&(t[s]=JSON.parse(o))}let a=JSON.stringify(t,null,2),r=new Blob([a],{type:"application/json"}),n=URL.createObjectURL(r),i=document.createElement("a");i.href=n;let l=new Date().toISOString().slice(0,10);i.download=`studylocus-backup-${l}.json`,document.body.appendChild(i),i.click(),document.body.removeChild(i),URL.revokeObjectURL(n)}),i.buttons.importData.addEventListener("click",()=>{i.inputs.importFile.click()}),i.inputs.importFile.addEventListener("change",t=>{let s=t.target.files[0];if(!s)return;let a=new FileReader;a.onload=t=>{try{let s=JSON.parse(t.target.result);if(!s.layout||!s.customCards){alert("Invalid backup file.");return}x("This will overwrite your dashboard.",()=>{for(let t in e)s[t]&&(o[t]=s[t],localStorage.setItem(e[t],JSON.stringify(s[t])));w(),currentUser&&h(),D(),j(),b("Import Successful")},"Import Data?")}catch(a){console.error(a),alert("Error reading file.")}finally{i.inputs.importFile.value=""}},a.readAsText(s)}),i.inputs.streamlinedModeToggle&&i.inputs.streamlinedModeToggle.addEventListener("change",()=>{o.settings.streamlinedModeEnabled=i.inputs.streamlinedModeToggle.checked,o.saveSettings(),D(),j()}),i.buttons.info.forEach(e=>e.addEventListener("click",()=>i.modals.info.classList.remove("hidden"))),i.buttons.closeInfo.addEventListener("click",()=>i.modals.info.classList.add("hidden")),i.buttons.zenModeBtn.forEach(e=>e.addEventListener("click",()=>{i.body.classList.add("zen-mode"),i.buttons.exitZenBtn.classList.remove("hidden")})),i.buttons.exitZenBtn.addEventListener("click",()=>{i.body.classList.remove("zen-mode"),i.buttons.exitZenBtn.classList.add("hidden")}),i.buttons.confirmCancel.addEventListener("click",()=>{i.modals.confirm.classList.add("hidden"),f=null}),i.buttons.confirmOk.addEventListener("click",()=>{"function"==typeof f&&f(),i.modals.confirm.classList.add("hidden"),f=null});let Z={tick(e){let t=o.pomodoroState[e];t.time>0?(t.time--,this.updateDisplay(e)):(this.stop(e),new Tone.Synth().toDestination().triggerAttackRelease("C5","0.5"))},updateDisplay(e){let t=i.dashboardGrid.querySelector(`[data-card-id="${e}"]`);t&&M.pomodoro.render(t,{id:e});let s=o.pomodoroState[e];if(s.isRunning){let a=Math.floor(s.time/60).toString().padStart(2,"0"),r=(s.time%60).toString().padStart(2,"0");document.title=`${a}:${r} - Time to focus!`}else{let{examType:n,examYear:l}=o.settings;document.title=`${n} ${l} | StudyLocus`}},start(e,t=!1){let s=o.pomodoroState[e];if(!s.isRunning){if(s.isRunning=!0,!t){if(o.activeTimer.cardId!==e||"pomodoro"!==o.activeTimer.type){o.activeTimer.unfocusedTime=0;let a=i.dashboardGrid.querySelector(`[data-card-id="${e}"]`);if(a){let r=a.querySelector(".focus-status");r&&(r.textContent="")}}o.activeTimer.cardId=e,o.activeTimer.type="pomodoro",o.settings.focusShieldEnabled&&X()}s.intervalId=setInterval(()=>this.tick(e),1e3),this.updateDisplay(e),o.save("pomodoroState")}},_internalPause(e){let t=o.pomodoroState[e];clearInterval(t.intervalId),t.isRunning=!1,this.updateDisplay(e)},stop(e){let t=o.pomodoroState[e];clearInterval(t.intervalId),o.activeTimer.cardId===e&&(o.activeTimer.cardId=null,o.activeTimer.type=null,o.settings.focusShieldEnabled&&Q()),t.isRunning=!1,this.updateDisplay(e),o.save("pomodoroState")},toggle(e){o.pomodoroState[e].isRunning?this.stop(e):this.start(e)},reset(e){let t=o.pomodoroState[e];this.stop(e),t.time=60*t.durations[t.mode],this.updateDisplay(e),o.save("pomodoroState")},setMode(e,t){o.pomodoroState[e].mode=t,this.reset(e)},setDuration(e,t,s){let a=o.pomodoroState[e];a.durations[t]=s,a.mode===t&&this.reset(e),o.save("pomodoroState")}};window.timeLogger={tick(e){let t=o.timeLoggerState[e];if(t&&t.isRunning&&t.startTime){let s=Date.now()-t.startTime,a=t.accumulatedTime+Math.round(s/1e3),r=i.dashboardGrid.querySelector(`[data-card-id="${e}"]`),n=C(a);r&&(r.querySelector(".timer-display").textContent=n,B()),document.title=`${n} • ${t.currentSubject||"Focus"}`}},start(e){let t=o.timeLoggerState[e];if(!t||t.isRunning)return;t.isRunning=!0,t.startTime=Date.now(),o.activeTimer.cardId=e,o.activeTimer.type="time-logger",o.settings.focusShieldEnabled&&X(),t.intervalId=setInterval(()=>this.tick(e),1e3);let s=i.dashboardGrid.querySelector(`[data-card-id="${e}"]`);s&&(s.querySelector(".start-pause-btn").textContent="PAUSE"),o.save("timeLoggerState"),q()},pause(e,t=!0){let s=o.timeLoggerState[e];if(!s||!s.isRunning)return;clearInterval(s.intervalId);let a=Date.now()-s.startTime;s.accumulatedTime+=Math.round(a/1e3),s.isRunning=!1,s.startTime=null,s.intervalId=null,o.activeTimer.cardId===e&&(o.activeTimer.cardId=null,o.activeTimer.type=null,o.settings.focusShieldEnabled&&Q());let{examType:r,examYear:n}=o.settings,l="Custom"===r?o.settings.customExamName||"My Exam":`${r} ${n}`;if(document.title=`${l} | StudyLocus`,o.save("timeLoggerState"),t){let d=i.dashboardGrid.querySelector(`[data-card-id="${e}"]`);d&&M["time-logger"].render(d,{id:e})}q(),B()},toggle(e){o.timeLoggerState[e].isRunning?this.pause(e):this.start(e)},log(e){this.pause(e,!1);let t=o.timeLoggerState[e];if(t.accumulatedTime<60){let s=i.dashboardGrid.querySelector(`[data-card-id="${e}"]`);if(s){let a=s.querySelector(".log-message");a&&(a.textContent="Minimum log time is 1 minute.",setTimeout(()=>{a&&(a.textContent="")},3e3))}this.start(e);return}let r=E(new Date);o.studyLogs[r]||(o.studyLogs[r]={});let n=t.currentSubject;o.studyLogs[r][n]=(o.studyLogs[r][n]||0)+t.accumulatedTime,o.save("studyLogs"),t.accumulatedTime=0,o.save("timeLoggerState"),j(),B(),q()},reset(e){this.pause(e,!1),o.timeLoggerState[e].accumulatedTime=0,o.save("timeLoggerState"),j(),B(),q()},changeSubject(e,t){let s=o.timeLoggerState[e];if("add_new"===t){alert("Please go to 'Customize Dashboard' to manage your subjects."),i.modals.customize.classList.remove("hidden"),P();let a=i.dashboardGrid.querySelector(`[data-card-id="${e}"]`);a&&(a.querySelector(".subject-select").value=s.currentSubject);return}s&&(s.currentSubject=t,o.save("timeLoggerState"))}},i.inputs.examType.addEventListener("change",()=>{o.settings.examType=i.inputs.examType.value,"JEE"===o.settings.examType?i.inputs.jeeContainer.classList.remove("hidden"):i.inputs.jeeContainer.classList.add("hidden"),G()}),i.inputs.jeeSession.addEventListener("change",()=>{o.settings.jeeSession=i.inputs.jeeSession.value,o.settings.jeeShiftDate="",i.inputs.jeeShift.value="",G();let{examType:e,examYear:t,jeeSession:s}=o.settings,a="JEE"===e?`JEE ${t}`:`${e} ${t}`;i.mainTitle.textContent=a}),i.inputs.jeeShift.addEventListener("change",()=>{o.settings.jeeShiftDate=i.inputs.jeeShift.value,G()});let K=null;function X(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen()}catch(e){console.warn("Fullscreen request failed.",e)}document.addEventListener("visibilitychange",et),document.addEventListener("fullscreenchange",ee)}function Q(){try{document.fullscreenElement&&document.exitFullscreen&&document.exitFullscreen()}catch(e){console.warn("Exit fullscreen request failed.",e)}document.removeEventListener("visibilitychange",et),document.removeEventListener("fullscreenchange",ee);let{cardId:t,type:s}=o.activeTimer,a=i.dashboardGrid.querySelector(`[data-card-id="${t}"]`);if(a){let r=a.querySelector(".focus-status");r&&(r.textContent="")}}function ee(){if(!document.fullscreenElement&&o.activeTimer.cardId){let{cardId:e,type:t}=o.activeTimer;"pomodoro"===t&&Z.stop(e),"time-logger"===t&&window.timeLogger.pause(e)}}function et(){let{cardId:e,type:t}=o.activeTimer;if(!e||"time-logger"!==t)return;let s=window.timeLogger,a=o.timeLoggerState[e];if(a){if("hidden"===document.visibilityState)a.isRunning&&s.pause(e,!1);else if("visible"===document.visibilityState&&a.isRunning){let r=(Date.now()-a.startTime)/1e3;a.accumulatedTime+=Math.round(r),s.start(e)}}}i.body.addEventListener("click",e=>{if(e.target.closest("#god-mode-panel")){let t=e.target.id;if("god-mode-close-btn"===t&&(i.godModePanel.classList.add("hidden"),K&&(o.settings.theme=K.theme,o.customCards=K.customCards,o.tests=K.tests,o.layout=K.layout,K=null,D(),j())),"god-mode-theme-btn"===t){let s=i.inputs.theme;if(!s.querySelector('[value="god-mode"]')){let a=document.createElement("option");a.value="god-mode",a.textContent="--- GOD MODE ---",s.appendChild(a)}o.settings.theme="god-mode",D(),j()}if("god-mode-complete-tasks-btn"===t&&(o.customCards.forEach(e=>{"todo"===e.type&&Array.isArray(e.content)&&e.content.forEach(e=>e.completed=!0)}),j()),"god-mode-perfect-score-btn"===t){let r=o.customCards.find(e=>"line-graph"===e.type);if(r&&Array.isArray(r.content)){let n="NEET"===o.settings.examType?720:300;r.content.push({name:"God Tier",marks:n,maxMarks:n}),j()}}if("god-mode-timewarp-btn"===t){let l={};Object.keys(o.tests).forEach(e=>{let t=new Date(e+"T00:00:00");t.setDate(t.getDate()+7);let s=E(t);l[s]=o.tests[e]}),o.tests=l,j()}if("god-mode-scramble-btn"===t){let d=o.layout;for(let c=d.length-1;c>0;c--){let u=Math.floor(Math.random()*(c+1));[d[c],d[u]]=[d[u],d[c]]}j()}"god-mode-nuke-btn"===t&&(i.dashboardGrid.querySelectorAll(".card").forEach((e,t)=>{e.style.animation=`fall-apart 1s ease-in-out ${.05*t}s forwards`}),setTimeout(()=>{x("Dashboard nuked. Restore?",()=>{i.dashboardGrid.innerHTML="",j()},"KABOOM!")},1500))}}),i.inputs.customName.addEventListener("input",()=>{o.settings.customExamName=i.inputs.customName.value,G()}),i.inputs.customDate.addEventListener("change",()=>{o.settings.customExamDate=i.inputs.customDate.value,G()}),i.inputs.examType.addEventListener("change",()=>{o.settings.examType=i.inputs.examType.value,i.inputs.jeeContainer.classList.toggle("hidden","JEE"!==o.settings.examType),i.inputs.customContainer.classList.toggle("hidden","Custom"!==o.settings.examType),G()}),i.mainTitle.addEventListener("click",e=>{3===e.detail&&(clearTimeout(null),i.inputs.theme.querySelector('[value="alakh-pandey"]').classList.remove("hidden"),o.settings.theme="alakh-pandey",o.saveSettings(),D(),j())});let es=!1;document.addEventListener("click",()=>{es||"undefined"==typeof Tone||"suspended"!==Tone.context.state||(Tone.start(),es=!0,console.log("AudioContext resumed by user gesture."));let e=document.getElementById("user-menu-dropdown");e&&!e.classList.contains("hidden")&&e.classList.add("hidden")}),p(),D(),j(),new Sortable(i.dashboardGrid,{animation:150,handle:".drag-handle",ghostClass:"sortable-ghost",chosenClass:"sortable-chosen",onEnd(){o.layout=[...i.dashboardGrid.children].map(e=>e.dataset.cardId),o.save("layout")}});let eo=new Tone.NoiseSynth({noise:{type:"white"},envelope:{attack:.001,decay:.005,sustain:0}}).toDestination(),ea=new Tone.NoiseSynth({noise:{type:"pink"},envelope:{attack:.001,decay:.015,sustain:0}}).toDestination(),er=new Tone.Filter(4e3,"highpass").toDestination();eo.connect(er),ea.connect(er);let en=0,ei=0,el=!1;setInterval(()=>{let e=i.dashboardGrid.querySelector('[data-card-id="countdown"]');if(e&&M.countdown.render&&M.countdown.render(e),o.settings.tickingSoundEnabled?++en>=60&&(el?ea.triggerAttackRelease("32n",void 0,.1):eo.triggerAttackRelease("32n",void 0,.15),e&&(e.style.transform="scale(1.04)",e.style.transition="transform 0.1s ease-out",setTimeout(()=>{e.style.transform="scale(1)"},100)),el=!el,en=0):en=0,++ei>=30){let t=i.dashboardGrid.querySelector('[data-card-id="quote"]');if(t&&M.quote.render){let s=t.querySelector("#quote-card-content");s?(s.style.transition="opacity 0.5s ease",s.style.opacity="0",setTimeout(()=>{M.quote.render(t),s.style.opacity="1"},500)):M.quote.render(t)}ei=0}let a=i.dashboardGrid.querySelector('[data-card-id="time"]');a&&M.time.render&&M.time.render(a)},1e3),window.addEventListener("beforeunload",()=>{o.activeTimer.cardId&&"time-logger"===o.activeTimer.type&&(console.log("Unload event: Forcing final save for active study logger."),window.timeLogger.pause(o.activeTimer.cardId,!1))});let ed=document.getElementById("info-modal"),ec=ed.querySelectorAll(".tab-btn"),eu=ed.querySelectorAll(".tab-content");ed.addEventListener("click",e=>{let t=e.target.closest(".tab-btn");if(!t)return;let s=t.dataset.tab;ec.forEach(e=>{e.classList.toggle("active",e.dataset.tab===s)}),eu.forEach(e=>{e.classList.toggle("hidden",e.id!==`tab-${s}`)})});let em=document.getElementById("super-focus-overlay"),eg=document.querySelectorAll(".focus-tab-btn"),ep=document.querySelectorAll(".focus-view"),eh=document.getElementById("toggle-focus-fullscreen"),ey=document.getElementById("focus-clock-display"),e$=document.getElementById("focus-date-display"),eb=document.getElementById("focus-quote-display"),ef=document.getElementById("focus-big-timer"),ev=document.getElementById("focus-timer-toggle"),ex=document.getElementById("focus-timer-reset"),e_=document.getElementById("dashboard-timer-display"),e0=document.getElementById("dash-timer-toggle"),ek=document.getElementById("dash-timer-reset"),eS=document.querySelectorAll(".timer-mode-btn"),eE=document.getElementById("focus-dashboard-tasks"),ew=document.getElementById("focus-dash-add-task"),eL="pomodoro",eC=null,e3=0,eT=()=>{i.body.style.backgroundImage&&(em.style.backgroundImage=i.body.style.backgroundImage),em.classList.remove("hidden"),eI("clock"),eq(!0),eM(),ej()};function e2(){let e=!1;if(!o.customCards.some(e=>"pomodoro"===e.type)){let t={id:`custom-${Date.now()}-pom`,type:"pomodoro",title:"Pomodoro",content:[]};o.customCards.push(t),o.layout.push(t.id),o.pomodoroState[t.id]={mode:"pomodoro",time:1500,isRunning:!1,durations:{pomodoro:25,shortBreak:5,longBreak:15}},e=!0}if(!o.customCards.some(e=>"time-logger"===e.type)){let s={id:`custom-${Date.now()}-log`,type:"time-logger",title:"Study Logger",content:[]};o.customCards.push(s),o.layout.push(s.id),o.timeLoggerState[s.id]={isRunning:!1,accumulatedTime:0,currentSubject:"Physics"},e=!0}e&&(o.save("customCards"),o.save("layout"),o.save("pomodoroState"),o.save("timeLoggerState"),j(),console.log("Auto-added missing timer cards for Focus Mode."))}function eI(e){eg.forEach(t=>t.classList.toggle("active",t.dataset.view===e)),ep.forEach(e=>e.classList.add("hidden")),document.getElementById(`focus-view-${e}`).classList.remove("hidden")}function e4(e){eL=e,eS.forEach(t=>t.classList.toggle("active",t.dataset.mode===e)),e1()}function e1(){let e="00:00",t=!1,s=null;if("pomodoro"===eL){let a=o.customCards.find(e=>"pomodoro"===e.type);if(a){s=a.id;let r=o.pomodoroState[s];if(r){let n=Math.floor(r.time/60).toString().padStart(2,"0"),i=(r.time%60).toString().padStart(2,"0");e=`${n}:${i}`,t=r.isRunning}}}else{let l=o.customCards.find(e=>"time-logger"===e.type);if(l){s=l.id;let d=o.timeLoggerState[s];if(d){let c=d.accumulatedTime;if(d.isRunning&&d.startTime){let u=Math.round((Date.now()-d.startTime)/1e3);c+=u}e=C(c),t=d.isRunning}}}ef&&(ef.textContent=e),e_&&(e_.textContent=e);let m=t?"PAUSE":"START",g=t?"#2C2D33":"grey";[ev,e0].forEach(e=>{e&&(e.textContent=m,e.style.backgroundColor=g,e.onclick=()=>e9(s,eL))}),[ex,ek].forEach(e=>{e&&(e.onclick=()=>eB(s,eL))})}function e9(e,t){e&&("pomodoro"===t?Z.toggle(e):window.timeLogger.toggle(e),setTimeout(e1,50))}function eB(e,t){e&&("pomodoro"===t?Z.reset(e):window.timeLogger.reset(e),setTimeout(e1,50))}function eq(e=!1){if(!eb)return;let t="alakh-pandey"===o.settings.theme?r:a,s=t[Math.floor(Math.random()*t.length)];e?(eb.textContent=`"${s.text}"`,eb.style.opacity=1):(eb.style.opacity=0,setTimeout(()=>{eb.textContent=`"${s.text}"`,eb.style.opacity=1},800))}function eM(){eC&&clearInterval(eC),e3=0,eC=setInterval(()=>{let e=new Date;ey&&(ey.textContent=e.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit",hour12:!1})),e$&&(e$.textContent=e.toLocaleDateString([],{weekday:"long",month:"long",day:"numeric"})),em.classList.contains("hidden")||e1(),++e3>=10&&(eq(),e3=0)},1e3),e1()}function ej(){if(!eE)return;eE.innerHTML="";let e=o.customCards.find(e=>"todo"===e.type);e||(e={id:`custom-${Date.now()}-todo`,type:"todo",title:"Tasks",content:[]},o.customCards.push(e),o.layout.push(e.id),o.save("customCards"),o.save("layout"),j()),e&&e.content&&e.content.forEach(e=>{if(!e.completed){let t=document.createElement("li");t.className="flex items-center gap-3 p-3 bg-white/5 rounded-lg hover:bg-white/10 cursor-pointer group transition-all",t.innerHTML=`
+            `;
+            // Click Handler
+            btn.addEventListener('click', () => {
+                // 1. Update the input field visually
+                domElements.inputs.bgUrl.value = wp.url;
+                // 2. Update the App State
+                appState.settings.bgUrl = wp.url;
+                // 3. Save and Apply (Reuse your existing function!)
+                saveAndApplySettings();
+            });
+            presetGrid.appendChild(btn);
+        });
+    }
+    // --- Settings Event Listeners ---
+    const saveAndApplySettings = () => {
+        appState.saveSettings();
+        applySettings();
+        renderDashboard(); // Re-render for exam date changes, etc.
+    };
+    domElements.inputs.examType.addEventListener("change", () => {
+        appState.settings.examType = domElements.inputs.examType.value;
+        saveAndApplySettings();
+    });
+    domElements.inputs.examYear.addEventListener("change", () => {
+        appState.settings.examYear = domElements.inputs.examYear.value;
+        // --- FIX: Clear the specific date so the new year's default takes over ---
+        appState.settings.jeeShiftDate = "";
+        domElements.inputs.jeeShift.value = "";
+        // ------------------------------------------------------------------------
+        saveAndApplySettings();
+    });
+    domElements.inputs.theme.addEventListener("change", () => {
+        appState.settings.theme = domElements.inputs.theme.value;
+        appState.saveSettings();
+        applySettings();
+        renderDashboard(); // Re-render for quotes
+    });
+    domElements.inputs.font.addEventListener("change", () => {
+        appState.settings.font = domElements.inputs.font.value;
+        appState.saveSettings();
+        applySettings();
+    });
+    domElements.inputs.bgUrl.addEventListener("input", () => {
+        appState.settings.bgUrl = domElements.inputs.bgUrl.value;
+        appState.saveSettings();
+        applySettings();
+    });
+    domElements.buttons.removeBg.addEventListener("click", () => {
+        appState.settings.bgUrl = "";
+        appState.saveSettings();
+        applySettings();
+    });
+    domElements.inputs.youtubeTintToggle.addEventListener("change", () => {
+        appState.settings.youtubeTintEnabled = domElements.inputs.youtubeTintToggle.checked;
+        appState.saveSettings();
+        updateYouTubeCardStyles();
+    });
+    domElements.inputs.youtubeBlurToggle.addEventListener("change", () => {
+        appState.settings.youtubeBlurEnabled = domElements.inputs.youtubeBlurToggle.checked;
+        appState.saveSettings();
+        updateYouTubeCardStyles();
+    });
+    // --- Focus Shield ---
+    domElements.inputs.focusShieldToggle.addEventListener("change", () => {
+        const isEnabled = domElements.inputs.focusShieldToggle.checked;
+        appState.settings.focusShieldEnabled = isEnabled;
+        appState.saveSettings();
+        // If shield is disabled while a timer is active, stop the timer
+        if (!isEnabled && appState.activeTimer.cardId) {
+            const {
+                cardId,
+                type
+            } = appState.activeTimer;
+            if (type === "pomodoro") pomodoroTimer.stop(cardId);
+            if (type === "time-logger") window.timeLogger.pause(cardId);
+        }
+    });
+
+
+    // --- Card Adder Grid Logic ---
+    const cardOptions = document.querySelectorAll('.card-option');
+    const hiddenInput = document.getElementById('new-card-type');
+    const contentInput = document.getElementById('new-card-content');
+    const titleInput = document.getElementById('new-card-title');
+
+    // Default titles map for smart auto-filling
+    const defaultTitles = {
+        note: "Quick Note",
+        todo: "My Tasks",
+        "daily-tasks": "Agenda",
+        pomodoro: "Focus Timer",
+        "time-logger": "Study Log",
+        "line-graph": "Test Progress",
+        analytics: "Stats",
+        ambient: "Soundscapes",
+        youtube: "Video Player"
+    };
+
+    cardOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            // 1. Visual Selection
+            cardOptions.forEach(opt => opt.classList.remove('active'));
+            option.classList.add('active');
+
+            // 2. Update Hidden Input
+            const value = option.dataset.value;
+            hiddenInput.value = value;
+
+            // 3. Toggle Content Textarea (Existing Logic adapted)
+            const isNote = value === "note";
+            const isYouTube = value === "youtube";
+
+            if (isNote || isYouTube) {
+                contentInput.style.display = "block";
+                contentInput.placeholder = isYouTube ? "Paste YouTube URL..." : "Write your note here...";
+                // Auto-focus content for these types
+                setTimeout(() => contentInput.focus(), 50);
+            } else {
+                contentInput.style.display = "none";
+                // Auto-focus title for others
+                titleInput.focus();
+            }
+
+            // 4. Smart Title Auto-fill (Quality of Life)
+            // Only change title if it's empty or matches a default of another type
+            const currentTitle = titleInput.value;
+            const isDefault = Object.values(defaultTitles).includes(currentTitle) || currentTitle === "";
+
+            if (isDefault) {
+                titleInput.value = defaultTitles[value] || "";
+            }
+        });
+    });
+
+    domElements.inputs.tickingSoundToggle.addEventListener("change", () => {
+        appState.settings.tickingSoundEnabled = domElements.inputs.tickingSoundToggle.checked;
+        appState.saveSettings();
+    });
+
+    // --- Riced Mode ---
+    domElements.inputs.ricedModeToggle.addEventListener("change", () => {
+        appState.settings.ricedModeEnabled = domElements.inputs.ricedModeToggle.checked;
+        appState.saveSettings();
+        applySettings();
+    });
+    // --- Data Management (Reset, Export, Import) ---
+    domElements.buttons.resetDashboard.addEventListener("click", () => {
+        showConfirmModal("This will delete all custom cards and reset the layout to the default.", async () => { // <--- Made function async
+            // 1. Clear Local Storage
+            Object.keys(LOCAL_STORAGE_KEYS).forEach((key) => {
+                // We keep settings (theme, etc.) but nuke data
+                if (key !== "settings" && key !== "mobileAlertDismissed") {
+                    localStorage.removeItem(LOCAL_STORAGE_KEYS[key]);
+                }
+            });
+            // 2. Clear Cloud Data (If logged in)
+            if (currentUser) {
+                showSyncStatus("Resetting Cloud Data...");
+                try {
+                    // Delete the user's document from Firestore
+                    await db.collection("users").doc(currentUser.uid).delete();
+                    console.log("Cloud data deleted.");
+                } catch (error) {
+                    console.error("Error resetting cloud data:", error);
+                    alert("Failed to reset cloud data. Check console.");
+                    return; // Stop reload if cloud delete fails
+                }
+            }
+            // 3. Reload to re-initialize defaults
+            // When page loads, it sees no LocalStorage and no Cloud Data, 
+            // so it starts fresh with the default hardcoded state.
+            location.reload();
+        }, "Reset Dashboard?");
+    });
+    domElements.buttons.exportData.addEventListener("click", () => {
+        const backupData = {};
+        for (const key in LOCAL_STORAGE_KEYS) {
+            const dataString = localStorage.getItem(LOCAL_STORAGE_KEYS[key]);
+            if (dataString !== null) {
+                backupData[key] = JSON.parse(dataString);
+            }
+        }
+        const jsonString = JSON.stringify(backupData, null, 2);
+        const blob = new Blob([jsonString], {
+            type: "application/json"
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        const dateStr = new Date().toISOString().slice(0, 10);
+        a.download = `studylocus-backup-${dateStr}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    });
+    domElements.buttons.importData.addEventListener("click", () => {
+        domElements.inputs.importFile.click();
+    });
+    domElements.inputs.importFile.addEventListener("change", (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const importedData = JSON.parse(e.target.result);
+
+                // Validation
+                if (!importedData.layout || !importedData.customCards) {
+                    alert("Invalid backup file.");
+                    return;
+                }
+
+                showConfirmModal("This will overwrite your dashboard.", () => {
+                    // 1. Update State & LocalStorage
+                    for (const key in LOCAL_STORAGE_KEYS) {
+                        if (importedData[key]) {
+                            appState[key] = importedData[key];
+                            localStorage.setItem(LOCAL_STORAGE_KEYS[key], JSON.stringify(importedData[key]));
+                        }
+                    }
+
+                    // 2. Sanitize
+                    sanitizeDashboardState();
+
+                    // 3. Force Cloud Save (User is logged in, so update cloud to match import)
+                    if (currentUser) {
+                        debouncedSaveAllToFirestore();
+                    }
+
+                    // 4. Update UI (NO RELOAD)
+                    applySettings();
+                    renderDashboard();
+                    showSyncStatus("Import Successful");
+                }, "Import Data?");
+            } catch (error) {
+                console.error(error);
+                alert("Error reading file.");
+            } finally {
+                domElements.inputs.importFile.value = "";
+            }
+        };
+        reader.readAsText(file);
+    });
+
+
+    if (domElements.inputs.streamlinedModeToggle) {
+        domElements.inputs.streamlinedModeToggle.addEventListener("change", () => {
+            appState.settings.streamlinedModeEnabled = domElements.inputs.streamlinedModeToggle.checked;
+            appState.saveSettings();
+            applySettings();
+            // Force a re-render to adjust grid classes if necessary
+            renderDashboard();
+        });
+    }
+    // --- Mobile Alert ---
+    // if (window.innerWidth < 768 && localStorage.getItem(LOCAL_STORAGE_KEYS.mobileAlertDismissed) !== "true") {
+    //     domElements.mobileAlert.classList.remove("hidden");
+    // }
+    // domElements.buttons.closeAlert.addEventListener("click", () => {
+    //     domElements.mobileAlert.classList.add("hidden");
+    //     localStorage.setItem(LOCAL_STORAGE_KEYS.mobileAlertDismissed, "true");
+    // });
+    // --- Info Modal ---
+    domElements.buttons.info.forEach(btn => btn.addEventListener("click", () => domElements.modals.info.classList.remove("hidden")));
+    domElements.buttons.closeInfo.addEventListener("click", () => domElements.modals.info.classList.add("hidden"));
+    // --- Zen Mode ---
+    domElements.buttons.zenModeBtn.forEach(btn => btn.addEventListener("click", () => {
+        domElements.body.classList.add("zen-mode");
+        domElements.buttons.exitZenBtn.classList.remove("hidden");
+    }));
+    domElements.buttons.exitZenBtn.addEventListener("click", () => {
+        domElements.body.classList.remove("zen-mode");
+        domElements.buttons.exitZenBtn.classList.add("hidden");
+    });
+    // --- Confirm Modal Buttons ---
+    domElements.buttons.confirmCancel.addEventListener("click", () => {
+        domElements.modals.confirm.classList.add("hidden");
+        confirmCallback = null;
+    });
+    domElements.buttons.confirmOk.addEventListener("click", () => {
+        if (typeof confirmCallback === "function") {
+            confirmCallback();
+        }
+        domElements.modals.confirm.classList.add("hidden");
+        confirmCallback = null;
+    });
+    // --- Timer Modules ---
+    /**
+
+    * Pomodoro Timer logic.
+
+    */
+    const pomodoroTimer = {
+        tick(cardId) {
+            const state = appState.pomodoroState[cardId];
+            if (state.time > 0) {
+                state.time--;
+                this.updateDisplay(cardId);
+            } else {
+                // --- START OF NEW LOGIC ---
+                // Only log if the completed mode was "pomodoro" (ignore breaks)
+                if (state.mode === "pomodoro") {
+                    const todayStr = formatDateToISO(new Date());
+
+                    // Initialize today's log if it doesn't exist
+                    if (!appState.studyLogs[todayStr]) {
+                        appState.studyLogs[todayStr] = {};
+                    }
+
+                    // Define the subject name for analytics
+                    // Note: Since Pomodoro cards don't have a subject dropdown, 
+                    // we log it under a generic "Pomodoro" category.
+                    const subject = "Pomodoro";
+
+                    // Calculate seconds from the duration setting (minutes * 60)
+                    const secondsToAdd = state.durations.pomodoro * 60;
+
+                    // Update the logs
+                    appState.studyLogs[todayStr][subject] = (appState.studyLogs[todayStr][subject] || 0) + secondsToAdd;
+
+                    // Save to storage
+                    appState.save("studyLogs");
+
+                    // Force the dashboard (and Analytics card) to update immediately
+                    renderDashboard();
+                }
+                // --- END OF NEW LOGIC ---
+
+                this.stop(cardId);
+                new Tone.Synth().toDestination().triggerAttackRelease("C5", "0.5"); // Play sound
+            }
+        },
+        updateDisplay(cardId) {
+            const cardElement = domElements.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
+            if (cardElement) {
+                cardRenderers.pomodoro.render(cardElement, {
+                    id: cardId
+                });
+            }
+            // Update page title
+            const state = appState.pomodoroState[cardId];
+            if (state.isRunning) {
+                const minutes = Math.floor(state.time / 60).toString().padStart(2, "0");
+                const seconds = (state.time % 60).toString().padStart(2, "0");
+                document.title = `${minutes}:${seconds} - Time to focus!`;
+            } else {
+                const {
+                    examType,
+                    examYear
+                } = appState.settings;
+                document.title = `${examType} ${examYear} | StudyLocus`;
+            }
+        },
+        start(cardId, isInternal = false) {
+            const state = appState.pomodoroState[cardId];
+            if (!state.isRunning) {
+                state.isRunning = true;
+                if (!isInternal) {
+                    // This is a manual start, not a focus shield restart
+                    if (appState.activeTimer.cardId !== cardId || appState.activeTimer.type !== "pomodoro") {
+                        appState.activeTimer.unfocusedTime = 0;
+                        const cardElement = domElements.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
+                        if (cardElement) {
+                            const focusStatusEl = cardElement.querySelector(".focus-status");
+                            if (focusStatusEl) focusStatusEl.textContent = "";
+                        }
+                    }
+                    appState.activeTimer.cardId = cardId;
+                    appState.activeTimer.type = "pomodoro";
+                    if (appState.settings.focusShieldEnabled) enterFocusShield();
+                }
+                state.intervalId = setInterval(() => this.tick(cardId), 1000);
+                this.updateDisplay(cardId);
+                appState.save("pomodoroState");
+            }
+        },
+        _internalPause(cardId) {
+            const state = appState.pomodoroState[cardId];
+            clearInterval(state.intervalId);
+            state.isRunning = false;
+            this.updateDisplay(cardId);
+        },
+        stop(cardId) {
+            const state = appState.pomodoroState[cardId];
+            clearInterval(state.intervalId);
+            if (appState.activeTimer.cardId === cardId) {
+                appState.activeTimer.cardId = null;
+                appState.activeTimer.type = null;
+                if (appState.settings.focusShieldEnabled) exitFocusShield();
+            }
+            state.isRunning = false;
+            this.updateDisplay(cardId);
+            appState.save("pomodoroState");
+        },
+        toggle(cardId) {
+            if (appState.pomodoroState[cardId].isRunning) {
+                this.stop(cardId);
+            } else {
+                this.start(cardId);
+            }
+        },
+        reset(cardId) {
+            const state = appState.pomodoroState[cardId];
+            this.stop(cardId);
+            state.time = state.durations[state.mode] * 60;
+            this.updateDisplay(cardId);
+            appState.save("pomodoroState");
+        },
+        setMode(cardId, mode) {
+            appState.pomodoroState[cardId].mode = mode;
+            this.reset(cardId);
+        },
+        setDuration(cardId, mode, duration) {
+            const state = appState.pomodoroState[cardId];
+            state.durations[mode] = duration;
+            if (state.mode === mode) {
+                this.reset(cardId);
+            }
+            appState.save("pomodoroState");
+        },
+    };
+    /**
+
+    * Time Logger (Stopwatch) logic.
+
+    */
+    window.timeLogger = {
+        tick(cardId) {
+            const state = appState.timeLoggerState[cardId];
+            if (state && state.isRunning && state.startTime) {
+                const elapsedMs = Date.now() - state.startTime;
+                const newTotalSeconds = state.accumulatedTime + Math.round(elapsedMs / 1000);
+                const cardElement = domElements.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
+
+                const timeString = formatTimeHHMMSS(newTotalSeconds);
+
+                if (cardElement) {
+                    cardElement.querySelector(".timer-display").textContent = timeString;
+                    updatePiPTimerDisplay(); // Update PiP window if open
+                }
+
+                // --- NEW: Update Page Title ---
+                document.title = `${timeString} • ${state.currentSubject || "Focus"}`;
+            }
+        },
+        start(cardId) {
+            const state = appState.timeLoggerState[cardId];
+            if (!state || state.isRunning) return;
+            state.isRunning = true;
+            state.startTime = Date.now();
+            appState.activeTimer.cardId = cardId;
+            appState.activeTimer.type = "time-logger";
+            if (appState.settings.focusShieldEnabled) enterFocusShield();
+            state.intervalId = setInterval(() => this.tick(cardId), 1000);
+            const cardElement = domElements.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
+            if (cardElement) {
+                cardElement.querySelector(".start-pause-btn").textContent = "PAUSE";
+            }
+            appState.save("timeLoggerState");
+            updatePiPControls();
+        },
+        pause(cardId, shouldRender = true) {
+            const state = appState.timeLoggerState[cardId];
+            if (!state || !state.isRunning) return;
+            clearInterval(state.intervalId);
+            const elapsedMs = Date.now() - state.startTime;
+            state.accumulatedTime += Math.round(elapsedMs / 1000);
+            state.isRunning = false;
+            state.startTime = null;
+            state.intervalId = null;
+            if (appState.activeTimer.cardId === cardId) {
+                appState.activeTimer.cardId = null;
+                appState.activeTimer.type = null;
+                if (appState.settings.focusShieldEnabled) exitFocusShield();
+            }
+
+            // --- NEW: Reset Page Title ---
+            const { examType, examYear } = appState.settings;
+            // Handle custom exam name or default fallback
+            const titlePrefix = examType === "Custom" ?
+                (appState.settings.customExamName || "My Exam") :
+                `${examType} ${examYear}`;
+            document.title = `${titlePrefix} | StudyLocus`;
+
+            appState.save("timeLoggerState");
+            if (shouldRender) {
+                const cardElement = domElements.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
+                if (cardElement) {
+                    cardRenderers["time-logger"].render(cardElement, {
+                        id: cardId
+                    });
+                }
+            }
+            updatePiPControls();
+            updatePiPTimerDisplay();
+        },
+        toggle(cardId) {
+            if (appState.timeLoggerState[cardId].isRunning) {
+                this.pause(cardId);
+            } else {
+                this.start(cardId);
+            }
+        },
+        log(cardId) {
+            this.pause(cardId, false); // Pause without re-rendering
+            const state = appState.timeLoggerState[cardId];
+            if (state.accumulatedTime < 60) { // Minimum 1 minute log
+                const cardElement = domElements.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
+                if (cardElement) {
+                    const logMessageEl = cardElement.querySelector(".log-message");
+                    if (logMessageEl) {
+                        logMessageEl.textContent = "Minimum log time is 1 minute.";
+                        setTimeout(() => {
+                            if (logMessageEl) logMessageEl.textContent = "";
+                        }, 3000);
+                    }
+                }
+                this.start(cardId); // Restart timer
+                return;
+            }
+            const todayStr = formatDateToISO(new Date());
+            if (!appState.studyLogs[todayStr]) {
+                appState.studyLogs[todayStr] = {};
+            }
+            const subject = state.currentSubject;
+            appState.studyLogs[todayStr][subject] = (appState.studyLogs[todayStr][subject] || 0) + state.accumulatedTime;
+            appState.save("studyLogs");
+            // Reset timer
+            state.accumulatedTime = 0;
+            appState.save("timeLoggerState");
+            renderDashboard(); // Re-render all to update graph and logger card
+            updatePiPTimerDisplay();
+            updatePiPControls();
+        },
+        reset(cardId) {
+            this.pause(cardId, false);
+            appState.timeLoggerState[cardId].accumulatedTime = 0;
+            appState.save("timeLoggerState");
+            renderDashboard();
+            updatePiPTimerDisplay();
+            updatePiPControls();
+        },
+        changeSubject(cardId, newSubject) {
+            const state = appState.timeLoggerState[cardId];
+
+            // If user selects "Add New Subject...", guide them to settings
+            if (newSubject === "add_new") {
+                // Option 1: Alert
+                alert("Please go to 'Customize Dashboard' to manage your subjects.");
+
+                // Option 2: Auto-open Customize Modal (Smoother UX)
+                domElements.modals.customize.classList.remove("hidden");
+                renderSubjectManager();
+
+                // Reset dropdown to previous value so it doesn't stay on "Add New..."
+                const cardElement = domElements.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
+                if (cardElement) {
+                    cardElement.querySelector(".subject-select").value = state.currentSubject;
+                }
+                return;
+            }
+
+            if (state) {
+                state.currentSubject = newSubject;
+                appState.save("timeLoggerState");
+            }
+        }
+    };
+    domElements.inputs.examType.addEventListener("change", () => {
+        appState.settings.examType = domElements.inputs.examType.value;
+        // Show/Hide container immediately
+        if (appState.settings.examType === "JEE") {
+            domElements.inputs.jeeContainer.classList.remove("hidden");
+        } else {
+            domElements.inputs.jeeContainer.classList.add("hidden");
+        }
+        saveAndApplySettings();
+    });
+    // Save Session (Jan/April)
+    domElements.inputs.jeeSession.addEventListener("change", () => {
+        appState.settings.jeeSession = domElements.inputs.jeeSession.value;
+        appState.settings.jeeShiftDate = "";
+        domElements.inputs.jeeShift.value = "";
+        saveAndApplySettings();
+        // Update Main Title dynamically
+        const {
+            examType,
+            examYear,
+            jeeSession
+        } = appState.settings;
+        const titleText = examType === "JEE" ? `JEE ${examYear}` : `${examType} ${examYear}`;
+        domElements.mainTitle.textContent = titleText;
+    });
+    // Save Specific Shift Date
+    domElements.inputs.jeeShift.addEventListener("change", () => {
+        appState.settings.jeeShiftDate = domElements.inputs.jeeShift.value;
+        saveAndApplySettings();
+    });
+    // --- God Mode (Easter Egg) ---
+    let godModeBackup = null; // To store state before god mode
+    domElements.body.addEventListener("click", (event) => {
+        if (event.target.closest("#god-mode-panel")) {
+            const targetId = event.target.id;
+            if (targetId === "god-mode-close-btn") {
+                domElements.godModePanel.classList.add("hidden");
+                // Restore backup
+                if (godModeBackup) {
+                    appState.settings.theme = godModeBackup.theme;
+                    appState.customCards = godModeBackup.customCards;
+                    appState.tests = godModeBackup.tests;
+                    appState.layout = godModeBackup.layout;
+                    godModeBackup = null;
+                    applySettings();
+                    renderDashboard();
+                }
+            }
+            if (targetId === "god-mode-theme-btn") {
+                const themeSelect = domElements.inputs.theme;
+                if (!themeSelect.querySelector('[value="god-mode"]')) {
+                    const optionEl = document.createElement("option");
+                    optionEl.value = "god-mode";
+                    optionEl.textContent = "--- GOD MODE ---";
+                    themeSelect.appendChild(optionEl);
+                }
+                appState.settings.theme = "god-mode";
+                applySettings();
+                renderDashboard();
+            }
+            if (targetId === "god-mode-complete-tasks-btn") {
+                appState.customCards.forEach(card => {
+                    if (card.type === 'todo' && Array.isArray(card.content)) {
+                        card.content.forEach(task => task.completed = true);
+                    }
+                });
+                renderDashboard();
+            }
+            if (targetId === "god-mode-perfect-score-btn") {
+                const lineGraphCard = appState.customCards.find(c => c.type === 'line-graph');
+                if (lineGraphCard && Array.isArray(lineGraphCard.content)) {
+                    const maxMarks = appState.settings.examType === 'NEET' ? 720 : 300;
+                    lineGraphCard.content.push({
+                        name: "God Tier",
+                        marks: maxMarks,
+                        maxMarks: maxMarks
+                    });
+                    renderDashboard();
+                }
+            }
+            if (targetId === "god-mode-timewarp-btn") {
+                const newTests = {};
+                Object.keys(appState.tests).forEach(dateStr => {
+                    const oldDate = new Date(dateStr + "T00:00:00");
+                    oldDate.setDate(oldDate.getDate() + 7); // Move 7 days
+                    const newDateStr = formatDateToISO(oldDate);
+                    newTests[newDateStr] = appState.tests[dateStr];
+                });
+                appState.tests = newTests;
+                renderDashboard();
+            }
+            if (targetId === "god-mode-scramble-btn") {
+                let layout = appState.layout;
+                for (let i = layout.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [layout[i], layout[j]] = [layout[j], layout[i]];
+                }
+                renderDashboard();
+            }
+            if (targetId === "god-mode-nuke-btn") {
+                domElements.dashboardGrid.querySelectorAll(".card").forEach((card, index) => {
+                    card.style.animation = `fall-apart 1s ease-in-out ${index * 0.05}s forwards`;
+                });
+                setTimeout(() => {
+                    showConfirmModal("Dashboard nuked. Restore?", () => {
+                        domElements.dashboardGrid.innerHTML = "";
+                        renderDashboard();
+                    }, "KABOOM!");
+                }, 1500);
+            }
+        }
+    });
+    // --- Focus Shield ---
+    function enterFocusShield() {
+        try {
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen();
+            }
+        } catch (err) {
+            console.warn("Fullscreen request failed.", err);
+        }
+        document.addEventListener("visibilitychange", handleFocusShieldVisibilityChange);
+        document.addEventListener("fullscreenchange", handleFullscreenChange);
+    }
+
+    function exitFocusShield() {
+        try {
+            if (document.fullscreenElement && document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+        } catch (err) {
+            console.warn("Exit fullscreen request failed.", err);
+        }
+        document.removeEventListener("visibilitychange", handleFocusShieldVisibilityChange);
+        document.removeEventListener("fullscreenchange", handleFullscreenChange);
+        // Clear any "unfocused" messages
+        const {
+            cardId,
+            type
+        } = appState.activeTimer;
+        const cardElement = domElements.dashboardGrid.querySelector(`[data-card-id="${cardId}"]`);
+        if (cardElement) {
+            const focusStatusEl = cardElement.querySelector(".focus-status");
+            if (focusStatusEl) focusStatusEl.textContent = "";
+        }
+    }
+
+    function handleFullscreenChange() {
+        // If user exits fullscreen manually, stop the active timer
+        if (!document.fullscreenElement && appState.activeTimer.cardId) {
+            const {
+                cardId,
+                type
+            } = appState.activeTimer;
+            if (type === "pomodoro") pomodoroTimer.stop(cardId);
+            if (type === "time-logger") window.timeLogger.pause(cardId);
+        }
+    }
+
+    function handleFocusShieldVisibilityChange() {
+        const {
+            cardId,
+            type
+        } = appState.activeTimer;
+        if (!cardId || type !== 'time-logger') return; // Only apply logic to time-logger
+        const timerModule = window.timeLogger;
+        const state = appState.timeLoggerState[cardId];
+        if (!state) return;
+        if (document.visibilityState === "hidden") {
+            if (state.isRunning) {
+                timerModule.pause(cardId, false); // Internal pause
+            }
+        } else if (document.visibilityState === "visible") {
+            if (state.isRunning) { // This means it was running *before* it was hidden
+                // Manually add elapsed time since last *real* start
+                const elapsedSeconds = (Date.now() - state.startTime) / 1000;
+                state.accumulatedTime += Math.round(elapsedSeconds);
+                timerModule.start(cardId); // Restart
+            }
+        }
+    }
+
+
+    // Custom Exam Name Change
+    domElements.inputs.customName.addEventListener("input", () => {
+        appState.settings.customExamName = domElements.inputs.customName.value;
+        saveAndApplySettings();
+    });
+
+    // Custom Exam Date Change
+    domElements.inputs.customDate.addEventListener("change", () => {
+        appState.settings.customExamDate = domElements.inputs.customDate.value;
+        saveAndApplySettings();
+    });
+
+    // Update the Exam Type Listener to handle the UI toggle immediately
+    domElements.inputs.examType.addEventListener("change", () => {
+        appState.settings.examType = domElements.inputs.examType.value;
+
+        // Immediate UI Toggle
+        domElements.inputs.jeeContainer.classList.toggle("hidden", appState.settings.examType !== "JEE");
+        domElements.inputs.customContainer.classList.toggle("hidden", appState.settings.examType !== "Custom");
+
+        saveAndApplySettings();
+    });
+
+    // --- App Initialization ---
+    domElements.mainTitle.addEventListener("click", (event) => {
+        if (event.detail === 3) {
+            // Triple click
+            clearTimeout(null);
+            domElements.inputs.theme.querySelector('[value="alakh-pandey"]').classList.remove("hidden");
+            appState.settings.theme = "alakh-pandey";
+            appState.saveSettings();
+            applySettings();
+            renderDashboard();
+        }
+    });
+    // --- FIX: Add a flag to resume audio context only once ---
+    let audioContextResumed = false;
+    // Global click listener to close user menu
+    document.addEventListener("click", () => {
+        // --- FIX FOR AUDIO CONTEXT ---
+        // Resume the Tone.js AudioContext on the first user click
+        if (!audioContextResumed && typeof Tone !== 'undefined' && Tone.context.state === "suspended") {
+            Tone.start();
+            audioContextResumed = true;
+            console.log("AudioContext resumed by user gesture.");
+        }
+        // --- END FIX ---
+        const userMenuDropdown = document.getElementById("user-menu-dropdown");
+        if (userMenuDropdown && !userMenuDropdown.classList.contains("hidden")) {
+            userMenuDropdown.classList.add("hidden");
+        }
+    });
+    // Initial setup
+    updateAuthUI();
+    applySettings();
+    renderDashboard();
+    // Initialize Sortable (drag-and-drop)
+    new Sortable(domElements.dashboardGrid, {
+        animation: 150,
+        handle: ".drag-handle",
+        ghostClass: "sortable-ghost",
+        chosenClass: "sortable-chosen",
+        onEnd: () => {
+            appState.layout = [...domElements.dashboardGrid.children].map((card) => card.dataset.cardId);
+            appState.save("layout");
+        },
+    });
+    const clockHigh = new Tone.NoiseSynth({
+        noise: { type: "white" },
+        envelope: { attack: 0.001, decay: 0.005, sustain: 0 }
+    }).toDestination();
+
+    const clockLow = new Tone.NoiseSynth({
+        noise: { type: "pink" },
+        envelope: { attack: 0.001, decay: 0.015, sustain: 0 }
+    }).toDestination();
+
+    const watchFilter = new Tone.Filter(4000, "highpass").toDestination();
+    clockHigh.connect(watchFilter);
+    clockLow.connect(watchFilter);
+
+    let doomTickCounter = 0;
+    let quoteOscillator = 0; // NEW: Counter for quotes
+    let isTock = false;
+
+    setInterval(() => {
+        // 1. Render Countdown
+        const countdownCard = domElements.dashboardGrid.querySelector('[data-card-id="countdown"]');
+        if (countdownCard && cardRenderers.countdown.render) {
+            cardRenderers.countdown.render(countdownCard);
+        }
+
+        // 2. Doom Tick Logic
+        if (appState.settings.tickingSoundEnabled) {
+            doomTickCounter++;
+            if (doomTickCounter >= 60) {
+                if (isTock) {
+                    clockLow.triggerAttackRelease("32n", undefined, 0.1);
+                } else {
+                    clockHigh.triggerAttackRelease("32n", undefined, 0.15);
+                }
+
+                if (countdownCard) {
+                    countdownCard.style.transform = "scale(1.04)";
+                    countdownCard.style.transition = "transform 0.1s ease-out";
+                    setTimeout(() => {
+                        countdownCard.style.transform = "scale(1)";
+                    }, 100);
+                }
+                isTock = !isTock;
+                doomTickCounter = 0;
+            }
+        } else {
+            doomTickCounter = 0;
+        }
+
+        // 3. NEW: Quote Oscillation Logic
+        quoteOscillator++;
+        if (quoteOscillator >= 30) { // Change every 30 seconds
+            const quoteCard = domElements.dashboardGrid.querySelector('[data-card-id="quote"]');
+
+            if (quoteCard && cardRenderers.quote.render) {
+                const content = quoteCard.querySelector("#quote-card-content");
+
+                if (content) {
+                    // Smooth Fade Transition
+                    content.style.transition = "opacity 0.5s ease";
+                    content.style.opacity = "0"; // Fade out
+
+                    setTimeout(() => {
+                        cardRenderers.quote.render(quoteCard); // Update text
+                        content.style.opacity = "1"; // Fade in
+                    }, 500); // Wait 0.5s for fade out to finish
+                } else {
+                    cardRenderers.quote.render(quoteCard);
+                }
+            }
+            quoteOscillator = 0; // Reset counter
+        }
+
+        // 4. Render Time
+        const timeCard = domElements.dashboardGrid.querySelector('[data-card-id="time"]');
+        if (timeCard && cardRenderers.time.render) {
+            cardRenderers.time.render(timeCard);
+        }
+    }, 1000);
+    // Save final study log time on page unload
+    window.addEventListener("beforeunload", () => {
+        if (appState.activeTimer.cardId && appState.activeTimer.type === "time-logger") {
+            console.log("Unload event: Forcing final save for active study logger.");
+            window.timeLogger.pause(appState.activeTimer.cardId, false); // Pause without rendering
+        }
+    });
+    // --- Info Modal Tab-switching ---
+    const infoModal = document.getElementById("info-modal");
+    const tabButtons = infoModal.querySelectorAll(".tab-btn");
+    const tabContents = infoModal.querySelectorAll(".tab-content");
+    infoModal.addEventListener("click", (event) => {
+        const tabButton = event.target.closest(".tab-btn");
+        if (!tabButton) return;
+        const tabId = tabButton.dataset.tab;
+        tabButtons.forEach(btn => {
+            btn.classList.toggle("active", btn.dataset.tab === tabId);
+        });
+        tabContents.forEach(content => {
+            content.classList.toggle("hidden", content.id !== `tab-${tabId}`);
+        });
+    });
+    const focusOverlay = document.getElementById('super-focus-overlay');
+    const viewTabs = document.querySelectorAll('.focus-tab-btn');
+    const views = document.querySelectorAll('.focus-view');
+    // Buttons
+    const fullscreenToggleBtn = document.getElementById('toggle-focus-fullscreen');
+    // Display Elements
+    const clockDisplay = document.getElementById('focus-clock-display');
+    const dateDisplay = document.getElementById('focus-date-display');
+    const quoteDisplay = document.getElementById('focus-quote-display');
+    // Timer Elements
+    const bigTimerDisplay = document.getElementById('focus-big-timer');
+    const bigTimerToggle = document.getElementById('focus-timer-toggle');
+    const bigTimerReset = document.getElementById('focus-timer-reset');
+    const dashTimerDisplay = document.getElementById('dashboard-timer-display');
+    const dashTimerToggle = document.getElementById('dash-timer-toggle');
+    const dashTimerReset = document.getElementById('dash-timer-reset');
+    const timerModeBtns = document.querySelectorAll('.timer-mode-btn');
+    // Tasks
+    const dashTaskList = document.getElementById('focus-dashboard-tasks');
+    const dashAddTaskInput = document.getElementById('focus-dash-add-task');
+    let currentTimerMode = 'pomodoro';
+    let focusInterval = null;
+    let quoteTimer = 0;
+    // 1. Open Focus Mode
+    const openFocusMode = () => {
+        // Sync Background
+        if (domElements.body.style.backgroundImage) {
+            focusOverlay.style.backgroundImage = domElements.body.style.backgroundImage;
+        }
+        focusOverlay.classList.remove('hidden');
+        switchFocusView('clock');
+        updateQuote(true);
+        startFocusLoop();
+        renderFocusTasks();
+        // NOTE: Removed automatic requestFullscreen() here
+    };
+    // 2. Exit Focus Mode
+    document.getElementById('exit-super-focus').addEventListener('click', () => {
+        focusOverlay.classList.add('hidden');
+        if (focusInterval) clearInterval(focusInterval);
+        // Exit fullscreen if active
+        if (document.fullscreenElement) {
+            document.exitFullscreen().catch(e => console.log(e));
+        }
+        renderDashboard();
+    });
+    // 3. Toggle Fullscreen (Optional)
+    fullscreenToggleBtn.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(e => console.log(e));
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen().catch(e => console.log(e));
+            }
+        }
+    });
+    // 4. Helper: Auto-Add Missing Cards
+    function ensureRequiredCards() {
+        let added = false;
+        // Check Pomodoro
+        if (!appState.customCards.some(c => c.type === 'pomodoro')) {
+            const newCard = {
+                id: `custom-${Date.now()}-pom`,
+                type: 'pomodoro',
+                title: 'Pomodoro',
+                content: []
+            };
+            appState.customCards.push(newCard);
+            appState.layout.push(newCard.id);
+            // Init default state
+            appState.pomodoroState[newCard.id] = {
+                mode: "pomodoro",
+                time: 25 * 60,
+                isRunning: false,
+                durations: {
+                    pomodoro: 25,
+                    shortBreak: 5,
+                    longBreak: 15
+                }
+            };
+            added = true;
+        }
+        // Check Time Logger
+        if (!appState.customCards.some(c => c.type === 'time-logger')) {
+            const newCard = {
+                id: `custom-${Date.now()}-log`,
+                type: 'time-logger',
+                title: 'Study Logger',
+                content: []
+            };
+            appState.customCards.push(newCard);
+            appState.layout.push(newCard.id);
+            // Init default state
+            appState.timeLoggerState[newCard.id] = {
+                isRunning: false,
+                accumulatedTime: 0,
+                currentSubject: "Physics"
+            };
+            added = true;
+        }
+        if (added) {
+            appState.save("customCards");
+            appState.save("layout");
+            appState.save("pomodoroState");
+            appState.save("timeLoggerState");
+            renderDashboard(); // Update background DOM
+            console.log("Auto-added missing timer cards for Focus Mode.");
+        }
+    }
+    // 5. Tab Switching
+    viewTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const targetView = tab.dataset.view;
+            if (targetView === 'timer' || targetView === 'dashboard') {
+                ensureRequiredCards(); // <--- Auto-add magic happens here
+                // Auto-correct mode if we just added a card
+                if (targetView === 'timer') {
+                    const hasPomodoro = appState.customCards.some(c => c.type === 'pomodoro');
+                    const hasLogger = appState.customCards.some(c => c.type === 'time-logger');
+                    if (!hasPomodoro && currentTimerMode === 'pomodoro') setTimerMode('logger');
+                    if (!hasLogger && currentTimerMode === 'logger') setTimerMode('pomodoro');
+                }
+            }
+            switchFocusView(targetView);
+        });
+    });
+
+    function switchFocusView(viewName) {
+        viewTabs.forEach(t => t.classList.toggle('active', t.dataset.view === viewName));
+        views.forEach(v => v.classList.add('hidden'));
+        document.getElementById(`focus-view-${viewName}`).classList.remove('hidden');
+    }
+    // 6. Timer Logic & Display
+    timerModeBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const mode = btn.dataset.mode;
+            ensureRequiredCards(); // Ensure card exists before switching mode
+            setTimerMode(mode);
+        });
+    });
+
+    function setTimerMode(mode) {
+        currentTimerMode = mode;
+        timerModeBtns.forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+        updateFocusTimerDisplay();
+    }
+
+    function updateFocusTimerDisplay() {
+        let timeStr = "00:00";
+        let isRunning = false;
+        let cardId = null;
+        if (currentTimerMode === 'pomodoro') {
+            const card = appState.customCards.find(c => c.type === 'pomodoro');
+            if (card) {
+                cardId = card.id;
+                const state = appState.pomodoroState[cardId];
+                if (state) {
+                    const m = Math.floor(state.time / 60).toString().padStart(2, '0');
+                    const s = (state.time % 60).toString().padStart(2, '0');
+                    timeStr = `${m}:${s}`;
+                    isRunning = state.isRunning;
+                }
+            }
+        } else {
+            const card = appState.customCards.find(c => c.type === 'time-logger');
+            if (card) {
+                cardId = card.id;
+                const state = appState.timeLoggerState[cardId];
+                if (state) {
+                    let totalSecs = state.accumulatedTime;
+                    if (state.isRunning && state.startTime) {
+                        const elapsed = Math.round((Date.now() - state.startTime) / 1000);
+                        totalSecs += elapsed;
+                    }
+                    timeStr = formatTimeHHMMSS(totalSecs);
+                    isRunning = state.isRunning;
+                }
+            }
+        }
+        // Apply to DOM
+        if (bigTimerDisplay) bigTimerDisplay.textContent = timeStr;
+        if (dashTimerDisplay) dashTimerDisplay.textContent = timeStr;
+        const btnText = isRunning ? "PAUSE" : "START";
+        const btnColor = isRunning ? "#2C2D33" : "grey";
+        [bigTimerToggle, dashTimerToggle].forEach(btn => {
+            if (btn) {
+                btn.textContent = btnText;
+                btn.style.backgroundColor = btnColor;
+                btn.onclick = () => toggleTimerGlobal(cardId, currentTimerMode);
+            }
+        });
+        [bigTimerReset, dashTimerReset].forEach(btn => {
+            if (btn) btn.onclick = () => resetTimerGlobal(cardId, currentTimerMode);
+        });
+    }
+
+    function toggleTimerGlobal(cardId, mode) {
+        if (!cardId) return;
+        if (mode === 'pomodoro') pomodoroTimer.toggle(cardId);
+        else window.timeLogger.toggle(cardId);
+        setTimeout(updateFocusTimerDisplay, 50);
+    }
+
+    function resetTimerGlobal(cardId, mode) {
+        if (!cardId) return;
+        if (mode === 'pomodoro') pomodoroTimer.reset(cardId);
+        else window.timeLogger.reset(cardId);
+        setTimeout(updateFocusTimerDisplay, 50);
+    }
+    // 7. Quote Oscillation
+    function updateQuote(immediate = false) {
+        if (!quoteDisplay) return;
+        const quotes = appState.settings.theme === "alakh-pandey" ? alakhPandeyQuotes : generalQuotes;
+        const rQuote = quotes[Math.floor(Math.random() * quotes.length)];
+        if (immediate) {
+            quoteDisplay.textContent = `"${rQuote.text}"`;
+            quoteDisplay.style.opacity = 1;
+        } else {
+            quoteDisplay.style.opacity = 0;
+            setTimeout(() => {
+                quoteDisplay.textContent = `"${rQuote.text}"`;
+                quoteDisplay.style.opacity = 1;
+            }, 800);
+        }
+    }
+    // 8. Main Loop 
+    function startFocusLoop() {
+        if (focusInterval) clearInterval(focusInterval);
+        quoteTimer = 0;
+        focusInterval = setInterval(() => {
+            const now = new Date();
+            if (clockDisplay) clockDisplay.textContent = now.toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            });
+            if (dateDisplay) dateDisplay.textContent = now.toLocaleDateString([], {
+                weekday: 'long',
+                month: 'long',
+                day: 'numeric'
+            });
+            if (!focusOverlay.classList.contains('hidden')) {
+                updateFocusTimerDisplay();
+            }
+            quoteTimer++;
+            if (quoteTimer >= 10) {
+                updateQuote();
+                quoteTimer = 0;
+            }
+        }, 1000);
+        updateFocusTimerDisplay();
+    }
+    // 9. Tasks (Auto-Create Todo Card if missing)
+    function renderFocusTasks() {
+        if (!dashTaskList) return;
+        dashTaskList.innerHTML = '';
+        let todoCard = appState.customCards.find(c => c.type === 'todo');
+        // Auto-create Todo card if missing
+        if (!todoCard) {
+            todoCard = {
+                id: `custom-${Date.now()}-todo`,
+                type: 'todo',
+                title: 'Tasks',
+                content: []
+            };
+            appState.customCards.push(todoCard);
+            appState.layout.push(todoCard.id);
+            appState.save("customCards");
+            appState.save("layout");
+            renderDashboard();
+        }
+        if (todoCard && todoCard.content) {
+            todoCard.content.forEach(task => {
+                if (!task.completed) {
+                    const li = document.createElement('li');
+                    li.className = "flex items-center gap-3 p-3 bg-white/5 rounded-lg hover:bg-white/10 cursor-pointer group transition-all";
+                    li.innerHTML = `
 
                     <div class="w-4 h-4 rounded-full border border-white/40 group-hover:border-green-400 group-hover:bg-green-400/20 transition-colors"></div>
 
-                    <span class="text-sm text-white/80 group-hover:text-white transition-colors">${e.text}</span>
+                    <span class="text-sm text-white/80 group-hover:text-white transition-colors">${task.text}</span>
 
-                `,t.addEventListener("click",()=>{e.completed=!0,o.save("customCards"),t.style.opacity="0",setTimeout(ej,200)}),eE.appendChild(t)}})}document.getElementById("exit-super-focus").addEventListener("click",()=>{em.classList.add("hidden"),eC&&clearInterval(eC),document.fullscreenElement&&document.exitFullscreen().catch(e=>console.log(e)),j()}),eh.addEventListener("click",()=>{document.fullscreenElement?document.exitFullscreen&&document.exitFullscreen().catch(e=>console.log(e)):document.documentElement.requestFullscreen().catch(e=>console.log(e))}),eg.forEach(e=>{e.addEventListener("click",()=>{let t=e.dataset.view;if(("timer"===t||"dashboard"===t)&&(e2(),"timer"===t)){let s=o.customCards.some(e=>"pomodoro"===e.type),a=o.customCards.some(e=>"time-logger"===e.type);s||"pomodoro"!==eL||e4("logger"),a||"logger"!==eL||e4("pomodoro")}eI(t)})}),eS.forEach(e=>{e.addEventListener("click",()=>{let t=e.dataset.mode;e2(),e4(t)})}),ew&&ew.addEventListener("keypress",e=>{if("Enter"===e.key&&e.target.value.trim()){let t=o.customCards.find(e=>"todo"===e.type);t||(t={id:`custom-${Date.now()}`,type:"todo",title:"Tasks",content:[]},o.customCards.push(t)),t.content.push({text:e.target.value.trim(),completed:!1}),o.save("customCards"),ej(),e.target.value=""}});let e6=document.querySelector(".default-header .flex.items-center.space-x-2"),e7=document.getElementById("open-focus-mode-btn");if(e7&&e7.remove(),e6){let eA=document.createElement("button");eA.id="open-focus-mode-btn",eA.className="bg-gray-700/50 hover:bg-gray-600/60 text-white font-bold p-2 rounded-full transition-colors text-sm",eA.title="Super Focus Mode",eA.innerHTML='<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>',eA.addEventListener("click",eT);let eD=document.getElementById("zen-mode-btn");e6.insertBefore(eA,eD)}let e5=document.getElementById("shortcuts-modal"),eP=document.getElementById("close-shortcuts-modal");eP&&eP.addEventListener("click",()=>{e5.classList.add("hidden")}),document.addEventListener("keydown",e=>{let t=document.activeElement.tagName,s="INPUT"===t||"TEXTAREA"===t||"SELECT"===t||document.activeElement.isContentEditable;if("Escape"===e.key){if(s){document.activeElement.blur();return}Object.values(i.modals).forEach(e=>e.classList.add("hidden")),e5&&e5.classList.add("hidden"),document.getElementById("mobile-alert")&&document.getElementById("mobile-alert").classList.add("hidden");return}if(s)return;let a=e.key.toLowerCase();switch(a){case" ":e.preventDefault();let r=o.activeTimer.cardId,n=o.activeTimer.type;if(!r){let l=o.customCards.find(e=>"pomodoro"===e.type);l&&(r=l.id,n="pomodoro")}r&&n&&("pomodoro"===n&&Z.toggle(r),"time-logger"===n&&window.timeLogger.toggle(r));break;case"z":i.body.classList.toggle("zen-mode");let d=i.body.classList.contains("zen-mode");i.buttons.exitZenBtn.classList.toggle("hidden",!d);break;case"n":e.preventDefault(),i.modals.addCard.classList.remove("hidden"),setTimeout(()=>i.forms.newCard.querySelector("input").focus(),100);break;case"c":i.modals.customize.classList.toggle("hidden");break;case"f":"function"==typeof eT&&eT();break;case"?":case"/":e5&&e5.classList.remove("hidden")}});let eR=()=>{if(!window.driver?.js?.driver){console.warn("Driver.js not loaded");return}let e=document.getElementById("info-modal");e&&e.classList.add("hidden");let t=document.getElementById("customize-modal");t&&t.classList.add("hidden"),setTimeout(()=>{let e=window.driver.js.driver,t=o.settings.ricedModeEnabled,s=t?".top-bar":".default-header",a=[{element:t?"#main-title-riced":"#main-title",popover:{title:"Welcome to StudyLocus",description:"Your personal JEE/NEET command center. Drag cards to reorder them.",side:"bottom",align:"start"}},{element:"#dashboard-grid",popover:{title:"Your Workspace",description:"This is where your study tools live.",side:"top"}},{element:`${s} .add-card-btn`,popover:{title:"Add Widgets",description:"Click here to add To-Do lists, Timers, Graphs, or YouTube videos.",side:"bottom"}},{element:`${s} .customize-btn`,popover:{title:"Customise",description:"Change themes, fonts, wallpapers, and set your Exam Goal here. (IMPORTANT)",side:"bottom"}},{element:`${s} .zen-mode-btn`,popover:{title:"Zen Mode",description:"Hide everything except your dashboard for deep focus.",side:"bottom"}},{element:".fab-container",popover:{title:"Quick Tools",description:"Fast access to Syllabus Tracker and Zenith.",side:"left"}},{element:t?"#auth-container-riced":"#auth-container",popover:{title:"Cloud Sync & Backup",description:"Sign in with Google to save your dashboard, tasks, and settings to the cloud. Never lose your progress and access your study space from any device! NOT COMPULSORY :)",side:"left",align:"center"}},{element:t?"#main-title-riced":"#main-title",popover:{title:"Well, good luck with your preparation!",description:"If you like the project, share it with others and follow me on github pls \uD83D\uDE42",side:"bottom",align:"center"}},],r=a.filter(e=>{let t=document.querySelector(e.element);return t&&(t.offsetWidth>0||t.offsetHeight>0)}),n=e({showProgress:!0,animate:!0,allowClose:!0,overlayClickNext:!1,popoverClass:"driverjs-theme",steps:r,onDestroyStarted(){localStorage.setItem("tutorialSeen_v2","true"),n.destroy()}});n.drive()},300)};window.startTutorial=eR;let eH=document.querySelectorAll(".settings-nav-btn"),eN=document.querySelectorAll(".settings-panel");eH.forEach(e=>{e.addEventListener("click",()=>{eH.forEach(e=>e.classList.remove("active")),e.classList.add("active"),eN.forEach(e=>e.classList.add("hidden"));let t=`panel-${e.dataset.target}`,s=document.getElementById(t);s&&s.classList.remove("hidden")})})});
+                `;
+                    li.addEventListener('click', () => {
+                        task.completed = true;
+                        appState.save("customCards");
+                        li.style.opacity = '0';
+                        setTimeout(renderFocusTasks, 200);
+                    });
+                    dashTaskList.appendChild(li);
+                }
+            });
+        }
+    }
+    if (dashAddTaskInput) {
+        dashAddTaskInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && e.target.value.trim()) {
+                let todoCard = appState.customCards.find(c => c.type === 'todo');
+                if (!todoCard) {
+                    todoCard = {
+                        id: `custom-${Date.now()}`,
+                        type: 'todo',
+                        title: 'Tasks',
+                        content: []
+                    };
+                    appState.customCards.push(todoCard);
+                }
+                todoCard.content.push({
+                    text: e.target.value.trim(),
+                    completed: false
+                });
+                appState.save("customCards");
+                renderFocusTasks();
+                e.target.value = '';
+            }
+        });
+    }
+    // --- TRIGGER BUTTON ---
+    const staticFocusBtn = document.getElementById('static-focus-btn');
+    if (staticFocusBtn) {
+        staticFocusBtn.addEventListener('click', openFocusMode);
+    }
+    const controlsContainer = document.querySelector('.default-header .flex.items-center.space-x-2');
+    // const oldBtn = document.getElementById('open-focus-mode-btn');
+    // if (oldBtn) oldBtn.remove();
+    if (controlsContainer) {
+        const focusBtn = document.createElement('button');
+        focusBtn.id = 'open-focus-mode-btn';
+        focusBtn.className = "bg-gray-700/50 hover:bg-gray-600/60 text-white font-bold p-2 rounded-full transition-colors text-sm";
+        focusBtn.title = "Super Focus Mode";
+        focusBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>`;
+        focusBtn.addEventListener('click', openFocusMode);
+        const zenBtn = document.getElementById('zen-mode-btn');
+        controlsContainer.insertBefore(focusBtn, zenBtn);
+    }
+
+    // --- KEYBOARD SHORTCUTS LOGIC ---
+
+    const shortcutsModal = document.getElementById("shortcuts-modal");
+    const closeShortcutsBtn = document.getElementById("close-shortcuts-modal");
+
+    if (closeShortcutsBtn) {
+        closeShortcutsBtn.addEventListener("click", () => {
+            shortcutsModal.classList.add("hidden");
+        });
+    }
+
+    document.addEventListener("keydown", (e) => {
+        // 1. IGNORE if user is typing in an input, textarea, or select
+        const tagName = document.activeElement.tagName;
+        const isTyping = (tagName === "INPUT" || tagName === "TEXTAREA" || tagName === "SELECT" || document.activeElement.isContentEditable);
+
+        // Exception: Allow ESC to blur focus from an input
+        if (e.key === "Escape") {
+            if (isTyping) {
+                document.activeElement.blur();
+                return;
+            }
+            // Close all modals
+            Object.values(domElements.modals).forEach(modal => modal.classList.add("hidden"));
+            if (shortcutsModal) shortcutsModal.classList.add("hidden");
+            if (document.getElementById('mobile-alert')) document.getElementById('mobile-alert').classList.add("hidden");
+            return;
+        }
+
+        // If typing, stop here. Do not trigger other shortcuts.
+        if (isTyping) return;
+
+        // 2. SHORTCUT MAPPINGS
+        const key = e.key.toLowerCase();
+
+        switch (key) {
+            case " ": // Spacebar -> Toggle Active Timer
+                e.preventDefault(); // Prevent scrolling
+                // Priority: Active Timer -> First Pomodoro -> First Logger
+                let targetId = appState.activeTimer.cardId;
+                let targetType = appState.activeTimer.type;
+
+                if (!targetId) {
+                    const pomCard = appState.customCards.find(c => c.type === "pomodoro");
+                    if (pomCard) {
+                        targetId = pomCard.id;
+                        targetType = "pomodoro";
+                    }
+                }
+
+                if (targetId && targetType) {
+                    if (targetType === "pomodoro") pomodoroTimer.toggle(targetId);
+                    if (targetType === "time-logger") window.timeLogger.toggle(targetId);
+                }
+                break;
+
+            case "z": // Z -> Toggle Zen Mode
+                domElements.body.classList.toggle("zen-mode");
+                const isZen = domElements.body.classList.contains("zen-mode");
+                domElements.buttons.exitZenBtn.classList.toggle("hidden", !isZen);
+                break;
+
+            case "n": // N -> New Card Modal
+                e.preventDefault();
+                domElements.modals.addCard.classList.remove("hidden");
+                // Auto-focus the input
+                setTimeout(() => domElements.forms.newCard.querySelector("input").focus(), 100);
+                break;
+
+            case "c": // C -> Customize Menu
+                domElements.modals.customize.classList.toggle("hidden");
+                break;
+
+            case "f": // F -> Super Focus Mode
+                // Check if the focus mode function exists (from your existing code)
+                if (typeof openFocusMode === 'function') {
+                    openFocusMode();
+                }
+                break;
+
+            case "?": // ? (Shift + /) -> Show Shortcuts Help
+            case "/":
+                if (shortcutsModal) shortcutsModal.classList.remove("hidden");
+                break;
+        }
+    });
+
+    // --- Updated Tutorial Logic ---
+    const startTutorial = () => {
+        // Check if Driver.js is loaded
+        if (!window.driver?.js?.driver) {
+            console.warn("Driver.js not loaded");
+            return;
+        }
+
+        // --- STEP 1: UI CLEANUP ---
+        // Close the Info Modal immediately
+        const infoModal = document.getElementById("info-modal");
+        if (infoModal) infoModal.classList.add("hidden");
+
+        // Close Customise Modal if open
+        const customizeModal = document.getElementById("customize-modal");
+        if (customizeModal) customizeModal.classList.add("hidden");
+
+        // --- STEP 2: START DRIVER AFTER DELAY ---
+        // We wait 300ms to let the modal vanish visually before the tutorial highlights elements
+        setTimeout(() => {
+            const driver = window.driver.js.driver;
+
+            // Determine active layout (for the button highlighting fix)
+            const isRicedMode = appState.settings.ricedModeEnabled;
+            const headerScope = isRicedMode ? '.top-bar' : '.default-header';
+
+            const rawSteps = [
+                {
+                    element: isRicedMode ? '#main-title-riced' : '#main-title',
+                    popover: {
+                        title: 'Welcome to StudyLocus',
+                        description: 'Your personal JEE/NEET command center. Drag cards to reorder them.',
+                        side: 'bottom',
+                        align: 'start'
+                    }
+                },
+                {
+                    element: '#dashboard-grid',
+                    popover: {
+                        title: 'Your Workspace',
+                        description: 'This is where your study tools live.',
+                        side: 'top'
+                    }
+                },
+                {
+                    element: `${headerScope} .add-card-btn`,
+                    popover: {
+                        title: 'Add Widgets',
+                        description: 'Click here to add To-Do lists, Timers, Graphs, or YouTube videos.',
+                        side: 'bottom'
+                    }
+                },
+                {
+                    element: `${headerScope} .customize-btn`,
+                    popover: {
+                        title: 'Customise',
+                        description: 'Change themes, fonts, wallpapers, and set your Exam Goal here. (IMPORTANT)',
+                        side: 'bottom'
+                    }
+                },
+                {
+                    element: `${headerScope} .zen-mode-btn`,
+                    popover: {
+                        title: 'Zen Mode',
+                        description: 'Hide everything except your dashboard for deep focus.',
+                        side: 'bottom'
+                    }
+                },
+                {
+                    element: '.fab-container',
+                    popover: {
+                        title: 'Quick Tools',
+                        description: 'Fast access to Syllabus Tracker and Zenith.',
+                        side: 'left'
+                    }
+                },
+                {
+                    // Selects the correct container based on the current mode
+                    element: isRicedMode ? '#auth-container-riced' : '#auth-container',
+                    popover: {
+                        title: 'Cloud Sync & Backup',
+                        description: 'Sign in with Google to save your dashboard, tasks, and settings to the cloud. Never lose your progress and access your study space from any device! NOT COMPULSORY :)',
+                        side: 'left',
+                        align: 'center'
+                    }
+                },
+                {
+                    element: isRicedMode ? '#main-title-riced' : '#main-title',
+                    popover: {
+                        title: 'Well, good luck with your preparation!',
+                        description: "If you like the project, share it with others and follow me on github pls 🙂",
+                        side: 'bottom',
+                        align: 'center'
+                    }
+                },
+            ];
+
+            // Filter for visible elements only
+            const validSteps = rawSteps.filter(step => {
+                const el = document.querySelector(step.element);
+                return el && (el.offsetWidth > 0 || el.offsetHeight > 0);
+            });
+
+            const driverObj = driver({
+                showProgress: true,
+                animate: true,
+                allowClose: true,
+                overlayClickNext: false,
+                popoverClass: 'driverjs-theme',
+                steps: validSteps,
+                onDestroyStarted: () => {
+                    localStorage.setItem("tutorialSeen_v2", "true");
+                    driverObj.destroy();
+                }
+            });
+
+            driverObj.drive();
+        }, 300); // 300ms delay for smooth transition
+    };
+
+    // const hasSeenTutorial = localStorage.getItem("tutorialSeen_v2");
+    window.startTutorial = startTutorial;
+
+    // if (!hasSeenTutorial) {
+    //     console.log("User has not seen tutorial. Prompting...");
+
+    //     setTimeout(() => {
+    //         showConfirmModal(
+    //             "Would you like a quick tour of the dashboard features?", // Message
+    //             () => {
+    //                 // User clicked "Start Tour"
+    //                 startTutorial(); 
+    //             },
+    //             "Welcome to StudyLocus!", // Title
+    //             () => {
+    //                 // User clicked "Skip"
+    //                 // Mark as seen so we don't ask again
+    //                 localStorage.setItem("tutorialSeen_v2", "true");
+    //             },
+    //             "Start Tour", // Confirm Button Text
+    //             "Skip"        // Cancel Button Text
+    //         );
+    //     }, 1500); 
+    // }
+    const settingsNavBtns = document.querySelectorAll('.settings-nav-btn');
+    const settingsPanels = document.querySelectorAll('.settings-panel');
+
+    settingsNavBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // 1. Remove active class from all buttons
+            settingsNavBtns.forEach(b => b.classList.remove('active'));
+            // 2. Add active class to clicked button
+            btn.classList.add('active');
+
+            // 3. Hide all panels
+            settingsPanels.forEach(p => p.classList.add('hidden'));
+
+            // 4. Show target panel
+            const targetId = `panel-${btn.dataset.target}`;
+            const targetPanel = document.getElementById(targetId);
+            if (targetPanel) targetPanel.classList.remove('hidden');
+        });
+    });
+});
