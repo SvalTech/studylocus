@@ -4054,16 +4054,41 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // --- App Initialization ---
-    domElements.mainTitle.addEventListener("click", (event) => {
-        if (event.detail === 3) {
-            // Triple click
-            clearTimeout(null);
-            domElements.inputs.theme.querySelector('[value="alakh-pandey"]').classList.remove("hidden");
-            appState.settings.theme = "alakh-pandey";
-            appState.saveSettings();
-            applySettings();
-            renderDashboard();
+    let tapCount = 0;
+    let tapTimer;
+
+    const triggerAlakhPandey = () => {
+        // Reveal hidden theme option
+        const alakhOption = domElements.inputs.theme.querySelector('[value="alakh-pandey"]');
+        if (alakhOption) alakhOption.classList.remove("hidden");
+
+        // Apply Theme
+        appState.settings.theme = "alakh-pandey";
+        appState.saveSettings();
+        applySettings();
+        renderDashboard();
+
+        // Play sound (Tone.js)
+        if (typeof Tone !== 'undefined') {
+            new Tone.Synth().toDestination().triggerAttackRelease("G4", "0.5");
         }
+    };
+
+    // Handle taps on BOTH titles (Standard and Riced)
+    [domElements.mainTitle, domElements.mainTitleRiced].forEach(titleEl => {
+        if (!titleEl) return;
+
+        titleEl.addEventListener("click", (e) => {
+            tapCount++;
+            clearTimeout(tapTimer);
+
+            if (tapCount === 3) {
+                triggerAlakhPandey();
+                tapCount = 0;
+            } else {
+                tapTimer = setTimeout(() => { tapCount = 0; }, 400); // Reset if 3 taps don't happen in 400ms
+            }
+        });
     });
     // --- FIX: Add a flag to resume audio context only once ---
     let audioContextResumed = false;
@@ -5128,12 +5153,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- CALENDAR & DRAG-DROP MANAGER ---
     // --- CALENDAR & DRAG-DROP MANAGER (UPDATED) ---
+    // --- CALENDAR & DRAG-DROP MANAGER (UPDATED) ---
     const calendarManager = {
         currentDate: new Date(),
+        listenersAttached: false, // <--- FIX 1: Add flag to prevent duplicate listeners
 
         init() {
             this.render();
-            this.attachHeaderListeners();
+            // <--- FIX 1: Only attach listeners if not already attached
+            if (!this.listenersAttached) {
+                this.attachHeaderListeners();
+                this.listenersAttached = true;
+            }
         },
 
         getDailyTasksCard() {
@@ -5165,11 +5196,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const firstDay = new Date(year, month, 1);
             const lastDay = new Date(year, month + 1, 0);
-            const startDayIndex = firstDay.getDay();
+
+            // <--- FIX 2: Monday Start Logic
+            // Standard getDay(): Sun=0, Mon=1...
+            // We want Mon=0, ... Sun=6
+            // Formula: (day + 6) % 7
+            const startDayIndex = (firstDay.getDay() + 6) % 7;
 
             const totalCells = 42;
 
-            const taskCard = this.getDailyTasksCard(); // Get card reference
+            const taskCard = this.getDailyTasksCard();
             const taskData = taskCard.content;
             const todayISO = formatDateToISO(new Date());
 
@@ -5191,7 +5227,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 // Task Container (Scrollable)
                 const taskContainer = document.createElement('div');
-                taskContainer.className = 'cal-task-container'; // Updated Class
+                taskContainer.className = 'cal-task-container';
                 taskContainer.dataset.date = isoDate;
 
                 const tasks = taskData[isoDate] || [];
@@ -5209,41 +5245,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 this.makeSortable(taskContainer);
 
-                // --- NEW CLICK LOGIC: GO TO DASHBOARD ---
+                // Click to go to dashboard
                 cell.addEventListener('click', (e) => {
                     if (e.target.closest('.cal-task-pill')) return;
-
-                    // 1. Switch to Dashboard Tab
                     const dashboardTab = document.querySelector('[data-target="dashboard"]');
                     if (dashboardTab) dashboardTab.click();
 
-                    // 2. Find and Scroll to Daily Tasks Card
                     setTimeout(() => {
                         const cardElement = document.querySelector(`[data-card-id="${taskCard.id}"]`);
                         if (cardElement) {
-                            // A. Scroll into view
                             cardElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-                            // B. Highlight visually (optional)
                             cardElement.style.transition = "box-shadow 0.5s";
                             cardElement.style.boxShadow = "0 0 20px var(--accent-color)";
                             setTimeout(() => cardElement.style.boxShadow = "", 1500);
-
-                            // C. Update the Card's Date Input & Render
                             const dateInput = cardElement.querySelector('.daily-date-selector');
                             if (dateInput) {
                                 dateInput.value = isoDate;
-                                // Trigger change event logic manually since setting value via JS doesn't fire it
                                 cardElement.dataset.selectedDate = isoDate;
                                 if (cardRenderers["daily-tasks"]) {
                                     cardRenderers["daily-tasks"].render(cardElement, taskCard);
                                 }
                             }
-                        } else {
-                            // Edge case: Card deleted or not in view
-                            alert("Daily Tasks card not found in dashboard.");
                         }
-                    }, 100); // Short delay to allow tab switch transition
+                    }, 100);
                 });
             }
         },
@@ -5270,30 +5294,29 @@ document.addEventListener("DOMContentLoaded", () => {
         moveTask(fromDate, toDate, oldIndex, newIndex) {
             const card = this.getDailyTasksCard();
             const sourceList = card.content[fromDate];
-
             const [movedTask] = sourceList.splice(oldIndex, 1);
-
             if (sourceList.length === 0) delete card.content[fromDate];
-
             if (!card.content[toDate]) card.content[toDate] = [];
             card.content[toDate].splice(newIndex, 0, movedTask);
-
             appState.save("customCards");
-
-            // Re-render dashboard to keep card in sync
             renderDashboard();
         },
 
         attachHeaderListeners() {
-            document.getElementById('cal-prev-btn').addEventListener('click', () => {
+            // These listeners now only attach ONCE due to the init flag
+            const prevBtn = document.getElementById('cal-prev-btn');
+            const nextBtn = document.getElementById('cal-next-btn');
+            const todayBtn = document.getElementById('cal-today-btn');
+
+            if (prevBtn) prevBtn.addEventListener('click', () => {
                 this.currentDate.setMonth(this.currentDate.getMonth() - 1);
                 this.render();
             });
-            document.getElementById('cal-next-btn').addEventListener('click', () => {
+            if (nextBtn) nextBtn.addEventListener('click', () => {
                 this.currentDate.setMonth(this.currentDate.getMonth() + 1);
                 this.render();
             });
-            document.getElementById('cal-today-btn').addEventListener('click', () => {
+            if (todayBtn) todayBtn.addEventListener('click', () => {
                 this.currentDate = new Date();
                 this.render();
             });

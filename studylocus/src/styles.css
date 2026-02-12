@@ -2319,3 +2319,36 @@ body.zen-mode .manual-entry-container {
 .cal-task-pill[data-priority="high"] { border-left: 3px solid #ef4444; }
 .cal-task-pill[data-priority="medium"] { border-left: 3px solid #f59e0b; }
 .cal-task-pill[data-priority="low"] { border-left: 3px solid #3b82f6; }
+
+/* --- MOBILE FIXES --- */
+@media (max-width: 768px) {
+    /* FIX 3: Hide Super Focus Button on Phone */
+    #static-focus-btn, 
+    #open-focus-mode-btn {
+        display: none !important;
+    }
+
+    /* FIX 4: Prevent Sign-in/User Menu Cut-off */
+    /* Ensure the dropdown anchors to the right correctly on small screens */
+    #user-menu-dropdown {
+        right: 0 !important;
+        left: auto !important;
+        margin-right: 10px !important;
+        width: 200px !important;
+        max-width: 90vw !important;
+        /* Ensure it sits on top of everything */
+        position: absolute !important; 
+        z-index: 9999 !important;
+    }
+    
+    /* Ensure the container doesn't push it out */
+    #user-menu-container {
+        position: static; 
+    }
+}
+
+#main-title, #main-title-riced {
+    touch-action: manipulation; /* Disables double-tap-to-zoom, making triple-tap faster */
+    user-select: none;          /* Prevents text selection during rapid tapping */
+    -webkit-user-select: none;
+}
