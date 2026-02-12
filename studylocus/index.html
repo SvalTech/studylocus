@@ -1,0 +1,2116 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StudyLocus | Customizable Dashboard for JEE & NEET Prep</title>
+  <meta name="description"
+    content="A customizable dashboard for students preparing for JEE, NEET, and other competitive exams. Track your progress with a journey graph, manage tasks with to-do lists, and stay focused with a Pomodoro timer.">
+  <meta name="keywords"
+    content="JEE dashboard, NEET dashboard, study planner, exam preparation, Pomodoro timer, syllabus tracker, mock test analysis, student dashboard, JEE 2026, NEET 2026, study logger">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://sval.tech/studylocus/">
+  <meta property="og:title" content="StudyLocus | Customizable Dashboard for JEE & NEET Prep">
+  <meta property="og:description"
+    content="A customizable dashboard for students preparing for JEE, NEET, and other competitive exams. Track your progress, manage tasks, and stay focused.">
+  <meta property="og:image" content="https://i.ibb.co/5Wm282XC/logo1.png">
+
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://sval.tech/studylocus/">
+  <meta property="twitter:title" content="StudyLocus | Customizable Dashboard for JEE & NEET Prep">
+  <meta property="twitter:description"
+    content="A customizable dashboard for students preparing for JEE, NEET, and other competitive exams. Track your progress, manage tasks, and stay focused.">
+  <meta property="twitter:image" content="https://i.ibb.co/5Wm282XC/logo1.png">
+
+  <link rel="canonical" href="https://sval.tech/studylocus/" />
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Comic+Neue&family=Fira+Code&family=Inter:wght@400;600;700&family=Roboto+Slab&family=Poppins:wght@300;400;500;600;700&family=Oswald:wght@400;500;700&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+    rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            inter: ["'Inter'", "sans-serif"],
+            roboto: ["'Roboto Slab'", "serif"],
+            fira: ["'Fira Code'", "monospace"],
+            comic: ["'Comic Neue'", "cursive"],
+            poppins: ["'Poppins'", "sans-serif"],
+            oswald: ["'Oswald'", "sans-serif"],
+            space: ["'Space Grotesk'", "sans-serif"],
+            jetbrains: ["'JetBrains Mono'", "monospace"],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* FORCE Tutorial on top of everything */
+    .driver-popover.driverjs-theme {
+      z-index: 999999 !important;
+      background-color: #18181b;
+      color: white;
+      border: 1px solid #3f3f46;
+    }
+
+    /* Ensure the overlay is also on top of your navbar/modals */
+    #driver-page-overlay {
+      z-index: 999998 !important;
+    }
+
+    /* Make sure buttons are visible and clickable */
+    .driver-popover.driverjs-theme button {
+      background-color: #27272a;
+      color: white;
+      border: 1px solid #52525b;
+      text-shadow: none;
+      cursor: pointer;
+      z-index: 1000000;
+      /* Super high to ensure clickability */
+    }
+
+    .driver-popover.driverjs-theme button:hover {
+      background-color: var(--accent-color, #6366f1);
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css" />
+  <script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.js.iife.js"></script>
+  <link rel="stylesheet" href="styles.css">
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "StudyLocus Dashboard",
+      "applicationCategory": "EducationalApplication",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "0"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "Shaurya Pratap Singh",
+        "url": "https://github.com/svalordev"
+      },
+      "description": "A customizable dashboard for students preparing for JEE, NEET, and other competitive exams. Track your progress with a journey graph, manage tasks with to-do lists, and stay focused with a Pomodoro timer."
+    }
+    </script>
+</head>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-TCK0S6VC58"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag() { dataLayer.push(arguments); }
+  gtag('js', new Date());
+
+  gtag('config', 'G-TCK0S6VC58');
+</script>
+
+<body class="antialiased">
+
+  <div id="app-background" class="fixed inset-0 w-full h-full -z-50 pointer-events-none">
+  </div>
+
+  <div id="bg-overlay" class="fixed inset-0 w-full h-full -z-40 pointer-events-none"></div>
+  <!-- Riced Linux Header -->
+  <header class="top-bar">
+    <div class="top-bar-left">
+      <h1 id="main-title-riced" class="font-bold cursor-pointer"></h1>
+    </div>
+    <div class="top-bar-center header-controls">
+      <button class="customize-btn" title="Customize Dashboard" aria-label="Customize Dashboard">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="4" x2="4" y1="21" y2="14"></line>
+          <line x1="4" x2="4" y1="10" y2="3"></line>
+          <line x1="12" x2="12" y1="21" y2="12"></line>
+          <line x1="12" x2="12" y1="8" y2="3"></line>
+          <line x1="20" x2="20" y1="21" y2="16"></line>
+          <line x1="20" x2="20" y1="12" y2="3"></line>
+          <line x1="1" x2="7" y1="14" y2="14"></line>
+          <line x1="9" x2="15" y1="8" y2="8"></line>
+          <line x1="17" x2="23" y1="16" y2="16"></line>
+        </svg>
+      </button>
+      <button class="add-card-btn btn-primary" title="Add New Card" aria-label="Add New Card">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+      </button>
+      <button class="info-btn" title="About this project" aria-label="About this project">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <path d="M12 16v-4"></path>
+          <path d="M12 8h.01"></path>
+        </svg>
+      </button>
+      <button class="zen-mode-btn" title="Enter Zen Mode" aria-label="Enter Zen Mode">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2Z"></path>
+          <path d="m9.5 16.5 4-4"></path>
+          <path d="m14.5 16.5-4-4"></path>
+          <path d="M12 8V7"></path>
+        </svg>
+      </button>
+    </div>
+    <div class="top-bar-right header-controls">
+      <div id="auth-container-riced"></div>
+    </div>
+  </header>
+  <div id="bg-overlay"></div>
+  <div id="sync-status-toast"></div>
+  <div class="container mx-auto px-2 sm:px-4 py-6">
+    <header class="default-header header-capsule flex flex-wrap justify-between items-center gap-y-2 relative">
+
+      <div class="flex items-center gap-3 pl-2">
+        <span class="brand-text hidden sm:block">sval.tech</span>
+        <span class="hidden sm:block text-gray-600">|</span>
+        <h1 id="main-title"
+          class="text-lg sm:text-xl font-bold tracking-tight cursor-pointer hover:text-[var(--accent-color)] transition-colors">
+          JEE 2026
+        </h1>
+      </div>
+
+      <div
+        class="order-last w-full md:w-auto md:absolute md:left-1/2 md:transform md:-translate-x-1/2 flex justify-center mt-2 md:mt-0">
+        <nav class="flex p-1 bg-black/20 backdrop-blur-md rounded-full border border-white/10 shadow-inner">
+          <button
+            class="view-tab-btn active px-4 py-1.5 text-xs font-bold rounded-full transition-all text-gray-400 hover:text-white hover:bg-white/5"
+            data-target="dashboard">
+            Dashboard
+          </button>
+          <button
+            class="view-tab-btn px-4 py-1.5 text-xs font-bold rounded-full transition-all text-gray-400 hover:text-white hover:bg-white/5"
+            data-target="calendar">
+            Calendar
+          </button>
+          <button
+            class="view-tab-btn px-4 py-1.5 text-xs font-bold rounded-full transition-all text-gray-400 hover:text-white hover:bg-white/5"
+            data-target="statistics">
+            Statistics
+          </button>
+        </nav>
+      </div>
+
+      <div class="flex items-center gap-2 pr-1 ml-auto md:ml-0">
+        <div id="auth-container" class="scale-90 origin-right"></div>
+        <div class="h-4 w-px bg-white/10 mx-1 hidden sm:block"></div>
+        <div class="flex items-center gap-1.5">
+          <button class="add-card-btn capsule-btn" title="Add New Card"><svg xmlns="http://www.w3.org/2000/svg"
+              width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg></button>
+          <button class="customize-btn capsule-btn" title="Customize"><svg xmlns="http://www.w3.org/2000/svg" width="16"
+              height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path
+                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+              </path>
+            </svg></button>
+          <button class="info-btn capsule-btn" title="Info"><svg xmlns="http://www.w3.org/2000/svg" width="16"
+              height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg></button>
+          <button id="static-focus-btn" class="capsule-btn" title="Super Focus Mode"><svg
+              xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <circle cx="12" cy="12" r="3" />
+            </svg></button>
+          <button class="zen-mode-btn capsule-btn" title="Enter Zen Mode"><svg xmlns="http://www.w3.org/2000/svg"
+              width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <circle cx="12" cy="12" r="4"></circle>
+              <line x1="4.93" y1="4.93" x2="9.17" y2="9.17"></line>
+              <line x1="14.83" y1="14.83" x2="19.07" y2="19.07"></line>
+              <line x1="14.83" y1="9.17" x2="19.07" y2="4.93"></line>
+              <line x1="14.83" y1="9.17" x2="18.36" y2="5.64"></line>
+              <line x1="4.93" y1="19.07" x2="9.17" y2="14.83"></line>
+            </svg></button>
+        </div>
+      </div>
+    </header>
+
+    <div id="view-container">
+
+      <div id="view-dashboard" class="view-section">
+        <main id="dashboard-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        </main>
+      </div>
+
+      <div id="view-statistics" class="view-section hidden animate-fade-in-down">
+        <div class="max-w-7xl mx-auto space-y-6 pb-20">
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="card rounded-2xl p-5 flex flex-col justify-center">
+              <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="currentColor"
+                  class="text-orange-500">
+                  <path
+                    d="M17.657 18.657A8 8 0 0 1 6.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0 1 20 13a7.975 7.975 0 0 1-2.343 5.657z">
+                  </path>
+                </svg>
+              </div>
+              <div>
+                <div class="text-xs text-orange-400 font-bold uppercase tracking-widest mb-1">Current Streak</div>
+                <div class="text-3xl font-black text-white" id="stat-streak">0 Days</div>
+                <div class="text-[10px] text-gray-400 mt-1">Keep the fire burning!</div>
+              </div>
+            </div>
+
+            <div class="card rounded-2xl p-5 flex flex-col justify-center">
+              <div>
+                <div class="text-xs text-blue-400 font-bold uppercase tracking-widest mb-1">Consistency Score</div>
+                <div class="text-3xl font-black text-white" id="stat-consistency">0%</div>
+                <div class="text-[10px] text-gray-400 mt-1">Based on daily study variance</div>
+              </div>
+              <div
+                class="h-12 w-12 rounded-full border-4 border-blue-500/30 flex items-center justify-center text-xs font-bold text-blue-400"
+                id="stat-consistency-grade">
+                -
+              </div>
+            </div>
+
+            <div class="card rounded-2xl p-5 flex flex-col justify-center">
+              <div class="flex justify-between items-end">
+                <div>
+                  <div class="text-xs text-gray-400 font-bold uppercase tracking-widest mb-1">Total Logged</div>
+                  <div class="text-2xl font-bold text-white" id="stat-total-time">0h 0m</div>
+                </div>
+                <div class="text-right">
+                  <div class="text-xs text-gray-400 font-bold uppercase tracking-widest mb-1">Daily Avg</div>
+                  <div class="text-xl font-bold text-gray-200" id="stat-daily-avg">0h</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <div class="card rounded-2xl p-6 flex flex-col">
+              <h3 class="text-sm font-bold text-gray-300 uppercase tracking-wider mb-4 border-b border-white/5 pb-2">
+                Study DNA (Day Analysis)
+              </h3>
+              <div class="flex-grow flex items-center justify-center min-h-[250px] relative">
+                <canvas id="stats-radar-chart"></canvas>
+              </div>
+              <p class="text-xs text-center text-gray-500 mt-4 italic" id="stat-day-persona">Analyzing your
+                schedule...</p>
+            </div>
+
+            <div class="card rounded-2xl p-6 flex flex-col">
+              <h3 class="text-sm font-bold text-gray-300 uppercase tracking-wider mb-4 border-b border-white/5 pb-2">
+                Subject Health
+              </h3>
+              <div class="flex-grow flex flex-col justify-center gap-6">
+                <div class="h-40 relative">
+                  <canvas id="stats-subject-chart"></canvas>
+                  <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                    <span class="text-[10px] text-gray-500">RATIO</span>
+                  </div>
+                </div>
+
+                <div class="bg-red-500/10 border border-red-500/20 rounded-lg p-3 hidden" id="neglect-container">
+                  <div class="flex items-center gap-2 mb-1">
+                    <svg class="w-4 h-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <span class="text-xs font-bold text-red-300 uppercase">Needs Attention</span>
+                  </div>
+                  <p class="text-xs text-red-200/80" id="stat-neglected-subjects">You haven't studied Chemistry in
+                    5 days.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="card rounded-2xl p-6">
+              <h3 class="text-sm font-bold text-gray-300 uppercase tracking-wider mb-4 border-b border-white/5 pb-2">
+                Test Metrics
+              </h3>
+
+              <div class="space-y-4">
+                <div class="flex items-center justify-between p-3 bg-green-500/5 border border-green-500/10 rounded-lg">
+                  <div>
+                    <div class="text-[10px] text-green-400 uppercase font-bold">Power Subject</div>
+                    <div class="text-lg font-bold text-white" id="stat-strongest-sub">-</div>
+                  </div>
+                  <div class="text-2xl font-black text-green-500/20">A+</div>
+                </div>
+
+                <div class="flex items-center justify-between p-3 bg-red-500/5 border border-red-500/10 rounded-lg">
+                  <div>
+                    <div class="text-[10px] text-red-400 uppercase font-bold">Critical Weakness</div>
+                    <div class="text-lg font-bold text-white" id="stat-weakest-sub">-</div>
+                  </div>
+                  <div class="text-2xl font-black text-red-500/20">F</div>
+                </div>
+
+                <div class="h-32 w-full mt-4">
+                  <canvas id="stats-performance-chart"></canvas>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="card rounded-2xl p-6">
+            <h3 class="text-sm font-bold text-gray-300 uppercase tracking-wider mb-4 flex justify-between items-center">
+              <span>30-Day Momentum</span>
+              <span class="text-[10px] bg-white/10 px-2 py-1 rounded text-gray-400" id="stat-total-trend">Total:
+                0h</span>
+            </h3>
+            <div class="h-64 w-full">
+              <canvas id="stats-trend-chart"></canvas>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div id="view-calendar" class="view-section hidden animate-fade-in-down h-full">
+        <div class="flex flex-col h-[600px] md:h-[calc(100vh-140px)] max-h-[900px] card rounded-2xl overflow-hidden">
+
+          <div class="flex items-center justify-between p-4 border-b border-white/10 bg-black/20">
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              <span id="cal-month-name">February</span>
+              <span id="cal-year-name" class="text-gray-500 font-normal">2026</span>
+            </h2>
+            <div class="flex items-center gap-1">
+              <button id="cal-prev-btn"
+                class="p-2 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white transition-colors">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="m15 18-6-6 6-6" />
+                </svg>
+              </button>
+              <button id="cal-today-btn"
+                class="px-3 py-1.5 text-xs font-bold bg-white/10 hover:bg-white/20 rounded-lg text-white transition-colors mx-1">
+                Today
+              </button>
+              <button id="cal-next-btn"
+                class="p-2 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white transition-colors">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="m9 18 6-6-6-6" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-7 border-b border-white/10 bg-black/10">
+            <div class="text-center py-2 text-[10px] uppercase font-bold text-gray-500">Sun</div>
+            <div class="text-center py-2 text-[10px] uppercase font-bold text-gray-500">Mon</div>
+            <div class="text-center py-2 text-[10px] uppercase font-bold text-gray-500">Tue</div>
+            <div class="text-center py-2 text-[10px] uppercase font-bold text-gray-500">Wed</div>
+            <div class="text-center py-2 text-[10px] uppercase font-bold text-gray-500">Thu</div>
+            <div class="text-center py-2 text-[10px] uppercase font-bold text-gray-500">Fri</div>
+            <div class="text-center py-2 text-[10px] uppercase font-bold text-gray-500">Sat</div>
+          </div>
+
+          <div id="calendar-grid" class="flex-grow grid grid-cols-7 grid-rows-5 overflow-y-auto">
+          </div>
+        </div>
+      </div>
+
+      <div id="day-editor-modal"
+        class="modal-overlay hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div
+          class="card w-full max-w-md bg-[var(--card-bg-color)] border border-[var(--border-color)] rounded-2xl shadow-2xl transform transition-all scale-100 opacity-100">
+          <div class="card-header flex justify-between items-center p-4 border-b border-white/10">
+            <h2 id="day-editor-title" class="text-lg font-bold text-white">Edit Tasks</h2>
+            <button id="close-day-editor" class="text-gray-400 hover:text-white">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 6 6 18" />
+                <path d="m6 6 12 12" />
+              </svg>
+            </button>
+          </div>
+          <div class="p-4">
+            <form id="day-editor-form" class="flex gap-2 mb-4">
+              <input type="text" placeholder="Add new task..." class="form-input flex-grow" required autocomplete="off">
+              <button type="submit" class="btn-primary px-4 py-2 text-sm font-bold rounded-lg">+</button>
+            </form>
+            <ul id="day-editor-list" class="space-y-2 max-h-[300px] overflow-y-auto custom-scrollbar p-1">
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button id="exit-zen-btn"
+    class="hidden fixed top-4 right-4 bg-gray-800/50 hover:bg-gray-700/70 backdrop-blur-sm text-white font-bold p-2 rounded-full transition-colors z-50"
+    title="Exit Zen Mode" aria-label="Exit Zen Mode"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+      viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+      stroke-linejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg></button>
+
+  <footer class="mt-16 border-t border-zinc-800 pt-8 pb-6 text-center">
+    <div class="flex flex-wrap justify-center gap-4 mb-6">
+      <a href="https://sval.tech/studylocus/termsandconditions.html" style="color: var(--accent-color);"
+        class="px-1.5 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-[10px] text-zinc-400 uppercase tracking-wide hover:border-indigo-500/50 hover:text-indigo-400 transition-colors">
+        Terms and Conditions
+      </a>
+      <a href="https://sval.tech/studylocus/privacypolicy.html" style="color: var(--accent-color);"
+        class="px-1.5 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-[10px] text-zinc-400 uppercase tracking-wide hover:border-indigo-500/50 hover:text-indigo-400 transition-colors">
+        Privacy Policy
+      </a>
+      <a href="https://discord.gg/c8xHpTfM" style="color: var(--accent-color);" target="_blank"
+        class="px-1.5 py-1.5 rounded-full bg-zinc-900 border border-[#5865F2]/20 text-[10px] text-[#5865F2] uppercase tracking-wide hover:text-white hover:border-indigo-500/50 transition-all flex items-center gap-2">
+        <svg class="w-3 h-3 fill-current" viewBox="0 0 127.14 96.36">
+          <path
+            d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.11,77.11,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22c1.24-23.28-3.28-47.54-18.9-72.15ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z" />
+        </svg>
+        Feedback / Discord
+      </a>
+    </div>
+    <p class="text-zinc-600 text-xs">
+      Built by <a href="https://github.com/svalordev" target="_blank" style="color: var(--accent-color);" class="
+        text-zinc-400 hover:text-white transition-colors underline decoration-dotted underline-offset-4">Shaurya
+        Pratap Singh</a>
+    </p>
+
+  </footer>
+
+  <template id="countdown-template">
+    <div class="card" data-card-id="countdown">
+      <div class="card-header">
+        <h2 class="text-lg font-semibold">Countdown</h2>
+        <div class="card-header-controls">
+          <button class="toggle-colspan-btn" title="Toggle size" aria-label="Toggle card size"><svg
+              xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 21l-6-6m6 6v-4m0 4h-4" />
+              <path d="M3 3l6 6" />
+              <path d="M3 3v4m0-4h4" />
+            </svg></button>
+          <span class="drag-handle" aria-label="Drag to reorder"><svg xmlns="http://www.w3.org/2000/svg" width="16"
+              height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <circle cx="9" cy="12" r="1" />
+              <circle cx="9" cy="5" r="1" />
+              <circle cx="9" cy="19" r="1" />
+              <circle cx="15" cy="12" r="1" />
+              <circle cx="15" cy="5" r="1" />
+              <circle cx="15" cy="19" r="1" />
+            </svg></span>
+        </div>
+      </div>
+      <div id="countdown-timer" class="flex justify-center space-x-2 sm:space-x-4 md:space-x-8 text-center py-2">
+        <div>
+          <div data-value="days" class="font-bold">00</div>
+          <div class="text-xs sm:text-sm text-secondary">Days</div>
+        </div>
+        <div>
+          <div data-value="hours" class="font-bold">00</div>
+          <div class="text-xs sm:text-sm text-secondary">Hours</div>
+        </div>
+        <div>
+          <div data-value="minutes" class="font-bold">00</div>
+          <div class="text-xs sm:text-sm text-secondary">Minutes</div>
+        </div>
+        <!-- <div>
+                    <div data-value="seconds" class="font-bold">00</div>
+                    <div class="text-xs sm:text-sm text-secondary">Seconds</div>
+                </div> -->
+      </div>
+    </div>
+  </template>
+
+  <template id="time-template">
+    <div class="card" data-card-id="time">
+      <div class="card-header">
+        <h2 class="text-lg font-semibold">Current Time</h2>
+        <div class="card-header-controls">
+          <button class="toggle-colspan-btn" title="Toggle size" aria-label="Toggle card size"><svg
+              xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 21l-6-6m6 6v-4m0 4h-4" />
+              <path d="M3 3l6 6" />
+              <path d="M3 3v4m0-4h4" />
+            </svg></button>
+          <span class="drag-handle" aria-label="Drag to reorder"><svg xmlns="http://www.w3.org/2000/svg" width="16"
+              height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <circle cx="9" cy="12" r="1" />
+              <circle cx="9" cy="5" r="1" />
+              <circle cx="9" cy="19" r="1" />
+              <circle cx="15" cy="12" r="1" />
+              <circle cx="15" cy="5" r="1" />
+              <circle cx="15" cy="19" r="1" />
+            </svg></span>
+        </div>
+      </div>
+      <div class="text-center py-2">
+        <div data-value="time" class="text-3xl font-bold tracking-wider">00:00:00 AM</div>
+        <div data-value="date" class="text-sm text-secondary">Sunday, August 17, 2025</div>
+      </div>
+    </div>
+  </template>
+
+  <template id="graph-template">
+    <div class="card" data-card-id="graph">
+      <div class="card-header">
+        <h2 class="text-lg font-semibold">Journey</h2>
+        <div class="card-header-controls">
+          <button class="toggle-colspan-btn" title="Toggle size" aria-label="Toggle card size"><svg
+              xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 21l-6-6m6 6v-4m0 4h-4" />
+              <path d="M3 3l6 6" />
+              <path d="M3 3v4m0-4h4" />
+            </svg></button>
+          <span class="drag-handle" aria-label="Drag to reorder"><svg xmlns="http://www.w3.org/2000/svg" width="16"
+              height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <circle cx="9" cy="12" r="1" />
+              <circle cx="9" cy="5" r="1" />
+              <circle cx="9" cy="19" r="1" />
+              <circle cx="15" cy="12" r="1" />
+              <circle cx="15" cy="5" r="1" />
+              <circle cx="15" cy="19" r="1" />
+            </svg></span>
+        </div>
+      </div>
+      <div class="graph-container no-scrollbar" id="contribution-graph"></div>
+      <div class="flex justify-center flex-wrap gap-x-4 gap-y-2 mt-4 text-xs text-secondary">
+        <div class="legend-item">
+          <div class="legend-color day-future"></div><span>Future</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color day-today"></div><span>Today</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color day-part-test"></div><span>Test</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color day-exam"></div><span>Exam</span>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <template id="tests-template">
+    <div class="card" data-card-id="tests">
+      <div class="card-header">
+        <h2 class="text-lg font-semibold">Test Planner</h2>
+        <div class="card-header-controls">
+          <button class="toggle-colspan-btn" title="Toggle size" aria-label="Toggle card size"><svg
+              xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 21l-6-6m6 6v-4m0 4h-4" />
+              <path d="M3 3l6 6" />
+              <path d="M3 3v4m0-4h4" />
+            </svg></button>
+          <span class="drag-handle" aria-label="Drag to reorder"><svg xmlns="http://www.w3.org/2000/svg" width="16"
+              height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <circle cx="9" cy="12" r="1" />
+              <circle cx="9" cy="5" r="1" />
+              <circle cx="9" cy="19" r="1" />
+              <circle cx="15" cy="12" r="1" />
+              <circle cx="15" cy="5" r="1" />
+              <circle cx="15" cy="19" r="1" />
+            </svg></span>
+        </div>
+      </div>
+      <form id="add-test-form" class="flex flex-col gap-3 mb-4">
+        <input type="date" name="date" class="form-input rounded-md p-2 w-full text-sm" required>
+        <input type="text" name="name" placeholder="Test Name" class="form-input rounded-md p-2 flex-grow text-sm"
+          required>
+        <button type="submit" class="btn-primary font-bold py-2 px-4 rounded-md transition-colors w-full text-sm">Add
+          Test</button>
+      </form>
+      <div id="test-list-container">
+        <h3 class="text-md font-semibold mb-2 border-b pb-1" style="border-color: var(--border-color);">Tests
+        </h3>
+        <ul id="test-list" class="space-y-2 max-h-48 overflow-y-auto no-scrollbar"></ul>
+      </div>
+    </div>
+  </template>
+
+  <template id="quote-template">
+    <div class="card" data-card-id="quote">
+      <div class="card-header">
+        <h2 class="text-lg font-semibold">Quote</h2>
+        <div class="card-header-controls">
+          <button class="toggle-colspan-btn" title="Toggle size" aria-label="Toggle card size"><svg
+              xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 21l-6-6m6 6v-4m0 4h-4" />
+              <path d="M3 3l6 6" />
+              <path d="M3 3v4m0-4h4" />
+            </svg></button>
+          <span class="drag-handle" aria-label="Drag to reorder"><svg xmlns="http://www.w3.org/2000/svg" width="16"
+              height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <circle cx="9" cy="12" r="1" />
+              <circle cx="9" cy="5" r="1" />
+              <circle cx="9" cy="19" r="1" />
+              <circle cx="15" cy="12" r="1" />
+              <circle cx="15" cy="5" r="1" />
+              <circle cx="15" cy="19" r="1" />
+            </svg></span>
+        </div>
+      </div>
+      <div id="quote-card-content" class="text-center cursor-pointer transition-transform transform hover:scale-105">
+        <p id="quote" class="text-md italic">"The best way to predict the future is to create it."</p>
+        <p id="author" class="text-sm text-secondary mt-2">- Peter Drucker</p>
+      </div>
+    </div>
+  </template>
+
+  <template id="note-card-template">
+    <div class="card custom-card" data-card-type="note">
+      <div class="card-header">
+        <h2 class="text-lg font-semibold card-title">Note</h2>
+        <div class="card-header-controls">
+          <button class="toggle-colspan-btn" title="Toggle size" aria-label="Toggle card size"><svg
+              xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 21l-6-6m6 6v-4m0 4h-4" />
+              <path d="M3 3l6 6" />
+              <path d="M3 3v4m0-4h4" />
+            </svg></button>
+          <button class="delete-card-btn" title="Delete card" aria-label="Delete card"><svg
+              xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 6h18"></path>
+              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+            </svg></button>
+          <span class="drag-handle" aria-label="Drag to reorder"><svg xmlns="http://www.w3.org/2000/svg" width="16"
+              height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <circle cx="9" cy="12" r="1" />
+              <circle cx="9" cy="5" r="1" />
+              <circle cx="9" cy="19" r="1" />
+              <circle cx="15" cy="12" r="1" />
+              <circle cx="15" cy="5" r="1" />
+              <circle cx="15" cy="19" r="1" />
+            </svg></span>
+        </div>
+      </div>
+      <div class="text-sm card-content whitespace-pre-wrap"></div>
+    </div>
+  </template>
+
+  <template id="daily-tasks-template">
+    <div class="card custom-card flex flex-col h-full" data-card-type="daily-tasks">
+      <div class="card-header mb-0 flex-shrink-0">
+        <h2 class="text-lg font-semibold card-title">Daily Agenda</h2>
+        <div class="card-header-controls">
+          <button class="toggle-colspan-btn" title="Toggle size"><svg xmlns="http://www.w3.org/2000/svg" width="16"
+              height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M21 21l-6-6m6 6v-4m0 4h-4" />
+              <path d="M3 3l6 6" />
+              <path d="M3 3v4m0-4h4" />
+            </svg></button>
+          <button class="delete-card-btn" title="Delete card"><svg xmlns="http://www.w3.org/2000/svg" width="16"
+              height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M3 6h18" />
+              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+            </svg></button>
+          <span class="drag-handle cursor-grab"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <circle cx="9" cy="12" r="1" />
+              <circle cx="9" cy="5" r="1" />
+              <circle cx="9" cy="19" r="1" />
+              <circle cx="15" cy="12" r="1" />
+              <circle cx="15" cy="5" r="1" />
+              <circle cx="15" cy="19" r="1" />
+            </svg></span>
+        </div>
+      </div>
+
+      <div
+        class="flex items-center justify-between gap-2 px-3 py-2 mb-3 mt-1 bg-black/20 rounded-lg border border-white/5">
+        <button class="prev-day-btn p-1 text-gray-400 hover:text-white hover:bg-white/10 rounded transition-colors"
+          title="Previous Day">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m15 18-6-6 6-6" />
+          </svg>
+        </button>
+
+        <input type="date"
+          class="daily-date-selector bg-transparent border-none text-xs font-bold text-center text-white focus:ring-0 cursor-pointer font-mono tracking-wide">
+
+        <button class="next-day-btn p-1 text-gray-400 hover:text-white hover:bg-white/10 rounded transition-colors"
+          title="Next Day">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m9 18 6-6-6-6" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="card-content flex flex-col flex-grow min-h-0">
+        <div class="flex items-center gap-2 mb-3 flex-shrink-0 px-1">
+          <div class="progress-container flex-grow bg-gray-700/30 rounded-full h-1.5">
+            <div
+              class="progress-bar bg-[var(--accent-color)] h-1.5 rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(var(--accent-color-rgb),0.4)]"
+              style="width: 0%"></div>
+          </div>
+          <span class="progress-text text-[10px] text-gray-400 font-bold">0%</span>
+        </div>
+
+        <ul class="daily-task-list space-y-2 overflow-y-auto no-scrollbar flex-grow min-h-0 pr-1"></ul>
+
+        <form class="add-daily-task-form flex gap-2 mt-3 pt-2 border-t border-white/5 flex-shrink-0">
+          <input type="text" placeholder="Add task for this day..."
+            class="form-input rounded-md p-2 w-full text-xs bg-black/20 focus:bg-black/40 transition-colors border-none focus:ring-1 focus:ring-[var(--accent-color)]"
+            required>
+          <button type="submit"
+            class="btn-primary py-1.5 px-3 rounded-md text-xs font-bold shadow-lg hover:shadow-[var(--accent-color)]/20 transition-all">+</button>
+        </form>
+
+        <div class="text-[9px] text-gray-600 text-center mt-1 font-mono opacity-40 flex-shrink-0">
+          Click circle to toggle • Click badge to prioritize
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <template id="todo-card-template">
+    <div class="card custom-card flex flex-col h-full" data-card-type="todo">
+      <div class="card-header mb-2 flex-shrink-0">
+        <h2 class="text-lg font-semibold card-title">Tasks</h2>
+        <div class="card-header-controls">
+          <button class="toggle-colspan-btn" title="Toggle size"><svg xmlns="http://www.w3.org/2000/svg" width="16"
+              height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M21 21l-6-6m6 6v-4m0 4h-4" />
+              <path d="M3 3l6 6" />
+              <path d="M3 3v4m0-4h4" />
+            </svg></button>
+          <button class="delete-card-btn" title="Delete card"><svg xmlns="http://www.w3.org/2000/svg" width="16"
+              height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M3 6h18" />
+              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+            </svg></button>
+          <span class="drag-handle cursor-grab"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <circle cx="9" cy="12" r="1" />
+              <circle cx="9" cy="5" r="1" />
+              <circle cx="9" cy="19" r="1" />
+              <circle cx="15" cy="12" r="1" />
+              <circle cx="15" cy="5" r="1" />
+              <circle cx="15" cy="19" r="1" />
+            </svg></span>
+        </div>
+      </div>
+
+      <div class="card-content flex flex-col flex-grow min-h-0">
+        <div class="flex items-center gap-2 mb-3 flex-shrink-0">
+          <div class="progress-container flex-grow bg-gray-700/30 rounded-full h-1.5">
+            <div
+              class="progress-bar bg-[var(--accent-color)] h-1.5 rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(var(--accent-color-rgb),0.4)]"
+              style="width: 0%"></div>
+          </div>
+          <span class="progress-text text-[10px] text-gray-400 font-bold">0%</span>
+        </div>
+
+        <ul class="todo-list space-y-2 overflow-y-auto no-scrollbar flex-grow min-h-0 pr-1"></ul>
+
+        <form class="add-todo-form flex gap-2 mt-3 pt-2 border-t border-white/5 flex-shrink-0">
+          <input type="text" placeholder="Add new task..."
+            class="form-input rounded-md p-2 w-full text-xs bg-black/20 focus:bg-black/40 transition-colors border-none focus:ring-1 focus:ring-[var(--accent-color)]"
+            required>
+          <button type="submit"
+            class="btn-primary py-1.5 px-3 rounded-md text-xs font-bold shadow-lg hover:shadow-[var(--accent-color)]/20 transition-all">+</button>
+        </form>
+
+        <div class="text-[9px] text-gray-600 text-center mt-1 font-mono opacity-40 flex-shrink-0">
+          Click circle to toggle • Click badge to prioritize
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <template id="pomodoro-card-template">
+    <div class="card custom-card" data-card-type="pomodoro">
+      <div class="card-header">
+        <h2 class="text-lg font-semibold card-title">Pomodoro</h2>
+        <div class="card-header-controls">
+          <button class="toggle-colspan-btn" title="Toggle size" aria-label="Toggle card size"><svg
+              xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 21l-6-6m6 6v-4m0 4h-4" />
+              <path d="M3 3l6 6" />
+              <path d="M3 3v4m0-4h4" />
+            </svg></button>
+          <button class="delete-card-btn" title="Delete card" aria-label="Delete card"><svg
+              xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 6h18"></path>
+              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+            </svg></button>
+          <span class="drag-handle" aria-label="Drag to reorder"><svg xmlns="http://www.w3.org/2000/svg" width="16"
+              height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <circle cx="9" cy="12" r="1" />
+              <circle cx="9" cy="5" r="1" />
+              <circle cx="9" cy="19" r="1" />
+              <circle cx="15" cy="12" r="1" />
+              <circle cx="15" cy="5" r="1" />
+              <circle cx="15" cy="19" r="1" />
+            </svg></span>
+        </div>
+      </div>
+      <div class="card-content text-center">
+        <div class="flex justify-center gap-2 mb-4">
+          <button data-mode="pomodoro"
+            class="pomodoro-btn text-sm px-3 py-1 rounded-md border border-transparent hover:border-gray-500">Pomodoro</button>
+          <button data-mode="shortBreak"
+            class="pomodoro-btn text-sm px-3 py-1 rounded-md border border-transparent hover:border-gray-500">Short
+            Break</button>
+          <button data-mode="longBreak"
+            class="pomodoro-btn text-sm px-3 py-1 rounded-md border border-transparent hover:border-gray-500">Long
+            Break</button>
+        </div>
+        <div class="timer-display text-6xl font-bold my-4">25:00</div>
+        <div class="flex justify-center gap-4">
+          <button class="start-pause-btn btn-primary font-bold py-2 px-8 text-lg rounded-md">START</button>
+          <button class="reset-btn text-secondary hover:text-primary">Reset</button>
+        </div>
+        <div class="focus-status text-xs text-yellow-400 mt-2 h-4"></div>
+        <div class="pomodoro-settings mt-4 flex justify-center gap-4 items-center">
+          <label class="flex flex-col text-xs items-center">
+            Work
+            <input type="number" data-mode="pomodoro"
+              class="pomodoro-duration-input form-input w-16 text-center rounded-md p-1" min="1">
+          </label>
+          <label class="flex flex-col text-xs items-center">
+            Short
+            <input type="number" data-mode="shortBreak"
+              class="pomodoro-duration-input form-input w-16 text-center rounded-md p-1" min="1">
+          </label>
+          <label class="flex flex-col text-xs items-center">
+            Long
+            <input type="number" data-mode="longBreak"
+              class="pomodoro-duration-input form-input w-16 text-center rounded-md p-1" min="1">
+          </label>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <template id="youtube-card-template">
+    <div class="card custom-card" data-card-type="youtube">
+      <div class="card-header">
+        <h2 class="text-lg font-semibold card-title">YouTube</h2>
+        <div class="card-header-controls">
+          <button class="toggle-colspan-btn" title="Toggle size" aria-label="Toggle card size"><svg
+              xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 21l-6-6m6 6v-4m0 4h-4" />
+              <path d="M3 3l6 6" />
+              <path d="M3 3v4m0-4h4" />
+            </svg></button>
+          <button class="delete-card-btn" title="Delete card" aria-label="Delete card"><svg
+              xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 6h18"></path>
+              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+            </svg></button>
+          <span class="drag-handle" aria-label="Drag to reorder"><svg xmlns="http://www.w3.org/2000/svg" width="16"
+              height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <circle cx="9" cy="12" r="1" />
+              <circle cx="9" cy="5" r="1" />
+              <circle cx="9" cy="19" r="1" />
+              <circle cx="15" cy="12" r="1" />
+              <circle cx="15" cy="5" r="1" />
+              <circle cx="15" cy="19" r="1" />
+            </svg></span>
+        </div>
+      </div>
+      <div class="card-content">
+        <div class="aspect-w-16 mb-3 youtube-container">
+          <iframe class="youtube-iframe w-full h-full" title="Embedded YouTube video player" src="" frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen></iframe>
+        </div>
+        <form class="update-youtube-form flex gap-2">
+          <label for="youtube-url-input" class="sr-only">YouTube URL</label>
+          <input type="text" id="youtube-url-input" name="url" placeholder="Paste YouTube URL..."
+            class="form-input rounded-md p-2 w-full text-sm" required>
+          <button type="submit" class="btn-primary font-bold py-2 px-3 rounded-md text-sm">Load</button>
+        </form>
+      </div>
+    </div>
+  </template>
+
+  <template id="time-logger-card-template">
+    <div class="card custom-card" data-card-type="time-logger">
+      <div class="card-header">
+        <h2 class="text-lg font-semibold card-title">Study Logger</h2>
+        <div class="card-header-controls">
+          <button class="pip-btn" title="Show in floating window">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12.75 4.75h-8.5a2 2 0 0 0-2 2v8.5a2 2 0 0 0 2 2h8.5a2 2 0 0 0 2-2v-8.5a2 2 0 0 0-2-2Z" />
+              <path d="M19.25 8.75h-8.5a2 2 0 0 1-2-2v-2.5" />
+              <path d="M17.5 15.5V14" />
+              <path d="m15 12 5 5" />
+            </svg>
+          </button>
+          <button class="toggle-colspan-btn" title="Toggle size">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 21l-6-6m6 6v-4m0 4h-4" />
+              <path d="M3 3l6 6" />
+              <path d="M3 3v4m0-4h4" />
+            </svg>
+          </button>
+          <button class="delete-card-btn" title="Delete card">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 6h18" />
+              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+            </svg>
+          </button>
+          <span class="drag-handle">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="9" cy="12" r="1" />
+              <circle cx="9" cy="5" r="1" />
+              <circle cx="9" cy="19" r="1" />
+              <circle cx="15" cy="12" r="1" />
+              <circle cx="15" cy="5" r="1" />
+              <circle cx="15" cy="19" r="1" />
+            </svg>
+          </span>
+        </div>
+      </div>
+      <div class="card-content text-center">
+        <div class="timer-display text-5xl font-bold my-4 tabular-nums">00:00:00</div>
+        <div class="focus-status text-xs text-yellow-400 mb-2 h-4"></div>
+
+        <div class="flex flex-col sm:flex-row gap-2 mb-4 items-center justify-center">
+          <label class="text-sm text-secondary sr-only sm:not-sr-only">Subject:</label>
+          <select class="subject-select form-input rounded-md p-2 text-sm flex-grow"></select>
+        </div>
+
+        <div class="flex justify-center gap-4">
+          <button class="start-pause-btn btn-primary font-bold py-2 px-8 text-lg rounded-md">START</button>
+          <button class="log-btn btn-primary font-bold py-2 px-8 text-lg rounded-md">LOG</button>
+          <button class="reset-btn text-secondary hover:text-primary">Reset</button>
+        </div>
+
+        <p class="log-message text-red-500 text-xs mt-2 h-4"></p>
+        <div class="w-full border-t border-[var(--border-color)] my-3"></div>
+
+        <div class="flex justify-between items-center mb-2">
+          <h3 class="text-md font-semibold text-left">Today's Log</h3>
+          <span class="total-study-time text-sm font-bold text-secondary"></span>
+        </div>
+
+        <ul class="study-log-list space-y-2 max-h-32 overflow-y-auto no-scrollbar text-left text-sm"></ul>
+
+        <div class="manual-entry-container mt-4 pt-2 border-t border-gray-700/50">
+          <button
+            class="toggle-manual-form text-xs text-secondary hover:text-white flex items-center gap-1 mx-auto transition-colors">
+            <span>+ Add Manual Entry</span>
+          </button>
+          <form class="manual-log-form hidden flex flex-col gap-2 mt-2">
+            <div class="flex gap-2">
+              <select class="manual-subject-select form-input rounded p-1.5 text-xs bg-gray-800 flex-grow"
+                required></select>
+              <input type="number" name="minutes" placeholder="Mins"
+                class="form-input rounded p-1.5 text-xs w-16 bg-gray-800 text-center" min="1" required>
+              <button type="submit" class="btn-primary text-xs px-3 py-1 rounded font-bold">Add</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </template>
+
+
+  <template id="analytics-card-template">
+    <div class="card custom-card" data-card-type="analytics">
+      <div class="card-header">
+        <h2 class="text-lg font-semibold card-title">Study Analytics</h2>
+        <div class="card-header-controls">
+          <button class="toggle-colspan-btn" title="Toggle size"><svg xmlns="http://www.w3.org/2000/svg" width="16"
+              height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M21 21l-6-6m6 6v-4m0 4h-4" />
+              <path d="M3 3l6 6" />
+              <path d="M3 3v4m0-4h4" />
+            </svg></button>
+          <button class="delete-card-btn" title="Delete card"><svg xmlns="http://www.w3.org/2000/svg" width="16"
+              height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M3 6h18"></path>
+              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+            </svg></button>
+          <span class="drag-handle"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="9" cy="12" r="1" />
+              <circle cx="9" cy="5" r="1" />
+              <circle cx="9" cy="19" r="1" />
+              <circle cx="15" cy="12" r="1" />
+              <circle cx="15" cy="5" r="1" />
+              <circle cx="15" cy="19" r="1" />
+            </svg></span>
+        </div>
+      </div>
+      <div class="card-content">
+        <div class="flex justify-center gap-2 mb-4">
+          <button data-range="7" class="range-btn text-sm px-3 py-1 rounded-md border active"
+            style="border-color: var(--accent-color); background-color: var(--accent-color); color: white;">Last
+            7 Days</button>
+          <button data-range="30"
+            class="range-btn text-sm px-3 py-1 rounded-md border border-gray-600 text-secondary hover:text-primary">Last
+            30 Days</button>
+        </div>
+        <div class="h-64 relative">
+          <canvas class="analytics-chart"></canvas>
+        </div>
+        <div class="mt-4 flex flex-wrap justify-center gap-4 text-xs text-secondary statistics-summary">
+          <!-- Stats injected here via JS -->
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <template id="ambient-card-template">
+    <div class="card custom-card" data-card-type="ambient">
+      <div class="card-header">
+        <h2 class="text-lg font-semibold card-title">Soundscapes</h2>
+        <div class="card-header-controls flex items-center gap-1">
+          <button class="ambient-toggle-btn mr-1 text-gray-400 hover:text-white transition-colors"
+            title="Play/Pause All">
+            <svg class="play-icon w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+            <svg class="pause-icon w-4 h-4 hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="6" y="4" width="4" height="16"></rect>
+              <rect x="14" y="4" width="4" height="16"></rect>
+            </svg>
+          </button>
+
+          <button class="toggle-colspan-btn" title="Toggle size">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 21l-6-6m6 6v-4m0 4h-4" />
+              <path d="M3 3l6 6" />
+              <path d="M3 3v4m0-4h4" />
+            </svg>
+          </button>
+          <button class="delete-card-btn" title="Delete card">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 6h18" />
+              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+            </svg>
+          </button>
+          <span class="drag-handle cursor-grab">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="9" cy="12" r="1" />
+              <circle cx="9" cy="5" r="1" />
+              <circle cx="9" cy="19" r="1" />
+              <circle cx="15" cy="12" r="1" />
+              <circle cx="15" cy="5" r="1" />
+              <circle cx="15" cy="19" r="1" />
+            </svg>
+          </span>
+        </div>
+      </div>
+      <div class="card-content flex flex-col gap-4 py-2">
+        <div class="sound-control group">
+          <div class="flex justify-between text-xs text-secondary mb-1">
+            <span class="group-hover:text-white transition-colors">🌧️ Rain</span>
+            <span class="opacity-0 group-hover:opacity-100 transition-opacity">Pink</span>
+          </div>
+          <input type="range" data-type="pink" min="-60" max="-10" value="-60"
+            class="ambient-slider w-full h-1.5 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+        </div>
+        <div class="sound-control group">
+          <div class="flex justify-between text-xs text-secondary mb-1">
+            <span class="group-hover:text-white transition-colors">⚡ Thunder</span>
+            <span class="opacity-0 group-hover:opacity-100 transition-opacity">Brown</span>
+          </div>
+          <input type="range" data-type="brown" min="-60" max="-10" value="-60"
+            class="ambient-slider w-full h-1.5 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+        </div>
+        <div class="sound-control group">
+          <div class="flex justify-between text-xs text-secondary mb-1">
+            <span class="group-hover:text-white transition-colors">🌊 Stream</span>
+            <span class="opacity-0 group-hover:opacity-100 transition-opacity">White</span>
+          </div>
+          <input type="range" data-type="white" min="-60" max="-20" value="-60"
+            class="ambient-slider w-full h-1.5 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <div id="add-card-modal" class="modal-overlay hidden">
+    <div class="card w-11/12 max-w-md">
+      <h2 class="text-xl font-semibold mb-4">Add New Card</h2>
+      <form id="new-card-form" class="flex flex-col h-full">
+        <input type="hidden" id="new-card-type" value="note">
+
+        <div class="flex-1 overflow-y-auto pr-2 mb-4 custom-scrollbar" style="max-height: 400px;">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="card-type-grid">
+            <div
+              class="card-option active p-3 rounded-xl border border-gray-700 bg-white/5 hover:bg-white/10 cursor-pointer transition-all flex flex-col gap-2"
+              data-value="note">
+              <div class="flex items-center gap-2">
+                <svg class="text-blue-400" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+                <span class="font-bold text-sm">Note</span>
+              </div>
+              <p class="text-xs text-gray-400">Simple text area for scratchpad or reminders.</p>
+            </div>
+
+            <div
+              class="card-option p-3 rounded-xl border border-gray-700 bg-white/5 hover:bg-white/10 cursor-pointer transition-all flex flex-col gap-2"
+              data-value="todo">
+              <div class="flex items-center gap-2">
+                <svg class="text-green-400" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
+                  <path d="m9 12 2 2 4-4" />
+                </svg>
+                <span class="font-bold text-sm">To-Do List</span>
+              </div>
+              <p class="text-xs text-gray-400">Task management with subtasks and priority.</p>
+            </div>
+
+            <div
+              class="card-option p-3 rounded-xl border border-gray-700 bg-white/5 hover:bg-white/10 cursor-pointer transition-all flex flex-col gap-2"
+              data-value="daily-tasks">
+              <div class="flex items-center gap-2">
+                <svg class="text-purple-400" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                <span class="font-bold text-sm">Calendar Tasks</span>
+              </div>
+              <p class="text-xs text-gray-400">Date-specific tasks with progress tracking.</p>
+            </div>
+
+            <div
+              class="card-option p-3 rounded-xl border border-gray-700 bg-white/5 hover:bg-white/10 cursor-pointer transition-all flex flex-col gap-2"
+              data-value="pomodoro">
+              <div class="flex items-center gap-2">
+                <svg class="text-red-400" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                <span class="font-bold text-sm">Pomodoro</span>
+              </div>
+              <p class="text-xs text-gray-400">Focus timer with short and long breaks.</p>
+            </div>
+
+            <div
+              class="card-option p-3 rounded-xl border border-gray-700 bg-white/5 hover:bg-white/10 cursor-pointer transition-all flex flex-col gap-2"
+              data-value="time-logger">
+              <div class="flex items-center gap-2">
+                <svg class="text-yellow-400" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                <span class="font-bold text-sm">Study Logger</span>
+              </div>
+              <p class="text-xs text-gray-400">Track subject-wise study hours.</p>
+            </div>
+
+            <div
+              class="card-option p-3 rounded-xl border border-gray-700 bg-white/5 hover:bg-white/10 cursor-pointer transition-all flex flex-col gap-2"
+              data-value="line-graph">
+              <div class="flex items-center gap-2">
+                <svg class="text-indigo-400" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                </svg>
+                <span class="font-bold text-sm">Marks Graph</span>
+              </div>
+              <p class="text-xs text-gray-400">Visualize test scores and trends.</p>
+            </div>
+            <div
+              class="card-option p-3 rounded-xl border border-gray-700 bg-white/5 hover:bg-white/10 cursor-pointer transition-all flex flex-col gap-2"
+              data-value="analytics">
+              <div class="flex items-center gap-2">
+                <svg class="text-cyan-400" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 20V10" />
+                  <path d="M18 20V4" />
+                  <path d="M6 20v-4" />
+                </svg>
+                <span class="font-bold text-sm">Analytics</span>
+              </div>
+              <p class="text-xs text-gray-400">Bar chart of study hours over time.</p>
+            </div>
+
+            <div
+              class="card-option p-3 rounded-xl border border-gray-700 bg-white/5 hover:bg-white/10 cursor-pointer transition-all flex flex-col gap-2"
+              data-value="ambient">
+              <div class="flex items-center gap-2">
+                <svg class="text-gray-400" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17.5 19c0-1.7-1.3-3-3-3s-3 1.3-3 3c0-1.7-1.3-3-3-3s-3 1.3-3 3" />
+                  <path d="M3 19V5c0-1.1.9-2 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                </svg>
+                <span class="font-bold text-sm">Soundscapes</span>
+              </div>
+              <p class="text-xs text-gray-400">White, brown, and pink noise.</p>
+            </div>
+
+            <div
+              class="card-option p-3 rounded-xl border border-gray-700 bg-white/5 hover:bg-white/10 cursor-pointer transition-all flex flex-col gap-2"
+              data-value="youtube">
+              <div class="flex items-center gap-2">
+                <svg class="text-red-500" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path
+                    d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z" />
+                  <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" />
+                </svg>
+                <span class="font-bold text-sm">YouTube</span>
+              </div>
+              <p class="text-xs text-gray-400">Embed lectures or lofi music.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="border-t border-gray-700 pt-4 mt-2">
+          <label for="new-card-title" class="sr-only">Card Title</label>
+          <input type="text" id="new-card-title" placeholder="Card Title"
+            class="form-input rounded-md p-2 w-full mb-3 text-sm bg-black/40 border-gray-600 focus:border-indigo-500"
+            required>
+
+          <label for="new-card-content" class="sr-only">Card Content</label>
+          <textarea id="new-card-content" placeholder="Card Content" rows="3"
+            class="form-input rounded-md p-2 w-full mb-4 text-sm bg-black/40 border-gray-600 focus:border-indigo-500 resize-none"></textarea>
+
+          <div class="flex justify-end gap-3">
+            <button type="button" id="cancel-add-card"
+              class="bg-gray-700 hover:bg-gray-600 text-white text-sm font-bold py-2 px-4 rounded-md transition-colors">Cancel</button>
+            <button type="submit"
+              class="btn-primary text-sm font-bold py-2 px-4 rounded-md shadow-lg shadow-indigo-500/20">Add
+              Card</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="customize-modal" class="modal-overlay hidden">
+    <div class="card w-11/12 max-w-4xl h-[80vh] flex flex-col p-0 overflow-hidden relative shadow-2xl">
+
+      <div class="flex justify-between items-center px-6 py-4 border-b border-gray-700/50 bg-black/20">
+        <h2 class="text-xl font-bold tracking-tight flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+            </path>
+          </svg>
+          Settings
+        </h2>
+        <button id="close-customize" class="text-secondary hover:text-white transition-colors p-1">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        <button id="close-customize-icon-btn" class="hidden"></button>
+      </div>
+
+      <div class="flex flex-col md:flex-row flex-1 overflow-hidden">
+
+        <div
+          class="w-full md:w-56 bg-black/20 border-r border-gray-700/30 flex flex-row md:flex-col overflow-x-auto md:overflow-y-auto">
+          <button class="settings-nav-btn active" data-target="general">
+            <span>General</span>
+          </button>
+          <button class="settings-nav-btn" data-target="appearance">
+            <span>Appearance</span>
+          </button>
+          <button class="settings-nav-btn" data-target="features">
+            <span>Features</span>
+          </button>
+          <button class="settings-nav-btn" data-target="data">
+            <span>Data & Reset</span>
+          </button>
+          <button class="settings-nav-btn text-red-400 hover:text-red-300" data-target="developer">
+            <span>Developer</span>
+          </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-6 bg-black/10 relative">
+
+          <div id="panel-general" class="settings-panel space-y-6">
+            <div class="settings-group">
+              <h3 class="text-sm font-bold text-white mb-3 uppercase tracking-wider opacity-80">Target
+                Exam</h3>
+              <div class="grid grid-cols-2 gap-3 mb-3">
+                <div>
+                  <label class="text-xs text-secondary mb-1 block">Exam</label>
+                  <select id="exam-type-select" class="form-input text-sm w-full">
+                    <option value="JEE">JEE Main</option>
+                    <option value="NEET">NEET</option>
+                    <option value="Custom">Custom</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="text-xs text-secondary mb-1 block">Year</label>
+                  <select id="exam-year-select" class="form-input text-sm w-full">
+                    <option value="2026">2026</option>
+                    <option value="2027">2027</option>
+                    <option value="2028">2028</option>
+                  </select>
+                </div>
+              </div>
+
+              <div id="jee-details-container"
+                class="p-3 rounded-lg border border-dashed border-gray-700 bg-black/20 hidden">
+                <div class="grid grid-cols-2 gap-3">
+                  <div><label class="text-xs text-secondary mb-1 block">Session</label><select id="jee-session-select"
+                      class="form-input text-sm w-full">
+                      <option value="January">January</option>
+                      <option value="April">April</option>
+                    </select></div>
+                  <div><label class="text-xs text-secondary mb-1 block">Shift Date</label><input type="date"
+                      id="jee-shift-input" class="form-input text-sm w-full"></div>
+                </div>
+              </div>
+
+              <div id="custom-exam-container"
+                class="p-3 rounded-lg border border-dashed border-gray-700 bg-black/20 hidden">
+                <div class="space-y-3">
+                  <div><label class="text-xs text-secondary mb-1 block">Name</label><input type="text"
+                      id="custom-exam-name" placeholder="e.g. BITSAT" class="form-input text-sm w-full"></div>
+                  <div><label class="text-xs text-secondary mb-1 block">Date</label><input type="date"
+                      id="custom-exam-date" class="form-input text-sm w-full"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-group">
+              <h3 class="text-sm font-bold text-white mb-3 uppercase tracking-wider opacity-80">Add Custom
+                Subjects</h3>
+              <div id="subject-manager-list"
+                class="flex flex-wrap gap-2 mb-3 min-h-[40px] p-2 rounded-lg border border-gray-700/50 bg-black/20">
+                <span class="text-xs text-gray-500 italic p-1">Loading...</span>
+              </div>
+              <div class="flex gap-2">
+                <input type="text" id="new-subject-input" placeholder="Add new subject..."
+                  class="form-input text-sm w-full">
+                <button id="add-subject-btn"
+                  class="btn-primary px-4 py-2 font-bold text-xs whitespace-nowrap">Add</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="panel-appearance" class="settings-panel hidden space-y-6">
+            <div class="settings-group">
+              <h3 class="text-sm font-bold text-white mb-3 uppercase tracking-wider opacity-80">Interface
+              </h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="text-xs text-secondary mb-1 block">Color Theme</label>
+                  <select id="theme-select" class="form-input text-sm w-full">
+                    <option value="default">Deep Space</option>
+                    <option value="cyberpunk">Cyberpunk</option>
+                    <option value="forest">Forest</option>
+                    <option value="rose-gold">Rose Gold</option>
+                    <option value="ocean">Ocean</option>
+                    <option value="sunset">Sunset</option>
+                    <option value="dracula">Dracula</option>
+                    <option value="coffee">Coffee Break</option>
+                    <option value="nordic">Nordic Frost</option>
+                    <option value="lavender">Lavender Haze</option>
+                    <option value="crimson">Crimson Elite</option>
+                    <option value="alakh-pandey" class="hidden">Alakh Pandey</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="text-xs text-secondary mb-1 block">Typography</label>
+                  <select id="font-select" class="form-input text-sm w-full">
+                    <option value="'Inter', sans-serif">Inter (Default)</option>
+                    <option value="'Poppins', sans-serif">Poppins (Modern)</option>
+                    <option value="'Space Grotesk', sans-serif">Space Grotesk (Sci-Fi)</option>
+                    <option value="'Oswald', sans-serif">Oswald (Condensed)</option>
+                    <option value="'Roboto Slab', serif">Roboto Slab (Serif)</option>
+                    <option value="'Fira Code', monospace">Fira Code (Code)</option>
+                    <option value="'JetBrains Mono', monospace">JetBrains Mono (Dev)</option>
+                    <option value="'Comic Neue', cursive">Comic Sans</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-group">
+              <h3 class="text-sm font-bold text-white mb-3 uppercase tracking-wider opacity-80">Background
+              </h3>
+              <div class="grid grid-cols-4 gap-2 mb-4" id="preset-wallpaper-grid"></div>
+
+              <div class="flex gap-2">
+                <input type="text" id="bg-image-url" placeholder="Custom Image URL..."
+                  class="form-input text-xs w-full">
+                <button id="remove-bg-btn"
+                  class="bg-red-600/80 hover:bg-red-600 text-white px-3 rounded-md transition-colors">✕</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="panel-features" class="settings-panel hidden space-y-6">
+
+            <div class="settings-group">
+              <h3 class="text-sm font-bold text-white mb-3 uppercase tracking-wider opacity-80">Focus &
+                Layout</h3>
+              <div class="space-y-3">
+
+
+                <label
+                  class="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors cursor-pointer border border-transparent hover:border-gray-600">
+                  <div>
+                    <span class="text-sm font-medium block">Focus Shield</span>
+                    <span class="text-[10px] text-secondary">Pauses timers if you switch
+                      tabs.</span>
+                  </div>
+                  <input type="checkbox" id="focus-shield-toggle" class="form-input-toggle">
+                </label>
+                <label
+                  class="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors cursor-pointer border border-transparent hover:border-gray-600">
+                  <div>
+                    <span class="text-sm font-medium block">Doom Tick</span>
+                    <span class="text-[10px] text-secondary">Plays a ticking sound every 60s.</span>
+                  </div>
+                  <input type="checkbox" id="ticking-sound-toggle" class="form-input-toggle">
+                </label>
+              </div>
+            </div>
+
+            <div class="settings-group">
+              <h3 class="text-sm font-bold text-white mb-3 uppercase tracking-wider opacity-80">Media</h3>
+              <div class="space-y-3">
+                <label
+                  class="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors cursor-pointer border border-transparent hover:border-gray-600">
+                  <span class="text-sm">YouTube Tint</span>
+                  <input type="checkbox" id="youtube-tint-toggle" class="form-input-toggle">
+                </label>
+                <label
+                  class="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors cursor-pointer border border-transparent hover:border-gray-600">
+                  <span class="text-sm">Blur Player</span>
+                  <input type="checkbox" id="youtube-blur-toggle" class="form-input-toggle">
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div id="panel-data" class="settings-panel hidden flex flex-col h-full justify-center space-y-8">
+            <div class="text-center space-y-2">
+              <h3 class="text-lg font-bold text-white">Data Management</h3>
+              <p class="text-xs text-secondary max-w-xs mx-auto">Backup your progress locally or wipe the
+                slate clean.</p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <button id="export-data-btn"
+                class="flex flex-col items-center justify-center p-6 rounded-xl bg-green-900/20 border border-green-700/50 hover:bg-green-900/40 hover:border-green-500 transition-all group">
+                <svg class="w-8 h-8 mb-3 text-green-500 group-hover:scale-110 transition-transform"
+                  xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                <span class="font-bold text-green-400">Export JSON</span>
+              </button>
+
+              <button id="import-data-btn"
+                class="flex flex-col items-center justify-center p-6 rounded-xl bg-blue-900/20 border border-blue-700/50 hover:bg-blue-900/40 hover:border-blue-500 transition-all group">
+                <svg class="w-8 h-8 mb-3 text-blue-500 group-hover:scale-110 transition-transform"
+                  xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                </svg>
+                <span class="font-bold text-blue-400">Import JSON</span>
+              </button>
+            </div>
+
+            <div class="border-t border-gray-700/50 pt-8">
+              <button id="reset-dashboard-btn"
+                class="w-full flex items-center justify-center gap-2 p-4 rounded-xl bg-red-900/10 border border-red-900/30 hover:bg-red-900/30 hover:border-red-500/50 text-red-400 hover:text-red-300 transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 6h18" />
+                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                </svg>
+                <span class="font-bold">Reset Dashboard Factory Settings</span>
+              </button>
+            </div>
+          </div>
+
+          <div id="panel-developer" class="settings-panel hidden space-y-4 h-full flex flex-col">
+            <div class="flex justify-between items-center">
+              <div>
+                <h3 class="text-sm font-bold text-red-400 uppercase tracking-wider">Settings Editor</h3>
+                <p class="text-[10px] text-gray-500">Edit raw application state. Incorrect values will break the app.
+                </p>
+              </div>
+              <button id="dev-save-btn"
+                class="btn-primary px-4 py-2 text-xs font-bold bg-red-600 hover:bg-red-700 border-red-500">
+                Save & Apply
+              </button>
+            </div>
+
+            <textarea id="dev-json-input"
+              class="flex-1 w-full bg-black/50 border border-gray-700 rounded-lg p-3 font-mono text-[10px] leading-relaxed text-green-400 focus:outline-none focus:border-red-500 resize-none custom-scrollbar"
+              spellcheck="false"></textarea>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <template id="line-graph-card-template">
+    <div class="card custom-card" data-card-type="line-graph">
+      <div class="card-header pb-2 border-b border-gray-700/30">
+        <h2 class="text-lg font-semibold card-title flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            style="color: var(--accent-color);">
+            <path d="M3 3v18h18" />
+            <path d="m19 9-5 5-4-4-3 3" />
+          </svg>
+          Progress Tracker
+        </h2>
+        <div class="card-header-controls">
+          <button class="toggle-colspan-btn" title="Toggle size"><svg xmlns="http://www.w3.org/2000/svg" width="16"
+              height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M21 21l-6-6m6 6v-4m0 4h-4" />
+              <path d="M3 3l6 6" />
+              <path d="M3 3v4m0-4h4" />
+            </svg></button>
+          <button class="delete-card-btn" title="Delete card"><svg xmlns="http://www.w3.org/2000/svg" width="16"
+              height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M3 6h18" />
+              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+            </svg></button>
+          <span class="drag-handle"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="9" cy="12" r="1" />
+              <circle cx="9" cy="5" r="1" />
+              <circle cx="9" cy="19" r="1" />
+              <circle cx="15" cy="12" r="1" />
+              <circle cx="15" cy="5" r="1" />
+              <circle cx="15" cy="19" r="1" />
+            </svg></span>
+        </div>
+      </div>
+      <div class="card-content">
+        <div class="grid grid-cols-3 gap-2 mb-4 mt-1">
+          <div class="bg-white/5 rounded-lg p-2 text-center">
+            <div class="text-[10px] text-secondary uppercase tracking-wider">Average</div>
+            <div class="text-lg font-bold mean-score-display text-white">0</div>
+          </div>
+          <div class="bg-white/5 rounded-lg p-2 text-center">
+            <div class="text-[10px] text-secondary uppercase tracking-wider">Best</div>
+            <div class="text-lg font-bold max-score-display" style="color: var(--accent-color);">0</div>
+          </div>
+          <div class="bg-white/5 rounded-lg p-2 text-center">
+            <div class="text-[10px] text-secondary uppercase tracking-wider">Trend</div>
+            <div class="text-lg font-bold trend-display text-gray-400">-</div>
+          </div>
+        </div>
+
+        <div class="mb-4 h-56 relative w-full">
+          <canvas class="marks-chart"></canvas>
+        </div>
+
+        <div class="chart-toggles flex justify-center flex-wrap gap-2 mb-4">
+          <button data-subject="total"
+            class="text-[10px] px-3 py-1 rounded-full border transition-all font-semibold shadow-sm"
+            style="background-color: var(--accent-color); border-color: var(--accent-color); color: white;">Total</button>
+          <button data-subject="physics"
+            class="text-[10px] px-3 py-1 rounded-full border border-gray-600 bg-gray-800/50 text-secondary hover:text-white hover:border-blue-500 transition-all">Physics</button>
+          <button data-subject="chemistry"
+            class="text-[10px] px-3 py-1 rounded-full border border-gray-600 bg-gray-800/50 text-secondary hover:text-white hover:border-green-500 transition-all">Chemistry</button>
+          <button data-subject="maths"
+            class="text-[10px] px-3 py-1 rounded-full border border-gray-600 bg-gray-800/50 text-secondary hover:text-white hover:border-red-500 transition-all">Math/Bio</button>
+        </div>
+
+        <div class="mb-3">
+          <button
+            class="toggle-add-marks-form w-full text-xs text-secondary hover:text-white flex items-center justify-center gap-1 py-1 transition-colors">
+            + Add Test Score
+          </button>
+          <form class="add-marks-form grid grid-cols-4 gap-2 mt-2 hidden">
+            <input type="text" name="name" placeholder="Test Name"
+              class="form-input rounded p-2 text-xs col-span-4 bg-black/20" required>
+            <input type="number" name="phy" placeholder="Phy"
+              class="form-input rounded p-2 text-xs w-full text-center bg-black/20" required>
+            <input type="number" name="chem" placeholder="Chem"
+              class="form-input rounded p-2 text-xs w-full text-center bg-black/20" required>
+            <input type="number" name="math" placeholder="M/B"
+              class="form-input rounded p-2 text-xs w-full text-center bg-black/20" required>
+            <input type="number" name="maxMarks" placeholder="Total"
+              class="form-input rounded p-2 text-xs w-full text-center bg-black/20" required>
+            <button type="submit"
+              class="btn-primary font-bold py-1.5 rounded text-xs col-span-4 shadow-lg">Save</button>
+          </form>
+        </div>
+
+        <div class="mt-2">
+          <div class="flex justify-between items-center mb-2 px-1">
+            <h3 class="text-[10px] font-bold text-secondary uppercase tracking-widest">History</h3>
+            <div class="flex items-center gap-2 text-xs">
+              <label class="text-secondary text-[10px]">Target:</label>
+              <input type="number"
+                class="target-score-input bg-gray-800/50 border border-gray-700 rounded px-1 py-0.5 w-12 text-right text-white text-[10px]"
+                placeholder="0">
+            </div>
+          </div>
+          <ul class="marks-list space-y-2 max-h-32 overflow-y-auto pr-1 custom-scrollbar"></ul>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <div id="confirm-modal" class="modal-overlay hidden">
+    <div class="card w-11/12 max-w-sm">
+      <h2 id="confirm-title" class="text-xl font-semibold mb-2">Are you sure?</h2>
+      <p id="confirm-message" class="text-sm text-secondary mb-6"></p>
+      <div class="flex justify-end gap-3">
+        <button type="button" id="confirm-cancel-btn"
+          class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md">Cancel</button>
+        <button type="button" id="confirm-ok-btn"
+          class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- <div id="mobile-alert"
+        class="fixed bottom-4 left-4 right-4 bg-yellow-400 text-black p-3 text-center text-sm rounded-lg flex justify-between items-center hidden z-50">
+        <span>Welcome to StudyLocus! This is your personalized JEE/NEET dashboard. Drag, drop, and click the '+' button
+            to add different cards to your space. Use the customise button to customise the dashboard to your liking.
+            For more details, check the Information tab.</span>
+        <button id="close-alert-btn" class="font-bold text-lg ml-4" aria-label="Close mobile alert">&times;</button>
+    </div>
+     -->
+  <div id="info-modal" class="modal-overlay hidden">
+    <div class="card w-11/12 max-w-lg">
+      <!-- Tab Navigation -->
+      <nav class="tab-nav">
+        <button class="tab-btn active" data-tab="quick-start">Quick Start</button>
+        <button class="tab-btn" data-tab="whats-new">What's New</button>
+        <button class="tab-btn" data-tab="feedback">Feedback</button>
+        <button class="tab-btn" data-tab="about">About & Support</button>
+      </nav>
+
+      <!-- Tab Content Panels -->
+      <div>
+        <!-- Quick Start Panel -->
+        <div id="tab-quick-start" class="tab-content space-y-3 text-sm">
+          <button onclick="startTutorial()"
+            class="w-full mb-4 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md font-bold transition-all">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <polygon points="10 8 16 12 10 16 10 8" />
+            </svg>
+            Take the Tour
+          </button>
+          <p><strong>YOU CAN NOW CHANGE DATE ACCORDING TO UR SHIFT IN CUSTOMISE MENU !!!</strong></p>
+          <p>Open "What's new" to see more changes !!!!</p>
+          <p>If you liked this update, follow me on <a href="https://github.com/svalordev" style="color:aqua"
+              target="_blank">github</a>!</p>
+          <p><strong>GOOD LUCK FOR YOUR PREPARATION ! 🫡</strong></p>
+          <p><strong>YOU CAN CHANGE JEE/NEET AND YEAR IN CUSTOMISE MENU</strong></p>
+
+        </div>
+
+        <!-- What's New Panel -->
+        <div id="tab-whats-new" class="tab-content hidden space-y-3 text-sm">
+          <h3 class="text-md font-bold text-primary">Version 1.4 (Jan 2026)</h3>
+          <ul class="list-disc list-inside text-secondary space-y-2">
+            <li>Added shift selector/session</li>
+            <li>Manual addition of study logs.</li>
+            <li>Fixed day tooltip hover issue.</li>
+            <li>Preset background wallpapers.</li>
+            <li>Enhanced Line graph card UI</li>
+            <li>Keyboard Shortcuts (Press ?)</li>
+            <li>More themes and fonts added</li>
+            <li>Custom Exams added.</li>
+            <li>Tutorial added.</li>
+            <li>Impending doom tick.</li>
+            <li>Pro Dashboard View</li>
+            <li>Improved Custom Subject Menus</li>
+            <li>Improved Settings and Card menus.</li>
+          </ul>
+        </div>
+
+        <!-- Feedback Panel -->
+        <div id="tab-feedback" class="tab-content hidden space-y-4 text-sm text-center">
+          <p>Have an idea or found a bug? Join the community!</p>
+          <a href="https://discord.gg/c8xHpTfM" target="_blank" class="btn-primary inline-block"
+            style="padding: 10px;">Join the Discord
+            Group</a>
+          <p class="text-xs text-secondary">You can also submit feedback or report issues on the project's
+            GitHub page.</p>
+        </div>
+
+        <!-- About & Support Panel -->
+        <div id="tab-about" class="tab-content hidden space-y-3 text-sm">
+          <p><strong>Created by:</strong> <a href="https://github.com/svalordev" target="_blank">Shaurya
+              Pratap Singh</a></p><br>
+          <p><strong>Project Repository:</strong> <a href="https://github.com/SvalTech/studylocus/" target="_blank">View
+              on GitHub</a></p><br>
+          <div class="border-t border-gray-700 my-4"></div>
+          <p>Enjoying StudyLocus? Star the project repository on Github (link above), will greatly appreciate
+            it, Thanks!</p>
+          <p>+ This project will try to stay free to use + ads free perpetually :)</p>
+        </div>
+
+      </div>
+
+      <div class="flex justify-end mt-6">
+        <button type="button" id="close-info-modal"
+          class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md">Close</button>
+      </div>
+    </div>
+  </div>
+  <div id="shortcuts-modal" class="modal-overlay hidden">
+    <div class="card w-11/12 max-w-sm">
+      <div class="card-header">
+        <h2 class="text-xl font-semibold">Keyboard Shortcuts</h2>
+        <div class="card-header-controls">
+          <kbd class="px-2 py-1 bg-gray-700 rounded text-xs text-gray-300 font-mono">?</kbd>
+        </div>
+      </div>
+      <div class="space-y-3 mt-4 text-sm">
+        <div class="flex justify-between items-center border-b border-gray-700/50 pb-2">
+          <span class="text-secondary">Toggle Timer (Pomodoro/Log)</span>
+          <kbd class="px-2 py-1 bg-gray-700 rounded text-xs font-mono text-white">Space</kbd>
+        </div>
+        <div class="flex justify-between items-center border-b border-gray-700/50 pb-2">
+          <span class="text-secondary">Zen Mode</span>
+          <kbd class="px-2 py-1 bg-gray-700 rounded text-xs font-mono text-white">Z</kbd>
+        </div>
+        <div class="flex justify-between items-center border-b border-gray-700/50 pb-2">
+          <span class="text-secondary">Add New Card</span>
+          <kbd class="px-2 py-1 bg-gray-700 rounded text-xs font-mono text-white">N</kbd>
+        </div>
+        <div class="flex justify-between items-center border-b border-gray-700/50 pb-2">
+          <span class="text-secondary">Customize Menu</span>
+          <kbd class="px-2 py-1 bg-gray-700 rounded text-xs font-mono text-white">C</kbd>
+        </div>
+        <div class="flex justify-between items-center border-b border-gray-700/50 pb-2">
+          <span class="text-secondary">Super Focus Mode</span>
+          <kbd class="px-2 py-1 bg-gray-700 rounded text-xs font-mono text-white">F</kbd>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-secondary">Close Modal / Blur Input</span>
+          <kbd class="px-2 py-1 bg-gray-700 rounded text-xs font-mono text-white">Esc</kbd>
+        </div>
+      </div>
+      <div class="flex justify-end mt-6">
+        <button type="button" id="close-shortcuts-modal" class="btn-primary font-bold py-2 px-4 rounded-md">Got
+          it</button>
+      </div>
+    </div>
+  </div>
+  <div class="fab-container">
+    <div class="fab-menu card p-2 space-y-1">
+      <h3 class="text-sm font-bold px-2 text-secondary">sval.tech</h3>
+      <a href="#" class="flex items-center gap-2 p-2 rounded-md hover:bg-gray-700/50">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect width="18" height="18" x="3" y="3" rx="2"></rect>
+          <path d="M7 3v18"></path>
+          <path d="M12 3v18"></path>
+          <path d="M17 3v18"></path>
+          <path d="M3 7.5h18"></path>
+          <path d="M3 12h18"></path>
+          <path d="M3 16.5h18"></path>
+        </svg>
+        <span>Dashboard</span>
+      </a>
+      <a href="https://svaltech.github.io/syllabustracker" target="_blank"
+        class="flex items-center gap-2 p-2 rounded-md hover:bg-gray-700/50">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path>
+          <path d="M14 2v4a2 2 0 0 0 2 2h4"></path>
+          <path d="m10 14-2 2 2 2"></path>
+          <path d="m14 6-2 2 2 2"></path>
+        </svg>
+        <span>Syllabus Tracker</span>
+      </a>
+      <a href="https://svaltech.github.io/zenith" target="_blank"
+        class="flex items-center gap-2 p-2 rounded-md hover:bg-gray-700/50">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path>
+          <path d="M14 2v4a2 2 0 0 0 2 2h4"></path>
+          <path d="m10 14-2 2 2 2"></path>
+          <path d="m14 6-2 2 2 2"></path>
+        </svg>
+        <span>Zenith</span>
+      </a>
+    </div>
+    <button
+      class="w-14 h-14 rounded-full bg-gray-800 shadow-lg flex items-center justify-center text-white hover:bg-gray-700 transition-colors"
+      aria-label="Toggle sval.tech products menu">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="7" height="7"></rect>
+        <rect x="14" y="3" width="7" height="7"></rect>
+        <rect x="14" y="14" width="7" height="7"></rect>
+        <rect x="3" y="14" width="7" height="7"></rect>
+      </svg>
+    </button>
+  </div>
+
+  <input type="file" id="import-file-input" class="hidden" accept=".json">
+
+  <div id="god-mode-panel" class="hidden fixed bottom-4 left-4 card p-4 w-64 z-50 space-y-3">
+    <h3 class="text-lg font-bold text-center" style="color: var(--accent-color);">-- GOD MODE --</h3>
+    <p class="text-xs text-secondary text-center">Ultimate power is now yours.</p>
+    <div class="border-t border-[var(--border-color)]"></div>
+    <div class="space-y-2">
+      <button id="god-mode-theme-btn"
+        class="w-full bg-green-700 hover:bg-green-800 text-white font-bold py-2 px-4 rounded-md text-sm">Matrix
+        Theme</button>
+      <button id="god-mode-complete-tasks-btn"
+        class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-2 px-4 rounded-md text-sm">Complete
+        All Tasks</button>
+      <button id="god-mode-perfect-score-btn"
+        class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-md text-sm">Get
+        Perfect Score</button>
+      <button id="god-mode-timewarp-btn"
+        class="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-md text-sm">Time
+        Warp (+7 Days)</button>
+      <button id="god-mode-scramble-btn"
+        class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md text-sm">Scramble
+        Layout</button>
+      <button id="god-mode-nuke-btn"
+        class="w-full bg-red-700 hover:bg-red-800 text-white font-bold py-2 px-4 rounded-md text-sm">NUKE</button>
+    </div>
+    <button id="god-mode-close-btn" class="absolute top-2 right-2 text-secondary hover:text-primary"
+      aria-label="Close God Mode Panel">&times;</button>
+  </div>
+
+  <div id="super-focus-overlay"
+    class="fixed inset-0 z-[9999] hidden flex flex-col bg-gray-900/95 backdrop-blur-xl transition-all duration-300 text-white font-sans selection:bg-indigo-500/30">
+
+    <div class="absolute top-0 left-0 right-0 p-6 flex justify-between items-center z-10">
+      <h1 class="text-2xl font-bold tracking-tighter hidden md:block select-none">sval.tech</h1>
+
+      <div class="flex bg-white/5 backdrop-blur-md rounded-full p-1 border border-white/10 shadow-lg">
+        <button class="focus-tab-btn active px-6 py-2 rounded-full text-sm font-medium transition-all hover:bg-white/10"
+          data-view="clock">Clock</button>
+        <button class="focus-tab-btn px-6 py-2 rounded-full text-sm font-medium transition-all hover:bg-white/10"
+          data-view="timer">Timer</button>
+        <button class="focus-tab-btn px-6 py-2 rounded-full text-sm font-medium transition-all hover:bg-white/10"
+          data-view="dashboard">Dashboard</button>
+      </div>
+
+      <div class="flex gap-3">
+        <button id="toggle-focus-fullscreen"
+          class="group flex items-center justify-center w-10 h-10 rounded-full bg-white/5 hover:bg-white/20 border border-white/10 transition-all"
+          title="Toggle Fullscreen">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 3H5a2 2 0 0 0-2 2v3" />
+            <path d="M16 3h3a2 2 0 0 1 2 2v3" />
+            <path d="M8 21H5a2 2 0 0 1-2-2v-3" />
+            <path d="M16 21h3a2 2 0 0 0 2-2v-3" />
+          </svg>
+        </button>
+
+        <button id="exit-super-focus"
+          class="group flex items-center justify-center w-10 h-10 rounded-full bg-white/5 hover:bg-red-500/20 hover:text-red-400 border border-white/10 transition-all"
+          title="Exit Focus Mode">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 6 6 18" />
+            <path d="m6 6 12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div id="focus-view-clock"
+      class="focus-view flex-1 flex flex-col items-center justify-center text-center p-4 relative">
+      <div class="space-y-4 relative z-10">
+        <div id="focus-quote-display"
+          class="text-xl md:text-2xl font-serif italic text-white/80 max-w-2xl mx-auto leading-relaxed">
+          "Believe in yourself and your abilities!"
+        </div>
+        <div id="focus-clock-display"
+          class="text-[6rem] md:text-[10rem] font-bold tabular-nums leading-none tracking-tight text-white drop-shadow-2xl">
+          12:00
+        </div>
+        <div id="focus-date-display" class="text-lg md:text-xl text-white/60 uppercase tracking-widest font-medium">
+          Monday, January 1st
+        </div>
+      </div>
+    </div>
+
+    <div id="focus-view-timer" class="focus-view hidden flex-1 flex flex-col items-center justify-center p-4">
+      <div
+        class="bg-white/5 border border-white/10 rounded-[3rem] p-12 md:p-20 backdrop-blur-2xl shadow-2xl text-center relative overflow-hidden">
+        <div id="timer-pulse"
+          class="absolute inset-0 bg-indigo-500/10 opacity-0 transition-opacity duration-1000 pointer-events-none">
+        </div>
+
+        <div class="relative z-10">
+          <div class="flex justify-center gap-4 mb-8">
+            <button
+              class="timer-mode-btn active text-sm font-bold uppercase tracking-wider text-white/40 hover:text-white transition-colors"
+              data-mode="pomodoro">Pomodoro</button>
+            <span class="text-white/20">|</span>
+            <button
+              class="timer-mode-btn text-sm font-bold uppercase tracking-wider text-white/40 hover:text-white transition-colors"
+              data-mode="logger">Stopwatch</button>
+          </div>
+
+          <div id="focus-big-timer"
+            class="text-[5rem] md:text-[8rem] font-bold font-mono tabular-nums leading-none mb-8">
+            25:00
+          </div>
+
+          <div class="flex justify-center gap-6">
+            <button id="focus-timer-toggle"
+              class="w-32 py-4 bg-white/10 text-white font-bold rounded-2xl hover:bg-white/20 transition-all">START</button>
+            <button id="focus-timer-reset"
+              class="w-32 py-4 bg-white/10 text-white font-bold rounded-2xl hover:bg-white/20 transition-all">RESET</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="focus-view-dashboard" class="focus-view hidden flex-1 flex items-center p-6 md:p-12 overflow-hidden">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-7xl mx-auto h-[600px] max-h-[80vh]">
+
+        <div
+          class="bg-black/40 border border-white/10 rounded-3xl p-6 backdrop-blur-md flex flex-col hover:border-white/20 transition-colors">
+          <h3 class="text-white/90 font-bold mb-1 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+            </svg>
+            Scratchpad
+          </h3>
+          <p class="text-xs text-white/40 mb-4">Quick notes disappear on refresh</p>
+          <textarea
+            class="flex-1 w-full bg-transparent resize-none outline-none text-white/80 placeholder-white/20 leading-relaxed text-sm font-mono"
+            placeholder="Jot down quick thoughts, formulas, or syllabus topics here..."></textarea>
+        </div>
+
+        <div
+          class="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl flex flex-col items-center justify-center relative shadow-2xl hover:border-indigo-500/50 transition-colors">
+          <div class="text-center">
+            <div id="dashboard-timer-display" class="text-6xl font-bold font-mono tabular-nums mb-6">25:00
+            </div>
+            <div class="flex gap-3 justify-center">
+              <button id="dash-timer-toggle"
+                class="px-6 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg transition-colors">Start</button>
+              <button id="dash-timer-reset"
+                class="px-6 py-2 bg-white/10 hover:bg-white/20 text-white font-bold rounded-lg transition-colors">Reset</button>
+            </div>
+            <div class="mt-6 text-xs text-white/40 uppercase tracking-widest">Focus Mode</div>
+          </div>
+        </div>
+
+        <div
+          class="bg-black/40 border border-white/10 rounded-3xl p-6 backdrop-blur-md flex flex-col hover:border-white/20 transition-colors">
+          <h3 class="text-white/90 font-bold mb-4 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 11l3 3L22 4" />
+              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+            </svg>
+            Tasks
+          </h3>
+          <div class="flex-1 overflow-y-auto no-scrollbar pr-2">
+            <ul id="focus-dashboard-tasks" class="space-y-2">
+            </ul>
+          </div>
+          <div class="mt-4 pt-4 border-t border-white/10">
+            <input type="text" id="focus-dash-add-task" placeholder="Add task & press Enter..."
+              class="w-full bg-transparent outline-none text-sm text-white placeholder-white/30">
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+
+</html>
