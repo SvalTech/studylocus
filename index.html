@@ -180,65 +180,72 @@
     <div id="bg-overlay"></div>
     <div id="sync-status-toast"></div>
     <div class="container mx-auto px-2 sm:px-4 py-6">
-        <!-- Default Header -->
-        <header class="default-header header-capsule flex justify-between items-center">
-        
+        <header class="default-header header-capsule flex flex-wrap justify-between items-center gap-y-2 relative">
+    
             <div class="flex items-center gap-3 pl-2">
-                <span class="brand-text hidden sm:block">sval.tech</span> | 
-            
+                <span class="brand-text hidden sm:block">sval.tech</span>
+                <span class="hidden sm:block text-gray-600">|</span>
                 <h1 id="main-title"
                     class="text-lg sm:text-xl font-bold tracking-tight cursor-pointer hover:text-[var(--accent-color)] transition-colors">
                     JEE 2026
                 </h1>
             </div>
-        
-            <div class="flex items-center gap-2 pr-1">
-        
+    
+            <div
+                class="order-last w-full md:w-auto md:absolute md:left-1/2 md:transform md:-translate-x-1/2 flex justify-center mt-2 md:mt-0">
+                <nav class="flex p-1 bg-black/20 backdrop-blur-md rounded-full border border-white/10 shadow-inner">
+                    <button
+                        class="view-tab-btn active px-4 py-1.5 text-xs font-bold rounded-full transition-all text-gray-400 hover:text-white hover:bg-white/5"
+                        data-target="dashboard">
+                        Dashboard
+                    </button>
+                    <button
+                        class="view-tab-btn px-4 py-1.5 text-xs font-bold rounded-full transition-all text-gray-400 hover:text-white hover:bg-white/5"
+                        data-target="calendar">
+                        Calendar
+                    </button>
+                    <button
+                        class="view-tab-btn px-4 py-1.5 text-xs font-bold rounded-full transition-all text-gray-400 hover:text-white hover:bg-white/5"
+                        data-target="statistics">
+                        Statistics
+                    </button>
+                </nav>
+            </div>
+    
+            <div class="flex items-center gap-2 pr-1 ml-auto md:ml-0">
                 <div id="auth-container" class="scale-90 origin-right"></div>
-        
-                <div class="h-4 w-px bg-white/10 mx-1"></div>
-        
+                <div class="h-4 w-px bg-white/10 mx-1 hidden sm:block"></div>
                 <div class="flex items-center gap-1.5">
-                    <button class="add-card-btn capsule-btn" title="Add New Card" aria-label="Add New Card">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <button class="add-card-btn capsule-btn" title="Add New Card"><svg xmlns="http://www.w3.org/2000/svg"
+                            width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                            stroke-linecap="round" stroke-linejoin="round">
                             <line x1="12" y1="5" x2="12" y2="19"></line>
                             <line x1="5" y1="12" x2="19" y2="12"></line>
-                        </svg>
-                    </button>
-        
-                    <button class="customize-btn capsule-btn" title="Customize Dashboard" aria-label="Customize Dashboard">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        </svg></button>
+                    <button class="customize-btn capsule-btn" title="Customize"><svg xmlns="http://www.w3.org/2000/svg"
+                            width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="3"></circle>
                             <path
                                 d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
                             </path>
-                        </svg>
-                    </button>
-        
-        
-                    <button class="info-btn capsule-btn" title="Info" aria-label="Info">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        </svg></button>
+                    <button class="info-btn capsule-btn" title="Info"><svg xmlns="http://www.w3.org/2000/svg" width="16"
+                            height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="10"></circle>
                             <line x1="12" y1="16" x2="12" y2="12"></line>
                             <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                        </svg>
-                    </button>
-
-                    <button id="static-focus-btn" class="capsule-btn" title="Super Focus Mode" aria-label="Enter Super Focus">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        </svg></button>
+                    <button id="static-focus-btn" class="capsule-btn" title="Super Focus Mode"><svg
+                            xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="10" />
                             <circle cx="12" cy="12" r="3" />
-                        </svg>
-                    </button>
-
-
-                    <button class="zen-mode-btn capsule-btn" title="Enter Zen Mode" aria-label="Enter Zen Mode">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        </svg></button>
+                    <button class="zen-mode-btn capsule-btn" title="Enter Zen Mode"><svg xmlns="http://www.w3.org/2000/svg"
+                            width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="10"></circle>
                             <circle cx="12" cy="12" r="4"></circle>
                             <line x1="4.93" y1="4.93" x2="9.17" y2="9.17"></line>
@@ -246,13 +253,221 @@
                             <line x1="14.83" y1="9.17" x2="19.07" y2="4.93"></line>
                             <line x1="14.83" y1="9.17" x2="18.36" y2="5.64"></line>
                             <line x1="4.93" y1="19.07" x2="9.17" y2="14.83"></line>
-                        </svg>
-                    </button>
+                        </svg></button>
                 </div>
             </div>
         </header>
-        <main id="dashboard-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        </main>
+    
+        <div id="view-container">
+    
+            <div id="view-dashboard" class="view-section">
+                <main id="dashboard-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                </main>
+            </div>
+    
+            <div id="view-statistics" class="view-section hidden animate-fade-in-down">
+                <div class="max-w-7xl mx-auto space-y-6 pb-20">
+            
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div
+                            class="bg-gradient-to-br from-orange-500/10 to-transparent border border-orange-500/20 rounded-2xl p-5 flex items-center justify-between relative overflow-hidden group">
+                            <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24"
+                                    fill="currentColor" class="text-orange-500">
+                                    <path
+                                        d="M17.657 18.657A8 8 0 0 1 6.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0 1 20 13a7.975 7.975 0 0 1-2.343 5.657z">
+                                    </path>
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="text-xs text-orange-400 font-bold uppercase tracking-widest mb-1">Current Streak</div>
+                                <div class="text-3xl font-black text-white" id="stat-streak">0 Days</div>
+                                <div class="text-[10px] text-gray-400 mt-1">Keep the fire burning!</div>
+                            </div>
+                        </div>
+            
+                        <div
+                            class="bg-gradient-to-br from-blue-500/10 to-transparent border border-blue-500/20 rounded-2xl p-5 flex items-center justify-between relative overflow-hidden">
+                            <div>
+                                <div class="text-xs text-blue-400 font-bold uppercase tracking-widest mb-1">Consistency Score</div>
+                                <div class="text-3xl font-black text-white" id="stat-consistency">0%</div>
+                                <div class="text-[10px] text-gray-400 mt-1">Based on daily study variance</div>
+                            </div>
+                            <div class="h-12 w-12 rounded-full border-4 border-blue-500/30 flex items-center justify-center text-xs font-bold text-blue-400"
+                                id="stat-consistency-grade">
+                                -
+                            </div>
+                        </div>
+            
+                        <div class="bg-white/5 border border-white/10 rounded-2xl p-5 flex flex-col justify-center">
+                            <div class="flex justify-between items-end">
+                                <div>
+                                    <div class="text-xs text-gray-400 font-bold uppercase tracking-widest mb-1">Total Logged</div>
+                                    <div class="text-2xl font-bold text-white" id="stat-total-time">0h 0m</div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-xs text-gray-400 font-bold uppercase tracking-widest mb-1">Daily Avg</div>
+                                    <div class="text-xl font-bold text-gray-200" id="stat-daily-avg">0h</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+                        <div class="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col">
+                            <h3 class="text-sm font-bold text-gray-300 uppercase tracking-wider mb-4 border-b border-white/5 pb-2">
+                                Study DNA (Day Analysis)
+                            </h3>
+                            <div class="flex-grow flex items-center justify-center min-h-[250px] relative">
+                                <canvas id="stats-radar-chart"></canvas>
+                            </div>
+                            <p class="text-xs text-center text-gray-500 mt-4 italic" id="stat-day-persona">Analyzing your
+                                schedule...</p>
+                        </div>
+            
+                        <div class="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col">
+                            <h3 class="text-sm font-bold text-gray-300 uppercase tracking-wider mb-4 border-b border-white/5 pb-2">
+                                Subject Health
+                            </h3>
+                            <div class="flex-grow flex flex-col justify-center gap-6">
+                                <div class="h-40 relative">
+                                    <canvas id="stats-subject-chart"></canvas>
+                                    <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                        <span class="text-[10px] text-gray-500">RATIO</span>
+                                    </div>
+                                </div>
+            
+                                <div class="bg-red-500/10 border border-red-500/20 rounded-lg p-3 hidden" id="neglect-container">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <svg class="w-4 h-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                        </svg>
+                                        <span class="text-xs font-bold text-red-300 uppercase">Needs Attention</span>
+                                    </div>
+                                    <p class="text-xs text-red-200/80" id="stat-neglected-subjects">You haven't studied Chemistry in
+                                        5 days.</p>
+                                </div>
+                            </div>
+                        </div>
+            
+                        <div class="bg-white/5 border border-white/10 rounded-2xl p-6">
+                            <h3 class="text-sm font-bold text-gray-300 uppercase tracking-wider mb-4 border-b border-white/5 pb-2">
+                                Test Metrics
+                            </h3>
+            
+                            <div class="space-y-4">
+                                <div
+                                    class="flex items-center justify-between p-3 bg-green-500/5 border border-green-500/10 rounded-lg">
+                                    <div>
+                                        <div class="text-[10px] text-green-400 uppercase font-bold">Power Subject</div>
+                                        <div class="text-lg font-bold text-white" id="stat-strongest-sub">-</div>
+                                    </div>
+                                    <div class="text-2xl font-black text-green-500/20">A+</div>
+                                </div>
+            
+                                <div class="flex items-center justify-between p-3 bg-red-500/5 border border-red-500/10 rounded-lg">
+                                    <div>
+                                        <div class="text-[10px] text-red-400 uppercase font-bold">Critical Weakness</div>
+                                        <div class="text-lg font-bold text-white" id="stat-weakest-sub">-</div>
+                                    </div>
+                                    <div class="text-2xl font-black text-red-500/20">F</div>
+                                </div>
+            
+                                <div class="h-32 w-full mt-4">
+                                    <canvas id="stats-performance-chart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+            
+                    </div>
+            
+                    <div class="bg-white/5 border border-white/10 rounded-2xl p-6">
+                        <h3 class="text-sm font-bold text-gray-300 uppercase tracking-wider mb-4 flex justify-between items-center">
+                            <span>30-Day Momentum</span>
+                            <span class="text-[10px] bg-white/10 px-2 py-1 rounded text-gray-400" id="stat-total-trend">Total:
+                                0h</span>
+                        </h3>
+                        <div class="h-64 w-full">
+                            <canvas id="stats-trend-chart"></canvas>
+                        </div>
+                    </div>
+            
+                </div>
+            </div>
+    
+            <div id="view-calendar" class="view-section hidden animate-fade-in-down h-full">
+                <div
+                    class="flex flex-col h-[600px] md:h-[calc(100vh-140px)] max-h-[900px] bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+            
+                    <div class="flex items-center justify-between p-4 border-b border-white/10 bg-black/20">
+                        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                            <span id="cal-month-name">February</span>
+                            <span id="cal-year-name" class="text-gray-500 font-normal">2026</span>
+                        </h2>
+                        <div class="flex items-center gap-1">
+                            <button id="cal-prev-btn"
+                                class="p-2 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white transition-colors">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m15 18-6-6 6-6" />
+                                </svg>
+                            </button>
+                            <button id="cal-today-btn"
+                                class="px-3 py-1.5 text-xs font-bold bg-white/10 hover:bg-white/20 rounded-lg text-white transition-colors mx-1">
+                                Today
+                            </button>
+                            <button id="cal-next-btn"
+                                class="p-2 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white transition-colors">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m9 18 6-6-6-6" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+            
+                    <div class="grid grid-cols-7 border-b border-white/10 bg-black/10">
+                        <div class="text-center py-2 text-[10px] uppercase font-bold text-gray-500">Sun</div>
+                        <div class="text-center py-2 text-[10px] uppercase font-bold text-gray-500">Mon</div>
+                        <div class="text-center py-2 text-[10px] uppercase font-bold text-gray-500">Tue</div>
+                        <div class="text-center py-2 text-[10px] uppercase font-bold text-gray-500">Wed</div>
+                        <div class="text-center py-2 text-[10px] uppercase font-bold text-gray-500">Thu</div>
+                        <div class="text-center py-2 text-[10px] uppercase font-bold text-gray-500">Fri</div>
+                        <div class="text-center py-2 text-[10px] uppercase font-bold text-gray-500">Sat</div>
+                    </div>
+            
+                    <div id="calendar-grid" class="flex-grow grid grid-cols-7 grid-rows-5 overflow-y-auto">
+                    </div>
+                </div>
+            </div>
+            
+            <div id="day-editor-modal"
+                class="modal-overlay hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+                <div
+                    class="card w-full max-w-md bg-[var(--card-bg-color)] border border-[var(--border-color)] rounded-2xl shadow-2xl transform transition-all scale-100 opacity-100">
+                    <div class="card-header flex justify-between items-center p-4 border-b border-white/10">
+                        <h2 id="day-editor-title" class="text-lg font-bold text-white">Edit Tasks</h2>
+                        <button id="close-day-editor" class="text-gray-400 hover:text-white">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M18 6 6 18" />
+                                <path d="m6 6 12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="p-4">
+                        <form id="day-editor-form" class="flex gap-2 mb-4">
+                            <input type="text" placeholder="Add new task..." class="form-input flex-grow" required
+                                autocomplete="off">
+                            <button type="submit" class="btn-primary px-4 py-2 text-sm font-bold rounded-lg">+</button>
+                        </form>
+                        <ul id="day-editor-list" class="space-y-2 max-h-[300px] overflow-y-auto custom-scrollbar p-1">
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <button id="exit-zen-btn"
