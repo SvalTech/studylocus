@@ -24,11 +24,56 @@ const firebaseConfig = {
     messagingSenderId: "79210973277",
     appId: "1:79210973277:web:cc0a5fa86729fd6d3f65b4",
     measurementId: "G-TE7Z0SR8L1",
+    databaseURL: "https://studydashboard-2a3eb-default-rtdb.asia-southeast1.firebasedatabase.app"
 };
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
+const rtdb = firebase.database();
+const onlineBadge = document.getElementById("online-users-badge");
+const onlineCountText = document.getElementById("online-count-text");
+
+// Reference to the special '.info/connected' path in RTDB
+const connectionsRef = rtdb.ref("connections");
+const connectedRef = rtdb.ref(".info/connected");
+
+// This function manages the session node
+function manageUserPresence(user) {
+    if (!user) return;
+
+    const sessionID = Date.now();
+    // Path: connections/UID/SESSION_ID
+    const mySessionRef = firebase.database().ref("connections").child(user.uid).child(sessionID);
+
+    firebase.database().ref(".info/connected").on("value", (snap) => {
+        if (snap.val() === true) {
+            mySessionRef.onDisconnect().remove();
+            mySessionRef.set({
+                joined: firebase.database.ServerValue.TIMESTAMP,
+                name: user.displayName || "User" // Changed from 'user' to 'name' to match rules
+            });
+        }
+    });
+}
+
+// Update the listener to count UNIQUE users
+connectionsRef.on("value", (snap) => {
+    const count = Object.keys(snap.val() || {}).length;
+
+    // Determine if we are on a small screen
+    const isMobile = window.innerWidth < 640;
+
+    if (isMobile) {
+        // Compact version for Shaurya's mobile UI
+        onlineCountText.textContent = `${count} Active`;
+    } else {
+        // Standard version for Desktop
+        onlineCountText.textContent = `${count} Live`;
+    }
+});
+
+// Integration: Call manageUserPresence(user) inside your auth.onAuthStateChanged block
 // --- Global State ---
 let currentUser = null;
 let syncTimeout = null;
@@ -223,6 +268,9 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         },
     };
+
+
+
     // --- Quotes Data ---
     const generalQuotes = [{
         text: "The secret of getting ahead is getting started.",
@@ -755,6 +803,19 @@ document.addEventListener("DOMContentLoaded", () => {
         cancelCallback = null;
     });
 
+
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            currentUser = user;
+            loadUserData(user);
+            manageUserPresence(user); // <--- Initialize presence here
+            enableAppControls();
+        } else {
+            currentUser = null;
+            updateAuthUI();
+            enableAppControls();
+        }
+    });
 
     // --- Subject Manager Listeners ---
 
@@ -2085,50 +2146,63 @@ document.addEventListener("DOMContentLoaded", () => {
         "time-logger": {
             templateId: "time-logger-card-template",
             render: (cardElement, cardData) => {
+                // 1. Initialization & Ghost State Protection
                 const state = appState.timeLoggerState[cardData.id] || {
                     isRunning: false,
                     accumulatedTime: 0,
                     currentSubject: "Physics",
                     intervalId: null,
                 };
+
+                const isActuallyRunning = state.isRunning && state.intervalId !== null;
                 appState.timeLoggerState[cardData.id] = state;
+
+                // 2. Update Display
                 cardElement.querySelector(".timer-display").textContent = formatTimeHHMMSS(state.accumulatedTime);
-                cardElement.querySelector(".start-pause-btn").textContent = state.isRunning ? "PAUSE" : "START";
-                // Update subject dropdown
-                const labelFor = `subject-select-${cardData.id}`;
+
+                const actionBtn = cardElement.querySelector(".start-pause-btn");
+                actionBtn.textContent = isActuallyRunning ? "PAUSE" : "START";
+                actionBtn.classList.toggle("bg-red-500/20", isActuallyRunning);
+
+                // 3. Subject Dropdown Logic (Main)
                 const selectEl = cardElement.querySelector(".subject-select");
-                const labelEl = selectEl.previousElementSibling; // Find the label relative to the select box
-                // Check if we found the label and it is a LABEL tag
-                if (labelEl && labelEl.tagName === 'LABEL') {
-                    labelEl.setAttribute("for", labelFor);
-                }
-                selectEl.id = labelFor;
-                const allSubjects = [...new Set(["Physics", "Chemistry", "Maths", "Biology", "Zoology", "Botany", ...(appState.settings.userSubjects || []),]),];
-                selectEl.innerHTML = allSubjects.map((subject) => `<option>${subject}</option>`).join("") + '<option value="add_new">Add New Subject...</option>';
+                // Get unique subjects
+                const allSubjects = [...new Set(["Physics", "Chemistry", "Maths", ...(appState.settings.userSubjects || [])])];
+
+                selectEl.innerHTML = allSubjects.map(s => `<option value="${s}">${s}</option>`).join("") +
+                    '<option value="add_new">Add New Subject...</option>';
                 selectEl.value = state.currentSubject;
-                const manualSelect = cardElement.querySelector(".manual-subject-select");
-                if (manualSelect) {
-                    manualSelect.innerHTML = allSubjects.map((subject) => `<option>${subject}</option>`).join("");
-                    // Set default to current timer subject just for convenience
-                    manualSelect.value = state.currentSubject;
+
+                // --- START FIX: Populate Manual Entry Dropdown ---
+                const manualSelectEl = cardElement.querySelector(".manual-subject-select");
+                if (manualSelectEl) {
+                    // We only show valid subjects here (no "Add New" option) to prevent logging errors
+                    manualSelectEl.innerHTML = allSubjects.map(s => `<option value="${s}">${s}</option>`).join("");
                 }
-                // Render today's study log
+                // --- END FIX ---
+
+                // 4. Render Log History
                 const logListEl = cardElement.querySelector(".study-log-list");
                 const totalTimeEl = cardElement.querySelector(".total-study-time");
                 logListEl.innerHTML = "";
                 const todayStr = formatDateToISO(new Date());
                 const todayLogs = appState.studyLogs[todayStr] || {};
                 const totalToday = Object.values(todayLogs).reduce((sum, time) => sum + time, 0);
-                if (totalTimeEl) {
-                    totalTimeEl.textContent = `Total: ${formatTimeReadable(totalToday)}`;
-                }
+
+                if (totalTimeEl) totalTimeEl.textContent = `Total: ${formatTimeReadable(totalToday)}`;
+
                 if (Object.keys(todayLogs).length === 0) {
-                    logListEl.innerHTML = '<li class="text-secondary px-2 text-sm">No sessions logged today.</li>';
+                    logListEl.innerHTML = '<li class="text-secondary px-2 text-sm opacity-50">No sessions logged today.</li>';
                 } else {
                     Object.entries(todayLogs).forEach(([subject, time]) => {
                         const listItem = document.createElement("li");
-                        listItem.className = "flex justify-between items-center";
-                        listItem.innerHTML = `<span>${subject}</span><div class="flex items-center gap-2"><span class="font-semibold">${formatTimeReadable(time)}</span><button data-subject="${subject}" class="delete-log-item text-red-500 hover:text-red-400 font-semibold px-2 py-1 text-xs leading-none rounded-sm" aria-label="Delete ${subject} log">×</button></div>`;
+                        listItem.className = "flex justify-between items-center group/log";
+                        listItem.innerHTML = `
+                    <span>${subject}</span>
+                    <div class="flex items-center gap-2">
+                        <span class="font-semibold text-[var(--accent-color)]">${formatTimeReadable(time)}</span>
+                        <button data-subject="${subject}" class="delete-log-item text-gray-500 hover:text-red-400 opacity-0 group-hover/log:opacity-100 transition-opacity">×</button>
+                    </div>`;
                         logListEl.appendChild(listItem);
                     });
                 }
@@ -4202,12 +4276,12 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }, 1000);
     // Save final study log time on page unload
-    window.addEventListener("beforeunload", () => {
-        if (appState.activeTimer.cardId && appState.activeTimer.type === "time-logger") {
-            console.log("Unload event: Forcing final save for active study logger.");
-            window.timeLogger.pause(appState.activeTimer.cardId, false); // Pause without rendering
-        }
-    });
+    // window.addEventListener("beforeunload", () => {
+    //     if (appState.activeTimer.cardId && appState.activeTimer.type === "time-logger") {
+    //         console.log("Unload event: Forcing final save for active study logger.");
+    //         window.timeLogger.pause(appState.activeTimer.cardId, false); // Pause without rendering
+    //     }
+    // });
     // --- Info Modal Tab-switching ---
     const infoModal = document.getElementById("info-modal");
     const tabButtons = infoModal.querySelectorAll(".tab-btn");
@@ -5404,5 +5478,29 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
-});
 
+    // --- FINAL FIX: Hard Synchronous Save ---
+    window.addEventListener("beforeunload", () => {
+        let needsSave = false;
+
+        Object.keys(appState.timeLoggerState).forEach(id => {
+            const state = appState.timeLoggerState[id];
+            // If the timer is running, calculate the final seconds and STOP it.
+            if (state.isRunning && state.startTime) {
+                const elapsedSeconds = Math.round((Date.now() - state.startTime) / 1000);
+                state.accumulatedTime += elapsedSeconds;
+
+                // Kill the "Running" state so it doesn't try to auto-resume incorrectly
+                // state.isRunning = false;
+                // state.startTime = null;
+                state.intervalId = null;
+                needsSave = true;
+            }
+        });
+
+        if (needsSave) {
+            // Synchronous save to LocalStorage (This is the only thing guaranteed to work on close)
+            localStorage.setItem("jeeTimeLoggerState_v1", JSON.stringify(appState.timeLoggerState));
+        }
+    });
+});

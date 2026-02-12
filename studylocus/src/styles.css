@@ -2352,3 +2352,21 @@ body.zen-mode .manual-entry-container {
     user-select: none;          /* Prevents text selection during rapid tapping */
     -webkit-user-select: none;
 }
+
+
+
+/* Optimized Mobile Presence Badge */
+@media (max-width: 640px) {
+    #online-users-badge {
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+        margin-right: 0.5rem !important;
+        gap: 0.25rem !important;
+    }
+
+    /* Hide the 'Live' text and label on very small screens */
+    #online-count-text {
+        font-size: 10px;
+    }
+}
+
