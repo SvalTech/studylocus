@@ -550,17 +550,16 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     };
     /**
-
      * Debounced function to save the ENTIRE local app state to Firestore.
-
-     * This bundles all changes (layout, cards, tests) into one write.
-
      */
     const debouncedSaveAllToFirestore = debounce(() => {
         if (!currentUser) return;
-        console.log("Debounced save triggered. Saving all data to cloud...");
+
+        console.log("Debounced save triggered...");
+        // Show persistent "Saving..." immediately
+        showSyncStatus("Saving...");
+
         const userDocRef = db.collection("users").doc(currentUser.uid);
-        // 1. Get all data from localStorage (which is our up-to-date cache)
         const localData = {};
         for (const key in LOCAL_STORAGE_KEYS) {
             const dataString = localStorage.getItem(LOCAL_STORAGE_KEYS[key]);
@@ -568,16 +567,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 localData[key] = JSON.parse(dataString);
             }
         }
-        // 2. Send it all to Firestore in ONE 'set' operation
+
         userDocRef.set(localData).then(() => {
-            // We don't need showSyncStatus("All changes saved") here
-            // The onSnapshot listener (Step 1) will handle this automatically!
-            console.log("Debounced save successful.");
+            console.log("Save successful.");
+            // EXPLICIT SUCCESS: We know it's done, so we say so.
+            showSyncStatus("All changes saved");
         }).catch((error) => {
-            showSyncStatus("Sync Error");
             console.error("Firestore save error:", error);
+            showSyncStatus("Sync Error");
         });
-    }, 2000); // 2-second debounce is plenty. 5 is too long.
+    }, 2000);
 
 
     /**
@@ -613,84 +612,89 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- Firestore Data Sync ---
     /**
-
-
-        
-
-* Loads user data from Firestore or migrates local data if new user.
-
-* @param {firebase.User} user The authenticated user object.
-
-*/
+     * Loads user data from Firestore or migrates local data if new user.
+     * @param {firebase.User} user The authenticated user object.
+     */
     const loadUserData = async (user) => {
         updateAuthUI();
         const userDocRef = db.collection("users").doc(user.uid);
-        // 1. Check if the document exists
-        const userDoc = await userDocRef.get();
-        if (!userDoc.exists) {
-            // 2. NEW USER: This part is fine. Migrate local data to the cloud ONCE.
-            console.log("New user detected. Migrating local data to cloud...");
-            await migrateLocalDataToCloud(userDocRef); // Your existing function is good for this
-        }
 
+        // 1. Check if the document exists (First load logic)
+        try {
+            const userDoc = await userDocRef.get();
+            if (!userDoc.exists) {
+                console.log("New user detected. Migrating local data to cloud...");
+                await migrateLocalDataToCloud(userDocRef);
+            }
+        } catch (e) {
+            console.error("Error checking user doc:", e);
+        }
 
         if (unsubscribeFirestore) {
             unsubscribeFirestore();
         }
-        // 3. (THE BIG CHANGE)
-        // Attach a REAL-TIME LISTENER to the user's document.
-        // This will replace your 'mergeCloudDataWithLocal' and the awful page reload.
+
+        // 2. Real-time Listener
         unsubscribeFirestore = userDocRef.onSnapshot(
             (doc) => {
-                console.log("Received cloud data snapshot...");
+                // SKIP LOCAL WRITES: If hasPendingWrites is true, it means WE just saved this data.
+                // We don't need to re-merge it or show "Syncing...", because debouncedSave handles that.
+                if (doc.metadata.hasPendingWrites) {
+                    return;
+                }
+
                 const cloudData = doc.data();
                 if (cloudData) {
                     let isStateUpdated = false;
-                    // 4. Merge cloud data into your local appState
-                    // (This is the "merge" without the page reload)
+
+                    // Merge Logic
                     for (const key in LOCAL_STORAGE_KEYS) {
                         if (cloudData[key]) {
-                            // Check if data is actually different to avoid needless re-renders
                             const localString = JSON.stringify(appState[key]);
                             const cloudString = JSON.stringify(cloudData[key]);
+
+                            // Only update if actually different
                             if (localString !== cloudString) {
                                 appState[key] = cloudData[key];
-                                // Also update the localStorage cache for the next offline load
                                 localStorage.setItem(LOCAL_STORAGE_KEYS[key], cloudString);
                                 isStateUpdated = true;
                             }
                         }
                     }
-                    // 5. If anything changed, just re-render the dashboard. NO RELOAD.
+
+                    // Only re-render and notify if we actually pulled NEW data from the cloud
                     if (isStateUpdated) {
-                        console.log("Cloud data merged. Re-rendering dashboard...");
-                        applySettings(); // Apply new settings
-                        renderDashboard(); // Re-render cards
+                        console.log("Cloud data merged. Re-rendering...");
+                        applySettings();
+                        renderDashboard();
+                        showSyncStatus("Dashboard Updated"); // Inform user data changed from another device
                     }
                 }
-                // 6. (BONUS) Use this to show a 100% accurate sync status!
-                // This replaces your manual showSyncStatus("All changes saved")
-                const status = doc.metadata.hasPendingWrites ? "Syncing..." : "All changes saved";
-                showSyncStatus(status);
             },
             (error) => {
                 console.error("Firestore snapshot error: ", error);
-                showSyncStatus("Sync Error");
-            });
+                // Only show error if it's not a permission/cancelled error during logout
+                if (currentUser) showSyncStatus("Sync Error");
+            }
+        );
     };
     /**
-
-    * Displays a sync status message (e.g., "Saving...", "All changes saved").
-
-    * @param {string} message The message to display.
-
-    */
+     * Displays a sync status message (e.g., "Saving...", "All changes saved").
+     * @param {string} message The message to display.
+     */
     const showSyncStatus = (message) => {
         const toast = domElements.syncStatusToast;
+
+        // 1. Always clear any pending hide-timer first to prevent glitches
+        clearTimeout(syncTimeout);
+
+        // 2. Show the message
         toast.textContent = message;
         toast.classList.add("show");
+
+        // 3. Only set a timer to hide if it's NOT a persistent state
+        // "Saving..." stays until we tell it to change. Everything else (Success/Error) fades out.
         if (message !== "Saving..." && message !== "Syncing...") {
-            clearTimeout(syncTimeout);
             syncTimeout = setTimeout(() => {
                 toast.classList.remove("show");
             }, 2000);
@@ -822,8 +826,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /**
- * Removes duplicate IDs from layout and ensures data integrity.
- */
+     * Removes duplicate IDs, ensures data integrity, and enforces singleton cards.
+     */
     function sanitizeDashboardState() {
         // 1. Remove duplicate IDs from the layout array
         if (appState.layout) {
@@ -844,7 +848,31 @@ document.addEventListener("DOMContentLoaded", () => {
             appState.customCards = uniqueCards;
         }
 
-        // 3. Ensure layout only contains IDs that actually exist (or are built-in)
+        // 3. ENFORCE SINGLETON: DAILY TASKS
+        // This ensures the Calendar always has a card to sync with.
+        const dailyCards = appState.customCards.filter(c => c.type === 'daily-tasks');
+
+        if (dailyCards.length === 0) {
+            // A. Create if missing
+            const newCard = {
+                id: `custom-${Date.now()}-daily`,
+                type: 'daily-tasks',
+                title: 'Daily Schedule',
+                content: {}
+            };
+            appState.customCards.push(newCard);
+            appState.layout.push(newCard.id);
+            console.log("Auto-created missing Daily Tasks card.");
+        } else if (dailyCards.length > 1) {
+            // B. Mitigate Duplicates (Keep the first one, delete others)
+            const idsToRemove = dailyCards.slice(1).map(c => c.id);
+
+            appState.customCards = appState.customCards.filter(c => !idsToRemove.includes(c.id));
+            appState.layout = appState.layout.filter(id => !idsToRemove.includes(id));
+            console.warn("Removed duplicate Daily Tasks cards to prevent conflicts:", idsToRemove);
+        }
+
+        // 4. Ensure layout only contains IDs that actually exist (or are built-in)
         const validCardIds = new Set(appState.customCards.map(c => c.id));
         const builtInCards = ["countdown", "time", "graph", "tests", "quote"];
 
@@ -852,7 +880,7 @@ document.addEventListener("DOMContentLoaded", () => {
             validCardIds.has(id) || builtInCards.includes(id)
         );
 
-        // Save the cleaned state back to storage
+        // 5. Save the cleaned state
         appState.save("layout");
         appState.save("customCards");
     }
@@ -2482,24 +2510,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
 
-        // Daily Tasks: Delete Task
-        if (event.target.closest(".delete-daily-task")) {
-            const btn = event.target.closest(".delete-daily-task");
-            const index = parseInt(btn.dataset.index);
-            const cardElement = event.target.closest(".card");
-            const cardId = cardElement.dataset.cardId;
-            const cardData = appState.customCards.find((c) => c.id === cardId);
-            const selectedDate = cardElement.querySelector(".daily-date-selector").value;
-
-            if (cardData && cardData.content[selectedDate]) {
-                cardData.content[selectedDate].splice(index, 1);
-                // Optional: clean up empty dates
-                if (cardData.content[selectedDate].length === 0) delete cardData.content[selectedDate];
-
-                appState.save("customCards");
-                cardRenderers["daily-tasks"].render(cardElement, cardData);
-            }
-        }
+    
 
         if (event.target.closest(".prev-day-btn") || event.target.closest(".next-day-btn")) {
             // NO 'const cardElement = ...' here because it exists at the top
@@ -4586,25 +4597,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 domElements.body.classList.toggle("zen-mode");
                 const isZen = domElements.body.classList.contains("zen-mode");
                 domElements.buttons.exitZenBtn.classList.toggle("hidden", !isZen);
-                break;
-
-            case "n": // N -> New Card Modal
-                e.preventDefault();
-                domElements.modals.addCard.classList.remove("hidden");
-                // Auto-focus the input
-                setTimeout(() => domElements.forms.newCard.querySelector("input").focus(), 100);
-                break;
-
-            case "c": // C -> Customize Menu
-                domElements.modals.customize.classList.toggle("hidden");
-                break;
-
-            case "f": // F -> Super Focus Mode
-                // Check if the focus mode function exists (from your existing code)
-                if (typeof openFocusMode === 'function') {
-                    openFocusMode();
-                }
-                break;
+                break
 
             case "?": // ? (Shift + /) -> Show Shortcuts Help
             case "/":
@@ -4776,4 +4769,538 @@ document.addEventListener("DOMContentLoaded", () => {
             if (targetPanel) targetPanel.classList.remove('hidden');
         });
     });
+
+    // --- MAIN DASHBOARD TAB LOGIC (FIXED) ---
+    const mainNavTabs = document.querySelectorAll('.view-tab-btn');
+    const mainNavSections = [
+        document.getElementById('view-dashboard'),
+        document.getElementById('view-statistics'),
+        document.getElementById('view-calendar') // Ensure this ID matches your HTML
+    ];
+
+    mainNavTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const target = tab.dataset.target;
+            const targetId = `view-${target}`;
+
+            // 1. Update Tab Styles
+            mainNavTabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+
+            // 2. Update Section Visibility
+            mainNavSections.forEach(section => {
+                if (section) {
+                    if (section.id === targetId) {
+                        section.classList.remove('hidden');
+                    } else {
+                        section.classList.add('hidden');
+                    }
+                }
+            });
+
+            // 3. TRIGGER VIEW SPECIFIC LOGIC
+            if (target === 'statistics') {
+                if (typeof renderStatisticsView === 'function') renderStatisticsView();
+            }
+            if (target === 'calendar') {
+                // This is the missing piece that makes it "Empty"
+                if (typeof calendarManager !== 'undefined') calendarManager.init();
+            }
+        });
+    });
+
+
+
+    // --- ADVANCED STATISTICS LOGIC ---
+
+    const statsCharts = {
+        trend: null,
+        subject: null,
+        performance: null,
+        radar: null
+    };
+
+    function renderStatisticsView() {
+        const logs = appState.studyLogs || {};
+        const subjectTotals = {};
+        const dailyTotals = {};
+        const dayOfWeekTotals = [0, 0, 0, 0, 0, 0, 0]; // Sun-Sat
+        let totalSecondsAllTime = 0;
+        let activeDaysCount = 0;
+
+        // 1. PROCESS STUDY LOGS
+        // Sort dates to calculate streaks
+        const sortedDates = Object.keys(logs).sort();
+        const todayStr = formatDateToISO(new Date());
+
+        Object.entries(logs).forEach(([date, subjects]) => {
+            let dayTotal = 0;
+            const dateObj = new Date(date);
+            const dayIndex = dateObj.getDay(); // 0 = Sunday
+
+            Object.entries(subjects).forEach(([sub, sec]) => {
+                subjectTotals[sub] = (subjectTotals[sub] || 0) + sec;
+                dayTotal += sec;
+                totalSecondsAllTime += sec;
+            });
+
+            if (dayTotal > 0) {
+                dailyTotals[date] = dayTotal;
+                dayOfWeekTotals[dayIndex] += dayTotal;
+                activeDaysCount++;
+            }
+        });
+
+        // 2. CALCULATE STREAK
+        let currentStreak = 0;
+        let checkDate = new Date();
+        // Check today first, if 0 logs, check yesterday to start streak count
+        // If today has logs, streak includes today.
+        let dateStr = formatDateToISO(checkDate);
+        if (!dailyTotals[dateStr]) {
+            checkDate.setDate(checkDate.getDate() - 1); // Check yesterday
+            dateStr = formatDateToISO(checkDate);
+        }
+
+        while (dailyTotals[dateStr]) {
+            currentStreak++;
+            checkDate.setDate(checkDate.getDate() - 1);
+            dateStr = formatDateToISO(checkDate);
+        }
+        document.getElementById('stat-streak').innerText = `${currentStreak} Days`;
+
+        // 3. CALCULATE CONSISTENCY SCORE (Standard Deviation Based)
+        // We look at the last 14 days
+        let consistencyScore = 0;
+        let consistencyGrade = "C";
+
+        if (activeDaysCount > 2) {
+            const values = Object.values(dailyTotals).slice(-14); // Last 14 active days
+            const mean = values.reduce((a, b) => a + b, 0) / values.length;
+            const variance = values.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / values.length;
+            const stdDev = Math.sqrt(variance);
+
+            // Coefficient of Variation (lower is better)
+            const cv = stdDev / mean;
+            // Map CV to 0-100 Score (approximate logic)
+            // CV 0.0 (Perfect) -> 100, CV 1.0 (Erratic) -> 0
+            consistencyScore = Math.max(0, Math.min(100, 100 - (cv * 100)));
+
+            if (consistencyScore > 80) consistencyGrade = "A";
+            else if (consistencyScore > 60) consistencyGrade = "B";
+            else if (consistencyScore > 40) consistencyGrade = "C";
+            else consistencyGrade = "D";
+        }
+
+        document.getElementById('stat-consistency').innerText = `${Math.round(consistencyScore)}%`;
+        document.getElementById('stat-consistency-grade').innerText = consistencyGrade;
+        document.getElementById('stat-consistency-grade').className = `h-12 w-12 rounded-full border-4 flex items-center justify-center text-xs font-bold ${consistencyScore > 60 ? 'border-green-500/30 text-green-400' : 'border-blue-500/30 text-blue-400'}`;
+
+        // 4. TOTALS
+        document.getElementById('stat-total-time').innerText = formatTimeReadable(totalSecondsAllTime);
+
+        // --- FIX APPLIED HERE: Added Math.round() ---
+        const dailyAvg = activeDaysCount > 0 ? Math.round(totalSecondsAllTime / activeDaysCount) : 0;
+        document.getElementById('stat-daily-avg').innerText = formatTimeReadable(dailyAvg);
+
+        // 5. DETECT NEGLECTED SUBJECTS
+        // Subjects defined in settings vs subjects logged in last 7 days
+        const allUserSubjects = appState.settings.userSubjects || ["Physics", "Chemistry", "Maths"];
+        const recentLogs = sortedDates.slice(-7);
+        const recentlyStudied = new Set();
+
+        recentLogs.forEach(d => {
+            Object.keys(logs[d]).forEach(s => recentlyStudied.add(s));
+        });
+
+        const neglected = allUserSubjects.filter(s => !recentlyStudied.has(s) && s !== "Pomodoro");
+        const neglectContainer = document.getElementById('neglect-container');
+
+        if (neglected.length > 0) {
+            neglectContainer.classList.remove('hidden');
+            document.getElementById('stat-neglected-subjects').innerText = `No logs recently: ${neglected.slice(0, 3).join(', ')}`;
+        } else {
+            neglectContainer.classList.add('hidden');
+        }
+
+        // 6. TEST PERFORMANCE ANALYSIS
+        const graphCard = appState.customCards.find(c => c.type === 'line-graph');
+        const testData = graphCard ? (graphCard.content || []) : [];
+        let strongest = { name: "-", avg: -1 };
+        let weakest = { name: "-", avg: 999 };
+
+        // Aggregate totals per subject from tests
+        const testSubTotals = {};
+        const testSubCounts = {};
+
+        testData.forEach(test => {
+            if (test.subjects) {
+                Object.entries(test.subjects).forEach(([sub, score]) => {
+                    testSubTotals[sub] = (testSubTotals[sub] || 0) + score;
+                    testSubCounts[sub] = (testSubCounts[sub] || 0) + 1;
+                });
+            }
+        });
+
+        Object.keys(testSubTotals).forEach(sub => {
+            const avg = testSubTotals[sub] / testSubCounts[sub];
+            if (avg > strongest.avg) strongest = { name: sub, avg: avg };
+            if (avg < weakest.avg) weakest = { name: sub, avg: avg };
+        });
+
+        // Edge case: if only 1 subject or no data
+        if (strongest.name === weakest.name && strongest.name !== "-") {
+            weakest = { name: "None", avg: 0 };
+        }
+
+        document.getElementById('stat-strongest-sub').innerText = strongest.name;
+        document.getElementById('stat-weakest-sub').innerText = weakest.name;
+
+        // 7. RENDER CHARTS
+        renderTrendChart(dailyTotals);
+        renderSubjectChart(subjectTotals);
+        renderPerformanceChart(testData);
+        renderRadarChart(dayOfWeekTotals);
+    }
+
+    // --- CHART FUNCTIONS ---
+
+    function renderTrendChart(dailyTotals) {
+        const ctx = document.getElementById('stats-trend-chart').getContext('2d');
+        const labels = [];
+        const data = [];
+        let rangeTotal = 0;
+
+        for (let i = 29; i >= 0; i--) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            const iso = formatDateToISO(d);
+            labels.push(d.toLocaleDateString('en-US', { day: 'numeric', month: 'short' }));
+            const secs = dailyTotals[iso] || 0;
+            data.push((secs / 3600).toFixed(1));
+            rangeTotal += secs;
+        }
+
+        document.getElementById('stat-total-trend').innerText = `30d Total: ${formatTimeReadable(rangeTotal)}`;
+
+        if (statsCharts.trend) statsCharts.trend.destroy();
+
+        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, 'rgba(59, 130, 246, 0.5)');
+        gradient.addColorStop(1, 'rgba(59, 130, 246, 0)');
+
+        statsCharts.trend = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Hours',
+                    data: data,
+                    borderColor: '#3b82f6',
+                    backgroundColor: gradient,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 0,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { border: { display: false }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                    x: { grid: { display: false }, ticks: { maxTicksLimit: 10 } }
+                }
+            }
+        });
+    }
+
+    function renderSubjectChart(subjectTotals) {
+        const ctx = document.getElementById('stats-subject-chart').getContext('2d');
+        const labels = Object.keys(subjectTotals);
+        const data = Object.values(subjectTotals).map(s => (s / 3600).toFixed(1));
+        const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+
+        if (statsCharts.subject) statsCharts.subject.destroy();
+
+        statsCharts.subject = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: colors,
+                    borderWidth: 0,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '75%',
+                plugins: {
+                    legend: { position: 'right', labels: { color: '#9ca3af', boxWidth: 10, font: { size: 10 } } }
+                }
+            }
+        });
+    }
+
+    function renderPerformanceChart(testData) {
+        const ctx = document.getElementById('stats-performance-chart').getContext('2d');
+        const recentTests = testData.slice(-5); // Last 5 tests only for cleanliness
+        const labels = recentTests.map(t => t.name.substring(0, 8)); // Truncate names
+        const scores = recentTests.map(t => t.total || t.marks);
+        const max = recentTests.length > 0 ? recentTests[0].maxMarks : 300;
+
+        if (statsCharts.performance) statsCharts.performance.destroy();
+
+        statsCharts.performance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Score',
+                    data: scores,
+                    backgroundColor: '#8b5cf6',
+                    borderRadius: 4,
+                    barThickness: 20
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { display: false, max: parseFloat(max) },
+                    x: { grid: { display: false }, ticks: { color: '#6b7280', font: { size: 9 } } }
+                }
+            }
+        });
+    }
+
+    function renderRadarChart(dayOfWeekTotals) {
+        const ctx = document.getElementById('stats-radar-chart').getContext('2d');
+        const labels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        // Normalize data to verify shape (hours)
+        const data = dayOfWeekTotals.map(sec => (sec / 3600).toFixed(1));
+
+        // Persona Logic
+        const maxVal = Math.max(...dayOfWeekTotals);
+        const maxIndex = dayOfWeekTotals.indexOf(maxVal);
+        let persona = "Balanced Scholar";
+        if (maxVal === 0) persona = "Ghost Mode";
+        else if (maxIndex === 0 || maxIndex === 6) persona = "Weekend Warrior";
+        else if (dayOfWeekTotals[1] > 0 && dayOfWeekTotals[5] > 0) persona = "Daily Grinder";
+
+        document.getElementById('stat-day-persona').innerText = `Study Persona: ${persona}`;
+
+        if (statsCharts.radar) statsCharts.radar.destroy();
+
+        statsCharts.radar = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Study Hours',
+                    data: data,
+                    backgroundColor: 'rgba(245, 158, 11, 0.2)', // Orange tint
+                    borderColor: 'rgba(245, 158, 11, 0.8)',
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgba(245, 158, 11, 1)'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                        pointLabels: { color: '#9ca3af', font: { size: 10 } },
+                        ticks: { display: false, backdropColor: 'transparent' }
+                    }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+
+    // --- CALENDAR & DRAG-DROP MANAGER ---
+    // --- CALENDAR & DRAG-DROP MANAGER (UPDATED) ---
+    const calendarManager = {
+        currentDate: new Date(),
+
+        init() {
+            this.render();
+            this.attachHeaderListeners();
+        },
+
+        getDailyTasksCard() {
+            let card = appState.customCards.find(c => c.type === 'daily-tasks');
+            if (!card) {
+                card = {
+                    id: `custom-${Date.now()}-daily`,
+                    type: 'daily-tasks',
+                    title: 'Daily Schedule',
+                    content: {}
+                };
+                appState.customCards.push(card);
+                appState.layout.push(card.id);
+            }
+            if (Array.isArray(card.content) || !card.content) card.content = {};
+            return card;
+        },
+
+        render() {
+            const grid = document.getElementById('calendar-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            const year = this.currentDate.getFullYear();
+            const month = this.currentDate.getMonth();
+
+            document.getElementById('cal-month-name').innerText = this.currentDate.toLocaleString('default', { month: 'long' });
+            document.getElementById('cal-year-name').innerText = year;
+
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const startDayIndex = firstDay.getDay();
+
+            const totalCells = 42;
+
+            const taskCard = this.getDailyTasksCard(); // Get card reference
+            const taskData = taskCard.content;
+            const todayISO = formatDateToISO(new Date());
+
+            for (let i = 0; i < totalCells; i++) {
+                const cellDate = new Date(year, month, 1 + (i - startDayIndex));
+                const isoDate = formatDateToISO(cellDate);
+                const isToday = isoDate === todayISO;
+                const isCurrentMonth = cellDate.getMonth() === month;
+
+                const cell = document.createElement('div');
+                cell.className = `cal-day-cell ${isToday ? 'today' : ''} ${!isCurrentMonth ? 'other-month' : ''}`;
+                cell.dataset.date = isoDate;
+
+                // Header
+                const header = document.createElement('span');
+                header.className = 'cal-day-header';
+                header.textContent = cellDate.getDate();
+                cell.appendChild(header);
+
+                // Task Container (Scrollable)
+                const taskContainer = document.createElement('div');
+                taskContainer.className = 'cal-task-container'; // Updated Class
+                taskContainer.dataset.date = isoDate;
+
+                const tasks = taskData[isoDate] || [];
+                tasks.forEach((task, index) => {
+                    const pill = document.createElement('div');
+                    pill.className = `cal-task-pill ${task.completed ? 'completed' : ''}`;
+                    pill.dataset.index = index;
+                    pill.dataset.priority = task.priority || 'medium';
+                    pill.innerHTML = `<span>${task.text}</span>`;
+                    taskContainer.appendChild(pill);
+                });
+
+                cell.appendChild(taskContainer);
+                grid.appendChild(cell);
+
+                this.makeSortable(taskContainer);
+
+                // --- NEW CLICK LOGIC: GO TO DASHBOARD ---
+                cell.addEventListener('click', (e) => {
+                    if (e.target.closest('.cal-task-pill')) return;
+
+                    // 1. Switch to Dashboard Tab
+                    const dashboardTab = document.querySelector('[data-target="dashboard"]');
+                    if (dashboardTab) dashboardTab.click();
+
+                    // 2. Find and Scroll to Daily Tasks Card
+                    setTimeout(() => {
+                        const cardElement = document.querySelector(`[data-card-id="${taskCard.id}"]`);
+                        if (cardElement) {
+                            // A. Scroll into view
+                            cardElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                            // B. Highlight visually (optional)
+                            cardElement.style.transition = "box-shadow 0.5s";
+                            cardElement.style.boxShadow = "0 0 20px var(--accent-color)";
+                            setTimeout(() => cardElement.style.boxShadow = "", 1500);
+
+                            // C. Update the Card's Date Input & Render
+                            const dateInput = cardElement.querySelector('.daily-date-selector');
+                            if (dateInput) {
+                                dateInput.value = isoDate;
+                                // Trigger change event logic manually since setting value via JS doesn't fire it
+                                cardElement.dataset.selectedDate = isoDate;
+                                if (cardRenderers["daily-tasks"]) {
+                                    cardRenderers["daily-tasks"].render(cardElement, taskCard);
+                                }
+                            }
+                        } else {
+                            // Edge case: Card deleted or not in view
+                            alert("Daily Tasks card not found in dashboard.");
+                        }
+                    }, 100); // Short delay to allow tab switch transition
+                });
+            }
+        },
+
+        makeSortable(element) {
+            new Sortable(element, {
+                group: 'calendar-tasks',
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                delay: 150,
+                delayOnTouchOnly: true,
+                onEnd: (evt) => {
+                    const fromDate = evt.from.dataset.date;
+                    const toDate = evt.to.dataset.date;
+                    const oldIndex = evt.oldIndex;
+                    const newIndex = evt.newIndex;
+
+                    if (fromDate === toDate && oldIndex === newIndex) return;
+                    this.moveTask(fromDate, toDate, oldIndex, newIndex);
+                }
+            });
+        },
+
+        moveTask(fromDate, toDate, oldIndex, newIndex) {
+            const card = this.getDailyTasksCard();
+            const sourceList = card.content[fromDate];
+
+            const [movedTask] = sourceList.splice(oldIndex, 1);
+
+            if (sourceList.length === 0) delete card.content[fromDate];
+
+            if (!card.content[toDate]) card.content[toDate] = [];
+            card.content[toDate].splice(newIndex, 0, movedTask);
+
+            appState.save("customCards");
+
+            // Re-render dashboard to keep card in sync
+            renderDashboard();
+        },
+
+        attachHeaderListeners() {
+            document.getElementById('cal-prev-btn').addEventListener('click', () => {
+                this.currentDate.setMonth(this.currentDate.getMonth() - 1);
+                this.render();
+            });
+            document.getElementById('cal-next-btn').addEventListener('click', () => {
+                this.currentDate.setMonth(this.currentDate.getMonth() + 1);
+                this.render();
+            });
+            document.getElementById('cal-today-btn').addEventListener('click', () => {
+                this.currentDate = new Date();
+                this.render();
+            });
+        }
+    };
 });
+

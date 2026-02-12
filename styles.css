@@ -2195,3 +2195,123 @@ body.zen-mode .manual-entry-container {
     box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
     color: var(--text-primary);
 }
+
+.view-tab-btn.active {
+    background-color: var(--accent-color);
+    color: var(--bg-color); /* Contrast text against accent */
+    box-shadow: 0 0 15px var(--accent-glow);
+}
+
+/* Ensure animation works for tabs */
+.animate-fade-in-down {
+    animation: fadeInDown 0.3s ease-out forwards;
+}
+
+/* CALENDAR STYLES */
+/* --- CALENDAR STYLES (UPDATED) --- */
+
+/* Grid Cells */
+.cal-day-cell {
+    border-right: 1px solid rgba(255,255,255,0.05);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    height: 100%; /* Fill the grid row */
+    min-height: 0; /* Crucial for internal scrolling */
+    transition: background-color 0.2s;
+    position: relative;
+    overflow: hidden; /* Contain spills */
+}
+
+.cal-day-cell:hover {
+    background-color: rgba(255,255,255,0.02);
+}
+
+.cal-day-header {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 2px;
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+    text-align: center;
+    border-radius: 50%;
+    flex-shrink: 0; /* Prevent header from shrinking */
+}
+
+/* Scrollable Task Container */
+.cal-task-container {
+    flex-grow: 1;
+    overflow-y: auto; /* Enable Scroll */
+    min-height: 0;    /* Allow shrinking to trigger scroll */
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding-right: 2px; /* Space for scrollbar */
+}
+
+/* Thin Scrollbar for Task Container */
+.cal-task-container::-webkit-scrollbar {
+    width: 3px;
+}
+.cal-task-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+.cal-task-container::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+}
+.cal-task-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+/* "Today" Highlight */
+.cal-day-cell.today .cal-day-header {
+    background-color: var(--accent-color);
+    color: var(--bg-color);
+}
+
+/* Different Month (dimmed) */
+.cal-day-cell.other-month {
+    opacity: 0.4;
+    background-color: rgba(0,0,0,0.2);
+}
+
+/* Task Pills */
+.cal-task-pill {
+    font-size: 0.7rem;
+    padding: 3px 5px;
+    background-color: rgba(59, 130, 246, 0.2);
+    border: 1px solid rgba(59, 130, 246, 0.4);
+    color: #93c5fd;
+    border-radius: 4px;
+    cursor: grab;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    user-select: none;
+    flex-shrink: 0; /* Prevent squishing */
+}
+
+.cal-task-pill:hover {
+    transform: translateY(-1px);
+    border-color: #60a5fa;
+    z-index: 10;
+}
+
+.cal-task-pill.completed {
+    background-color: rgba(16, 185, 129, 0.1);
+    border-color: rgba(16, 185, 129, 0.3);
+    color: #6ee7b7;
+    text-decoration: line-through;
+    opacity: 0.7;
+}
+
+/* Priority Colors */
+.cal-task-pill[data-priority="high"] { border-left: 3px solid #ef4444; }
+.cal-task-pill[data-priority="medium"] { border-left: 3px solid #f59e0b; }
+.cal-task-pill[data-priority="low"] { border-left: 3px solid #3b82f6; }
