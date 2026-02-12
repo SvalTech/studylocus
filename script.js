@@ -1521,6 +1521,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         datasets: datasets,
                     },
                     options: {
+                        animation: { duration: 0 },
                         responsive: true,
                         maintainAspectRatio: false,
                         interaction: {
@@ -2262,7 +2263,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const subTheme = ["cyberpunk", "god-mode"].includes(appState.settings.theme) ? appState.settings.theme : "";
         document.documentElement.dataset.subTheme = subTheme;
         // Apply riced mode
-        document.documentElement.dataset.ricedMode = appState.settings.ricedModeEnabled ? "true" : "false";
         // Apply font
         domElements.body.style.fontFamily = appState.settings.font;
         // Apply background
@@ -2325,15 +2325,20 @@ document.addEventListener("DOMContentLoaded", () => {
         domElements.inputs.examType.value = appState.settings.examType;
         domElements.inputs.examYear.value = appState.settings.examYear;
         domElements.inputs.focusShieldToggle.checked = appState.settings.focusShieldEnabled;
-        domElements.inputs.ricedModeToggle.checked = appState.settings.ricedModeEnabled;
+        // domElements.inputs.ricedModeToggle.checked = appState.settings.ricedModeEnabled;
         updateYouTubeCardStyles();
+        
+        // FORCE DISABLE: Riced Mode
+        appState.settings.ricedModeEnabled = false;
+        document.documentElement.dataset.ricedMode = "false";
+        if (domElements.inputs.ricedModeToggle) domElements.inputs.ricedModeToggle.checked = false;
 
-        document.documentElement.dataset.streamlinedMode = appState.settings.streamlinedModeEnabled ? "true" : "false";
+        // FORCE DISABLE: Streamlined Mode
+        appState.settings.streamlinedModeEnabled = false;
+        document.documentElement.dataset.streamlinedMode = "false";
+        if (domElements.inputs.streamlinedModeToggle) domElements.inputs.streamlinedModeToggle.checked = false;
 
-        // Update Toggle UI
-        if (domElements.inputs.streamlinedModeToggle) {
-            domElements.inputs.streamlinedModeToggle.checked = appState.settings.streamlinedModeEnabled;
-        }
+        appState.saveSettings();
     }
     // --- Dashboard Grid Event Listeners (Delegation) ---
     // Click handler
@@ -3421,11 +3426,11 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // --- Riced Mode ---
-    domElements.inputs.ricedModeToggle.addEventListener("change", () => {
-        appState.settings.ricedModeEnabled = domElements.inputs.ricedModeToggle.checked;
-        appState.saveSettings();
-        applySettings();
-    });
+    // domElements.inputs.ricedModeToggle.addEventListener("change", () => {
+    //     appState.settings.ricedModeEnabled = domElements.inputs.ricedModeToggle.checked;
+    //     appState.saveSettings();
+    //     applySettings();
+    // });
     // --- Data Management (Reset, Export, Import) ---
     domElements.buttons.resetDashboard.addEventListener("click", () => {
         showConfirmModal("This will delete all custom cards and reset the layout to the default.", async () => { // <--- Made function async
@@ -3527,15 +3532,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
 
-    if (domElements.inputs.streamlinedModeToggle) {
-        domElements.inputs.streamlinedModeToggle.addEventListener("change", () => {
-            appState.settings.streamlinedModeEnabled = domElements.inputs.streamlinedModeToggle.checked;
-            appState.saveSettings();
-            applySettings();
-            // Force a re-render to adjust grid classes if necessary
-            renderDashboard();
-        });
-    }
+    
     // --- Mobile Alert ---
     // if (window.innerWidth < 768 && localStorage.getItem(LOCAL_STORAGE_KEYS.mobileAlertDismissed) !== "true") {
     //     domElements.mobileAlert.classList.remove("hidden");
@@ -5302,5 +5299,87 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
     };
+
+    // --- DEVELOPER / BUG VIEW LOGIC ---
+
+    const devJsonInput = document.getElementById("dev-json-input");
+    const devSaveBtn = document.getElementById("dev-save-btn");
+
+    // 1. Function to gather clean state
+    const getFullAppState = () => {
+        return {
+            settings: appState.settings,
+            layout: appState.layout,
+            customCards: appState.customCards,
+            tests: appState.tests,
+            cardProps: appState.cardProps,
+            pomodoroState: appState.pomodoroState,
+            timeLoggerState: appState.timeLoggerState,
+            studyLogs: appState.studyLogs
+            // Add other keys if you have more persisted state
+        };
+    };
+
+    // 2. Hook into the Tab Click to Load Data
+    // We modify the existing loop for settingsNavBtns to detect the 'developer' target
+    settingsNavBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // ... existing active class logic ... 
+
+            // NEW: If Developer tab, load JSON
+            if (btn.dataset.target === 'developer') {
+                const cleanState = getFullAppState();
+                devJsonInput.value = JSON.stringify(cleanState, null, 2);
+            }
+        });
+    });
+
+    // 3. Save Logic
+    if (devSaveBtn) {
+        devSaveBtn.addEventListener("click", () => {
+            try {
+                const rawJson = devJsonInput.value;
+                const parsedData = JSON.parse(rawJson);
+
+                // Basic Validation
+                if (!parsedData.layout || !parsedData.customCards) {
+                    throw new Error("Missing core data (layout or customCards).");
+                }
+
+                // Update AppState
+                Object.assign(appState, parsedData);
+
+                // Persist to LocalStorage (Iterate keys to match LOCAL_STORAGE_KEYS)
+                // We use the keys from the parsed object to ensure we capture everything edited
+                Object.keys(parsedData).forEach(key => {
+                    if (LOCAL_STORAGE_KEYS[key]) {
+                        localStorage.setItem(LOCAL_STORAGE_KEYS[key], JSON.stringify(parsedData[key]));
+                    }
+                });
+
+                // Force Cloud Sync
+                if (currentUser) {
+                    showSyncStatus("Syncing Dev Changes...");
+                    debouncedSaveAllToFirestore();
+                }
+
+                // Refresh UI
+                applySettings();
+                renderDashboard();
+
+                // Visual Feedback
+                const originalText = devSaveBtn.textContent;
+                devSaveBtn.textContent = "Saved!";
+                devSaveBtn.classList.add("bg-green-600", "border-green-500");
+                setTimeout(() => {
+                    devSaveBtn.textContent = originalText;
+                    devSaveBtn.classList.remove("bg-green-600", "border-green-500");
+                }, 1500);
+
+            } catch (err) {
+                alert("JSON Error: " + err.message);
+            }
+        });
+    }
 });
 

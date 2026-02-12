@@ -1407,6 +1407,9 @@
                     <button class="settings-nav-btn" data-target="data">
                         <span>Data & Reset</span>
                     </button>
+                    <button class="settings-nav-btn text-red-400 hover:text-red-300" data-target="developer">
+                        <span>Developer</span>
+                    </button>
                 </div>
 
                 <div class="flex-1 overflow-y-auto p-6 bg-black/10 relative">
@@ -1533,25 +1536,7 @@
                             <h3 class="text-sm font-bold text-white mb-3 uppercase tracking-wider opacity-80">Focus &
                                 Layout</h3>
                             <div class="space-y-3">
-                                <label
-                                    class="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors cursor-pointer border border-transparent hover:border-gray-600">
-                                    <div>
-                                        <span class="text-sm font-medium block">Pro Dashboard Mode</span>
-                                        <span class="text-[10px] text-secondary">Dense grid, no glassmorphism, fixed
-                                            headers.</span>
-                                    </div>
-                                    <input type="checkbox" id="streamlined-mode-toggle" class="form-input-toggle">
-                                </label>
-
-                                <label
-                                    class="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors cursor-pointer border border-transparent hover:border-gray-600">
-                                    <div>
-                                        <span class="text-sm font-medium block">Riced Linux Mode (Beta)</span>
-                                        <span class="text-[10px] text-secondary">Top bar layout for the Unix
-                                            enthusiasts.</span>
-                                    </div>
-                                    <input type="checkbox" id="riced-mode-toggle" class="form-input-toggle">
-                                </label>
+                            
 
                                 <label
                                     class="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors cursor-pointer border border-transparent hover:border-gray-600">
@@ -1634,6 +1619,23 @@
                                 <span class="font-bold">Reset Dashboard Factory Settings</span>
                             </button>
                         </div>
+                    </div>
+
+                    <div id="panel-developer" class="settings-panel hidden space-y-4 h-full flex flex-col">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h3 class="text-sm font-bold text-red-400 uppercase tracking-wider">Settings Editor</h3>
+                                <p class="text-[10px] text-gray-500">Edit raw application state. Incorrect values will break the app.</p>
+                            </div>
+                            <button id="dev-save-btn"
+                                class="btn-primary px-4 py-2 text-xs font-bold bg-red-600 hover:bg-red-700 border-red-500">
+                                Save & Apply
+                            </button>
+                        </div>
+                    
+                        <textarea id="dev-json-input"
+                            class="flex-1 w-full bg-black/50 border border-gray-700 rounded-lg p-3 font-mono text-[10px] leading-relaxed text-green-400 focus:outline-none focus:border-red-500 resize-none custom-scrollbar"
+                            spellcheck="false"></textarea>
                     </div>
 
                 </div>
