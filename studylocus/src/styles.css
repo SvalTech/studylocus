@@ -1,4 +1,8 @@
 /* Add this at the very top of your CSS */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 *, *::before, *::after {
     box-sizing: border-box;
 }
