@@ -45,36 +45,6 @@ html, body {
     border: 1px solid transparent; /* We control border via the ::before element */
 }
 
-.card::before {
-    content: "";
-    position: absolute;
-    inset: -1px; /* Hugs the card border */
-    border-radius: inherit;
-    padding: 1px; /* The width of the border */
-    
-    /* The Magic Gradient */
-    background: radial-gradient(
-        800px circle at var(--mouse-x) var(--mouse-y), 
-        rgba(255, 255, 255, 0.4),
-        transparent 40%
-    );
-    
-    /* Logic to make it a border mask */
-    -webkit-mask: 
-        linear-gradient(#fff 0 0) content-box, 
-        linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    
-    pointer-events: none; /* Let clicks pass through */
-    z-index: 2;
-    opacity: 0;
-    transition: opacity 0.5s;
-}
-
-.card:hover::before {
-    opacity: 1;
-}
 
 #customize-modal.modal-overlay,
 #info-modal.modal-overlay {
@@ -2451,3 +2421,24 @@ body.zen-mode .manual-entry-container {
     }
 }
 
+/* Fix for "Too Clear" - Makes Calendar & Stats 90% Solid */
+#view-statistics .card, 
+#view-calendar .card {
+    /* 1. Heavy Dark Background (90% Opaque) */
+    /* This is the key fix. It paints the card dark gray. */
+    background-color: rgba(12, 12, 12, 0.90) !important; 
+    
+    /* 2. Keep a little blur for the remaining 10% transparency */
+    backdrop-filter: blur(10px);
+    
+    /* 3. Add a distinct border so it doesn't blend into the dark wallpaper */
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    
+    /* 4. Strong shadow to lift it off the page */
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+}
+
+#quote {
+    font-family: 'Roboto Slab', serif !important;
+    font-weight: 400;
+}
