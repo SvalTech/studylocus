@@ -69,7 +69,7 @@ connectionsRef.on("value", (snap) => {
         onlineCountText.textContent = `${count} Active`;
     } else {
         // Standard version for Desktop
-        onlineCountText.textContent = `${count} Live`;
+        onlineCountText.textContent = `${count} Studying`;
     }
 });
 
@@ -2350,16 +2350,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 appState.layout.push(card.id);
             }
         });
-        document.getElementById("dashboard-grid").onmousemove = e => {
-            for (const card of document.getElementsByClassName("card")) {
-                const rect = card.getBoundingClientRect(),
-                    x = e.clientX - rect.left,
-                    y = e.clientY - rect.top;
-
-                card.style.setProperty("--mouse-x", `${x}px`);
-                card.style.setProperty("--mouse-y", `${y}px`);
-            }
-        };
+        
         sanitizeDashboardState();
         appState.save("layout");
         // Create and append card elements
@@ -2519,9 +2510,38 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!cardElement) return;
         const cardId = cardElement.dataset.cardId;
         // --- Card-Specific Actions ---
-        // Refresh quote
-        if (cardId === "quote" && cardRenderers.quote.render) {
-            cardRenderers.quote.render(cardElement);
+        if (cardId === "quote") {
+            // 1. Refresh Button Click
+            if (event.target.closest(".refresh-quote-btn") || event.target.closest("#quote-card-content")) {
+                if (cardRenderers.quote.render) {
+                    // Add a small rotation animation to the button
+                    const btn = event.target.closest(".refresh-quote-btn");
+                    if (btn) {
+                        btn.querySelector("svg").style.transition = "transform 0.5s";
+                        btn.querySelector("svg").style.transform = "rotate(180deg)";
+                        setTimeout(() => btn.querySelector("svg").style.transform = "rotate(0deg)", 500);
+                    }
+                    cardRenderers.quote.render(cardElement);
+                }
+            }
+
+            // 2. Copy Button Click
+            if (event.target.closest(".copy-quote-btn")) {
+                const quoteText = cardElement.querySelector("#quote").textContent;
+                const authorText = cardElement.querySelector("#author").textContent;
+                const fullText = `${quoteText} ${authorText}`;
+
+                navigator.clipboard.writeText(fullText).then(() => {
+                    const btn = event.target.closest(".copy-quote-btn");
+                    const originalIcon = btn.innerHTML;
+
+                    // Show Checkmark temporarily
+                    btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-green-400"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+                    setTimeout(() => {
+                        btn.innerHTML = originalIcon;
+                    }, 1500);
+                });
+            }
         }
         // Delete test
         if (event.target.closest(".delete-test-btn")) {

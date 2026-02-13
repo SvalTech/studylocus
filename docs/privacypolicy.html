@@ -1,414 +1,259 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Privacy Policy | StudyLocus</title>
+    <title>Privacy Policy | StudyLocus by sval.tech</title>
     <meta name="description" content="Privacy Policy for StudyLocus Dashboard">
 
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="icon" type="image/x-icon" href="./assets/favicon-C9Itwhn5.ico">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Fira+Code&display=swap"
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap"
         rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        bg: '#09090b',
+                        card: 'rgba(24, 24, 27, 0.6)',
+                        border: 'rgba(255, 255, 255, 0.1)',
+                        accent: '#6366f1',
+                        accentHover: '#4f46e5',
+                        textMain: '#e4e4e7',
+                        textMuted: '#a1a1aa'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        :root {
-            /* Deep Space Theme (Default) */
-            --bg-color: #0d1117;
-            --card-bg-color: rgba(22, 27, 34, 0.4);
-            --border-color: #30363d;
-            --text-primary: #c9d1d9;
-            --text-secondary: #8b949e;
-            --accent-color: #58a6ff;
-            --accent-glow: 0 0 15px rgba(88, 166, 255, 0.3);
-            --font-family: 'Inter', sans-serif;
-            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
-
         body {
-            font-family: var(--font-family);
-            background-color: var(--bg-color);
-            color: var(--text-primary);
-            line-height: 1.8;
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
+            background-color: #09090b;
+            background-image:
+                radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.1) 0px, transparent 50%),
+                radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.1) 0px, transparent 50%);
+            background-attachment: fixed;
         }
 
-        /* Glassmorphism Card Style matching main dashboard */
-        .glass-card {
-            background-color: var(--card-bg-color);
-            border: 1px solid color-mix(in srgb, var(--accent-color) 40%, var(--border-color));
-            border-radius: 24px;
-            padding: 4rem;
-            /* Increased padding for better layout */
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            box-shadow: var(--card-shadow);
-            max-width: 800px;
-            margin: 4rem auto;
-            width: 90%;
+        .glass-panel {
+            background: var(--card);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
         }
 
-        h1,
-        h2,
-        h3 {
-            color: #ffffff;
+        .prose-custom h2 {
+            font-size: 1.5rem;
             font-weight: 700;
-            line-height: 1.3;
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 1.5rem;
-            margin-top: 0;
-            margin-bottom: 2rem;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        h2 {
-            font-size: 1.75rem;
-            color: var(--accent-color);
-            margin-top: 3.5rem;
-            /* Large space before new sections */
-            margin-bottom: 1.5rem;
-        }
-
-        h3 {
-            font-size: 1.25rem;
-            color: #ffffff;
             margin-top: 2.5rem;
             margin-bottom: 1rem;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
         }
 
-        p {
-            margin-bottom: 1.5rem;
-            color: var(--text-primary);
-            font-size: 1.05rem;
+        .prose-custom h2::before {
+            content: '§';
+            color: #10b981;
+            font-family: 'JetBrains Mono', monospace;
+            opacity: 0.7;
         }
 
-        a {
-            color: var(--accent-color);
-            text-decoration: none;
-            transition: color 0.2s, text-shadow 0.2s;
-        }
-
-        a:hover {
-            color: #79c0ff;
-            text-decoration: underline;
-            text-shadow: var(--accent-glow);
-        }
-
-        ul {
-            padding-left: 1.5rem;
-            margin-bottom: 2rem;
-            color: var(--text-primary);
-        }
-
-        li {
-            margin-bottom: 1rem;
-            /* More space between list items */
-            list-style-type: disc;
-            padding-left: 0.5rem;
-        }
-
-        li::marker {
-            color: var(--accent-color);
-        }
-
-        strong {
-            color: #ffffff;
+        .prose-custom h3 {
+            font-size: 1.1rem;
             font-weight: 600;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: #e4e4e7;
+        }
+
+        .prose-custom p {
+            margin-bottom: 1.25rem;
+            line-height: 1.75;
+            color: #d4d4d8;
+        }
+
+        .prose-custom ul {
+            list-style-type: none;
+            padding-left: 0;
+            margin-bottom: 1.5rem;
+        }
+
+        .prose-custom li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: #d4d4d8;
+        }
+
+        .prose-custom li::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: bold;
         }
 
         code {
-            background-color: rgba(0, 0, 0, 0.3);
-            border: 1px solid var(--border-color);
-            padding: 0.2rem 0.4rem;
-            border-radius: 6px;
-            font-size: 0.9em;
-            font-family: 'Fira Code', monospace;
-            color: var(--accent-color);
-        }
-
-        .nav-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 3rem;
-            font-weight: 600;
-            padding: 0.75rem 1.25rem;
-            border-radius: 12px;
-            background-color: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border-color);
-            transition: all 0.2s;
-            color: var(--text-primary);
-        }
-
-        .nav-link:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            border-color: var(--accent-color);
-            text-decoration: none;
-            box-shadow: var(--accent-glow);
-            color: #ffffff;
-        }
-
-        /* Footer matching main site */
-        footer {
-            margin-top: auto;
-            text-align: center;
-            padding: 3rem 0;
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-        }
-
-        /* Background overlay similar to dashboard */
-        #bg-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: -1;
-        }
-
-        @media (max-width: 640px) {
-            .glass-card {
-                padding: 2rem;
-                width: 95%;
-                border-radius: 16px;
-                margin: 2rem auto;
-            }
-
-            h1 {
-                font-size: 1.75rem;
-            }
-
-            h2 {
-                font-size: 1.4rem;
-                margin-top: 2.5rem;
-            }
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2em 0.4em;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-family: 'JetBrains Mono', monospace;
+            color: #6ee7b7;
         }
     </style>
 </head>
 
-<body>
+<body class="text-textMain min-h-screen flex flex-col font-sans selection:bg-emerald-500/30">
 
-    <div id="bg-overlay"></div>
+    <!-- Sticky Header -->
+    <header
+        class="sticky top-0 z-50 w-full border-b border-white/10 bg-bg/80 backdrop-blur-md supports-[backdrop-filter]:bg-bg/60">
+        <div class="container mx-auto px-4 h-16 flex items-center justify-between max-w-4xl">
+            <div class="flex items-center gap-2 font-bold text-lg tracking-tight">
+                StudyLocus by sval.tech
+            </div>
+            <a href="index.html"
+                class="text-sm font-medium text-textMuted hover:text-white transition-colors flex items-center gap-2 group">
+                <span>Back to Dashboard</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="group-hover:translate-x-1 transition-transform">
+                    <path d="M5 12h14" />
+                    <path d="m12 5 7 7-7 7" />
+                </svg>
+            </a>
+        </div>
+    </header>
 
-    <div class="glass-card">
-        <a href="https://sval.tech/studylocus/" class="nav-link">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M19 12H5" />
-                <path d="M12 19l-7-7 7-7" />
-            </svg>
-            Back to Dashboard
-        </a>
+    <main class="flex-grow container mx-auto px-4 py-12 max-w-3xl">
 
-        <h1>Privacy Policy</h1>
-        <p class="text-sm" style="color: var(--text-secondary); margin-top: -1.5rem; margin-bottom: 3rem;">Effective
-            Date: November 7, 2025</p>
+        <div class="mb-12 text-center">
+            <h1
+                class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 bg-clip-text text-transparent bg-gradient-to-br from-white to-gray-500">
+                Privacy Policy
+            </h1>
+            <p class="text-textMuted font-mono text-sm">Effective Date: February 2026</p>
+        </div>
 
-        <h2>1. Introduction</h2>
-        <br>
-        <p>
-            Welcome to StudyLocus ("we," "our," or "us"). We are committed to protecting your privacy. This Privacy
-            Policy explains how we collect, use, disclose, and safeguard your information when you use our web
-            application (the "Service").
-        </p>
-        <br>
-        <p>
-            By using the Service, you agree to the collection and use of information in accordance with this policy.
-        </p>
+        <div class="glass-panel rounded-2xl p-6 md:p-10 shadow-2xl">
+            <div class="prose-custom">
+                <p class="text-lg font-medium text-white mb-8">
+                    Your privacy is important. This policy explains how <strong>StudyLocus by sval.tech</strong> ("we")
+                    collects, stores, and protects your information. We value transparency and your right to own your
+                    data.
+                </p>
 
-        <br>
-        <h2>2. Information We Collect</h2>
-        <br>
-        <p>We collect information in a few different ways to provide and improve our Service.</p>
+                <h2>1. Information Collection</h2>
 
-        <br>
-        <h3>Information You Provide</h3>
-        <br>
-        <ul>
-            <li>
-                <strong>Account Information:</strong> When you choose to sign in using Google, we use Firebase
-                Authentication. We receive your basic Google profile information (name, email, photo) to create and
-                identify your account.
-            </li>
-            <li>
-                <strong>Your Personal Data:</strong> The Service is designed to be your personal dashboard. To enable
-                features like cross-device sync, the application saves the data you create to a secure cloud database
-                (Firebase Firestore). This data includes your to-do lists, notes, test scores, study logs, custom card
-                layouts, and app settings. This data is treated as your private property.
-            </li>
-        </ul>
+                <h3>A. Guest Users (Local Storage)</h3>
+                <p>
+                    If you use <strong>StudyLocus by sval.tech</strong> without signing in, all your data (tasks, notes,
+                    timers, settings) is stored exclusively in your browser's <code>localStorage</code>.
+                    <strong>We do not have access to this data.</strong> It never leaves your device unless you choose
+                    to sign in.
+                </p>
 
-        <h3>Information We Collect Automatically</h3>
-        <br>
-        <ul>
-            <li>
-                <strong>Usage Data (Analytics):</strong> We use Google Analytics to collect information about how you
-                interact with our Service. This may include your IP address (often anonymized), browser type, device
-                type, pages visited, and the time and date of your visits. We use this data to understand how our
-                Service is being used and to make improvements.
-            </li>
-            <li>
-                <strong>Local Storage Data:</strong> The app uses your browser's <code>localStorage</code> to save a
-                copy of your data (like your card layout and content) directly on your device. This allows the app to
-                load quickly and work offline. This data is not sent to us unless you are signed in, at which point it
-                is synced with your secure cloud account.
-            </li>
-        </ul>
+                <h3>B. Registered Users (Cloud Sync)</h3>
+                <p>
+                    When you voluntarily choose to sign in using Google, we collect limited information to provide sync
+                    functionality:
+                </p>
+                <ul>
+                    <li><strong>Authentication Data:</strong> Provided by Google (Name, Email, Profile Picture).</li>
+                    <li><strong>User Content:</strong> The dashboard data you create (To-Do lists, notes, study logs,
+                        exam dates) is synced to our secure database to allow access across multiple devices.</li>
+                </ul>
 
-        <h2>3. How We Use Your Information</h2>
-        <br>
-        <p>We use the information we collect for the following purposes:</p>
-        <br>
-        <ul>
-            <li>
-                <strong>We Do Not Access Your Content:</strong> Your personal data (tasks, notes, test scores, logs) is
-                your own. We do not access, view, or analyze this content for any purpose. All data storage and syncing
-                is automated and is not monitored by us.
-            </li>
-            <li>
-                <strong>To Provide and Sync Your Service:</strong> The <em>only</em> use of your personal data is to
-                securely store it in your private cloud account (Firebase Firestore) and automatically sync it across
-                any devices where you are logged in.
-            </li>
-            <li>
-                <strong>To Personalize Your Experience:</strong> We use your saved settings (<code>settings</code>) to
-                customize the app's theme, font, and layout to your preferences.
-            </li>
-            <li>
-                <strong>To Maintain and Improve Our Service:</strong> We use anonymous Google Analytics data to identify
-                bugs, understand user behavior, and improve the app's features and performance.
-            </li>
-            <li>
-                <strong>To Authenticate You:</strong> We use your Google Account information via Firebase Authentication
-                to securely log you in and verify your identity.
-            </li>
-        </ul>
-        <br>
-        <h2>4. How We Share Your Information</h2>
-        <br>
-        <p>
-            We do not sell, trade, or rent your personal information to third parties. We never share your personal
-            user-generated content (notes, tasks, etc.) with anyone. Your information is shared only in the following
-            limited and technical circumstances:
-        </p>
-        <br>
-        <ul>
-            <li>
-                <strong>With Service Providers:</strong> We use Google (Firebase and Google Analytics) as a third-party
-                service provider to host our database, authenticate users, and process analytics. These providers are
-                bound by their own privacy policies and are not permitted to use your personal information for any other
-                purpose.
-            </li>
-            <li>
-                <strong>For Legal Reasons:</strong> We may disclose your information if required to do so by law or in
-                response to valid requests by public authorities (e.g., a court or a government agency).
-            </li>
-        </ul>
-        <br>
-        <h2>5. Data Storage and Security</h2>
-        <p>
-            Your user-generated content and account information are stored securely on Google's Firebase Firestore
-            servers. We rely on the robust security measures provided by Google to protect your data.
-        </p>
-        <p>
-            Data stored in your browser's <code>localStorage</code> is only as secure as the device and browser you are
-            using.
-        </p>
-        <p>
-            While we and our service providers take reasonable measures to protect your information, no method of
-            transmission over the Internet or method of electronic storage is 100% secure.
-        </p>
-        <br>
-        <h2>6. Your Data Rights and Choices</h2>
-        <br>
-        <h3>Accessing and Updating Your Information</h3>
-        <br>
-        <p>
-            You can access, add, delete, and modify all of your user-generated content (notes, tasks, logs, etc.)
-            directly within the StudyLocus application at any time. Your basic account information (name, email) is
-            managed through your Google Account.
-        </p>
+                <h2>2. How We Use Your Data</h2>
+                <p>We use your information strictly for functional purposes:</p>
+                <ul>
+                    <li>To authenticate your identity and secure your account.</li>
+                    <li>To sync your study progress across your devices (Phone/Desktop).</li>
+                    <li>To maintain your preferred application settings (Theme, Fonts, Backgrounds).</li>
+                </ul>
+                <p class="text-sm text-textMuted italic border-l-2 border-white/20 pl-3">
+                    Note: We do not sell your data, nor do we analyze your personal notes or study content for
+                    advertising purposes.
+                </p>
 
-        <h3>Data Deletion</h3>
-        <br>
-        <p>
-            You can delete individual pieces of content (like cards or to-do items) directly in the app. If you wish to
-            permanently delete your entire account and all associated data from our database, please contact us at the
-            email address listed below. We will process your request in a timely manner.
-        </p>
+                <h2>3. Technology & Third Parties</h2>
+                <p>
+                    <strong>StudyLocus by sval.tech</strong> is built on <strong>Google Firebase</strong>, a secure
+                    cloud infrastructure platform.
+                </p>
+                <ul>
+                    <li><strong>Firebase Authentication:</strong> Manages secure logins.</li>
+                    <li><strong>Cloud Firestore:</strong> Stores your synced data encrypted at rest.</li>
+                    <li><strong>Google Analytics:</strong> We collect anonymous, aggregated usage data (e.g., "how many
+                        users used the Timer feature") to improve the application performance. You can opt-out using
+                        standard browser privacy tools.</li>
+                </ul>
 
-        <h3>Opting-Out of Analytics</h3>
-        <br>
-        <p>
-            You can opt-out of Google Analytics data collection by using browser plugins like the Google Analytics
-            Opt-out Browser Add-on or by configuring your browser's privacy settings (e.g., "Do Not Track").
-        </p>
-        <br>
-        <h2>7. Third-Party Services</h2>
-        <br>
-        <p>Our Service relies on the following third-party services, which have their own privacy policies:</p>
-        <ul>
-            <li>
-                <strong>Google (Firebase & Google Analytics):</strong>
-                <a href="https://policies.google.com/privacy" target="_blank"
-                    rel="noopener noreferrer">https://policies.google.com/privacy</a>
-            </li>
-            <li>
-                <strong>Google Fonts:</strong>
-                <a href="https://policies.google.com/privacy" target="_blank"
-                    rel="noopener noreferrer">https://policies.google.com/privacy</a>
-            </li>
-        </ul>
-        <br>
-        <h2>8. Children's Privacy</h2>
-        <br>
-        <p>
-            Our Service is not intended for use by children under the age of 13. We do not knowingly collect personally
-            identifiable information from children under 13. If you become aware that a child has provided us with
-            personal data, please contact us.
-        </p>
+                <h2>4. Data Retention & Deletion</h2>
+                <p>
+                    <strong>Your Rights:</strong> You own your data.
+                </p>
+                <ul>
+                    <li><strong>Edit/Delete:</strong> You can modify or delete specific cards, tasks, or logs directly
+                        within the app interface at any time.</li>
+                    <li><strong>Full Account Deletion:</strong> If you wish to permanently wipe all your data from our
+                        servers, you can send a request to the email below. We will process deletion requests within 30
+                        days.</li>
+                </ul>
 
-        <br>
-        <h2>9. Changes to This Privacy Policy</h2>
-        <br>
-        <p>
-            We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new
-            Privacy Policy on this page and updating the "Effective Date" at the top. You are advised to review this
-            Privacy Policy periodically for any changes.
-        </p>
+                <h2>5. Security</h2>
+                <p>
+                    We rely on industry-standard security protocols provided by Google Firebase. Access to the database
+                    is restricted by strict security rules, ensuring only the authenticated user (you) can read or write
+                    their own private data.
+                </p>
 
-        <br>
-        <h2>10. Contact Us</h2>
-        <br>
-        <p>
-            If you have any questions about this Privacy Policy or wish to make a data deletion request, please contact
-            the project maintainer, Shaurya Pratap Singh, at:
-        </p>
-        <br>
-        <ul>
-            <li><strong>Email:</strong> <a href="mailto:shaurya.p.singh21@gmail.com">shaurya.p.singh21@gmail.com</a>
-            </li>
-            <li><strong>GitHub Project:</strong> <a href="https://github.com/svalordev" target="_blank"
-                    rel="noopener noreferrer">https://github.com/svalordev</a></li>
-        </ul>
+                <h2>6. Changes to Policy</h2>
+                <p>
+                    We may update this policy as the application evolves. Significant changes will be notified via the
+                    application. Continued use implies acceptance of the updated policy.
+                </p>
 
-    </div>
+                <h2>7. Contact Us</h2>
+                <p>
+                    If you have questions about your privacy or data safety, please contact the developer:
+                </p>
+                <div class="mt-6 flex flex-wrap gap-4">
+                    <a href="mailto:shaurya.p.singh21@gmail.com"
+                        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 transition-colors text-sm font-mono text-emerald-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect width="20" height="16" x="2" y="4" rx="2" />
+                            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                        </svg>
+                        Email Support
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
 
-    <footer>
-        <p>© Shaurya Pratap Singh 2026 | StudyLocus</p>
+    <footer class="border-t border-white/10 bg-black/20 py-8">
+        <div class="container mx-auto px-4 text-center">
+            <p class="text-textMuted text-sm">&copy; 2026 Shaurya Pratap Singh. All rights reserved.</p>
+            <div class="flex justify-center gap-6 mt-4 text-xs font-mono text-textMuted">
+                <a href="termsandconditions.html" class="hover:text-emerald-400 transition-colors">Terms</a>
+                <a href="privacypolicy.html"
+                    class="text-white hover:text-emerald-400 underline decoration-dotted underline-offset-4">Privacy</a>
+            </div>
+        </div>
     </footer>
 
 </body>

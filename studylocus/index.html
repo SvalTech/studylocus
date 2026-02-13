@@ -203,7 +203,7 @@
             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
             <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
           </span>
-          <span id="online-count-text">1 Live</span>
+          <span id="online-count-text">1 Studying</span>
         </div>
         <div id="auth-container" class="scale-90 origin-right"></div>
         <div class="h-4 w-px bg-white/10 mx-1 hidden sm:block"></div>
@@ -688,7 +688,8 @@
   </template>
 
   <template id="quote-template">
-    <div class="card" data-card-id="quote">
+    <div class="card flex flex-col h-full relative group" data-card-id="quote">
+  
       <div class="card-header">
         <h2 class="text-lg font-semibold">Quote</h2>
         <div class="card-header-controls">
@@ -711,9 +712,42 @@
             </svg></span>
         </div>
       </div>
-      <div id="quote-card-content" class="text-center cursor-pointer transition-transform transform hover:scale-105">
-        <p id="quote" class="text-md italic">"The best way to predict the future is to create it."</p>
-        <p id="author" class="text-sm text-secondary mt-2">- Peter Drucker</p>
+  
+      <div id="quote-card-content"
+        class="flex-grow flex flex-col justify-center items-center text-center px-6 py-4 relative z-10">
+  
+        <p id="quote"
+          class="text-lg md:text-xl leading-relaxed text-gray-200 font-serif italic mb-4 transition-opacity duration-300">
+          "Loading..."
+        </p>
+  
+        <div class="w-12 h-[2px] bg-[var(--accent-color)] opacity-50 mb-4 rounded-full"></div>
+  
+        <p id="author" class="text-xs font-bold uppercase tracking-widest text-gray-400">
+          ...
+        </p>
+  
+      </div>
+  
+      <div
+        class="absolute bottom-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
+        <button
+          class="copy-quote-btn p-1.5 rounded bg-white/10 hover:bg-[var(--accent-color)] hover:text-white text-gray-400 transition-colors"
+          title="Copy">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+        </button>
+        <button
+          class="refresh-quote-btn p-1.5 rounded bg-white/10 hover:bg-[var(--accent-color)] hover:text-white text-gray-400 transition-colors"
+          title="New Quote">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3" />
+          </svg>
+        </button>
       </div>
     </div>
   </template>
@@ -796,7 +830,7 @@
         </button>
 
         <input type="date"
-          class="daily-date-selector bg-transparent border-none text-xs font-bold text-center text-white focus:ring-0 cursor-pointer font-mono tracking-wide">
+          class="daily-date-selector bg-transparent border-none text-xs font-bold text-center text-white focus:ring-0 cursor-pointer tracking-wide">
 
         <button class="next-day-btn p-1 text-gray-400 hover:text-white hover:bg-white/10 rounded transition-colors"
           title="Next Day">
