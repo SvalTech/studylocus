@@ -1288,6 +1288,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 const progressText = cardElement.querySelector(".progress-text");
                 listElement.innerHTML = "";
 
+                // --- 1. ENABLE DRAG & DROP (SortableJS) ---
+                new Sortable(listElement, {
+                    animation: 150,
+                    ghostClass: 'sortable-ghost',
+                    delay: 100, 
+                    delayOnTouchOnly: true,
+                    onEnd: (evt) => {
+                        const item = cardData.content.splice(evt.oldIndex, 1)[0];
+                        cardData.content.splice(evt.newIndex, 0, item);
+                        appState.save("customCards");
+                    }
+                });
+
                 if (Array.isArray(cardData.content)) {
                     let totalTasks = 0;
                     let completedTasks = 0;
@@ -1296,7 +1309,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         listElement.innerHTML = '<li class="text-secondary text-xs text-center py-6 opacity-60">No active tasks. Time to focus.</li>';
                     } else {
                         cardData.content.forEach((task, index) => {
-                            // --- DATA CHECKS ---
                             if (!task.priority) task.priority = 'medium';
                             if (!task.status) task.status = task.completed ? 'done' : 'todo';
                             if (!task.subtasks) task.subtasks = [];
@@ -1304,8 +1316,6 @@ document.addEventListener("DOMContentLoaded", () => {
                             totalTasks++;
                             if (task.status === 'done') completedTasks++;
 
-                            // --- MODERN STYLING (No Monospace) ---
-                            // Using softer backgrounds and text colors
                             const priorityConfig = {
                                 high: { color: 'text-red-300', bg: 'bg-red-500/20', border: 'border-red-500/20', label: 'High' },
                                 medium: { color: 'text-amber-200', bg: 'bg-amber-500/20', border: 'border-amber-500/20', label: 'Medium' },
@@ -1313,8 +1323,6 @@ document.addEventListener("DOMContentLoaded", () => {
                             };
 
                             const pStyle = priorityConfig[task.priority];
-
-                            // Clean, friendly status icons
                             const statusIcons = {
                                 todo: `<div class="w-4 h-4 rounded-full border-[1.5px] border-gray-400 hover:border-white transition-colors"></div>`,
                                 'in-progress': `<div class="w-4 h-4 rounded-full border-[1.5px] border-amber-400 flex items-center justify-center"><div class="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse"></div></div>`,
@@ -1322,11 +1330,9 @@ document.addEventListener("DOMContentLoaded", () => {
                             };
 
                             const listItem = document.createElement("li");
-                            // Removed glass borders, made it cleaner
-                            listItem.className = `group mb-2 rounded-xl bg-white/5 hover:bg-white/10 transition-all overflow-hidden relative`;
+                            listItem.className = `group mb-2 rounded-xl bg-white/5 hover:bg-white/10 transition-all overflow-hidden relative cursor-grab active:cursor-grabbing`;
                             listItem.dataset.index = index;
 
-                            // Subtasks (Clean Sans-Serif)
                             const subtasksHtml = task.subtasks.map((sub, sIndex) => `
                                 <div class="flex items-center gap-3 py-1.5 pl-2 group/sub relative">
                                     <div class="absolute left-[-6px] top-1/2 w-2 h-px bg-gray-700"></div>
@@ -1346,8 +1352,8 @@ document.addEventListener("DOMContentLoaded", () => {
                                     </button>
                                     
                                     <div class="flex-grow min-w-0 flex flex-col toggle-expand-btn cursor-pointer">
-                                        <div class="flex items-center justify-between gap-2">
-                                            <span class="text-sm font-semibold leading-tight transition-colors ${task.status === 'done' ? 'line-through text-gray-500 decoration-gray-500' : 'text-gray-100 group-hover:text-white'}">
+                                        <div class="flex items-center justify-between gap-2 pr-12">
+                                            <span id="todo-text-${index}" class="text-sm font-semibold leading-tight transition-colors ${task.status === 'done' ? 'line-through text-gray-500 decoration-gray-500' : 'text-gray-100 group-hover:text-white'}">
                                                 ${task.text}
                                             </span>
                                         </div>
@@ -1367,9 +1373,14 @@ document.addEventListener("DOMContentLoaded", () => {
                                         </div>
                                     </div>
 
-                                    <button class="delete-todo-item text-gray-500 hover:text-red-400 p-1 opacity-0 group-hover:opacity-100 transition-opacity absolute top-3 right-3">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
-                                    </button>
+                                    <div class="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 rounded-lg backdrop-blur-sm shadow-sm">
+                                        <button class="edit-todo-item text-gray-400 hover:text-blue-400 p-1.5 transition-colors" title="Edit">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                        </button>
+                                        <button class="delete-todo-item text-gray-400 hover:text-red-400 p-1.5 transition-colors" title="Delete">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                                        </button>
+                                    </div>
                                 </div>
                                 
                                 <div class="subtasks-section ${task.expanded ? 'block' : 'hidden'} pl-10 pr-4 pb-3 border-t border-white/5 bg-black/20">
@@ -1382,14 +1393,53 @@ document.addEventListener("DOMContentLoaded", () => {
                                     </form>
                                 </div>
                             `;
+
+                            // --- 2. EDIT LOGIC (CLICK BUTTON) ---
+                            const editBtn = listItem.querySelector('.edit-todo-item');
+                            const textSpan = listItem.querySelector(`#todo-text-${index}`);
+                            
+                            editBtn.addEventListener('click', (e) => {
+                                e.stopPropagation(); 
+                                
+                                const currentText = task.text;
+                                const input = document.createElement('input');
+                                input.type = 'text';
+                                input.value = currentText;
+                                input.className = 'bg-transparent text-white text-sm font-semibold border-b border-accent-color focus:outline-none w-full';
+                                
+                                // Prevent bubbling
+                                input.addEventListener('click', (ev) => ev.stopPropagation());
+                                input.addEventListener('dblclick', (ev) => ev.stopPropagation());
+
+                                textSpan.replaceWith(input);
+                                input.focus();
+
+                                const saveEdit = () => {
+                                    const newText = input.value.trim();
+                                    if (newText) {
+                                        task.text = newText;
+                                        appState.save("customCards");
+                                    }
+                                    cardRenderers.todo.render(cardElement, cardData);
+                                };
+
+                                input.addEventListener('keydown', (ev) => {
+                                    if (ev.key === 'Enter') {
+                                        saveEdit();
+                                    } else if (ev.key === 'Escape') {
+                                        cardRenderers.todo.render(cardElement, cardData); // Revert
+                                    }
+                                });
+                                input.addEventListener('blur', saveEdit);
+                            });
+
                             listElement.appendChild(listItem);
                         });
                     }
 
-                    // Clean Progress Bar
                     const percent = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
                     progressBar.style.width = `${percent}%`;
-                    progressText.className = "progress-text text-[10px] text-gray-400 font-bold"; // Removed font-mono
+                    progressText.className = "progress-text text-[10px] text-gray-400 font-bold";
                     progressText.textContent = `${percent}%`;
                 }
             },
@@ -1909,21 +1959,17 @@ document.addEventListener("DOMContentLoaded", () => {
         "daily-tasks": {
             templateId: "daily-tasks-template",
             render: (cardElement, cardData) => {
-                // Initialize content structure: { "YYYY-MM-DD": [tasks] }
                 if (!cardData.content || Array.isArray(cardData.content)) {
                     cardData.content = {};
                 }
 
-                // 1. Get Selected Date (Default to Today)
                 const dateInput = cardElement.querySelector(".daily-date-selector");
                 if (!dateInput.value) {
-                    // Check dataset first (persisted state), then fallback to today
                     dateInput.value = cardElement.dataset.selectedDate || new Date().toISOString().split('T')[0];
                 }
-                cardElement.dataset.selectedDate = dateInput.value; // Sync dataset
+                cardElement.dataset.selectedDate = dateInput.value;
                 const selectedDate = dateInput.value;
 
-                // 2. Prepare Task Data
                 const tasksForDate = cardData.content[selectedDate] || [];
                 const listElement = cardElement.querySelector(".daily-task-list");
                 const progressBar = cardElement.querySelector(".progress-bar");
@@ -1931,7 +1977,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 listElement.innerHTML = "";
 
-                // 3. Render Progress Bar
+                new Sortable(listElement, {
+                    animation: 150,
+                    ghostClass: 'sortable-ghost',
+                    delay: 100,
+                    delayOnTouchOnly: true,
+                    onEnd: (evt) => {
+                        const item = tasksForDate.splice(evt.oldIndex, 1)[0];
+                        tasksForDate.splice(evt.newIndex, 0, item);
+                        appState.save("customCards");
+                    }
+                });
+
                 let totalTasks = 0;
                 let completedTasks = 0;
 
@@ -1942,7 +1999,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     </li>`;
                 } else {
                     tasksForDate.forEach((task, index) => {
-                        // Initialize missing properties
                         if (!task.priority) task.priority = 'medium';
                         if (!task.status) task.status = task.completed ? 'done' : 'todo';
                         if (!task.subtasks) task.subtasks = [];
@@ -1950,7 +2006,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         totalTasks++;
                         if (task.status === 'done') completedTasks++;
 
-                        // Styling Config (Copied from Todo Renderer)
                         const priorityConfig = {
                             high: { color: 'text-red-300', bg: 'bg-red-500/20', border: 'border-red-500/20', label: 'High' },
                             medium: { color: 'text-amber-200', bg: 'bg-amber-500/20', border: 'border-amber-500/20', label: 'Medium' },
@@ -1963,7 +2018,11 @@ document.addEventListener("DOMContentLoaded", () => {
                             done: `<div class="w-4 h-4 rounded-full bg-[var(--accent-color)] border border-[var(--accent-color)] flex items-center justify-center text-white"><svg width="10" height="8" viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 5L4 8L11 1"/></svg></div>`
                         };
 
-                        // Subtasks HTML
+                        const li = document.createElement("li");
+                        li.className = `group mb-2 rounded-xl bg-white/5 hover:bg-white/10 transition-all overflow-hidden relative cursor-grab active:cursor-grabbing`;
+                        li.dataset.index = index;
+
+                        // Subtasks HTML (No changes here)
                         const subtasksHtml = task.subtasks.map((sub, sIndex) => `
                             <div class="flex items-center gap-3 py-1.5 pl-2 group/sub relative">
                                 <div class="absolute left-[-6px] top-1/2 w-2 h-px bg-gray-700"></div>
@@ -1975,10 +2034,6 @@ document.addEventListener("DOMContentLoaded", () => {
                             </div>
                         `).join('');
 
-                        const li = document.createElement("li");
-                        li.className = `group mb-2 rounded-xl bg-white/5 hover:bg-white/10 transition-all overflow-hidden relative`;
-                        li.dataset.index = index;
-
                         li.innerHTML = `
                             <div class="flex items-start gap-3 p-3.5">
                                 <button class="status-btn mt-0.5 flex-shrink-0 transform active:scale-95 transition-transform">
@@ -1986,8 +2041,8 @@ document.addEventListener("DOMContentLoaded", () => {
                                 </button>
                                 
                                 <div class="flex-grow min-w-0 flex flex-col toggle-expand-btn cursor-pointer">
-                                    <div class="flex items-center justify-between gap-2">
-                                        <span class="text-sm font-semibold leading-tight transition-colors ${task.status === 'done' ? 'line-through text-gray-500 decoration-gray-500' : 'text-gray-100 group-hover:text-white'}">
+                                    <div class="flex items-center justify-between gap-2 pr-12">
+                                        <span id="daily-text-${index}" class="text-sm font-semibold leading-tight transition-colors ${task.status === 'done' ? 'line-through text-gray-500 decoration-gray-500' : 'text-gray-100 group-hover:text-white'}">
                                             ${task.text}
                                         </span>
                                     </div>
@@ -2005,9 +2060,14 @@ document.addEventListener("DOMContentLoaded", () => {
                                     </div>
                                 </div>
 
-                                <button class="delete-daily-task text-gray-500 hover:text-red-400 p-1 opacity-0 group-hover:opacity-100 transition-opacity absolute top-3 right-3">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
-                                </button>
+                                <div class="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 rounded-lg backdrop-blur-sm shadow-sm">
+                                    <button class="edit-daily-task text-gray-400 hover:text-blue-400 p-1.5 transition-colors" title="Edit">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                    </button>
+                                    <button class="delete-daily-task text-gray-400 hover:text-red-400 p-1.5 transition-colors" title="Delete">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                                    </button>
+                                </div>
                             </div>
                             
                             <div class="subtasks-section ${task.expanded ? 'block' : 'hidden'} pl-10 pr-4 pb-3 border-t border-white/5 bg-black/20">
@@ -2020,11 +2080,46 @@ document.addEventListener("DOMContentLoaded", () => {
                                 </form>
                             </div>
                         `;
+
+                        // --- 2. EDIT LOGIC ---
+                        const editBtn = li.querySelector('.edit-daily-task');
+                        const textSpan = li.querySelector(`#daily-text-${index}`);
+
+                        editBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+
+                            const currentText = task.text;
+                            const input = document.createElement('input');
+                            input.type = 'text';
+                            input.value = currentText;
+                            input.className = 'bg-transparent text-white text-sm font-semibold border-b border-accent-color focus:outline-none w-full';
+
+                            input.addEventListener('click', (ev) => ev.stopPropagation());
+                            input.addEventListener('dblclick', (ev) => ev.stopPropagation());
+
+                            textSpan.replaceWith(input);
+                            input.focus();
+
+                            const saveEdit = () => {
+                                const newText = input.value.trim();
+                                if (newText) {
+                                    task.text = newText;
+                                    appState.save("customCards");
+                                }
+                                cardRenderers["daily-tasks"].render(cardElement, cardData);
+                            };
+
+                            input.addEventListener('keydown', (ev) => {
+                                if (ev.key === 'Enter') saveEdit();
+                                if (ev.key === 'Escape') cardRenderers["daily-tasks"].render(cardElement, cardData);
+                            });
+                            input.addEventListener('blur', saveEdit);
+                        });
+
                         listElement.appendChild(li);
                     });
                 }
 
-                // Update Progress Bar
                 const percent = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
                 progressBar.style.width = `${percent}%`;
                 progressText.textContent = `${percent}%`;
