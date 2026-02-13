@@ -445,6 +445,9 @@ document.addEventListener("DOMContentLoaded", () => {
     domElements.buttons.addCard.forEach(btn => btn.disabled = true);
     domElements.dashboardGrid.style.pointerEvents = "none";
     domElements.dashboardGrid.style.opacity = "0.5";
+    
+    let yptViewDate = new Date();
+    
     // --- Picture-in-Picture (PiP) State ---
     let pipWindow = null;
     let pipCardId = null;
@@ -3607,6 +3610,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     
+    
     // --- Mobile Alert ---
     // if (window.innerWidth < 768 && localStorage.getItem(LOCAL_STORAGE_KEYS.mobileAlertDismissed) !== "true") {
     //     domElements.mobileAlert.classList.remove("hidden");
@@ -4992,6 +4996,26 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('stat-consistency-grade').innerText = consistencyGrade;
         document.getElementById('stat-consistency-grade').className = `h-12 w-12 rounded-full border-4 flex items-center justify-center text-xs font-bold ${consistencyScore > 60 ? 'border-green-500/30 text-green-400' : 'border-blue-500/30 text-blue-400'}`;
 
+        const yptPrev = document.getElementById('ypt-prev-btn');
+        const yptNext = document.getElementById('ypt-next-btn');
+
+        // Use .onclick to prevent duplicate listeners when switching tabs
+        if (yptPrev) {
+            yptPrev.onclick = () => {
+                yptViewDate.setMonth(yptViewDate.getMonth() - 1);
+                renderYPTHeatmap();
+            };
+        }
+
+        if (yptNext) {
+            yptNext.onclick = () => {
+                yptViewDate.setMonth(yptViewDate.getMonth() + 1);
+                renderYPTHeatmap();
+            };
+        }
+
+        // CRITICAL: Initial render call
+        renderYPTHeatmap();
         // 4. TOTALS
         document.getElementById('stat-total-time').innerText = formatTimeReadable(totalSecondsAllTime);
 
@@ -5503,4 +5527,97 @@ document.addEventListener("DOMContentLoaded", () => {
             localStorage.setItem("jeeTimeLoggerState_v1", JSON.stringify(appState.timeLoggerState));
         }
     });
+
+    function renderYPTHeatmap() {
+        const grid = document.getElementById('ypt-grid');
+        const label = document.getElementById('ypt-month-label');
+
+        if (!grid || !label) return;
+
+        grid.innerHTML = '';
+
+        // 1. Update Month Label
+        const year = yptViewDate.getFullYear();
+        const month = yptViewDate.getMonth();
+        label.textContent = yptViewDate.toLocaleString('default', { month: 'long', year: 'numeric' }).toUpperCase();
+
+        // 2. Calendar Calculation
+        const firstDayOfMonth = new Date(year, month, 1);
+        const lastDayOfMonth = new Date(year, month + 1, 0);
+        const daysInMonth = lastDayOfMonth.getDate();
+
+        // Adjust start day (0=Mon, ..., 6=Sun)
+        let startDayIndex = (firstDayOfMonth.getDay() + 6) % 7;
+
+        // 3. Render Empty Cells (Padding)
+        for (let i = 0; i < startDayIndex; i++) {
+            const blank = document.createElement('div');
+            blank.className = 'ypt-cell empty';
+            grid.appendChild(blank);
+        }
+
+        // 4. Render Actual Days
+        const MAX_SECONDS = 10 * 3600; // 10 Hours Target
+
+        // Get current theme's accent color to use for the heatmap
+        // We use a safe fallback if the variable isn't found
+        const computedStyle = getComputedStyle(document.documentElement);
+        const accentColor = computedStyle.getPropertyValue('--accent-color').trim() || '#3b82f6';
+
+        // Helper to convert hex to RGB for opacity handling
+        const hexToRgb = (hex) => {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '59, 130, 246';
+        };
+        const accentRgb = hexToRgb(accentColor);
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+            let totalSeconds = 0;
+            if (appState.studyLogs && appState.studyLogs[dateStr]) {
+                const log = appState.studyLogs[dateStr];
+                if (typeof log === 'number') {
+                    totalSeconds = log;
+                } else if (typeof log === 'object') {
+                    totalSeconds = Object.values(log).reduce((a, b) => a + b, 0);
+                }
+            }
+
+            const cell = document.createElement('div');
+            cell.className = 'ypt-cell';
+
+            let timeText = "OFF";
+            let emptyClass = "empty-text"; // Applied when time is 0
+
+            if (totalSeconds > 0) {
+                // Calculate Opacity: Scale from 0.15 to 0.95
+                let intensity = Math.min(1, totalSeconds / MAX_SECONDS);
+                let alpha = 0.15 + (intensity * 0.8);
+
+                // USE THEME COLOR
+                cell.style.backgroundColor = `rgba(${accentRgb}, ${alpha})`;
+                cell.style.borderColor = `rgba(${accentRgb}, 1)`; // Solid border of same color
+
+                // Text color: Black if very bright/opaque, White otherwise
+                // Simple heuristic: if alpha > 0.6, assume background is bright enough to need dark text
+                cell.style.color = alpha > 0.6 ? '#000' : '#fff';
+
+                const h = Math.floor(totalSeconds / 3600);
+                const m = Math.floor((totalSeconds % 3600) / 60);
+                timeText = `${h}h ${m}m`;
+                emptyClass = ""; // Not empty
+            } else {
+                // Default dark style for 0 hours
+                cell.style.color = 'var(--text-secondary)';
+            }
+
+            cell.innerHTML = `
+                <span class="ypt-date">${day}</span>
+                <span class="ypt-time ${emptyClass}">${timeText}</span>
+            `;
+
+            grid.appendChild(cell);
+        }
+    }
 });
