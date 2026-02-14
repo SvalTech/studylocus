@@ -272,89 +272,209 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     // --- Quotes Data ---
-    const generalQuotes = [{
-        text: "The secret of getting ahead is getting started.",
-        author: "Mark Twain"
-    }, {
-        text: "It’s not whether you get knocked down, it’s whether you get up.",
-        author: "Vince Lombardi"
-    }, {
-        text: "Success is the sum of small efforts, repeated day in and day out.",
-        author: "Robert Collier"
-    }, {
-        text: "The expert in anything was once a beginner.",
-        author: "Helen Hayes"
-    }, {
-        text: "Believe you can and you're halfway there.",
-        author: "Theodore Roosevelt"
-    }, {
-        text: "The difference between ordinary and extraordinary is that little extra.",
-        author: "Jimmy Johnson",
-    }, {
-        text: "A person who never made a mistake never tried anything new.",
-        author: "Albert Einstein"
-    }, {
-        text: "The harder I work, the luckier I get.",
-        author: "Samuel Goldwyn"
-    }, {
-        text: "Success is not final, failure is not fatal: it is the courage to continue that counts.",
-        author: "Winston Churchill",
-    }, {
-        text: "Strive for progress, not perfection.",
-        author: "Unknown"
-    }, {
-        text: "Genius is one percent inspiration and ninety-nine percent perspiration.",
-        author: "Thomas A. Edison",
-    }, {
-        text: "It does not matter how slowly you go as long as you do not stop.",
-        author: "Confucius"
-    }, {
-        text: "Doubt kills more dreams than failure ever will.",
-        author: "Suzy Kassem"
-    }, {
-        text: "Push yourself, because no one else is going to do it for you.",
-        author: "Unknown"
-    }, {
-        text: "If you want to shine like a sun, first burn like a sun.",
-        author: "A. P. J. Abdul Kalam"
-    }, {
-        text: "The important thing is not to stop questioning. Curiosity has its own reason for existing.",
-        author: "Albert Einstein",
-    }, {
-        text: "We are what we repeatedly do. Excellence, then, is not an act, but a habit.",
-        author: "Aristotle",
-    }, {
-        text: "The chapters you study today will decide the chapters of your life tomorrow.",
-        author: "Unknown"
-    }, {
-        text: "Your toughest competition is the person you were yesterday.",
-        author: "Unknown"
-    }, {
-        text: "Rank is just a number. Knowledge and skill are the real assets.",
-        author: "Unknown"
-    }, {
-        text: "Dream is not that which you see while sleeping it is something that does not let you sleep.",
-        author: "A. P. J. Abdul Kalam",
-    }, {
-        text: "Focus on the process, not the outcome. The right process will lead to the right outcome.",
-        author: "Unknown",
-    },];
-    const alakhPandeyQuotes = [{
-        text: "Kyu nahi ho rahi padhai?",
-        author: "Alakh Pandey"
-    }, {
-        text: "System phaad denge!",
-        author: "A wise man"
-    }, {
-        text: "Physics is not a subject, it's an emotion.",
-        author: "Alakh Pandey"
-    }, {
-        text: "Aag laga denge!",
-        author: "Revolutionaries"
-    }, {
-        text: "Mehnat karta hu bhai",
-        author: "Basava Reddy"
-    },];
+    const generalQuotes = [
+        // --- The Classics (Preserved & Relevant) ---
+        {
+            text: "The secret of getting ahead is getting started.",
+            author: "Mark Twain"
+        },
+        {
+            text: "It’s not whether you get knocked down, it’s whether you get up.",
+            author: "Vince Lombardi"
+        },
+        {
+            text: "Success is the sum of small efforts, repeated day in and day out.",
+            author: "Robert Collier"
+        },
+        {
+            text: "The expert in anything was once a beginner.",
+            author: "Helen Hayes"
+        },
+        {
+            text: "Believe you can and you're halfway there.",
+            author: "Theodore Roosevelt"
+        },
+        {
+            text: "The difference between ordinary and extraordinary is that little extra.",
+            author: "Jimmy Johnson"
+        },
+        {
+            text: "A person who never made a mistake never tried anything new.",
+            author: "Albert Einstein"
+        },
+        {
+            text: "The harder I work, the luckier I get.",
+            author: "Samuel Goldwyn"
+        },
+        {
+            text: "Success is not final, failure is not fatal: it is the courage to continue that counts.",
+            author: "Winston Churchill"
+        },
+        {
+            text: "Genius is one percent inspiration and ninety-nine percent perspiration.",
+            author: "Thomas A. Edison"
+        },
+        {
+            text: "It does not matter how slowly you go as long as you do not stop.",
+            author: "Confucius"
+        },
+        {
+            text: "Doubt kills more dreams than failure ever will.",
+            author: "Suzy Kassem"
+        },
+        {
+            text: "If you want to shine like a sun, first burn like a sun.",
+            author: "A. P. J. Abdul Kalam"
+        },
+        {
+            text: "The important thing is not to stop questioning. Curiosity has its own reason for existing.",
+            author: "Albert Einstein"
+        },
+        {
+            text: "We are what we repeatedly do. Excellence, then, is not an act, but a habit.",
+            author: "Aristotle"
+        },
+        {
+            text: "Dream is not that which you see while sleeping it is something that does not let you sleep.",
+            author: "A. P. J. Abdul Kalam"
+        },
+
+        // --- Science, Maths & Logic (The JEE Core) ---
+        {
+            text: "The first principle is that you must not fool yourself and you are the easiest person to fool.",
+            author: "Richard Feynman"
+        },
+        {
+            text: "I fear not the man who has practiced 10,000 kicks once, but I fear the man who has practiced one kick 10,000 times.",
+            author: "Bruce Lee"
+        },
+        {
+            text: "If you can't explain it simply, you don't understand it well enough.",
+            author: "Albert Einstein"
+        },
+        {
+            text: "An equation for me has no meaning unless it expresses a thought of God.",
+            author: "Srinivasa Ramanujan"
+        },
+        {
+            text: "Nothing in life is to be feared, it is only to be understood. Now is the time to understand more, so that we may fear less.",
+            author: "Marie Curie"
+        },
+        {
+            text: "One must be sane to think clearly, but one can think deeply and be quite insane.",
+            author: "Nikola Tesla"
+        },
+        {
+            text: "Intelligence is the ability to adapt to change.",
+            author: "Stephen Hawking"
+        },
+        {
+            text: "Nature uses only the longest threads to weave her patterns, so that each small piece of her fabric reveals the organization of the entire tapestry.",
+            author: "Richard Feynman"
+        },
+        {
+            text: "The good thing about science is that it's true whether or not you believe in it.",
+            author: "Neil deGrasse Tyson"
+        },
+
+        // --- Pop Culture & Modern Icons (Motivation & Resilience) ---
+        {
+            text: "Do. Or do not. There is no try.",
+            author: "Master Yoda"
+        },
+        {
+            text: "The greatest teacher, failure is.",
+            author: "Master Yoda"
+        },
+        {
+            text: "It is possible to commit no mistakes and still lose. That is not a weakness; that is life.",
+            author: "Jean-Luc Picard"
+        },
+        {
+            text: "Why do we fall, sir? So that we can learn to pick ourselves up.",
+            author: "Alfred Pennyworth"
+        },
+        {
+            text: "Sometimes you gotta run before you can walk.",
+            author: "Tony Stark"
+        },
+        {
+            text: "Hard work betrays none, but dreams betray many.",
+            author: "Hikigaya Hachiman"
+        },
+        {
+            text: "If you don't take risks, you can't create a future.",
+            author: "Monkey D. Luffy"
+        },
+        {
+            text: "Talent is something you make bloom, instinct is something you polish.",
+            author: "Oikawa Tooru"
+        },
+        {
+            text: "If you win, you live. If you lose, you die. If you don't fight, you can't win!",
+            author: "Eren Yeager"
+        },
+        {
+            text: "Limits, like fears, are often just an illusion.",
+            author: "Michael Jordan"
+        },
+        {
+            text: "You can't connect the dots looking forward; you can only connect them looking backwards.",
+            author: "Steve Jobs"
+        },
+        {
+            text: "When something is important enough, you do it even if the odds are not in your favor.",
+            author: "Elon Musk"
+        },
+        {
+            text: "Your time is limited, so don't waste it living someone else's life.",
+            author: "Steve Jobs"
+        },
+        {
+            text: "Today is victory over yourself of yesterday; tomorrow is your victory over lesser men.",
+            author: "Miyamoto Musashi"
+        },
+        {
+            text: "Discipline is doing what you hate to do, but doing it like you love it.",
+            author: "Mike Tyson"
+        },
+        {
+            text: "It is our choices that show what we truly are, far more than our abilities.",
+            author: "Albus Dumbledore"
+        },
+        {
+            text: "Yesterday is history, tomorrow is a mystery, but today is a gift. That is why it is called the present.",
+            author: "Master Oogway"
+        },
+        {
+            text: "Hard work is worthless for those that don't believe in themselves.",
+            author: "Naruto Uzumaki"
+        },
+        {
+            text: "A dropout will beat a genius through hard work.",
+            author: "Rock Lee"
+        },
+        {
+            text: "I can do this all day.",
+            author: "Captain America"
+        },
+        {
+            text: "The hardest choices require the strongest wills.",
+            author: "Thanos"
+        },
+        {
+            text: "I don't have dreams, I have goals.",
+            author: "Harvey Specter"
+        },
+        {
+            text: "A mind needs books as a sword needs a whetstone, if it is to keep its edge.",
+            author: "Tyrion Lannister"
+        },
+        {
+            text: "Your focus determines your reality.",
+            author: "Qui-Gon Jinn"
+        }
+    ];
     const chaitanyaQuotes = [ // Easter egg quotes
         {
             text: "Chaitanya is a noob 🤓",
