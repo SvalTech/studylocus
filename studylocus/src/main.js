@@ -218,6 +218,7 @@ document.addEventListener("DOMContentLoaded", () => {
             customExamName: "",
             customExamDate: "",
             streamlinedModeEnabled: false,
+            liteModeEnabled: false,
             ...parsedSettings,
         },
         cardProps: JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEYS.cardProps)) || {
@@ -553,6 +554,7 @@ document.addEventListener("DOMContentLoaded", () => {
             customDate: document.getElementById("custom-exam-date"),
             tickingSoundToggle: document.getElementById("ticking-sound-toggle"),
             streamlinedModeToggle: document.getElementById("streamlined-mode-toggle"),
+            liteModeToggle: document.getElementById("lite-mode-toggle"),
         },
         mobileAlert: document.getElementById("mobile-alert"),
         confirmTitle: document.getElementById("confirm-title"),
@@ -716,7 +718,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     </button>
                 `;
                 container.innerHTML = signInHTML;
-                container.querySelector("#sign-in-btn").addEventListener("click", signInWithGoogle);
+                container.querySelector("#sign-in-btn").addEventListener("click", () => {
+                    document.getElementById("sign-in-modal").classList.remove("hidden");
+                }); 
             }
         });
     };
@@ -2611,6 +2615,16 @@ document.addEventListener("DOMContentLoaded", () => {
         // domElements.inputs.ricedModeToggle.checked = appState.settings.ricedModeEnabled;
         updateYouTubeCardStyles();
         
+        // Apply Lite Mode
+        if (appState.settings.liteModeEnabled) {
+            document.documentElement.classList.add('lite-mode');
+        } else {
+            document.documentElement.classList.remove('lite-mode');
+        }
+        if (domElements.inputs.liteModeToggle) {
+            domElements.inputs.liteModeToggle.checked = appState.settings.liteModeEnabled;
+        }
+
         // FORCE DISABLE: Riced Mode
         appState.settings.ricedModeEnabled = false;
         document.documentElement.dataset.ricedMode = "false";
@@ -5854,5 +5868,38 @@ document.addEventListener("DOMContentLoaded", () => {
 
             grid.appendChild(cell);
         }
+    }
+
+    const signInModal = document.getElementById("sign-in-modal");
+    const closeSignInModalBtn = document.getElementById("close-sign-in-modal");
+    const googleSignInActionBtn = document.getElementById("google-sign-in-action-btn");
+
+    if (closeSignInModalBtn) {
+        closeSignInModalBtn.addEventListener("click", () => {
+            signInModal.classList.add("hidden");
+        });
+    }
+
+    if (googleSignInActionBtn) {
+        googleSignInActionBtn.addEventListener("click", () => {
+            signInModal.classList.add("hidden");
+            signInWithGoogle(); // Trigger the actual Firebase Google Auth
+        });
+    }
+
+    // Allow closing the modal by clicking outside of it
+    if (signInModal) {
+        signInModal.addEventListener("click", (e) => {
+            if (e.target === signInModal) {
+                signInModal.classList.add("hidden");
+            }
+        });
+    }
+
+    if (domElements.inputs.liteModeToggle) {
+        domElements.inputs.liteModeToggle.addEventListener("change", (e) => {
+            appState.settings.liteModeEnabled = e.target.checked;
+            saveAndApplySettings();
+        });
     }
 });

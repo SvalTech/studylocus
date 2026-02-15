@@ -203,7 +203,7 @@
             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
             <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
           </span>
-          <span id="online-count-text">1 Studying</span>
+          <span id="online-count-text">Loading..</span>
         </div>
         <div id="auth-container" class="scale-90 origin-right"></div>
         <div class="h-4 w-px bg-white/10 mx-1 hidden sm:block"></div>
@@ -1583,6 +1583,20 @@
           </div>
 
           <div id="panel-features" class="settings-panel hidden space-y-6">
+            
+            <div class="settings-group mb-6">
+              <h3 class="text-sm font-bold text-white mb-3 uppercase tracking-wider opacity-80">Performance</h3>
+              <div class="space-y-3">
+                <label
+                  class="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors cursor-pointer border border-transparent hover:border-gray-600">
+                  <div>
+                    <span class="text-sm font-medium block">Lite Mode</span>
+                    <span class="text-[10px] text-secondary">Reduces blurs, shadows, and animations for older devices.</span>
+                  </div>
+                  <input type="checkbox" id="lite-mode-toggle" class="form-input-toggle">
+                </label>
+              </div>
+            </div>
 
             <div class="settings-group">
               <h3 class="text-sm font-bold text-white mb-3 uppercase tracking-wider opacity-80">Focus &
@@ -1609,6 +1623,7 @@
                 </label>
               </div>
             </div>
+
 
             <div class="settings-group">
               <h3 class="text-sm font-bold text-white mb-3 uppercase tracking-wider opacity-80">Media</h3>
@@ -1821,6 +1836,45 @@
         <button id="close-alert-btn" class="font-bold text-lg ml-4" aria-label="Close mobile alert">&times;</button>
     </div>
      -->
+
+    <div id="sign-in-modal" class="modal-overlay hidden flex items-center justify-center z-50">
+      <div class="card w-11/12 max-w-sm border border-[var(--border-color)] shadow-2xl">
+        <h2 class="text-xl font-bold mb-2 text-white text-center">Welcome!</h2>
+        <p class="text-xs text-secondary mb-6 text-center">Sign in to sync your study dashboard across all your devices + access social features.</p>
+    
+        <button id="google-sign-in-action-btn"
+          class="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-200 text-black font-bold py-2.5 px-4 rounded-lg transition-colors mb-4">
+          <svg class="w-5 h-5" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M47.532 24.552c0-1.566-.14-3.084-.404-4.548H24.5v8.58h12.944c-.566 2.76-2.213 5.108-4.72 6.708v5.524h7.112c4.162-3.832 6.596-9.42 6.596-16.264z"
+              fill="#4285F4" />
+            <path
+              d="M24.5 48c6.48 0 11.944-2.14 15.928-5.788l-7.112-5.524c-2.14 1.44-4.884 2.292-7.816 2.292-6.004 0-11.084-4.04-12.9-9.492H4.42v5.7c3.48 6.912 10.32 11.532 18.08 11.532l2 .28z"
+              fill="#34A853" />
+            <path
+              d="M11.6 28.98c-.34-.996-.54-2.052-.54-3.144s.2-2.148.54-3.144V16.992H4.42C2.852 20.04 2 23.436 2 27.024c0 3.588.852 6.984 2.42 10.032l7.18-5.7v-.376z"
+              fill="#FBBC05" />
+            <path
+              d="M24.5 9.8c3.516 0 6.66 1.212 9.128 3.54l6.32-6.32C36.44.88 30.98 0 24.5 0 16.74 0 9.9 4.62 6.42 11.532l7.18 5.7c1.816-5.452 6.896-9.432 12.9-9.432z"
+              fill="#EA4335" />
+          </svg>
+          Sign in with Google
+        </button>
+    
+        <p class="text-[10px] text-gray-500 text-center px-2">
+          By continuing, you acknowledge and agree to our
+          <a href="termsandconditions.html" class="underline hover:text-white" target="_blank">Terms & Conditions</a> and
+          <a href="privacypolicy.html" class="underline hover:text-white" target="_blank">Privacy Policy</a>.
+        </p>
+    
+        <div class="flex justify-end mt-4 pt-4 border-t border-gray-700/50">
+          <button id="close-sign-in-modal"
+            class="text-xs font-bold text-gray-400 hover:text-white transition-colors">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+
   <div id="info-modal" class="modal-overlay hidden">
     <div class="card w-11/12 max-w-lg">
       <!-- Tab Navigation -->
@@ -1855,21 +1909,12 @@
 
         <!-- What's New Panel -->
         <div id="tab-whats-new" class="tab-content hidden space-y-3 text-sm">
-          <h3 class="text-md font-bold text-primary">Version 1.4 (Jan 2026)</h3>
+          <h3 class="text-md font-bold text-primary">Version 1.5 (February 2026)</h3>
           <ul class="list-disc list-inside text-secondary space-y-2">
-            <li>Added shift selector/session</li>
-            <li>Manual addition of study logs.</li>
-            <li>Fixed day tooltip hover issue.</li>
-            <li>Preset background wallpapers.</li>
-            <li>Enhanced Line graph card UI</li>
-            <li>Keyboard Shortcuts (Press ?)</li>
-            <li>More themes and fonts added</li>
-            <li>Custom Exams added.</li>
-            <li>Tutorial added.</li>
-            <li>Impending doom tick.</li>
-            <li>Pro Dashboard View</li>
-            <li>Improved Custom Subject Menus</li>
-            <li>Improved Settings and Card menus.</li>
+            <li>Revamped top bar</li>
+            <li>Introduced active user count</li>
+            <li>Made sign in process adhere to EU guidelines.</li>
+            <li>Introduced Lite Mode which improves performance.</li>
           </ul>
         </div>
 
@@ -1878,7 +1923,7 @@
           <p>Have an idea or found a bug? Join the community!</p>
           <a href="https://discord.gg/c8xHpTfM" target="_blank" class="btn-primary inline-block"
             style="padding: 10px;">Join the Discord
-            Group</a>
+            Server</a>
           <p class="text-xs text-secondary">You can also submit feedback or report issues on the project's
             GitHub page.</p>
         </div>
