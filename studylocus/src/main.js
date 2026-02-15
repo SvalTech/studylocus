@@ -1012,6 +1012,31 @@ document.addEventListener("DOMContentLoaded", () => {
         return `${year}-${month}-${day}`;
     };
 
+    // --- GLOBAL PLATFORM TIME TRACKER ---
+    const globalHoursText = document.getElementById("global-hours-text");
+
+    // Helper to log time to the global community pool
+    const logGlobalTime = (seconds) => {
+        if (!seconds || seconds <= 0) return;
+        const todayStr = formatDateToISO(new Date());
+        // Uses atomic increment to prevent concurrent overwrite issues
+        rtdb.ref(`globalStats/${todayStr}/totalSeconds`).set(firebase.database.ServerValue.increment(seconds));
+    };
+
+    // Listen for real-time updates to today's global pool
+    const listenToGlobalTime = () => {
+        const todayStr = formatDateToISO(new Date());
+        rtdb.ref(`globalStats/${todayStr}/totalSeconds`).on("value", (snap) => {
+            const totalSecs = snap.val() || 0;
+            const hours = Math.floor(totalSecs / 3600);
+            const minutes = Math.floor((totalSecs % 3600) / 60);
+            if (globalHoursText) {
+                globalHoursText.textContent = `${hours}h ${minutes}m`;
+            }
+        });
+    };
+    listenToGlobalTime();
+
 
     /**
      * Removes duplicate IDs, ensures data integrity, and enforces singleton cards.
@@ -3090,6 +3115,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 // Add to logs
                 appState.studyLogs[todayStr][subject] = (appState.studyLogs[todayStr][subject] || 0) + secondsToAdd;
                 // Save and Render
+                logGlobalTime(state.accumulatedTime);
                 appState.save("studyLogs");
                 renderDashboard();
                 // Clear input but keep form open for rapid entry
@@ -3927,6 +3953,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     appState.studyLogs[todayStr][subject] = (appState.studyLogs[todayStr][subject] || 0) + secondsToAdd;
 
                     // Save to storage
+                    logGlobalTime(state.accumulatedTime);
                     appState.save("studyLogs");
 
                     // Force the dashboard (and Analytics card) to update immediately
@@ -4132,6 +4159,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             const subject = state.currentSubject;
             appState.studyLogs[todayStr][subject] = (appState.studyLogs[todayStr][subject] || 0) + state.accumulatedTime;
+            logGlobalTime(state.accumulatedTime);
             appState.save("studyLogs");
             // Reset timer
             state.accumulatedTime = 0;
