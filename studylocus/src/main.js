@@ -18,7 +18,7 @@ function debounce(func, delay) {
 // (Note: Your provided config is here)
 const firebaseConfig = {
     apiKey: "AIzaSyAO9ya8gHtVbMfxcnAAJrz6FdYWvIRqgBY",
-    authDomain: "studydashboard-2a3eb.firebaseapp.com",
+    authDomain: "auth.sval.tech",
     projectId: "studydashboard-2a3eb",
     storageBucket: "studydashboard-2a3eb.firebasestorage.app",
     messagingSenderId: "79210973277",
