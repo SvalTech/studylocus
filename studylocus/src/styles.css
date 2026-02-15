@@ -2442,3 +2442,31 @@ body.zen-mode .manual-entry-container {
     font-family: 'Roboto Slab', serif !important;
     font-weight: 400;
 }
+/* --- LITE MODE (Performance Optimizations) --- */
+html.lite-mode *,
+html.lite-mode *::before,
+html.lite-mode *::after {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+}
+
+/* 1. Make individual widgets solid for readability */
+html.lite-mode .card,
+html.lite-mode .custom-card,
+html.lite-mode .glass-panel,
+html.lite-mode .modal-overlay > .card {
+    background-color: var(--bg-color, #18181b) !important; 
+    border-color: var(--border-color, #3f3f46) !important;
+    background-image: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)) !important;
+}
+
+/* 2. THE FIX: Prevent the main full-screen tab wrappers from turning black */
+html.lite-mode #view-statistics,
+html.lite-mode #view-calendar,
+html.lite-mode #main-dashboard,
+html.lite-mode .tab-content-container {
+    background-color: transparent !important;
+    background-image: none !important;
+    border: none !important;
+}
