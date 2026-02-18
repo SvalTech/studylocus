@@ -1433,6 +1433,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         listElement.innerHTML = '<li class="text-secondary text-xs text-center py-6 opacity-60">No active tasks. Time to focus.</li>';
                     } else {
                         cardData.content.forEach((task, index) => {
+                            if (!task) return;
                             if (!task.priority) task.priority = 'medium';
                             if (!task.status) task.status = task.completed ? 'done' : 'todo';
                             if (!task.subtasks) task.subtasks = [];
@@ -2123,6 +2124,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     </li>`;
                 } else {
                     tasksForDate.forEach((task, index) => {
+                        if (!task) return;
                         if (!task.priority) task.priority = 'medium';
                         if (!task.status) task.status = task.completed ? 'done' : 'todo';
                         if (!task.subtasks) task.subtasks = [];
