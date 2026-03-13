@@ -106,6 +106,16 @@
 
 <body class="antialiased">
 
+    <div class="fixed top-0 left-0 w-full z-[9999] bg-rose-600 text-white px-4 py-2.5 flex items-center justify-center gap-2.5 shadow-lg border-b border-rose-700/50 animate-slide-down">
+    <i data-lucide="alert-triangle" class="w-4 h-4 shrink-0"></i>
+    <p class="text-xs md:text-sm font-bold tracking-wide text-center">
+        Notice: We are currently mitigating a malicious attack. Service may be unreliable today.
+    </p>
+    <button onclick="this.parentElement.remove()" class="absolute right-4 p-1 hover:bg-rose-700 rounded-full transition-colors">
+        <i data-lucide="x" class="w-4 h-4"></i>
+    </button>
+</div>
+  
   <div id="app-background" class="fixed inset-0 w-full h-full -z-50 pointer-events-none">
   </div>
 
