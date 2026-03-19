@@ -1796,7 +1796,29 @@ document.addEventListener("DOMContentLoaded", () => {
                             },
                             x: {
                                 grid: { display: false },
-                                ticks: { color: '#6b7280', font: { size: 10 } }
+                                ticks: {
+                                  color: "#6b7280",
+                                  font: { size: 10 },
+                                  callback: function (value, index) {
+                                    const label = this.getLabelForValue(index);
+
+                                    // Calculate available width per label
+                                    const chartWidth = this.chart.width;
+                                    const labelCount = this.chart.data.labels.length;
+                                    const avgCharWidth = 7; // ~7px per character at default font size
+                                    const maxChars = Math.floor(
+                                      chartWidth / labelCount / avgCharWidth,
+                                    );
+                
+                                    if (label.length <= maxChars) return label;
+                
+                                    // 3 from start + 3 from end, but only if space allows
+                                    const half = Math.floor((maxChars - 1) / 2); // -1 for the ellipsis
+                                    const start = Math.max(3, half);
+                                    const end = Math.max(3, maxChars - start);
+                
+                                    return label.slice(0, start) + "…" + label.slice(-end);
+                                },
                             },
                         },
                     },
