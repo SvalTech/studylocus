@@ -2517,6 +2517,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 appState.cardProps[cardId] = cardProps;
                 if (cardProps.colspan === 2) {
                     cardElement.classList.add("md:col-span-2");
+                } else if (cardProps.colspan === 3) {
+                    cardElement.classList.add("md:col-span-3");  // add this
                 }
                 // Set title for custom cards
                 if (cardData) {
@@ -2738,6 +2740,16 @@ document.addEventListener("DOMContentLoaded", () => {
             appState.save("cardProps");
             renderDashboard();
         }
+
+        if (event.target.closest(".toggle-fullwidth-btn")) {
+            const cardProps = appState.cardProps[cardId] || { colspan: 1 };
+            cardProps.colspan = cardProps.colspan === 3 ? 1 : 3;
+            appState.cardProps[cardId] = cardProps;
+            appState.save("cardProps");
+            renderDashboard();
+        }
+
+
         // Delete custom card
         if (event.target.closest(".delete-card-btn") && cardData) {
             appState.customCards = appState.customCards.filter((card) => card.id !== cardId);
