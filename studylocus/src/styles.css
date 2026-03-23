@@ -1463,9 +1463,13 @@ body.zen-mode .card-header {
 
 /* ✨ END: Firebase Auth UI Styles */
 
-/* Hide the expand button on mobile screens (width < 768px) */
+/* Hide the expand button and full width button on mobile screens (width < 768px) */
 @media (max-width: 768px) {
     .toggle-colspan-btn {
+        display: none !important;
+    }
+
+    .toggle-fullwidth-btn{
         display: none !important;
     }
 }
