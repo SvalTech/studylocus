@@ -508,12 +508,30 @@
 
 
 
-<div class="container mx-auto px-2 sm:px-4 mt-8 mb-2">
+<!-- ========================================== -->
+  <!-- NATIVE CHAOSPREP SYSTEM BANNER START       -->
+  <!-- ========================================== -->
+  <div id="chaos-promo-banner" class="container mx-auto px-2 sm:px-4 mt-8 mb-2" style="display: none;">
     <div class="card rounded-2xl p-5 sm:p-6 flex flex-col lg:flex-row items-start lg:items-center gap-5 justify-between relative overflow-hidden group border border-[var(--accent-color)]/30">
       
+      <!-- Dismiss Button -->
+      <button id="dismiss-chaos-banner" class="absolute top-3 right-3 text-gray-500 hover:text-white transition-colors z-20 p-1 bg-black/20 hover:bg-white/10 rounded-md" title="Hide forever">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 6 6 18"></path>
+          <path d="m6 6 12 12"></path>
+        </svg>
+      </button>
+
       <!-- Dynamic Theme Glow -->
-      <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 relative z-10 w-full">
-      
+      <div class="absolute -right-20 -top-20 w-64 h-64 opacity-10 rounded-full blur-3xl pointer-events-none group-hover:opacity-20 transition-opacity duration-500" style="background-color: var(--accent-color);"></div>
+
+      <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 relative z-10 w-full pr-6">
+        <!-- Icon -->
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border border-[var(--accent-color)]/20" style="background-color: color-mix(in srgb, var(--accent-color) 15%, transparent);">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent-color);">
+            <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+          </svg>
+        </div>
         
         <!-- Content -->
         <div class="flex-1">
@@ -535,6 +553,26 @@
       </a>
     </div>
   </div>
+
+  <script>
+    // Logic to hide the banner forever if dismissed
+    document.addEventListener("DOMContentLoaded", () => {
+      const banner = document.getElementById("chaos-promo-banner");
+      const dismissBtn = document.getElementById("dismiss-chaos-banner");
+
+      // Check if user has already dismissed it
+      if (localStorage.getItem("chaosBannerDismissed") !== "true") {
+        banner.style.display = "block"; // Show if not dismissed
+      }
+
+      // Hide and save to local storage when clicked
+      dismissBtn.addEventListener("click", () => {
+        localStorage.setItem("chaosBannerDismissed", "true");
+        banner.style.opacity = "0";
+        setTimeout(() => { banner.style.display = "none"; }, 300); // Smooth fade out
+      });
+    });
+  </script>
     
   <footer class="mt-16 border-t border-zinc-800 pt-8 pb-6 text-center">
     <div class="flex flex-wrap justify-center gap-4 mb-6">
