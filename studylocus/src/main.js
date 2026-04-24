@@ -353,6 +353,24 @@ document.addEventListener("DOMContentLoaded", () => {
         { text: "The man who moves a mountain begins by carrying away small stones.", author: "Confucius" },
         { text: "You can suffer the pain of discipline or the pain of regret.", author: "Jim Rohn" }
     ];
+    const alakhPandeyQuotes = [ 
+        {
+            text: "Hello Bacchon!",
+            author: "Alakh Pandey"
+        }, {
+            text: "Padhai karte rahein, All the very best!",
+            author: "Alakh Pandey"
+        }, {
+            text: "Selection hoga yahin se!",
+            author: "Alakh Pandey"
+        }, {
+            text: "Physics is not just a subject, it's an emotion.",
+            author: "Alakh Pandey"
+        }, {
+            text: "Your competition is not with others, it's with your sleep and distractions.",
+            author: "Alakh Pandey"
+        }
+    ];
     const chaitanyaQuotes = [ // Easter egg quotes
         {
             text: "Chaitanya is a noob 🤓",
