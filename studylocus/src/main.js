@@ -273,208 +273,85 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     // --- Quotes Data ---
-    const generalQuotes = [
+        const generalQuotes = [
         // --- The Classics (Preserved & Relevant) ---
-        {
-            text: "The secret of getting ahead is getting started.",
-            author: "Mark Twain"
-        },
-        {
-            text: "It’s not whether you get knocked down, it’s whether you get up.",
-            author: "Vince Lombardi"
-        },
-        {
-            text: "Success is the sum of small efforts, repeated day in and day out.",
-            author: "Robert Collier"
-        },
-        {
-            text: "The expert in anything was once a beginner.",
-            author: "Helen Hayes"
-        },
-        {
-            text: "Believe you can and you're halfway there.",
-            author: "Theodore Roosevelt"
-        },
-        {
-            text: "The difference between ordinary and extraordinary is that little extra.",
-            author: "Jimmy Johnson"
-        },
-        {
-            text: "A person who never made a mistake never tried anything new.",
-            author: "Albert Einstein"
-        },
-        {
-            text: "The harder I work, the luckier I get.",
-            author: "Samuel Goldwyn"
-        },
-        {
-            text: "Success is not final, failure is not fatal: it is the courage to continue that counts.",
-            author: "Winston Churchill"
-        },
-        {
-            text: "Genius is one percent inspiration and ninety-nine percent perspiration.",
-            author: "Thomas A. Edison"
-        },
-        {
-            text: "It does not matter how slowly you go as long as you do not stop.",
-            author: "Confucius"
-        },
-        {
-            text: "Doubt kills more dreams than failure ever will.",
-            author: "Suzy Kassem"
-        },
-        {
-            text: "If you want to shine like a sun, first burn like a sun.",
-            author: "A. P. J. Abdul Kalam"
-        },
-        {
-            text: "The important thing is not to stop questioning. Curiosity has its own reason for existing.",
-            author: "Albert Einstein"
-        },
-        {
-            text: "We are what we repeatedly do. Excellence, then, is not an act, but a habit.",
-            author: "Aristotle"
-        },
-        {
-            text: "Dream is not that which you see while sleeping it is something that does not let you sleep.",
-            author: "A. P. J. Abdul Kalam"
-        },
+        { text: "The secret of getting ahead is getting started.", author: "Mark Twain" },
+        { text: "It’s not whether you get knocked down, it’s whether you get up.", author: "Vince Lombardi" },
+        { text: "Success is the sum of small efforts, repeated day in and day out.", author: "Robert Collier" },
+        { text: "The expert in anything was once a beginner.", author: "Helen Hayes" },
+        { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" },
+        { text: "The difference between ordinary and extraordinary is that little extra.", author: "Jimmy Johnson" },
+        { text: "A person who never made a mistake never tried anything new.", author: "Albert Einstein" },
+        { text: "The harder I work, the luckier I get.", author: "Samuel Goldwyn" },
+        { text: "Success is not final, failure is not fatal: it is the courage to continue that counts.", author: "Winston Churchill" },
+        { text: "Genius is one percent inspiration and ninety-nine percent perspiration.", author: "Thomas A. Edison" },
+        { text: "It does not matter how slowly you go as long as you do not stop.", author: "Confucius" },
+        { text: "Doubt kills more dreams than failure ever will.", author: "Suzy Kassem" },
+        { text: "If you want to shine like a sun, first burn like a sun.", author: "A. P. J. Abdul Kalam" },
+        { text: "The important thing is not to stop questioning. Curiosity has its own reason for existing.", author: "Albert Einstein" },
+        { text: "We are what we repeatedly do. Excellence, then, is not an act, but a habit.", author: "Aristotle" },
+        { text: "Dream is not that which you see while sleeping it is something that does not let you sleep.", author: "A. P. J. Abdul Kalam" },
 
         // --- Science, Maths & Logic (The JEE Core) ---
-        {
-            text: "The first principle is that you must not fool yourself and you are the easiest person to fool.",
-            author: "Richard Feynman"
-        },
-        {
-            text: "I fear not the man who has practiced 10,000 kicks once, but I fear the man who has practiced one kick 10,000 times.",
-            author: "Bruce Lee"
-        },
-        {
-            text: "If you can't explain it simply, you don't understand it well enough.",
-            author: "Albert Einstein"
-        },
-        {
-            text: "An equation for me has no meaning unless it expresses a thought of God.",
-            author: "Srinivasa Ramanujan"
-        },
-        {
-            text: "Nothing in life is to be feared, it is only to be understood. Now is the time to understand more, so that we may fear less.",
-            author: "Marie Curie"
-        },
-        {
-            text: "One must be sane to think clearly, but one can think deeply and be quite insane.",
-            author: "Nikola Tesla"
-        },
-        {
-            text: "Intelligence is the ability to adapt to change.",
-            author: "Stephen Hawking"
-        },
-        {
-            text: "Nature uses only the longest threads to weave her patterns, so that each small piece of her fabric reveals the organization of the entire tapestry.",
-            author: "Richard Feynman"
-        },
-        {
-            text: "The good thing about science is that it's true whether or not you believe in it.",
-            author: "Neil deGrasse Tyson"
-        },
+        { text: "The first principle is that you must not fool yourself and you are the easiest person to fool.", author: "Richard Feynman" },
+        { text: "I fear not the man who has practiced 10,000 kicks once, but I fear the man who has practiced one kick 10,000 times.", author: "Bruce Lee" },
+        { text: "If you can't explain it simply, you don't understand it well enough.", author: "Albert Einstein" },
+        { text: "An equation for me has no meaning unless it expresses a thought of God.", author: "Srinivasa Ramanujan" },
+        { text: "Nothing in life is to be feared, it is only to be understood. Now is the time to understand more, so that we may fear less.", author: "Marie Curie" },
+        { text: "One must be sane to think clearly, but one can think deeply and be quite insane.", author: "Nikola Tesla" },
+        { text: "Intelligence is the ability to adapt to change.", author: "Stephen Hawking" },
+        { text: "Nature uses only the longest threads to weave her patterns, so that each small piece of her fabric reveals the organization of the entire tapestry.", author: "Richard Feynman" },
+        { text: "The good thing about science is that it's true whether or not you believe in it.", author: "Neil deGrasse Tyson" },
 
         // --- Pop Culture & Modern Icons (Motivation & Resilience) ---
-        {
-            text: "Do. Or do not. There is no try.",
-            author: "Master Yoda"
-        },
-        {
-            text: "The greatest teacher, failure is.",
-            author: "Master Yoda"
-        },
-        {
-            text: "It is possible to commit no mistakes and still lose. That is not a weakness; that is life.",
-            author: "Jean-Luc Picard"
-        },
-        {
-            text: "Why do we fall, sir? So that we can learn to pick ourselves up.",
-            author: "Alfred Pennyworth"
-        },
-        {
-            text: "Sometimes you gotta run before you can walk.",
-            author: "Tony Stark"
-        },
-        {
-            text: "Hard work betrays none, but dreams betray many.",
-            author: "Hikigaya Hachiman"
-        },
-        {
-            text: "If you don't take risks, you can't create a future.",
-            author: "Monkey D. Luffy"
-        },
-        {
-            text: "Talent is something you make bloom, instinct is something you polish.",
-            author: "Oikawa Tooru"
-        },
-        {
-            text: "If you win, you live. If you lose, you die. If you don't fight, you can't win!",
-            author: "Eren Yeager"
-        },
-        {
-            text: "Limits, like fears, are often just an illusion.",
-            author: "Michael Jordan"
-        },
-        {
-            text: "You can't connect the dots looking forward; you can only connect them looking backwards.",
-            author: "Steve Jobs"
-        },
-        {
-            text: "When something is important enough, you do it even if the odds are not in your favor.",
-            author: "Elon Musk"
-        },
-        {
-            text: "Your time is limited, so don't waste it living someone else's life.",
-            author: "Steve Jobs"
-        },
-        {
-            text: "Today is victory over yourself of yesterday; tomorrow is your victory over lesser men.",
-            author: "Miyamoto Musashi"
-        },
-        {
-            text: "Discipline is doing what you hate to do, but doing it like you love it.",
-            author: "Mike Tyson"
-        },
-        {
-            text: "It is our choices that show what we truly are, far more than our abilities.",
-            author: "Albus Dumbledore"
-        },
-        {
-            text: "Yesterday is history, tomorrow is a mystery, but today is a gift. That is why it is called the present.",
-            author: "Master Oogway"
-        },
-        {
-            text: "Hard work is worthless for those that don't believe in themselves.",
-            author: "Naruto Uzumaki"
-        },
-        {
-            text: "A dropout will beat a genius through hard work.",
-            author: "Rock Lee"
-        },
-        {
-            text: "I can do this all day.",
-            author: "Captain America"
-        },
-        {
-            text: "The hardest choices require the strongest wills.",
-            author: "Thanos"
-        },
-        {
-            text: "I don't have dreams, I have goals.",
-            author: "Harvey Specter"
-        },
-        {
-            text: "A mind needs books as a sword needs a whetstone, if it is to keep its edge.",
-            author: "Tyrion Lannister"
-        },
-        {
-            text: "Your focus determines your reality.",
-            author: "Qui-Gon Jinn"
-        }
+        { text: "Do. Or do not. There is no try.", author: "Master Yoda" },
+        { text: "The greatest teacher, failure is.", author: "Master Yoda" },
+        { text: "It is possible to commit no mistakes and still lose. That is not a weakness; that is life.", author: "Jean-Luc Picard" },
+        { text: "Why do we fall, sir? So that we can learn to pick ourselves up.", author: "Alfred Pennyworth" },
+        { text: "Sometimes you gotta run before you can walk.", author: "Tony Stark" },
+        { text: "Hard work betrays none, but dreams betray many.", author: "Hikigaya Hachiman" },
+        { text: "If you don't take risks, you can't create a future.", author: "Monkey D. Luffy" },
+        { text: "Talent is something you make bloom, instinct is something you polish.", author: "Oikawa Tooru" },
+        { text: "If you win, you live. If you lose, you die. If you don't fight, you can't win!", author: "Eren Yeager" },
+        { text: "Limits, like fears, are often just an illusion.", author: "Michael Jordan" },
+        { text: "You can't connect the dots looking forward; you can only connect them looking backwards.", author: "Steve Jobs" },
+        { text: "When something is important enough, you do it even if the odds are not in your favor.", author: "Elon Musk" },
+        { text: "Your time is limited, so don't waste it living someone else's life.", author: "Steve Jobs" },
+        { text: "Today is victory over yourself of yesterday; tomorrow is your victory over lesser men.", author: "Miyamoto Musashi" },
+        { text: "Discipline is doing what you hate to do, but doing it like you love it.", author: "Mike Tyson" },
+        { text: "It is our choices that show what we truly are, far more than our abilities.", author: "Albus Dumbledore" },
+        { text: "Yesterday is history, tomorrow is a mystery, but today is a gift. That is why it is called the present.", author: "Master Oogway" },
+        { text: "Hard work is worthless for those that don't believe in themselves.", author: "Naruto Uzumaki" },
+        { text: "A dropout will beat a genius through hard work.", author: "Rock Lee" },
+        { text: "I can do this all day.", author: "Captain America" },
+        { text: "The hardest choices require the strongest wills.", author: "Thanos" },
+        { text: "I don't have dreams, I have goals.", author: "Harvey Specter" },
+        { text: "A mind needs books as a sword needs a whetstone, if it is to keep its edge.", author: "Tyrion Lannister" },
+        { text: "Your focus determines your reality.", author: "Qui-Gon Jinn" },
+
+        // --- NEW: Expanding the collection to prevent repetition ---
+        { text: "He who has a why to live for can bear almost any how.", author: "Friedrich Nietzsche" },
+        { text: "The future depends on what you do today.", author: "Mahatma Gandhi" },
+        { text: "Don't stop when you're tired. Stop when you're done.", author: "David Goggins" },
+        { text: "If it was easy, everyone would do it.", author: "Unknown" },
+        { text: "To achieve great things, two things are needed: a plan, and not quite enough time.", author: "Leonard Bernstein" },
+        { text: "The only place where success comes before work is in the dictionary.", author: "Vidal Sassoon" },
+        { text: "Focus on the step in front of you, not the whole staircase.", author: "Unknown" },
+        { text: "Do something today that your future self will thank you for.", author: "Sean Patrick Flanery" },
+        { text: "I will not lose, for even in defeat, there's a valuable lesson learned, so it evens up for me.", author: "Jay-Z" },
+        { text: "Small disciplines repeated with consistency every day lead to great achievements gained slowly over time.", author: "John C. Maxwell" },
+        { text: "We suffer more often in imagination than in reality.", author: "Seneca" },
+        { text: "Amateurs sit and wait for inspiration, the rest of us just get up and go to work.", author: "Stephen King" },
+        { text: "Success isn't always about greatness. It's about consistency.", author: "Dwayne Johnson" },
+        { text: "There are no traffic jams on the extra mile.", author: "Zig Ziglar" },
+        { text: "You don’t have to be great to start, but you have to start to be great.", author: "Zig Ziglar" },
+        { text: "Make your life a masterpiece; imagine no limitations on what you can be, have or do.", author: "Brian Tracy" },
+        { text: "Your life does not get better by chance, it gets better by change.", author: "Jim Rohn" },
+        { text: "Fall seven times, stand up eight.", author: "Japanese Proverb" },
+        { text: "A year from now you may wish you had started today.", author: "Karen Lamb" },
+        { text: "If you are going through hell, keep going.", author: "Winston Churchill" },
+        { text: "The man who moves a mountain begins by carrying away small stones.", author: "Confucius" },
+        { text: "You can suffer the pain of discipline or the pain of regret.", author: "Jim Rohn" }
     ];
     const chaitanyaQuotes = [ // Easter egg quotes
         {
@@ -5212,11 +5089,16 @@ document.addEventListener("DOMContentLoaded", () => {
         const dayOfWeekTotals = [0, 0, 0, 0, 0, 0, 0]; // Sun-Sat
         let totalSecondsAllTime = 0;
         let activeDaysCount = 0;
+        let todayTotalSeconds = 0;
 
         // 1. PROCESS STUDY LOGS
-        // Sort dates to calculate streaks
         const sortedDates = Object.keys(logs).sort();
         const todayStr = formatDateToISO(new Date());
+
+        // Calculate boundary for the last 7 days (for resetting Study DNA radar)
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        const sevenDaysAgoStr = formatDateToISO(sevenDaysAgo);
 
         Object.entries(logs).forEach(([date, subjects]) => {
             let dayTotal = 0;
@@ -5227,23 +5109,30 @@ document.addEventListener("DOMContentLoaded", () => {
                 subjectTotals[sub] = (subjectTotals[sub] || 0) + sec;
                 dayTotal += sec;
                 totalSecondsAllTime += sec;
+
+                // Track Today's total specifically
+                if (date === todayStr) {
+                    todayTotalSeconds += sec;
+                }
             });
 
             if (dayTotal > 0) {
                 dailyTotals[date] = dayTotal;
-                dayOfWeekTotals[dayIndex] += dayTotal;
                 activeDaysCount++;
+
+                // DNA/Radar Chart Logic: ONLY aggregate stats from the last 7 days
+                if (date >= sevenDaysAgoStr) {
+                    dayOfWeekTotals[dayIndex] += dayTotal;
+                }
             }
         });
 
         // 2. CALCULATE STREAK
         let currentStreak = 0;
         let checkDate = new Date();
-        // Check today first, if 0 logs, check yesterday to start streak count
-        // If today has logs, streak includes today.
         let dateStr = formatDateToISO(checkDate);
         if (!dailyTotals[dateStr]) {
-            checkDate.setDate(checkDate.getDate() - 1); // Check yesterday
+            checkDate.setDate(checkDate.getDate() - 1); 
             dateStr = formatDateToISO(checkDate);
         }
 
@@ -5254,21 +5143,16 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         document.getElementById('stat-streak').innerText = `${currentStreak} Days`;
 
-        // 3. CALCULATE CONSISTENCY SCORE (Standard Deviation Based)
-        // We look at the last 14 days
+        // 3. CALCULATE CONSISTENCY SCORE
         let consistencyScore = 0;
         let consistencyGrade = "C";
 
         if (activeDaysCount > 2) {
-            const values = Object.values(dailyTotals).slice(-14); // Last 14 active days
+            const values = Object.values(dailyTotals).slice(-14); 
             const mean = values.reduce((a, b) => a + b, 0) / values.length;
             const variance = values.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / values.length;
             const stdDev = Math.sqrt(variance);
-
-            // Coefficient of Variation (lower is better)
             const cv = stdDev / mean;
-            // Map CV to 0-100 Score (approximate logic)
-            // CV 0.0 (Perfect) -> 100, CV 1.0 (Erratic) -> 0
             consistencyScore = Math.max(0, Math.min(100, 100 - (cv * 100)));
 
             if (consistencyScore > 80) consistencyGrade = "A";
@@ -5284,14 +5168,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const yptPrev = document.getElementById('ypt-prev-btn');
         const yptNext = document.getElementById('ypt-next-btn');
 
-        // Use .onclick to prevent duplicate listeners when switching tabs
         if (yptPrev) {
             yptPrev.onclick = () => {
                 yptViewDate.setMonth(yptViewDate.getMonth() - 1);
                 renderYPTHeatmap();
             };
         }
-
         if (yptNext) {
             yptNext.onclick = () => {
                 yptViewDate.setMonth(yptViewDate.getMonth() + 1);
@@ -5299,17 +5181,17 @@ document.addEventListener("DOMContentLoaded", () => {
             };
         }
 
-        // CRITICAL: Initial render call
         renderYPTHeatmap();
-        // 4. TOTALS
-        document.getElementById('stat-total-time').innerText = formatTimeReadable(totalSecondsAllTime);
 
-        // --- FIX APPLIED HERE: Added Math.round() ---
+        // 4. TOTALS (Updated to reflect "Today" instead of all time)
+        const totalTimeLabel = document.getElementById('stat-total-time').previousElementSibling;
+        if(totalTimeLabel) totalTimeLabel.innerText = "Today's Logged"; // Dynamically update HTML label text
+        document.getElementById('stat-total-time').innerText = formatTimeReadable(todayTotalSeconds);
+
         const dailyAvg = activeDaysCount > 0 ? Math.round(totalSecondsAllTime / activeDaysCount) : 0;
         document.getElementById('stat-daily-avg').innerText = formatTimeReadable(dailyAvg);
 
         // 5. DETECT NEGLECTED SUBJECTS
-        // Subjects defined in settings vs subjects logged in last 7 days
         const allUserSubjects = appState.settings.userSubjects || ["Physics", "Chemistry", "Maths"];
         const recentLogs = sortedDates.slice(-7);
         const recentlyStudied = new Set();
@@ -5334,7 +5216,6 @@ document.addEventListener("DOMContentLoaded", () => {
         let strongest = { name: "-", avg: -1 };
         let weakest = { name: "-", avg: 999 };
 
-        // Aggregate totals per subject from tests
         const testSubTotals = {};
         const testSubCounts = {};
 
@@ -5353,7 +5234,6 @@ document.addEventListener("DOMContentLoaded", () => {
             if (avg < weakest.avg) weakest = { name: sub, avg: avg };
         });
 
-        // Edge case: if only 1 subject or no data
         if (strongest.name === weakest.name && strongest.name !== "-") {
             weakest = { name: "None", avg: 0 };
         }
@@ -5454,9 +5334,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderPerformanceChart(testData) {
         const ctx = document.getElementById('stats-performance-chart').getContext('2d');
-        const recentTests = testData.slice(-5); // Last 5 tests only for cleanliness
-        const labels = recentTests.map(t => t.name.substring(0, 8)); // Truncate names
-        const scores = recentTests.map(t => t.total || t.marks);
+        const recentTests = testData.slice(-5); // Last 5 tests
+        const labels = recentTests.map(t => t.name.substring(0, 8));
+        
+        // Extract subject-wise scores
+        const phyScores = recentTests.map(t => t.subjects ? t.subjects.physics || 0 : 0);
+        const chemScores = recentTests.map(t => t.subjects ? t.subjects.chemistry || 0 : 0);
+        const mathScores = recentTests.map(t => t.subjects ? t.subjects.maths || 0 : 0);
+
         const max = recentTests.length > 0 ? recentTests[0].maxMarks : 300;
 
         if (statsCharts.performance) statsCharts.performance.destroy();
@@ -5465,26 +5350,56 @@ document.addEventListener("DOMContentLoaded", () => {
             type: 'bar',
             data: {
                 labels: labels,
-                datasets: [{
-                    label: 'Score',
-                    data: scores,
-                    backgroundColor: '#8b5cf6',
-                    borderRadius: 4,
-                    barThickness: 20
-                }]
+                datasets: [
+                    {
+                        label: 'Physics',
+                        data: phyScores,
+                        backgroundColor: '#60a5fa', // Blue
+                        borderRadius: 2
+                    },
+                    {
+                        label: 'Chemistry',
+                        data: chemScores,
+                        backgroundColor: '#34d399', // Green
+                        borderRadius: 2
+                    },
+                    {
+                        label: 'Maths/Bio',
+                        data: mathScores,
+                        backgroundColor: '#fb923c', // Orange
+                        borderRadius: 2
+                    }
+                ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
+                plugins: { 
+                    legend: { 
+                        display: true,
+                        position: 'bottom',
+                        labels: { color: '#9ca3af', boxWidth: 10, font: { size: 9 } }
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false
+                    }
+                },
                 scales: {
-                    y: { display: false, max: parseFloat(max) },
-                    x: { grid: { display: false }, ticks: { color: '#6b7280', font: { size: 9 } } }
+                    x: { 
+                        stacked: true, 
+                        grid: { display: false }, 
+                        ticks: { color: '#6b7280', font: { size: 9 } } 
+                    },
+                    y: { 
+                        stacked: true, 
+                        display: false, 
+                        max: parseFloat(max) 
+                    }
                 }
             }
         });
     }
-
     function renderRadarChart(dayOfWeekTotals) {
         const ctx = document.getElementById('stats-radar-chart').getContext('2d');
         const labels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
